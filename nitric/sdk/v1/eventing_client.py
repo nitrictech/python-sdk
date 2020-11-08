@@ -1,6 +1,9 @@
+from grpc._channel import _InactiveRpcError, _UnaryUnaryMultiCallable
+
 from nitric.proto import eventing
 from nitric.proto import eventing_service
 from nitric.sdk.v1._base_client import BaseClient
+from google.protobuf.struct_pb2 import Struct
 
 
 class EventingClient(BaseClient):
@@ -10,11 +13,12 @@ class EventingClient(BaseClient):
         self._stub = eventing_service.EventingStub(self._channel)
 
     def get_topics(self):
-        response = self._stub.GetTopics()
-        return response
+        return self._exec('GetTopics')
 
-    def publish(self, topic_name: str, message: str):
+    def publish(self, topic_name: str, message: dict):
         # FIXME: Think about a smarter way to define the params
         # api_v1._PUBLISHREQUEST.fields
-        response = self._stub.Publish(eventing.PublishRequest(topic_name, message))
-        return response
+        message_struct = Struct()
+        message_struct.update(message)
+        request = eventing.PublishRequest(topicName=topic_name, message=message_struct)
+        return self._exec('Publish', request)

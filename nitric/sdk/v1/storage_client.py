@@ -10,9 +10,11 @@ class StorageClient(BaseClient):
         self._stub = storage_service.StorageStub(self._channel)
 
     def put(self, bucket_name: str, key: str, body: bytes):
-        response = self._stub.Put(storage.PutRequest(bucket_name, key, body))
+        request = storage.PutRequest(bucketName=bucket_name, key=key, body=body)
+        response = self._exec("Put", request)
         return response
 
     def get(self, bucket_name: str, key: str):
-        response: storage.GetReply = self._stub.Get(storage.GetRequest(bucket_name, key))
+        request = storage.GetRequest(bucketName=bucket_name, key=key)
+        response = self._exec("Get", request)
         return response
