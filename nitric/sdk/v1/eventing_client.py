@@ -1,9 +1,10 @@
-from grpc._channel import _InactiveRpcError, _UnaryUnaryMultiCallable
-
+from typing import List
 from nitric.proto import eventing
 from nitric.proto import eventing_service
 from nitric.sdk.v1._base_client import BaseClient
 from google.protobuf.struct_pb2 import Struct
+
+from nitric.sdk.v1.models import Topic
 
 
 class EventingClient(BaseClient):
@@ -12,8 +13,10 @@ class EventingClient(BaseClient):
         super(self.__class__, self).__init__()
         self._stub = eventing_service.EventingStub(self._channel)
 
-    def get_topics(self):
-        return self._exec('GetTopics')
+    def get_topics(self) -> List[Topic]:
+        response = self._exec('GetTopics')
+        topics = [Topic(name=topic_name) for topic_name in response.topics]
+        return topics
 
     def publish(self, topic_name: str, message: dict):
         # FIXME: Think about a smarter way to define the params
