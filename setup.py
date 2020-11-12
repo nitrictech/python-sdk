@@ -5,7 +5,7 @@ with open("README.md", "r") as readme_file:
 
 setuptools.setup(
     name="nitric",
-    version="0.0.4",
+    version="0.0.dev1",
     author="Nitric",
     author_email="team@nitric.io",
     description="The Nitric SDK, used to communicate with native cloud services",
