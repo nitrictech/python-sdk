@@ -11,15 +11,14 @@ class SourceType(Enum):
 class NitricContext(object):
     """Represents the contextual metadata for a Nitric function request"""
 
-    def __init__(self, request_id: str, source: str, source_type: SourceType | str, content_type: str,
-                 payload_type: str, payload: bytes):
+    def __init__(self, request_id: str, source: str, source_type: str, content_type: str,
+                 payload_type: str):
         self.request_id = request_id
         self.type = type
         self.source = source
         self.source_type = source_type
         self.content_type = content_type
         self.payload_type = payload_type
-        self.payload = payload
 
 
 def _clean_header(header_name: str):
