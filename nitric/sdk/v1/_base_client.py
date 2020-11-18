@@ -4,7 +4,7 @@ from google.protobuf.struct_pb2 import Struct
 from grpc._channel import _InactiveRpcError
 
 from nitric.config import settings
-
+from nitric.sdk.v1.exception import *
 
 class BaseClient(ABC):
 
@@ -21,7 +21,14 @@ class BaseClient(ABC):
             response = grpc_method(request)
         except _InactiveRpcError as ire:
             method_name = str(grpc_method._method, 'utf-8').replace("/", "", 1)
-            raise Exception("Failed to call {}\n\tCode: {}\n\tDetails: {}"
-                            .format(method_name, ire.code(), ire.details())) from None
+            ex_message = "Failed to call {}\n\tCode: {}\n\tDetails: {}".format(method_name, ire.code(), ire.details())
+
+            # handle specific status codes
+            if ire.code() == grpc.StatusCode.UNIMPLEMENTED:
+                raise UnimplementedException(ex_message) from None
+            elif ire.code() == grpc.StatusCode.ALREADY_EXISTS:
+                raise AlreadyExistsException(ex_message) from None
+
+            raise Exception(ex_message) from None
 
         return response
