@@ -17,6 +17,9 @@ class BaseClient(ABC):
         # TODO: handle other channel types
         self._channel = grpc.insecure_channel(ambassador_bind)
 
+    def _get_method_function(self, method):
+        return getattr(self._stub, method)
+
     def _exec(self, method: str, request: object = None):
         """
         Execute a gRPC request.
@@ -27,7 +30,7 @@ class BaseClient(ABC):
         """
         if request is None:
             request = Struct()
-        grpc_method = getattr(self._stub, method)
+        grpc_method = self._get_method_function(method)
         try:
             response = grpc_method(request)
         except _InactiveRpcError as ire:
