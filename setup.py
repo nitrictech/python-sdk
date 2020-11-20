@@ -5,7 +5,7 @@ with open("README.md", "r") as readme_file:
 
 setuptools.setup(
     name="nitric",
-    version="0.0.dev9",
+    version="0.0.dev11",
     author="Nitric",
     author_email="team@nitric.io",
     description="The Nitric SDK, used to communicate with native cloud services",
@@ -17,10 +17,6 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
     ],
-    install_requires=[
-        'grpcio==1.33.2',
-        'six==1.15.0',
-        'protobuf==3.13.0'
-    ],
-    python_requires='>=3.7',
+    install_requires=["grpcio==1.33.2", "six==1.15.0", "protobuf==3.13.0"],
+    python_requires=">=3.7",
 )

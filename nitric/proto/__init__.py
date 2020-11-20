@@ -7,10 +7,10 @@ from nitric.proto.v1 import documents_pb2_grpc as documents_service
 
 
 __all__ = [
-    'eventing',
-    'eventing_service',
-    'storage',
-    'storage_service',
-    'documents',
-    'documents_service'
+    "eventing",
+    "eventing_service",
+    "storage",
+    "storage_service",
+    "documents",
+    "documents_service",
 ]
