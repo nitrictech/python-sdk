@@ -1,2 +1,8 @@
+grpcio==1.33.2
+grpcio-tools==1.33.2
 protobuf==3.13.0
-grpcio==1.26.0
+six==1.15.0
+setuptools~=50.3.2
+tox==3.20.1
+pytest==6.0.1
+pytest-cov==2.10.1

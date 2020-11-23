@@ -5,3 +5,4 @@ CONTRACTS=./contracts/proto
 OUTPUT=./nitric/proto
 mkdir -p ${OUTPUT}
 python3 -m grpc_tools.protoc -I ${CONTRACTS}  --python_out=${OUTPUT} --grpc_python_out=${OUTPUT} ./contracts/proto/**/*.proto
+python3 ./tools/fix_grpc_imports.py
