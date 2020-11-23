@@ -3,7 +3,11 @@ import grpc
 from google.protobuf.struct_pb2 import Struct
 from grpc._channel import _InactiveRpcError
 from nitric.config import settings
-from nitric.sdk.v1.exception import UnimplementedException, AlreadyExistsException
+from nitric.sdk.v1.exception import (
+    UnimplementedException,
+    AlreadyExistsException,
+    UnavailableException,
+)
 
 
 class BaseClient(ABC):
@@ -46,6 +50,8 @@ class BaseClient(ABC):
                 raise UnimplementedException(ex_message) from None
             elif ire.code() == grpc.StatusCode.ALREADY_EXISTS:
                 raise AlreadyExistsException(ex_message) from None
+            elif ire.code() == grpc.StatusCode.UNAVAILABLE:
+                raise UnavailableException(ex_message) from None
 
             raise Exception(ex_message) from None
 

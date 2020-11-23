@@ -13,7 +13,13 @@ class Context(object):
     """Represents the contextual metadata for a Nitric function request."""
 
     def __init__(
-        self, request_id: str, source: str, source_type: str, payload_type: str
+        self,
+        *,
+        request_id: str,
+        source: str,
+        source_type: str,
+        payload_type: str,
+        **kwargs
     ):
         """Construct a Nitric Request Content object."""
         self.request_id = request_id
@@ -24,7 +30,7 @@ class Context(object):
 
 def _clean_header(header_name: str):
     """Convert a Nitric HTTP request header name into the equivalent Context property name."""
-    return header_name.replace("x-nitric-", "").replace("-", "_").lower()
+    return header_name.lower().replace("x-nitric-", "").replace("-", "_")
 
 
 class Request(object):

@@ -1,4 +1,4 @@
-from unittest.mock import patch, MagicMock, Mock
+from unittest.mock import patch, Mock
 from nitric.sdk.v1 import EventingClient
 from google.protobuf.struct_pb2 import Struct
 from uuid import UUID
@@ -41,8 +41,8 @@ def test_publish():
     payload_struct = Struct()
     payload_struct.update(payload)
 
-    # Ensure the get topics method is called with the expected input
-    mock_publish.assert_called_once()  # No input data required to get topics
+    # Ensure the publish method is called with the expected input
+    mock_publish.assert_called_once()
     assert mock_publish.call_args.args[0].topicName == "topic_name"
     assert mock_publish.call_args.args[0].event.requestId == "abc-123"
     assert mock_publish.call_args.args[0].event.payloadType == "payload.type"
@@ -73,6 +73,34 @@ def test_automatic_request_id():
         raise Exception(
             "Auto-generated Request ID was not a valid version 4 UUID value."
         ) from None
+
+
+def test_empty_payload():
+    mock_grpc_method_getter = Mock()
+    mock_grpc_method_getter.return_value = mock_publish = Mock()
+    mock_publish.return_value.topics = []
+
+    with patch(
+        "nitric.sdk.v1.EventingClient._get_method_function", mock_grpc_method_getter
+    ):
+        client = EventingClient()
+        client.publish(topic_name="topic_name", payload_type="payload.type")
+
+    # Ensure the gRPC method is called, with an empty Struct as the payload.
+    mock_publish.assert_called_once()
+    assert mock_publish.call_args.args[0].event.payload == Struct()
+
+
+def test_grpc_methods():
+    client = EventingClient()
+    assert (
+        client._get_method_function("GetTopics")._method
+        == b"/nitric.v1.eventing.Eventing/GetTopics"
+    )
+    assert (
+        client._get_method_function("Publish")._method
+        == b"/nitric.v1.eventing.Eventing/Publish"
+    )
 
 
 def test_create_client():
