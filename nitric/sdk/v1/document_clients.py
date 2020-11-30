@@ -31,7 +31,7 @@ class DocumentsClient(BaseClient):
         """Retrieve a document from the specified collection by its key."""
         request = documents.GetDocumentRequest(collection=collection, key=key)
         reply: GetDocumentReply = self._exec("GetDocument", request)
-        document = MessageToDict(reply)
+        document = MessageToDict(reply)['document']
         return document
 
     def update_document(self, collection: str, key: str, document: dict):

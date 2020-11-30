@@ -47,8 +47,7 @@ def test_get_document():
 
     # Ensure the correct gRPC method is retrieved
     mock_grpc_method_getter.assert_called_with("GetDocument")
-    # TODO: Should this just return the doc, rather than the full dict?
-    assert document == {"document": {"doc_key": "doc_value"}}
+    assert document == {"doc_key": "doc_value"}
 
 
 # Update
