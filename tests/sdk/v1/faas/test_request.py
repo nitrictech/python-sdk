@@ -6,7 +6,6 @@ import unittest
 
 
 class RequestCases(unittest.TestCase):
-
     def test_clean_header(self):
         test_headers = [
             # Input, Expected Output
@@ -69,7 +68,8 @@ class RequestCases(unittest.TestCase):
         request = Request(test_headers, b"test content")
         # Make sure the unknown header didn't end up in the context and no errors are thrown.
         assert (
-                len([key for key in request.context.__dict__.keys() if "unknown" in key]) == 0
+            len([key for key in request.context.__dict__.keys() if "unknown" in key])
+            == 0
         )
 
     def test_get_object(self):
@@ -81,7 +81,7 @@ class RequestCases(unittest.TestCase):
             "x-nitric-unknown-header": "should be ignored",
         }
         request = Request(headers=test_headers, payload=b'{"name": "John"}')
-        assert request.get_object()['name'] == 'John'
+        assert request.get_object()["name"] == "John"
 
     def test_get_object_with_invalid_payload_json(self):
         test_headers = {
