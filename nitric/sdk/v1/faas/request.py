@@ -44,7 +44,7 @@ class Request(object):
         """Construct a Nitric Function Request."""
         # Map headers to context properties
         context_props = {
-            _clean_header(k): v for k, v in headers.items() if k.startswith("x-nitric")
+            _clean_header(k): v for k, v in headers.items() if k.lower().startswith("x-nitric")
         }
         self.context = Context(**context_props)
         self.payload = payload
