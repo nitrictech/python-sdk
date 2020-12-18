@@ -38,6 +38,25 @@ class RequestCases(unittest.TestCase):
             request = Request(test_headers, b"test content")
         mock_clean_headers.assert_called_with("x-nitric-payload-type")
 
+    def test_mime_canon_headers_are_cleaned_in_request(self):
+        test_headers = {
+            "X-Nitric-Request-Id": "abc123",
+            "X-Nitric-Source": "some.source",
+            "X-Nitric-Source-Type": "REQUEST",
+            "X-Nitric-Payload-Type": "com.example.payload.type",
+        }
+
+        mock_clean_headers = Mock()
+        mock_clean_headers.side_effect = [
+            "request_id",
+            "source",
+            "source_type",
+            "payload_type",
+        ]
+        with patch("nitric.sdk.v1.faas.request._clean_header", mock_clean_headers):
+            request = Request(test_headers, b"test content")
+        mock_clean_headers.assert_called_with("X-Nitric-Payload-Type")
+
     def test_unsupported_headers_ignored(self):
         test_headers = {
             "x-nitric-request-id": "abc123",
