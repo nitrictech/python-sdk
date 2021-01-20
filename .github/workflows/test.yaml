@@ -1,0 +1,31 @@
+name: Tests
+
+on: pull_request
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2.3.1
+      with:
+        token: ${{secrets.SUBMOD_PAT}}
+        submodules: recursive
+        #lfs: true
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+    - name: Gen Protoc Sources
+      run: ./generate_grpc_client.sh
+    - name: Install nitric
+      run: pip install -e .
+    - name: Run Tox
+      # Run tox using the version of Python in `PATH`
+      run: tox -e py

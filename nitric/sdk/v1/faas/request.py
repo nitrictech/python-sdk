@@ -15,10 +15,10 @@ class Context(object):
     def __init__(
         self,
         *,
-        request_id: str,
-        source: str,
-        source_type: str,
-        payload_type: str,
+        request_id: str = None,
+        source: str = None,
+        source_type: str = None,
+        payload_type: str = None,
         **kwargs
     ):
         """Construct a Nitric Request Content object."""
@@ -44,7 +44,24 @@ class Request(object):
         """Construct a Nitric Function Request."""
         # Map headers to context properties
         context_props = {
-            _clean_header(k): v for k, v in headers.items() if k.startswith("x-nitric")
+            _clean_header(k): v
+            for k, v in headers.items()
+            if k.lower().startswith("x-nitric")
         }
         self.context = Context(**context_props)
         self.payload = payload
+
+    def get_body(self) -> bytes:
+        return self.payload
+
+    def get_object(self) -> dict:
+        """
+        Assume the payload is JSON and return the content deserialized into a dictionary
+
+        :raises JSONDecodeError: raised when the request payload (body) is not valid JSON.
+
+        :return: the deserialized JSON request body as a dictionary
+        """
+        import json
+
+        return json.loads(self.payload)
