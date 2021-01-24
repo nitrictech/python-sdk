@@ -4,6 +4,7 @@ from nitric.proto import queue_service
 from nitric.sdk.v1._base_client import BaseClient
 from google.protobuf.struct_pb2 import Struct
 from nitric.sdk.v1.models import Event, FailedEvent
+from google.protobuf.json_format import MessageToDict
 
 import uuid
 
@@ -36,7 +37,12 @@ class QueueClient(BaseClient):
       self,
       event: queue.FailedMessage
     ) -> FailedEvent:
-        
+        tmp_evt = event.event
+        tmp_msg = event.message
+
+        evt = Event(request_id=tmp_evt.request_id, payload_type=tmp_evt.payload_type, payload=MessageToDict(tmp_evt.payload))
+
+        return FailedEvent(event=evt, message=tmp_msg)
 
     def push(
         self,
@@ -54,6 +60,8 @@ class QueueClient(BaseClient):
 
         request = queue.PushRequest(queue=queue_name, events=wire_events)
 
-        response: PushResponse = self._exec("Push", request)
+        response: queue.PushResponse = self._exec("Push", request)
+
+        failed_events = map(self.wire_to_failed_evt, response.failedMessages)
         
-        return PushResponse(failed_events)
+        return PushResponse(failed_events=list(failed_events))
