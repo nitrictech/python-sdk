@@ -18,7 +18,7 @@ def test_put():
     # Ensure the correct gRPC method is retrieved
     mock_grpc_method_getter.assert_called_with("Put")
 
-    # Ensure the get topics method is called with the expected input
+    # Ensure the 'Put' method is called with the expected input
     mock_create.assert_called_once()  # No input data required to get topics
     assert mock_create.call_args.args[0].bucketName == "bucket_name"
     assert mock_create.call_args.args[0].key == "key_name"
@@ -39,7 +39,7 @@ def test_get():
     # Ensure the correct gRPC method is retrieved
     mock_grpc_method_getter.assert_called_with("Get")
 
-    # Ensure the get topics method is called with the expected input
+    # Ensure the 'Get' method is called with the expected input
     mock_create.assert_called_once()  # No input data required to get topics
     assert mock_create.call_args.args[0].bucketName == "bucket_name"
     assert mock_create.call_args.args[0].key == "key_name"
