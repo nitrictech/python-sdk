@@ -38,5 +38,4 @@ class StorageClient(BaseClient):
         """
         request = storage.GetRequest(bucketName=bucket_name, key=key)
         response = self._exec("Get", request)
-        # TODO: just return the bytes
-        return response
+        return response.body
