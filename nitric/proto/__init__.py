@@ -15,5 +15,5 @@ __all__ = [
     "documents",
     "documents_service",
     "queue",
-    "queue_service"
+    "queue_service",
 ]

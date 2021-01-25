@@ -1,6 +1,7 @@
 from unittest.mock import patch, Mock
 from nitric.sdk.v1 import QueueClient, Event
 
+
 def test_push():
     mock_grpc_method_getter = Mock()
     mock_grpc_method_getter.return_value = mock_create = Mock()
@@ -8,7 +9,9 @@ def test_push():
 
     content = b"test content"
 
-    test_events = [Event(request_id="1234", payload_type="test-payload", payload={'test': 'test'})]
+    test_events = [
+        Event(request_id="1234", payload_type="test-payload", payload={"test": "test"})
+    ]
 
     with patch(
         "nitric.sdk.v1.QueueClient._get_method_function", mock_grpc_method_getter

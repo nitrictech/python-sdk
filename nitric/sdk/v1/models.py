@@ -5,16 +5,21 @@ class Topic(object):
         """Construct a new topic instance."""
         self.name = name
 
+
 class Event(object):
-    """Represents a NitricEvent"""
-    def __init__(self, request_id:str, payload_type: str, payload: dict):
+    """Represents a NitricEvent."""
+
+    def __init__(self, request_id: str, payload_type: str, payload: dict):
+        """Construct a new Event."""
         self.request_id = request_id
         self.payload_type = payload_type
         self.payload = payload
 
+
 class FailedEvent(object):
-    """Represents a failed queue publish for an event"""
+    """Represents a failed queue publish for an event."""
+
     def __init__(self, event: Event, message: str):
+        """Construct a new Failed Event."""
         self.event = event
         self.message = message
-

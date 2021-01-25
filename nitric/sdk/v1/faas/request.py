@@ -52,11 +52,12 @@ class Request(object):
         self.payload = payload
 
     def get_body(self) -> bytes:
+        """Return the bytes of the body of the request."""
         return self.payload
 
     def get_object(self) -> dict:
         """
-        Assume the payload is JSON and return the content deserialized into a dictionary
+        Assume the payload is JSON and return the content deserialized into a dictionary.
 
         :raises JSONDecodeError: raised when the request payload (body) is not valid JSON.
 
