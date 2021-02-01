@@ -2,7 +2,7 @@ import glob
 import fileinput
 import os
 
-AUTO_GEN_PATH = "../nitric/proto/**/*_grpc.py"
+AUTO_GEN_PATH = "../nitric/proto/**/*_pb2*.py"
 REPLACE = "from v1 import"
 WITH = "from . import"
 

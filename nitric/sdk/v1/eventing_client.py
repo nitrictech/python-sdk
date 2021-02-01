@@ -3,7 +3,7 @@ from nitric.proto import eventing
 from nitric.proto import eventing_service
 from nitric.sdk.v1._base_client import BaseClient
 from google.protobuf.struct_pb2 import Struct
-from nitric.proto.v1.eventing_pb2 import NitricEvent
+from nitric.proto.v1.common_pb2 import NitricEvent
 from nitric.sdk.v1.models import Topic
 import uuid
 

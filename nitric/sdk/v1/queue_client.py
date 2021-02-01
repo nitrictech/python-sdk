@@ -1,6 +1,7 @@
 from typing import List
 from nitric.proto import queue
 from nitric.proto import queue_service
+from nitric.proto import common
 from nitric.sdk.v1._base_client import BaseClient
 from google.protobuf.struct_pb2 import Struct
 from nitric.sdk.v1.models import Event, FailedEvent
@@ -27,7 +28,7 @@ class QueueClient(BaseClient):
         super(self.__class__, self).__init__()
         self._stub = queue_service.QueueStub(self._channel)
 
-    def evt_to_wire(self, event: Event) -> queue.NitricEvent:
+    def evt_to_wire(self, event: Event) -> common.NitricEvent:
         """
         Convert a Nitric Event to a Nitric Queue Event.
 
@@ -37,7 +38,7 @@ class QueueClient(BaseClient):
         payload_struct = Struct()
         payload_struct.update(event.payload)
 
-        return queue.NitricEvent(
+        return common.NitricEvent(
             requestId=event.request_id,
             payloadType=event.payload_type,
             payload=payload_struct,
