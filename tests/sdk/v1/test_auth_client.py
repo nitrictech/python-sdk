@@ -18,7 +18,7 @@ def test_create_user():
         # Ensure the correct gRPC method is retrieved
     mock_grpc_method_getter.assert_called_with("CreateUser")
 
-    # Ensure the get topics method is called with the expected input
+    # Ensure the create user method is called with the expected input
     mock_create.assert_called_once()  # No input data required to get topics
     assert mock_create.call_args.args[0].id == "test"
     assert mock_create.call_args.args[0].tenant == "test"
