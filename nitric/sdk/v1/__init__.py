@@ -6,4 +6,11 @@ from nitric.sdk.v1.documents_client import DocumentsClient
 from nitric.sdk.v1.queue_client import QueueClient
 from nitric.sdk.v1.models import Event
 
-__all__ = ["AuthClient", "EventingClient", "StorageClient", "DocumentsClient", "QueueClient", "Event"]
+__all__ = [
+    "AuthClient",
+    "EventingClient",
+    "StorageClient",
+    "DocumentsClient",
+    "QueueClient",
+    "Event",
+]

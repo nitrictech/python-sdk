@@ -8,7 +8,7 @@ def test_create_user():
     mock_grpc_method_getter.return_value = mock_create = Mock()
 
     with patch(
-            "nitric.sdk.v1.AuthClient._get_method_function", mock_grpc_method_getter
+        "nitric.sdk.v1.AuthClient._get_method_function", mock_grpc_method_getter
     ):
         client = AuthClient()
         client.create_user("test", "test", "test@test.com", "test")

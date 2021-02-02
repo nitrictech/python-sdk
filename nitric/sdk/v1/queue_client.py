@@ -54,7 +54,7 @@ class QueueClient(BaseClient):
         return Event(
             request_id=event.requestId,
             payload_type=event.payloadType,
-            payload=MessageToDict(event.payload)
+            payload=MessageToDict(event.payload),
         )
 
     def _wire_to_queue_item(self, item: queue.NitricQueueItem) -> QueueItem:
@@ -103,7 +103,8 @@ class QueueClient(BaseClient):
         """
         Pops 1 or more items from the specified queue up to the depth limit.
 
-        :param queue_name: Nitric name for the queue. This will be automatically resolved to the provider specific identifier.
+        :param queue_name: Nitric name for the queue. This will be automatically resolved to the provider specific
+        identifier.
         :param depth: The maximum number of queue items to return. Default: 1, Min: 1.
         :return: Queue items popped from the specified queue.
         """
