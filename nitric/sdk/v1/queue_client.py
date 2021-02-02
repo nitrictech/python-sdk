@@ -46,11 +46,11 @@ class QueueClient(BaseClient):
 
     def _wire_to_event(self, event: common.NitricEvent) -> Event:
         """
-        Convert a Nitric Queue Event (protobuf) to a Nitric Event (python SDK)
+        Convert a Nitric Queue Event (protobuf) to a Nitric Event (python SDK).
+
         :param event: to convert
         :return: converted event
         """
-
         return Event(
             request_id=event.requestId,
             payload_type=event.payloadType,
@@ -59,7 +59,7 @@ class QueueClient(BaseClient):
 
     def _wire_to_queue_item(self, item: queue.NitricQueueItem) -> QueueItem:
         """
-        Convert a NitricQueueItem to the Python SDK model equivalent QueueItem
+        Convert a NitricQueueItem to the Python SDK model equivalent QueueItem.
 
         :param item: to be converted
         :return: the converted queue item, containing the associated event
@@ -108,7 +108,6 @@ class QueueClient(BaseClient):
         :param depth: The maximum number of queue items to return. Default: 1, Min: 1.
         :return: Queue items popped from the specified queue.
         """
-
         # Set the default and minimum depth to 1.
         if depth is None or depth < 1:
             depth = 1
