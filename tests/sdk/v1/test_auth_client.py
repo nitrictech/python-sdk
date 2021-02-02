@@ -1,9 +1,7 @@
 from unittest.mock import patch, Mock
 
-from google.protobuf.struct_pb2 import Struct
-
 from nitric.sdk.v1 import AuthClient
-from nitric.proto.v1.auth_pb2 import CreateUserResponse
+
 
 def test_create_user():
     mock_grpc_method_getter = Mock()
