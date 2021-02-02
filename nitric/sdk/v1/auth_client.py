@@ -15,9 +15,9 @@ class AuthClient(BaseClient):
         super(self.__class__, self).__init__()
         self._stub = auth_service.AuthStub(self._channel)
 
-    def create_user(self, tenant: str, id: str, email: str, password: str):
+    def create_user(self, tenant: str, user_id: str, email: str, password: str):
         """Creates a new user"""
         request = auth.CreateUserRequest(
-            tenant=tenant, id=id, email=email, password=password
+            tenant=tenant, id=user_id, email=email, password=password
         )
         return self._exec("CreateUser", request)
