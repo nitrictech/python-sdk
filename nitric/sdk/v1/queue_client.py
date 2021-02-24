@@ -81,11 +81,11 @@ class QueueClient(BaseClient):
 
     def push(self, queue_name: str, events: List[Event] = None) -> PushResponse:
         """
-        Publish an event/message to a topic, which can be subscribed to by other services.
+        Push a collection of events to a queue, which can be retrieved by other services.
 
         :param queue_name: the name of the queue to publish to
         :param events: The events to push to the queue
-        :return: the request id on successful publish
+        :return: a list containing details of any messages that failed to publish.
         """
         if events is None:
             events = []
@@ -101,7 +101,13 @@ class QueueClient(BaseClient):
 
     def pop(self, queue_name: str, depth: int = None) -> List[QueueItem]:
         """
-        Pops 1 or more items from the specified queue up to the depth limit.
+        Pop 1 or more items from the specified queue up to the depth limit.
+
+        Queue items are Nitric Events that are leased for a limited period of time, where they may be worked on.
+        Once complete or failed they must be acknowledged using request specified leaseId.
+
+        If the lease on a queue item expires before it is acknowledged or the lease is extended the event will be
+        returned to the queue for reprocessing.
 
         :param queue_name: Nitric name for the queue. This will be automatically resolved to the provider specific
         identifier.
