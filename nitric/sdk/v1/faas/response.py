@@ -7,9 +7,9 @@ class Response(object):
 
     def __init__(
         self,
+        body=None,
         status: Union[int, HTTPStatus] = HTTPStatus.OK,
         headers: dict = None,
-        body=None,
     ):
         """Construct a new Nitric Response."""
         # FIXME: Fix typing of the status parameter, add tests
