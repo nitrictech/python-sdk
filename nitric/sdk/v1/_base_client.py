@@ -17,7 +17,9 @@ class BaseClient(ABC):
 
     def __init__(self):
         """Construct a base nitric gRPC client."""
-        nitric_service_address = f"{settings.NITRIC_SERVICE_HOST}:{settings.NITRIC_SERVICE_PORT}"
+        nitric_service_address = (
+            f"{settings.NITRIC_SERVICE_HOST}:{settings.NITRIC_SERVICE_PORT}"
+        )
         self._channel = grpc.insecure_channel(nitric_service_address)
 
     def _get_method_function(self, method):

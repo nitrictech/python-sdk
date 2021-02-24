@@ -3,7 +3,7 @@ from unittest.mock import patch, Mock
 from google.protobuf.struct_pb2 import Struct
 
 from nitric.sdk.v1 import DocumentsClient
-from nitric.proto.v1.documents_pb2 import GetDocumentReply
+from nitric.proto.v1.documents_pb2 import DocumentGetResponse
 
 
 # Create
@@ -21,7 +21,7 @@ def test_create_document():
         client.create_document("collection_name", "doc_key", test_document)
 
     # Ensure the correct gRPC method is retrieved
-    mock_grpc_method_getter.assert_called_with("CreateDocument")
+    mock_grpc_method_getter.assert_called_with("Create")
 
     # Ensure the get topics method is called with the expected input
     mock_create.assert_called_once()  # No input data required to get topics
@@ -36,7 +36,7 @@ def test_get_document():
     mock_grpc_method_getter.return_value = mock_get = Mock()
     document = Struct()
     document.update({"doc_key": "doc_value"})
-    reply = GetDocumentReply(document=document)
+    reply = DocumentGetResponse(document=document)
     mock_get.return_value = reply
 
     with patch(
@@ -46,7 +46,7 @@ def test_get_document():
         document = client.get_document("collection_name", "doc_key")
 
     # Ensure the correct gRPC method is retrieved
-    mock_grpc_method_getter.assert_called_with("GetDocument")
+    mock_grpc_method_getter.assert_called_with("Get")
     assert document == {"doc_key": "doc_value"}
 
 
@@ -65,7 +65,7 @@ def test_update_document():
         client.update_document("collection_name", "doc_key", test_document)
 
     # Ensure the correct gRPC method is retrieved
-    mock_grpc_method_getter.assert_called_with("UpdateDocument")
+    mock_grpc_method_getter.assert_called_with("Update")
 
     # Ensure the get topics method is called with the expected input
     mock_create.assert_called_once()  # No input data required to get topics
@@ -92,7 +92,7 @@ def test_delete_document():
         client.delete_document("collection_name", "doc_key")
 
     # Ensure the correct gRPC method is retrieved
-    mock_grpc_method_getter.assert_called_with("DeleteDocument")
+    mock_grpc_method_getter.assert_called_with("Delete")
 
     # Ensure the get topics method is called with the expected input
     mock_create.assert_called_once()  # No input data required to get topics
@@ -103,20 +103,20 @@ def test_delete_document():
 def test_grpc_methods():
     client = DocumentsClient()
     assert (
-        client._get_method_function("CreateDocument")._method
-        == b"/nitric.v1.documents.Documents/CreateDocument"
+        client._get_method_function("Create")._method
+        == b"/nitric.v1.documents.Document/Create"
     )
     assert (
-        client._get_method_function("GetDocument")._method
-        == b"/nitric.v1.documents.Documents/GetDocument"
+        client._get_method_function("Get")._method
+        == b"/nitric.v1.documents.Document/Get"
     )
     assert (
-        client._get_method_function("UpdateDocument")._method
-        == b"/nitric.v1.documents.Documents/UpdateDocument"
+        client._get_method_function("Update")._method
+        == b"/nitric.v1.documents.Document/Update"
     )
     assert (
-        client._get_method_function("DeleteDocument")._method
-        == b"/nitric.v1.documents.Documents/DeleteDocument"
+        client._get_method_function("Delete")._method
+        == b"/nitric.v1.documents.Document/Delete"
     )
 
 
