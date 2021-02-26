@@ -24,7 +24,7 @@ class StorageClient(BaseClient):
         :param body: data to be stored.
         :return: storage result.
         """
-        request = storage.PutRequest(bucketName=bucket_name, key=key, body=body)
+        request = storage.StoragePutRequest(bucketName=bucket_name, key=key, body=body)
         response = self._exec("Put", request)
         return response
 
@@ -36,6 +36,6 @@ class StorageClient(BaseClient):
         :param key: key for the file to retrieve.
         :return: the file as bytes.
         """
-        request = storage.GetRequest(bucketName=bucket_name, key=key)
+        request = storage.StorageGetRequest(bucketName=bucket_name, key=key)
         response = self._exec("Get", request)
         return response.body

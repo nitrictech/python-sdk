@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, Mock
-from nitric.sdk.v1 import EventingClient
+from nitric.sdk.v1 import EventClient
 from nitric.sdk.v1.exception import *
 import grpc
 from grpc._channel import _InactiveRpcError, _RPCState
@@ -17,9 +17,9 @@ class GRPCErrorCases(unittest.TestCase):
         mock_publish._method = b"test.topic/Publish"
 
         with patch(
-            "nitric.sdk.v1.EventingClient._get_method_function", mock_grpc_method_getter
+            "nitric.sdk.v1.EventClient._get_method_function", mock_grpc_method_getter
         ):
-            client = EventingClient()
+            client = EventClient()
             self.assertRaises(
                 UnavailableException, client.publish, topic_name="t", payload_type="p"
             )
@@ -34,9 +34,9 @@ class GRPCErrorCases(unittest.TestCase):
         mock_publish._method = b"test.topic/Publish"
 
         with patch(
-            "nitric.sdk.v1.EventingClient._get_method_function", mock_grpc_method_getter
+            "nitric.sdk.v1.EventClient._get_method_function", mock_grpc_method_getter
         ):
-            client = EventingClient()
+            client = EventClient()
             self.assertRaises(
                 UnimplementedException, client.publish, topic_name="t", payload_type="p"
             )
@@ -51,9 +51,9 @@ class GRPCErrorCases(unittest.TestCase):
         mock_publish._method = b"test.topic/Publish"
 
         with patch(
-            "nitric.sdk.v1.EventingClient._get_method_function", mock_grpc_method_getter
+            "nitric.sdk.v1.EventClient._get_method_function", mock_grpc_method_getter
         ):
-            client = EventingClient()
+            client = EventClient()
             self.assertRaises(
                 AlreadyExistsException, client.publish, topic_name="t", payload_type="p"
             )
@@ -67,9 +67,9 @@ class GRPCErrorCases(unittest.TestCase):
         mock_publish._method = b"test.topic/Publish"
 
         with patch(
-            "nitric.sdk.v1.EventingClient._get_method_function", mock_grpc_method_getter
+            "nitric.sdk.v1.EventClient._get_method_function", mock_grpc_method_getter
         ):
-            client = EventingClient()
+            client = EventClient()
             # Expect a standard Exception if a non-grpc error is raised.
             self.assertRaises(
                 Exception, client.publish, topic_name="t", payload_type="p"

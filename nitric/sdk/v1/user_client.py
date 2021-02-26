@@ -3,7 +3,7 @@ from nitric.proto import auth_service
 from nitric.sdk.v1._base_client import BaseClient
 
 
-class AuthClient(BaseClient):
+class UserClient(BaseClient):
     """
     Construct a Nitric Auth client.
 
@@ -13,11 +13,11 @@ class AuthClient(BaseClient):
     def __init__(self):
         """Construct a new AuthClient."""
         super(self.__class__, self).__init__()
-        self._stub = auth_service.AuthStub(self._channel)
+        self._stub = auth_service.UserStub(self._channel)
 
     def create_user(self, tenant: str, user_id: str, email: str, password: str):
         """Create a new user."""
-        request = auth.CreateUserRequest(
+        request = auth.UserCreateRequest(
             tenant=tenant, id=user_id, email=email, password=password
         )
-        return self._exec("CreateUser", request)
+        return self._exec("Create", request)

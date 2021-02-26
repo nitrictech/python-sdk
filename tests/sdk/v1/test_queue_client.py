@@ -15,10 +15,10 @@ def test_push():
         "nitric.sdk.v1.QueueClient._get_method_function", mock_grpc_method_getter
     ):
         client = QueueClient()
-        client.push("test-queue", test_events)
+        client.batch_push("test-queue", test_events)
 
     # Ensure the correct gRPC method is retrieved
-    mock_grpc_method_getter.assert_called_with("Push")
+    mock_grpc_method_getter.assert_called_with("BatchPush")
 
     # Ensure the queue push method is called with the expected input
     mock_push.assert_called_once()

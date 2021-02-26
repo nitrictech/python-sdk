@@ -68,18 +68,18 @@ class QueueClient(BaseClient):
 
         return QueueItem(event=evt, lease_id=item.leaseId)
 
-    def _wire_to_failed_evt(self, failed_message: queue.FailedMessage) -> FailedEvent:
+    def _wire_to_failed_evt(self, failed_event: queue.FailedEvent) -> FailedEvent:
         """
         Convert a queue event that failed to push into a Failed Event object.
 
-        :param failed_message: the failed event
+        :param failed_event: the failed event
         :return: the Failed Event with failure message
         """
-        evt = self._wire_to_event(failed_message.event)
+        evt = self._wire_to_event(failed_event.event)
 
-        return FailedEvent(event=evt, message=failed_message.message)
+        return FailedEvent(event=evt, message=failed_event.message)
 
-    def push(self, queue_name: str, events: List[Event] = None) -> PushResponse:
+    def batch_push(self, queue_name: str, events: List[Event] = None) -> PushResponse:
         """
         Push a collection of events to a queue, which can be retrieved by other services.
 
@@ -91,9 +91,9 @@ class QueueClient(BaseClient):
             events = []
         wire_events = map(self._evt_to_wire, events)
 
-        request = queue.PushRequest(queue=queue_name, events=wire_events)
+        request = queue.QueueBatchPushRequest(queue=queue_name, events=wire_events)
 
-        response: queue.PushResponse = self._exec("Push", request)
+        response: queue.QueueBatchPushResponse = self._exec("BatchPush", request)
 
         failed_events = map(self._wire_to_failed_evt, response.failedMessages)
 
@@ -118,9 +118,9 @@ class QueueClient(BaseClient):
         if depth is None or depth < 1:
             depth = 1
 
-        request = queue.PopRequest(queue=queue_name, depth=depth)
+        request = queue.QueuePopRequest(queue=queue_name, depth=depth)
 
-        response: queue.PopResponse = self._exec("Pop", request)
+        response: queue.QueuePopResponse = self._exec("Pop", request)
 
         # Map the response protobuf response items to Python SDK Nitric Queue Items
         return [self._wire_to_queue_item(item) for item in response.items]

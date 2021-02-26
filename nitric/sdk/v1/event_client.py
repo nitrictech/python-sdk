@@ -1,30 +1,22 @@
-from typing import List
-from nitric.proto import eventing
-from nitric.proto import eventing_service
+from nitric.proto import events
+from nitric.proto import event_service
 from nitric.sdk.v1._base_client import BaseClient
 from google.protobuf.struct_pb2 import Struct
 from nitric.proto.v1.common_pb2 import NitricEvent
-from nitric.sdk.v1.models import Topic
 import uuid
 
 
-class EventingClient(BaseClient):
+class EventClient(BaseClient):
     """
-    Nitric generic publish/subscribe eventing client.
+    Nitric generic publish/subscribe event client.
 
-    This client insulates application code from stack specific event/topic operations or SDKs.
+    This client insulates application code from stack specific event operations or SDKs.
     """
 
     def __init__(self):
         """Construct a Nitric Event Client."""
         super(self.__class__, self).__init__()
-        self._stub = eventing_service.EventingStub(self._channel)
-
-    def get_topics(self) -> List[Topic]:
-        """Get a list of topics available for publishing or subscription."""
-        response = self._exec("GetTopics")
-        topics = [Topic(name=topic_name) for topic_name in response.topics]
-        return topics
+        self._stub = event_service.EventStub(self._channel)
 
     def publish(
         self,
@@ -53,6 +45,6 @@ class EventingClient(BaseClient):
         event = NitricEvent(
             requestId=request_id, payloadType=payload_type, payload=payload_struct
         )
-        request = eventing.PublishRequest(topicName=topic_name, event=event)
+        request = events.EventPublishRequest(topic=topic_name, event=event)
         self._exec("Publish", request)
         return request_id
