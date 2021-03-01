@@ -1,5 +1,5 @@
 class UnimplementedException(Exception):
-    """Exception raised when the requested operation isn't supported by the ambassador."""
+    """Exception raised when the requested operation isn't supported by the server."""
 
     pass
 
