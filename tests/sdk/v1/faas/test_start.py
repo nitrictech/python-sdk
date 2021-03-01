@@ -6,7 +6,6 @@ from nitric.sdk.v1.faas.faas import Handler
 
 
 class StartCases(unittest.TestCase):
-
     def test_serve_called(self):
         mock_serve = Mock()
         mock_serve.return_value = None
@@ -16,33 +15,36 @@ class StartCases(unittest.TestCase):
 
         args, kwargs = mock_serve.call_args
         mock_serve.assert_called_once()
-        assert kwargs['host'] == "127.0.0.1"
-        assert kwargs['port'] == 8080
+        assert kwargs["host"] == "127.0.0.1"
+        assert kwargs["port"] == 8080
 
 
 class HandlerCases(unittest.TestCase):
-
     def test_full_response(self):
         mock_func = Mock()
-        mock_func.return_value = Response(status=200, body="it works", headers={"a": "a header", "b": "b header"})
+        mock_func.return_value = Response(
+            status=200, body="it works", headers={"a": "a header", "b": "b header"}
+        )
 
         with patch("nitric.sdk.v1.faas.faas.construct_request", Mock()):
             handler = Handler(mock_func)
             response = handler()
 
         # Ensure the response is returned in the tuple format for Flask
-        assert response == ('it works', 200, {"a": "a header", "b": "b header"})
+        assert response == ("it works", 200, {"a": "a header", "b": "b header"})
 
     def test_custom_status(self):
         mock_func = Mock()
-        mock_func.return_value = Response(status=404)  # Simulate a non 200 status, such as an error
+        mock_func.return_value = Response(
+            status=404
+        )  # Simulate a non 200 status, such as an error
 
         with patch("nitric.sdk.v1.faas.faas.construct_request", Mock()):
             handler = Handler(mock_func)
             response = handler()
 
         # Ensure the response is returned in the tuple format for Flask
-        assert response == ('', 404, {})
+        assert response == ("", 404, {})
 
     def test_unhandled_exception(self):
         # always return and error to test how it's handled internally
@@ -69,14 +71,10 @@ class HandlerCases(unittest.TestCase):
             response = handler()
 
         # Ensure the debug details are provided along with the error status
-        assert response == ('<html><head><title>Error</title></head><body><h2>An Error Occurred:</h2>\n' +
-                            '<pre>Traceback:\n' +
-                            '  File ' +
-                            '&quot;/Users/jcusch/Code/nitric/sdks/python-sdk/nitric/sdk/v1/faas/faas.py&quot;, '
-                            'line 80, in __call__\n'
-                            '    response: Union[Response, str] = self.func(nitric_request)\n' +
-                            ' TypeError: error_func() takes 0 positional arguments but 1 was given\n' +
-                            '</pre></body></html>\n', 500)
+        assert response[0].startswith(
+            "<html><head><title>Error</title></head><body><h2>An Error Occurred:</h2>"
+        )
+        assert response[1] == 500  # Status code
 
     def test_str_response(self):
         mock_func = Mock()
@@ -87,10 +85,9 @@ class HandlerCases(unittest.TestCase):
             response = handler()
 
         # Ensure the response string was wrapped with http response values
-        assert response == ('test', 200, {})
+        assert response == ("test", 200, {})
 
     def test_no_response(self):
-
         def no_response(request):
             # do nothing
             mock = Mock()
@@ -100,4 +97,4 @@ class HandlerCases(unittest.TestCase):
             response = handler()
 
         # Ensure an empty response with a success status
-        assert response == ('', 200)
+        assert response == ("", 200)
