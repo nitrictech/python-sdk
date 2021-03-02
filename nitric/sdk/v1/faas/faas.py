@@ -9,7 +9,8 @@ from nitric.sdk.v1.faas import Request, Response
 
 def construct_request() -> Request:
     """Construct a Nitric Request object from the Flask HTTP Request."""
-    return Request(dict(request.headers), request.get_data())
+    # full_path used to better match behavior in other SDKs
+    return Request(dict(request.headers), request.get_data(), path=request.full_path)
 
 
 def format_status(response: Response) -> int:
@@ -83,7 +84,7 @@ class Handler(object):
         """Construct a new handler using the provided function to handle new requests."""
         self.func = func
 
-    def __call__(self, *args):
+    def __call__(self, path="", *args):
         """Construct Nitric Request from HTTP Request."""
         nitric_request = construct_request()
         try:
@@ -96,15 +97,22 @@ class Handler(object):
         return http_response(response)
 
 
-def start(func: Callable[[Request], Response]):
+def start(func: Callable[[Request], Union[Response, str]]):
     """
     Register the provided function as the request handler and starts handling new requests.
 
     :param func: to use to handle new requests
     """
     app = Flask(__name__)
-    app.add_url_rule("/", "index", Handler(func))
-    app.add_url_rule("/<path:path>", "path", Handler(func))
+    app.add_url_rule(
+        "/", "index", Handler(func), methods=["GET", "PUT", "POST", "PATCH", "DELETE"]
+    )
+    app.add_url_rule(
+        "/<path:path>",
+        "path",
+        Handler(func),
+        methods=["GET", "PUT", "POST", "PATCH", "DELETE"],
+    )
 
     host, port = f"{settings.CHILD_ADDRESS}".split(":")
     # Start the function HTTP server

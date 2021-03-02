@@ -33,6 +33,19 @@ def _clean_header(header_name: str):
     return header_name.lower().replace("x-nitric-", "").replace("-", "_")
 
 
+class RequestParameters(object):
+    """Represents parsed URL path and query parameters."""
+
+    def __init__(self, path: dict = None, query: dict = None):
+        """Construct a new request parameters object containing path and query param dicts."""
+        if path is None:
+            path = {}
+        if query is None:
+            query = {}
+        self.path = path
+        self.query = query
+
+
 class Request(object):
     """
     Represents a standard Nitric function request.
@@ -40,7 +53,7 @@ class Request(object):
     These requests are normalized from their original stack-specific structures.
     """
 
-    def __init__(self, headers: typing.Dict[str, str], payload: bytes):
+    def __init__(self, headers: typing.Dict[str, str], payload: bytes, path: str = ""):
         """Construct a Nitric Function Request."""
         # Map headers to context properties
         context_props = {
@@ -50,6 +63,7 @@ class Request(object):
         }
         self.context = Context(**context_props)
         self.payload = payload
+        self.path = path
 
     def get_body(self) -> bytes:
         """Return the bytes of the body of the request."""
@@ -66,3 +80,7 @@ class Request(object):
         import json
 
         return json.loads(self.payload)
+
+    # TODO: Implement path and query param parsing, which is consistent with other SDKs
+    # def get_params(self) -> RequestParameters:
+    #     self.path
