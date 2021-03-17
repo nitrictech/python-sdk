@@ -85,7 +85,7 @@ class QueueClient(BaseClient):
 
         :param queue_name: the name of the queue to publish to
         :param events: The events to push to the queue
-        :return: a list containing details of any messages that failed to publish.
+        :return: PushResponse containing a list containing details of any messages that failed to publish.
         """
         if events is None:
             events = []
@@ -104,7 +104,7 @@ class QueueClient(BaseClient):
         Pop 1 or more items from the specified queue up to the depth limit.
 
         Queue items are Nitric Events that are leased for a limited period of time, where they may be worked on.
-        Once complete or failed they must be acknowledged using request specified leaseId.
+        Once complete or failed they must be acknowledged using the request specific leaseId.
 
         If the lease on a queue item expires before it is acknowledged or the lease is extended the event will be
         returned to the queue for reprocessing.
