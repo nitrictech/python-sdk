@@ -22,7 +22,7 @@ class EventClient(BaseClient):
         self,
         topic_name: str,
         payload: dict = None,
-        payload_type: str = "none",
+        payload_type: str = "",
         request_id: str = None,
     ) -> str:
         """
