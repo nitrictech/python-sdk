@@ -79,7 +79,7 @@ class QueueClient(BaseClient):
 
         return FailedEvent(event=evt, message=failed_event.message)
 
-    def batch_push(self, queue_name: str, events: List[Event] = None) -> PushResponse:
+    def send_batch(self, queue_name: str, events: List[Event] = None) -> PushResponse:
         """
         Push a collection of events to a queue, which can be retrieved by other services.
 
@@ -91,15 +91,15 @@ class QueueClient(BaseClient):
             events = []
         wire_events = map(self._evt_to_wire, events)
 
-        request = queue.QueueBatchPushRequest(queue=queue_name, events=wire_events)
+        request = queue.QueueSendBatchRequest(queue=queue_name, events=wire_events)
 
-        response: queue.QueueBatchPushResponse = self._exec("BatchPush", request)
+        response: queue.QueueSendBatchResponse = self._exec("SendBatch", request)
 
         failed_events = map(self._wire_to_failed_evt, response.failedMessages)
 
         return PushResponse(failed_events=list(failed_events))
 
-    def pop(self, queue_name: str, depth: int = None) -> List[QueueItem]:
+    def receive(self, queue_name: str, depth: int = None) -> List[QueueItem]:
         """
         Pop 1 or more items from the specified queue up to the depth limit.
 
@@ -118,9 +118,9 @@ class QueueClient(BaseClient):
         if depth is None or depth < 1:
             depth = 1
 
-        request = queue.QueuePopRequest(queue=queue_name, depth=depth)
+        request = queue.QueueReceiveRequest(queue=queue_name, depth=depth)
 
-        response: queue.QueuePopResponse = self._exec("Pop", request)
+        response: queue.QueueReceiveResponse = self._exec("Receive", request)
 
         # Map the response protobuf response items to Python SDK Nitric Queue Items
         return [self._wire_to_queue_item(item) for item in response.items]

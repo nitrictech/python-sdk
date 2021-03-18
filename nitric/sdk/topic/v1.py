@@ -1,7 +1,7 @@
 from typing import List
 
 from nitric.proto import event_service
-from nitric.proto.v1.events_pb2 import TopicListResponse
+from nitric.proto import event
 from nitric.sdk.v1._base_client import BaseClient
 from nitric.sdk.v1.models import Topic
 
@@ -20,6 +20,6 @@ class TopicClient(BaseClient):
 
     def get_topics(self) -> List[Topic]:
         """Get a list of topics available for publishing or subscription."""
-        response: TopicListResponse = self._exec("List")
+        response: event.TopicListResponse = self._exec("List")
         topics = [Topic(name=topic.name) for topic in response.topics]
         return topics

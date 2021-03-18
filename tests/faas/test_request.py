@@ -1,6 +1,6 @@
 from json.decoder import JSONDecodeError
 
-from nitric.sdk.v1.faas.request import _clean_header, Request
+from nitric.faas.request import _clean_header, Request
 from unittest.mock import patch, Mock
 import unittest
 
@@ -33,7 +33,7 @@ class RequestCases(unittest.TestCase):
             "source_type",
             "payload_type",
         ]
-        with patch("nitric.sdk.v1.faas.request._clean_header", mock_clean_headers):
+        with patch("nitric.faas.request._clean_header", mock_clean_headers):
             request = Request(test_headers, b"test content")
         mock_clean_headers.assert_called_with("x-nitric-payload-type")
 
@@ -52,7 +52,7 @@ class RequestCases(unittest.TestCase):
             "source_type",
             "payload_type",
         ]
-        with patch("nitric.sdk.v1.faas.request._clean_header", mock_clean_headers):
+        with patch("nitric.faas.request._clean_header", mock_clean_headers):
             request = Request(test_headers, b"test content")
         mock_clean_headers.assert_called_with("X-Nitric-Payload-Type")
 

@@ -35,5 +35,5 @@ pip3 install nitric
 
 ```python
 # import classes/modules as required
-from nitric.sdk.v1 import EventClient, DocumentsClient
+from nitric.sdk.v1 import EventClient, KeyValueClient
 ```

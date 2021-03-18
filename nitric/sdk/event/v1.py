@@ -1,8 +1,8 @@
-from nitric.proto import events
+from nitric.proto import event as event_model
 from nitric.proto import event_service
 from nitric.sdk.v1._base_client import BaseClient
 from google.protobuf.struct_pb2 import Struct
-from nitric.proto.v1.common_pb2 import NitricEvent
+from nitric.proto.common.v1.common_pb2 import NitricEvent
 import uuid
 
 
@@ -34,8 +34,6 @@ class EventClient(BaseClient):
         :param request_id: a unique id, used to ensure idempotent processing of events. Defaults to a version 4 UUID.
         :return: the request id on successful publish
         """
-        # FIXME: Think about a smarter way to define the params
-        # api_v1._PUBLISHREQUEST.fields
         if payload is None:
             payload = {}
         if request_id is None:
@@ -45,6 +43,6 @@ class EventClient(BaseClient):
         event = NitricEvent(
             requestId=request_id, payloadType=payload_type, payload=payload_struct
         )
-        request = events.EventPublishRequest(topic=topic_name, event=event)
+        request = event_model.EventPublishRequest(topic=topic_name, event=event)
         self._exec("Publish", request)
         return request_id

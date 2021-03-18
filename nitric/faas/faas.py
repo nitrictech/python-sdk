@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify
 from waitress import serve
 
 from nitric.config import settings
-from nitric.sdk.v1.faas import Request, Response
+from nitric.faas import Request, Response
 
 
 def construct_request() -> Request:

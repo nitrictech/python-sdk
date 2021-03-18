@@ -1,4 +1,4 @@
-from nitric.sdk.v1.faas import Response
+from nitric.faas import Response
 from http import HTTPStatus
 
 

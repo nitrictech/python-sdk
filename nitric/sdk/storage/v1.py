@@ -15,7 +15,7 @@ class StorageClient(BaseClient):
         super(self.__class__, self).__init__()
         self._stub = storage_service.StorageStub(self._channel)
 
-    def put(self, bucket_name: str, key: str, body: bytes):
+    def write(self, bucket_name: str, key: str, body: bytes):
         """
         Store a file.
 
@@ -24,11 +24,13 @@ class StorageClient(BaseClient):
         :param body: data to be stored.
         :return: storage result.
         """
-        request = storage.StoragePutRequest(bucketName=bucket_name, key=key, body=body)
-        response = self._exec("Put", request)
+        request = storage.StorageWriteRequest(
+            bucketName=bucket_name, key=key, body=body
+        )
+        response = self._exec("Write", request)
         return response
 
-    def get(self, bucket_name: str, key: str) -> bytes:
+    def read(self, bucket_name: str, key: str) -> bytes:
         """
         Retrieve an existing file.
 
@@ -36,6 +38,6 @@ class StorageClient(BaseClient):
         :param key: key for the file to retrieve.
         :return: the file as bytes.
         """
-        request = storage.StorageGetRequest(bucketName=bucket_name, key=key)
-        response = self._exec("Get", request)
+        request = storage.StorageReadRequest(bucketName=bucket_name, key=key)
+        response = self._exec("Read", request)
         return response.body

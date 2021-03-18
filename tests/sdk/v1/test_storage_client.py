@@ -2,8 +2,8 @@ from unittest.mock import patch, Mock
 from nitric.sdk.v1 import StorageClient
 
 
-# Put to bucket
-def test_put():
+# Write to bucket
+def test_write():
     mock_grpc_method_getter = Mock()
     mock_grpc_method_getter.return_value = mock_create = Mock()
 
@@ -13,10 +13,10 @@ def test_put():
         "nitric.sdk.v1.StorageClient._get_method_function", mock_grpc_method_getter
     ):
         client = StorageClient()
-        client.put("bucket_name", "key_name", content)
+        client.write("bucket_name", "key_name", content)
 
     # Ensure the correct gRPC method is retrieved
-    mock_grpc_method_getter.assert_called_with("Put")
+    mock_grpc_method_getter.assert_called_with("Write")
 
     # Ensure the 'Put' method is called with the expected input
     mock_create.assert_called_once()  # No input data required to get topics
@@ -25,8 +25,8 @@ def test_put():
     assert mock_create.call_args.args[0].body == content
 
 
-# Get from bucket
-def test_get():
+# Read from bucket
+def test_read():
     mock_grpc_method_getter = Mock()
     mock_grpc_method_getter.return_value = mock_create = Mock()
 
@@ -34,10 +34,10 @@ def test_get():
         "nitric.sdk.v1.StorageClient._get_method_function", mock_grpc_method_getter
     ):
         client = StorageClient()
-        client.get("bucket_name", "key_name")
+        client.read("bucket_name", "key_name")
 
     # Ensure the correct gRPC method is retrieved
-    mock_grpc_method_getter.assert_called_with("Get")
+    mock_grpc_method_getter.assert_called_with("Read")
 
     # Ensure the 'Get' method is called with the expected input
     mock_create.assert_called_once()  # No input data required to get topics
@@ -48,8 +48,10 @@ def test_get():
 def test_grpc_methods():
     client = StorageClient()
     assert (
-        client._get_method_function("Get")._method == b"/nitric.v1.storage.Storage/Get"
+        client._get_method_function("Read")._method
+        == b"/nitric.storage.v1.Storage/Read"
     )
     assert (
-        client._get_method_function("Put")._method == b"/nitric.v1.storage.Storage/Put"
+        client._get_method_function("Write")._method
+        == b"/nitric.storage.v1.Storage/Write"
     )

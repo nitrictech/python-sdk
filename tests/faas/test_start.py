@@ -1,8 +1,8 @@
 from unittest.mock import patch, Mock
 import unittest
-from nitric.sdk.v1.faas import Response
-from nitric.sdk.v1.faas import start
-from nitric.sdk.v1.faas.faas import Handler
+from nitric.faas import Response
+from nitric.faas import start
+from nitric.faas.faas import Handler
 
 
 class StartCases(unittest.TestCase):
@@ -10,7 +10,7 @@ class StartCases(unittest.TestCase):
         mock_serve = Mock()
         mock_serve.return_value = None
 
-        with patch("nitric.sdk.v1.faas.faas.serve", mock_serve):
+        with patch("nitric.faas.faas.serve", mock_serve):
             start(func=lambda a: Response("test mock response"))
 
         args, kwargs = mock_serve.call_args
@@ -26,7 +26,7 @@ class HandlerCases(unittest.TestCase):
             status=200, body="it works", headers={"a": "a header", "b": "b header"}
         )
 
-        with patch("nitric.sdk.v1.faas.faas.construct_request", Mock()):
+        with patch("nitric.faas.faas.construct_request", Mock()):
             handler = Handler(mock_func)
             response = handler()
 
@@ -39,7 +39,7 @@ class HandlerCases(unittest.TestCase):
             status=404
         )  # Simulate a non 200 status, such as an error
 
-        with patch("nitric.sdk.v1.faas.faas.construct_request", Mock()):
+        with patch("nitric.faas.faas.construct_request", Mock()):
             handler = Handler(mock_func)
             response = handler()
 
@@ -51,7 +51,7 @@ class HandlerCases(unittest.TestCase):
         def error_func():
             raise Exception("mock error")
 
-        with patch("nitric.sdk.v1.faas.faas.construct_request", Mock()):
+        with patch("nitric.faas.faas.construct_request", Mock()):
             handler = Handler(error_func)
             response = handler()
 
@@ -66,7 +66,7 @@ class HandlerCases(unittest.TestCase):
         def error_func():
             raise Exception("mock error")
 
-        with patch("nitric.sdk.v1.faas.faas.construct_request", Mock()):
+        with patch("nitric.faas.faas.construct_request", Mock()):
             handler = Handler(error_func)
             response = handler()
 
@@ -80,7 +80,7 @@ class HandlerCases(unittest.TestCase):
         mock_func = Mock()
         mock_func.return_value = "test"
 
-        with patch("nitric.sdk.v1.faas.faas.construct_request", Mock()):
+        with patch("nitric.faas.faas.construct_request", Mock()):
             handler = Handler(mock_func)
             response = handler()
 
@@ -92,7 +92,7 @@ class HandlerCases(unittest.TestCase):
             # do nothing
             mock = Mock()
 
-        with patch("nitric.sdk.v1.faas.faas.construct_request", Mock()):
+        with patch("nitric.faas.faas.construct_request", Mock()):
             handler = Handler(no_response)
             response = handler()
 

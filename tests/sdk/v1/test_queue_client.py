@@ -15,10 +15,10 @@ def test_push():
         "nitric.sdk.v1.QueueClient._get_method_function", mock_grpc_method_getter
     ):
         client = QueueClient()
-        client.batch_push("test-queue", test_events)
+        client.send_batch("test-queue", test_events)
 
     # Ensure the correct gRPC method is retrieved
-    mock_grpc_method_getter.assert_called_with("BatchPush")
+    mock_grpc_method_getter.assert_called_with("SendBatch")
 
     # Ensure the queue push method is called with the expected input
     mock_push.assert_called_once()
@@ -28,66 +28,82 @@ def test_push():
     assert mock_push.call_args.args[0].events[0].payload["test"] == "test"
 
 
-def test_pop():
+def test_receive():
     mock_grpc_method_getter = Mock()
-    mock_grpc_method_getter.return_value = mock_pop = Mock()
-    mock_pop.return_value.items = []
+    mock_grpc_method_getter.return_value = mock_receive = Mock()
+    mock_receive.return_value.items = []
 
     with patch(
         "nitric.sdk.v1.QueueClient._get_method_function", mock_grpc_method_getter
     ):
         client = QueueClient()
-        client.pop("test-queue", 1)
+        client.receive("test-queue", 1)
 
     # Ensure the correct gRPC method is retrieved
-    mock_grpc_method_getter.assert_called_with("Pop")
+    mock_grpc_method_getter.assert_called_with("Receive")
 
-    # Ensure the queue pop method is called with the expected input
-    mock_pop.assert_called_once()
-    assert mock_pop.call_args.args[0].queue == "test-queue"
-    assert mock_pop.call_args.args[0].depth == 1
+    # Ensure the queue receive method is called with the expected input
+    mock_receive.assert_called_once()
+    assert mock_receive.call_args.args[0].queue == "test-queue"
+    assert mock_receive.call_args.args[0].depth == 1
 
 
-def test_pop_no_depth():
+def test_receive_no_depth():
     mock_grpc_method_getter = Mock()
-    mock_grpc_method_getter.return_value = mock_pop = Mock()
-    mock_pop.return_value.items = []
+    mock_grpc_method_getter.return_value = mock_receive = Mock()
+    mock_receive.return_value.items = []
 
     with patch(
         "nitric.sdk.v1.QueueClient._get_method_function", mock_grpc_method_getter
     ):
         client = QueueClient()
-        client.pop("test-queue")  # call pop without the optional depth parameter.
+        client.receive(
+            "test-queue"
+        )  # call receive without the optional depth parameter.
 
     # Ensure the default value 1 is used.
-    assert mock_pop.call_args.args[0].depth == 1
+    assert mock_receive.call_args.args[0].depth == 1
 
 
-def test_pop_none_depth():
+def test_receive_none_depth():
     mock_grpc_method_getter = Mock()
-    mock_grpc_method_getter.return_value = mock_pop = Mock()
-    mock_pop.return_value.items = []
+    mock_grpc_method_getter.return_value = mock_receive = Mock()
+    mock_receive.return_value.items = []
 
     with patch(
         "nitric.sdk.v1.QueueClient._get_method_function", mock_grpc_method_getter
     ):
         client = QueueClient()
-        client.pop("test-queue", None)  # call pop with depth = None.
+        client.receive("test-queue", None)  # call receive with depth = None.
 
     # Ensure the default value 1 is used.
-    assert mock_pop.call_args.args[0].depth == 1
+    assert mock_receive.call_args.args[0].depth == 1
 
 
-def test_pop_negative_depth():
+def test_receive_negative_depth():
     mock_grpc_method_getter = Mock()
-    mock_grpc_method_getter.return_value = mock_pop = Mock()
-    mock_pop.return_value.items = []
+    mock_grpc_method_getter.return_value = mock_receive = Mock()
+    mock_receive.return_value.items = []
 
     with patch(
         "nitric.sdk.v1.QueueClient._get_method_function", mock_grpc_method_getter
     ):
         client = QueueClient()
-        client.pop("test-queue", -2)  # call pop with a negative integer for depth.
+        client.receive(
+            "test-queue", -2
+        )  # call receive with a negative integer for depth.
 
     # Ensure the default value 1 is used.
-    assert mock_pop.call_args.args[0].depth == 1
+    assert mock_receive.call_args.args[0].depth == 1
+
+
+def test_grpc_methods():
+    client = QueueClient()
+    assert (
+        client._get_method_function("SendBatch")._method
+        == b"/nitric.queue.v1.Queue/SendBatch"
+    )
+    assert (
+        client._get_method_function("Receive")._method
+        == b"/nitric.queue.v1.Queue/Receive"
+    )
