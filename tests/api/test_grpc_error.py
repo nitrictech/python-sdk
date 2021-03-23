@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, Mock
-from nitric.sdk.v1 import EventClient
-from nitric.sdk.v1.exception import *
+from nitric.api import EventClient
+from nitric.api.exception import *
 import grpc
 from grpc._channel import _InactiveRpcError, _RPCState
 
@@ -17,7 +17,7 @@ class GRPCErrorCases(unittest.TestCase):
         mock_publish._method = b"test.topic/Publish"
 
         with patch(
-            "nitric.sdk.v1.EventClient._get_method_function", mock_grpc_method_getter
+            "nitric.api.EventClient._get_method_function", mock_grpc_method_getter
         ):
             client = EventClient()
             self.assertRaises(
@@ -34,7 +34,7 @@ class GRPCErrorCases(unittest.TestCase):
         mock_publish._method = b"test.topic/Publish"
 
         with patch(
-            "nitric.sdk.v1.EventClient._get_method_function", mock_grpc_method_getter
+            "nitric.api.EventClient._get_method_function", mock_grpc_method_getter
         ):
             client = EventClient()
             self.assertRaises(
@@ -51,7 +51,7 @@ class GRPCErrorCases(unittest.TestCase):
         mock_publish._method = b"test.topic/Publish"
 
         with patch(
-            "nitric.sdk.v1.EventClient._get_method_function", mock_grpc_method_getter
+            "nitric.api.EventClient._get_method_function", mock_grpc_method_getter
         ):
             client = EventClient()
             self.assertRaises(
@@ -67,7 +67,7 @@ class GRPCErrorCases(unittest.TestCase):
         mock_publish._method = b"test.topic/Publish"
 
         with patch(
-            "nitric.sdk.v1.EventClient._get_method_function", mock_grpc_method_getter
+            "nitric.api.EventClient._get_method_function", mock_grpc_method_getter
         ):
             client = EventClient()
             # Expect a standard Exception if a non-grpc error is raised.

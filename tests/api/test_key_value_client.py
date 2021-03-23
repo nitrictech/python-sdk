@@ -2,7 +2,7 @@ from unittest.mock import patch, Mock
 
 from google.protobuf.struct_pb2 import Struct
 
-from nitric.sdk.v1 import KeyValueClient
+from nitric.api import KeyValueClient
 from nitric.proto.kv.v1.kv_pb2 import KeyValueGetResponse
 
 
@@ -14,7 +14,7 @@ def test_put_key_value():
     test_key_value = {"content": "some text content"}
 
     with patch(
-        "nitric.sdk.v1.KeyValueClient._get_method_function", mock_grpc_method_getter
+        "nitric.api.KeyValueClient._get_method_function", mock_grpc_method_getter
     ):
         client = KeyValueClient()
         client.put("collection_name", "kv_key", test_key_value)
@@ -39,7 +39,7 @@ def test_get_key_value():
     mock_get.return_value = reply
 
     with patch(
-        "nitric.sdk.v1.KeyValueClient._get_method_function", mock_grpc_method_getter
+        "nitric.api.KeyValueClient._get_method_function", mock_grpc_method_getter
     ):
         client = KeyValueClient()
         response_value = client.get("collection_name", "kv_key")
@@ -55,7 +55,7 @@ def test_delete_key_value():
     mock_grpc_method_getter.return_value = mock_create = Mock()
 
     with patch(
-        "nitric.sdk.v1.KeyValueClient._get_method_function", mock_grpc_method_getter
+        "nitric.api.KeyValueClient._get_method_function", mock_grpc_method_getter
     ):
         client = KeyValueClient()
         client.delete("collection_name", "kv_key")

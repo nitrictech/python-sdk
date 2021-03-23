@@ -1,6 +1,6 @@
 from nitric.proto import key_value
 from nitric.proto import key_value_service
-from nitric.sdk.v1._base_client import BaseClient
+from nitric.api._base_client import BaseClient
 from google.protobuf.struct_pb2 import Struct
 from google.protobuf.json_format import MessageToDict
 from nitric.proto.kv.v1.kv_pb2 import KeyValueGetResponse
@@ -18,10 +18,10 @@ class KeyValueClient(BaseClient):
         super(self.__class__, self).__init__()
         self._stub = key_value_service.KeyValueStub(self._channel)
 
-    def put(self, collection: str, key: str, document: dict):
+    def put(self, collection: str, key: str, value: dict):
         """Create a new document with the specified key in the specified collection."""
         value_struct = Struct()
-        value_struct.update(document)
+        value_struct.update(value)
         request = key_value.KeyValuePutRequest(
             collection=collection, key=key, value=value_struct
         )

@@ -1,5 +1,5 @@
 from unittest.mock import patch, Mock
-from nitric.sdk.v1 import StorageClient
+from nitric.api import StorageClient
 
 
 # Write to bucket
@@ -10,7 +10,7 @@ def test_write():
     content = b"test content"
 
     with patch(
-        "nitric.sdk.v1.StorageClient._get_method_function", mock_grpc_method_getter
+        "nitric.api.StorageClient._get_method_function", mock_grpc_method_getter
     ):
         client = StorageClient()
         client.write("bucket_name", "key_name", content)
@@ -31,7 +31,7 @@ def test_read():
     mock_grpc_method_getter.return_value = mock_create = Mock()
 
     with patch(
-        "nitric.sdk.v1.StorageClient._get_method_function", mock_grpc_method_getter
+        "nitric.api.StorageClient._get_method_function", mock_grpc_method_getter
     ):
         client = StorageClient()
         client.read("bucket_name", "key_name")

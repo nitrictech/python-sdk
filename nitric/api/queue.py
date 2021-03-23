@@ -2,9 +2,9 @@ from typing import List
 from nitric.proto import queue
 from nitric.proto import queue_service
 from nitric.proto import common
-from nitric.sdk.v1._base_client import BaseClient
+from nitric.api._base_client import BaseClient
 from google.protobuf.struct_pb2 import Struct
-from nitric.sdk.v1.models import Event, FailedEvent, QueueItem
+from nitric.api.models import Event, FailedEvent, QueueItem
 from google.protobuf.json_format import MessageToDict
 
 

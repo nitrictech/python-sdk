@@ -3,7 +3,7 @@ import grpc
 from google.protobuf.struct_pb2 import Struct
 from grpc._channel import _InactiveRpcError
 from nitric.config import settings
-from nitric.sdk.v1.exception import (
+from nitric.api.exception import (
     UnimplementedException,
     AlreadyExistsException,
     UnavailableException,

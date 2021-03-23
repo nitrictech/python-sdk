@@ -1,5 +1,5 @@
 from unittest.mock import patch, Mock
-from nitric.sdk.v1 import EventClient
+from nitric.api import EventClient
 from google.protobuf.struct_pb2 import Struct
 from uuid import UUID
 
@@ -11,9 +11,7 @@ def test_publish():
 
     payload = {"content": "of event"}
 
-    with patch(
-        "nitric.sdk.v1.EventClient._get_method_function", mock_grpc_method_getter
-    ):
+    with patch("nitric.api.EventClient._get_method_function", mock_grpc_method_getter):
         client = EventClient()
         request_id = client.publish(
             "topic_name", payload, "payload.type", request_id="abc-123"
@@ -39,9 +37,7 @@ def test_automatic_request_id():
 
     payload = {"content": "of event"}
 
-    with patch(
-        "nitric.sdk.v1.EventClient._get_method_function", mock_grpc_method_getter
-    ):
+    with patch("nitric.api.EventClient._get_method_function", mock_grpc_method_getter):
         client = EventClient()
         request_id = client.publish("topic_name", payload, "payload.type")
 
@@ -63,9 +59,7 @@ def test_empty_payload():
     mock_grpc_method_getter.return_value = mock_publish = Mock()
     mock_publish.return_value.topics = []
 
-    with patch(
-        "nitric.sdk.v1.EventClient._get_method_function", mock_grpc_method_getter
-    ):
+    with patch("nitric.api.EventClient._get_method_function", mock_grpc_method_getter):
         client = EventClient()
         client.publish(topic_name="topic_name", payload_type="payload.type")
 

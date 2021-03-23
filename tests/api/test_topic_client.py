@@ -1,5 +1,5 @@
 from unittest.mock import patch, Mock
-from nitric.sdk.v1 import TopicClient
+from nitric.api import TopicClient
 from google.protobuf.struct_pb2 import Struct
 
 
@@ -8,9 +8,7 @@ def test_get_topics():
     mock_grpc_method_getter.return_value = mock_get_topics = Mock()
     mock_get_topics.return_value.topics = []
 
-    with patch(
-        "nitric.sdk.v1.TopicClient._get_method_function", mock_grpc_method_getter
-    ):
+    with patch("nitric.api.TopicClient._get_method_function", mock_grpc_method_getter):
         client = TopicClient()
         topics = client.get_topics()
 

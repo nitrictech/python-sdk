@@ -1,5 +1,5 @@
 from unittest.mock import patch, Mock
-from nitric.sdk.v1 import QueueClient, Event
+from nitric.api import QueueClient, Event
 
 
 def test_push():
@@ -11,9 +11,7 @@ def test_push():
         Event(request_id="1234", payload_type="test-payload", payload={"test": "test"})
     ]
 
-    with patch(
-        "nitric.sdk.v1.QueueClient._get_method_function", mock_grpc_method_getter
-    ):
+    with patch("nitric.api.QueueClient._get_method_function", mock_grpc_method_getter):
         client = QueueClient()
         client.send_batch("test-queue", test_events)
 
@@ -33,9 +31,7 @@ def test_receive():
     mock_grpc_method_getter.return_value = mock_receive = Mock()
     mock_receive.return_value.items = []
 
-    with patch(
-        "nitric.sdk.v1.QueueClient._get_method_function", mock_grpc_method_getter
-    ):
+    with patch("nitric.api.QueueClient._get_method_function", mock_grpc_method_getter):
         client = QueueClient()
         client.receive("test-queue", 1)
 
@@ -53,9 +49,7 @@ def test_receive_no_depth():
     mock_grpc_method_getter.return_value = mock_receive = Mock()
     mock_receive.return_value.items = []
 
-    with patch(
-        "nitric.sdk.v1.QueueClient._get_method_function", mock_grpc_method_getter
-    ):
+    with patch("nitric.api.QueueClient._get_method_function", mock_grpc_method_getter):
         client = QueueClient()
         client.receive(
             "test-queue"
@@ -70,9 +64,7 @@ def test_receive_none_depth():
     mock_grpc_method_getter.return_value = mock_receive = Mock()
     mock_receive.return_value.items = []
 
-    with patch(
-        "nitric.sdk.v1.QueueClient._get_method_function", mock_grpc_method_getter
-    ):
+    with patch("nitric.api.QueueClient._get_method_function", mock_grpc_method_getter):
         client = QueueClient()
         client.receive("test-queue", None)  # call receive with depth = None.
 
@@ -85,9 +77,7 @@ def test_receive_negative_depth():
     mock_grpc_method_getter.return_value = mock_receive = Mock()
     mock_receive.return_value.items = []
 
-    with patch(
-        "nitric.sdk.v1.QueueClient._get_method_function", mock_grpc_method_getter
-    ):
+    with patch("nitric.api.QueueClient._get_method_function", mock_grpc_method_getter):
         client = QueueClient()
         client.receive(
             "test-queue", -2

@@ -1,4 +1,4 @@
-from nitric.sdk.v1.models import Topic
+from nitric.api.models import Topic
 
 
 def test_topic_model():

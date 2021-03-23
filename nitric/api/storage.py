@@ -1,6 +1,6 @@
 from nitric.proto import storage
 from nitric.proto import storage_service
-from nitric.sdk.v1._base_client import BaseClient
+from nitric.api._base_client import BaseClient
 
 
 class StorageClient(BaseClient):
