@@ -2,9 +2,9 @@ from typing import List
 
 from nitric.proto import event as event_model, event
 from nitric.proto import event_service
+from nitric.proto.event.v1.event_pb2 import NitricEvent
 from nitric.api._base_client import BaseClient
 from google.protobuf.struct_pb2 import Struct
-from nitric.proto.common.v1.common_pb2 import NitricEvent
 import uuid
 
 from nitric.api.models import Topic
@@ -27,7 +27,7 @@ class EventClient(BaseClient):
         topic_name: str,
         payload: dict = None,
         payload_type: str = "",
-        request_id: str = None,
+        event_id: str = None,
     ) -> str:
         """
         Publish an event/message to a topic, which can be subscribed to by other services.
@@ -35,21 +35,21 @@ class EventClient(BaseClient):
         :param topic_name: the name of the topic to publish to
         :param payload: content of the message to send
         :param payload_type: fully qualified name of the event payload type, e.g. io.nitric.example.customer.created
-        :param request_id: a unique id, used to ensure idempotent processing of events. Defaults to a version 4 UUID.
+        :param event_id: a unique id, used to ensure idempotent processing of events. Defaults to a version 4 UUID.
         :return: the request id on successful publish
         """
         if payload is None:
             payload = {}
-        if request_id is None:
-            request_id = str(uuid.uuid4())
+        if event_id is None:
+            event_id = str(uuid.uuid4())
         payload_struct = Struct()
         payload_struct.update(payload)
-        event = NitricEvent(
-            requestId=request_id, payloadType=payload_type, payload=payload_struct
+        nitric_event = NitricEvent(
+            id=event_id, payloadType=payload_type, payload=payload_struct
         )
-        request = event_model.EventPublishRequest(topic=topic_name, event=event)
+        request = event_model.EventPublishRequest(topic=topic_name, event=nitric_event)
         self._exec("Publish", request)
-        return request_id
+        return event_id
 
 
 class TopicClient(BaseClient):

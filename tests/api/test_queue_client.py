@@ -1,5 +1,5 @@
 from unittest.mock import patch, Mock
-from nitric.api import QueueClient, Event
+from nitric.api import QueueClient, Task
 
 
 def test_push():
@@ -7,13 +7,13 @@ def test_push():
     mock_grpc_method_getter.return_value = mock_push = Mock()
     mock_push.return_value.failedMessages = []
 
-    test_events = [
-        Event(request_id="1234", payload_type="test-payload", payload={"test": "test"})
+    test_tasks = [
+        Task(task_id="1234", payload_type="test-payload", payload={"test": "test"})
     ]
 
     with patch("nitric.api.QueueClient._get_method_function", mock_grpc_method_getter):
         client = QueueClient()
-        client.send_batch("test-queue", test_events)
+        client.send_batch("test-queue", test_tasks)
 
     # Ensure the correct gRPC method is retrieved
     mock_grpc_method_getter.assert_called_with("SendBatch")
@@ -21,9 +21,9 @@ def test_push():
     # Ensure the queue push method is called with the expected input
     mock_push.assert_called_once()
     assert mock_push.call_args.args[0].queue == "test-queue"
-    assert mock_push.call_args.args[0].events[0].requestId == "1234"
-    assert mock_push.call_args.args[0].events[0].payloadType == "test-payload"
-    assert mock_push.call_args.args[0].events[0].payload["test"] == "test"
+    assert mock_push.call_args.args[0].tasks[0].id == "1234"
+    assert mock_push.call_args.args[0].tasks[0].payloadType == "test-payload"
+    assert mock_push.call_args.args[0].tasks[0].payload["test"] == "test"
 
 
 def test_receive():

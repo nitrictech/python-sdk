@@ -14,7 +14,7 @@ def test_publish():
     with patch("nitric.api.EventClient._get_method_function", mock_grpc_method_getter):
         client = EventClient()
         request_id = client.publish(
-            "topic_name", payload, "payload.type", request_id="abc-123"
+            "topic_name", payload, "payload.type", event_id="abc-123"
         )
 
     # Ensure the correct gRPC method is retrieved
@@ -25,7 +25,7 @@ def test_publish():
     # Ensure the publish method is called with the expected input
     mock_publish.assert_called_once()
     assert mock_publish.call_args.args[0].topic == "topic_name"
-    assert mock_publish.call_args.args[0].event.requestId == "abc-123"
+    assert mock_publish.call_args.args[0].event.id == "abc-123"
     assert mock_publish.call_args.args[0].event.payloadType == "payload.type"
     assert mock_publish.call_args.args[0].event.payload["content"] == "of event"
 

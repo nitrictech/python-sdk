@@ -3,7 +3,7 @@ from nitric.api.event import EventClient, TopicClient
 from nitric.api.kv import KeyValueClient
 from nitric.api.queue import QueueClient
 from nitric.api.storage import StorageClient
-from nitric.api.models import Event, QueueItem, FailedEvent, Topic
+from nitric.api.models import Event, Task, FailedTask, Topic
 
 __all__ = [
     "EventClient",
@@ -12,7 +12,7 @@ __all__ = [
     "QueueClient",
     "StorageClient",
     "Event",
-    "QueueItem",
-    "FailedEvent",
+    "Task",
+    "FailedTask",
     "Topic",
 ]

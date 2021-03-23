@@ -9,26 +9,30 @@ class Topic(object):
 class Event(object):
     """Represents a NitricEvent."""
 
-    def __init__(self, request_id: str, payload_type: str, payload: dict):
+    def __init__(self, event_id: str, payload_type: str, payload: dict):
         """Construct a new Event."""
-        self.request_id = request_id
+        self.event_id = event_id
         self.payload_type = payload_type
         self.payload = payload
 
 
-class FailedEvent(object):
+class Task(object):
+    """Represents a NitricTask."""
+
+    def __init__(
+        self, task_id: str, payload_type: str, payload: dict, lease_id: str = None
+    ):
+        """Construct a new Task."""
+        self.task_id = task_id
+        self.payload_type = payload_type
+        self.payload = payload
+        self.lease_id = lease_id
+
+
+class FailedTask(Task):
     """Represents a failed queue publish for an event."""
 
-    def __init__(self, event: Event, message: str):
+    def __init__(self, task: Task, message: str):
         """Construct a new Failed Event."""
-        self.event = event
+        super().__init__(task.task_id, task.payload_type, task.payload, task.lease_id)
         self.message = message
-
-
-class QueueItem(object):
-    """Represents a NitricEvents from a Queue that must be acknowledged once complete."""
-
-    def __init__(self, event: Event, lease_id: str):
-        """Construct a new Queue Item, containing an Event."""
-        self.event = event
-        self.lease_id = lease_id

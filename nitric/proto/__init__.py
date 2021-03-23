@@ -6,7 +6,6 @@ from nitric.proto.kv.v1 import kv_pb2 as key_value
 from nitric.proto.kv.v1 import kv_pb2_grpc as key_value_service
 from nitric.proto.queue.v1 import queue_pb2 as queue
 from nitric.proto.queue.v1 import queue_pb2_grpc as queue_service
-from nitric.proto.common.v1 import common_pb2 as common
 
 __all__ = [
     "event",
@@ -17,5 +16,4 @@ __all__ = [
     "key_value_service",
     "queue",
     "queue_service",
-    "common",
 ]
