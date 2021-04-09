@@ -30,30 +30,6 @@ def test_publish():
     assert mock_publish.call_args.args[0].event.payload["content"] == "of event"
 
 
-def test_automatic_request_id():
-    mock_grpc_method_getter = Mock()
-    mock_grpc_method_getter.return_value = mock_publish = Mock()
-    mock_publish.return_value.topics = []
-
-    payload = {"content": "of event"}
-
-    with patch("nitric.api.EventClient._get_method_function", mock_grpc_method_getter):
-        client = EventClient()
-        request_id = client.publish("topic_name", payload, "payload.type")
-
-    # Ensure a request id was automatically generated
-    assert len(request_id) > 0
-    assert type(request_id) == str
-
-    # Currently default request ids are UUIDs
-    try:
-        uuid4 = UUID(request_id, version=4)
-    except Exception:
-        raise Exception(
-            "Auto-generated Request ID was not a valid version 4 UUID value."
-        ) from None
-
-
 def test_empty_payload():
     mock_grpc_method_getter = Mock()
     mock_grpc_method_getter.return_value = mock_publish = Mock()

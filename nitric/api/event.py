@@ -5,7 +5,6 @@ from nitric.proto import event_service
 from nitric.proto.event.v1.event_pb2 import NitricEvent
 from nitric.api._base_client import BaseClient
 from google.protobuf.struct_pb2 import Struct
-import uuid
 
 from nitric.api.models import Topic
 
@@ -40,8 +39,6 @@ class EventClient(BaseClient):
         """
         if payload is None:
             payload = {}
-        if event_id is None:
-            event_id = str(uuid.uuid4())
         payload_struct = Struct()
         payload_struct.update(payload)
         nitric_event = NitricEvent(
