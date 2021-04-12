@@ -13,9 +13,7 @@ def test_put_key_value():
 
     test_key_value = {"content": "some text content"}
 
-    with patch(
-        "nitric.api.KeyValueClient._get_method_function", mock_grpc_method_getter
-    ):
+    with patch("nitric.api.KeyValueClient._get_method_function", mock_grpc_method_getter):
         client = KeyValueClient()
         client.put("collection_name", "kv_key", test_key_value)
 
@@ -38,9 +36,7 @@ def test_get_key_value():
     reply = KeyValueGetResponse(value=value_struct)
     mock_get.return_value = reply
 
-    with patch(
-        "nitric.api.KeyValueClient._get_method_function", mock_grpc_method_getter
-    ):
+    with patch("nitric.api.KeyValueClient._get_method_function", mock_grpc_method_getter):
         client = KeyValueClient()
         response_value = client.get("collection_name", "kv_key")
 
@@ -54,9 +50,7 @@ def test_delete_key_value():
     mock_grpc_method_getter = Mock()
     mock_grpc_method_getter.return_value = mock_create = Mock()
 
-    with patch(
-        "nitric.api.KeyValueClient._get_method_function", mock_grpc_method_getter
-    ):
+    with patch("nitric.api.KeyValueClient._get_method_function", mock_grpc_method_getter):
         client = KeyValueClient()
         client.delete("collection_name", "kv_key")
 
@@ -73,10 +67,7 @@ def test_grpc_methods():
     client = KeyValueClient()
     assert client._get_method_function("Put")._method == b"/nitric.kv.v1.KeyValue/Put"
     assert client._get_method_function("Get")._method == b"/nitric.kv.v1.KeyValue/Get"
-    assert (
-        client._get_method_function("Delete")._method
-        == b"/nitric.kv.v1.KeyValue/Delete"
-    )
+    assert client._get_method_function("Delete")._method == b"/nitric.kv.v1.KeyValue/Delete"
 
 
 def test_create_client():

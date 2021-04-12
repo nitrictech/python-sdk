@@ -19,9 +19,7 @@ class Event(object):
 class Task(object):
     """Represents a NitricTask."""
 
-    def __init__(
-        self, task_id: str, payload_type: str, payload: dict, lease_id: str = None
-    ):
+    def __init__(self, task_id: str, payload_type: str, payload: dict, lease_id: str = None):
         """Construct a new Task."""
         self.task_id = task_id
         self.payload_type = payload_type

@@ -37,10 +37,8 @@ class BaseClient(ABC):
             response = grpc_method(request)
         except _InactiveRpcError as ire:
             method_name = str(grpc_method._method, "utf-8").replace("/", "", 1)
-            ex_message = (
-                "Failed to call {method}\n\tCode: {code}\n\tDetails: {details}".format(
-                    method=method_name, code=ire.code(), details=ire.details()
-                )
+            ex_message = "Failed to call {method}\n\tCode: {code}\n\tDetails: {details}".format(
+                method=method_name, code=ire.code(), details=ire.details()
             )
 
             # handle specific status codes

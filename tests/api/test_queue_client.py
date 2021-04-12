@@ -7,9 +7,7 @@ def test_push():
     mock_grpc_method_getter.return_value = mock_push = Mock()
     mock_push.return_value.failedMessages = []
 
-    test_tasks = [
-        Task(task_id="1234", payload_type="test-payload", payload={"test": "test"})
-    ]
+    test_tasks = [Task(task_id="1234", payload_type="test-payload", payload={"test": "test"})]
 
     with patch("nitric.api.QueueClient._get_method_function", mock_grpc_method_getter):
         client = QueueClient()
@@ -51,9 +49,7 @@ def test_receive_no_depth():
 
     with patch("nitric.api.QueueClient._get_method_function", mock_grpc_method_getter):
         client = QueueClient()
-        client.receive(
-            "test-queue"
-        )  # call receive without the optional depth parameter.
+        client.receive("test-queue")  # call receive without the optional depth parameter.
 
     # Ensure the default value 1 is used.
     assert mock_receive.call_args.args[0].depth == 1
@@ -79,9 +75,7 @@ def test_receive_negative_depth():
 
     with patch("nitric.api.QueueClient._get_method_function", mock_grpc_method_getter):
         client = QueueClient()
-        client.receive(
-            "test-queue", -2
-        )  # call receive with a negative integer for depth.
+        client.receive("test-queue", -2)  # call receive with a negative integer for depth.
 
     # Ensure the default value 1 is used.
     assert mock_receive.call_args.args[0].depth == 1
@@ -89,11 +83,5 @@ def test_receive_negative_depth():
 
 def test_grpc_methods():
     client = QueueClient()
-    assert (
-        client._get_method_function("SendBatch")._method
-        == b"/nitric.queue.v1.Queue/SendBatch"
-    )
-    assert (
-        client._get_method_function("Receive")._method
-        == b"/nitric.queue.v1.Queue/Receive"
-    )
+    assert client._get_method_function("SendBatch")._method == b"/nitric.queue.v1.Queue/SendBatch"
+    assert client._get_method_function("Receive")._method == b"/nitric.queue.v1.Queue/Receive"

@@ -22,9 +22,7 @@ class KeyValueClient(BaseClient):
         """Create a new document with the specified key in the specified collection."""
         value_struct = Struct()
         value_struct.update(value)
-        request = key_value.KeyValuePutRequest(
-            collection=collection, key=key, value=value_struct
-        )
+        request = key_value.KeyValuePutRequest(collection=collection, key=key, value=value_struct)
         return self._exec("Put", request)
 
     def get(self, collection: str, key: str) -> dict:

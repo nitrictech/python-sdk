@@ -13,9 +13,7 @@ def test_publish():
 
     with patch("nitric.api.EventClient._get_method_function", mock_grpc_method_getter):
         client = EventClient()
-        request_id = client.publish(
-            "topic_name", payload, "payload.type", event_id="abc-123"
-        )
+        request_id = client.publish("topic_name", payload, "payload.type", event_id="abc-123")
 
     # Ensure the correct gRPC method is retrieved
     mock_grpc_method_getter.assert_called_with("Publish")
@@ -46,10 +44,7 @@ def test_empty_payload():
 
 def test_grpc_methods():
     client = EventClient()
-    assert (
-        client._get_method_function("Publish")._method
-        == b"/nitric.event.v1.Event/Publish"
-    )
+    assert client._get_method_function("Publish")._method == b"/nitric.event.v1.Event/Publish"
 
 
 def test_create_client():
