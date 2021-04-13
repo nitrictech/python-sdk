@@ -13,13 +13,7 @@ class Context(object):
     """Represents the contextual metadata for a Nitric function request."""
 
     def __init__(
-        self,
-        *,
-        request_id: str = None,
-        source: str = None,
-        source_type: str = None,
-        payload_type: str = None,
-        **kwargs
+        self, *, request_id: str = None, source: str = None, source_type: str = None, payload_type: str = None, **kwargs
     ):
         """Construct a Nitric Request Content object."""
         self.request_id = request_id
@@ -56,11 +50,7 @@ class Request(object):
     def __init__(self, headers: typing.Dict[str, str], payload: bytes, path: str = ""):
         """Construct a Nitric Function Request."""
         # Map headers to context properties
-        context_props = {
-            _clean_header(k): v
-            for k, v in headers.items()
-            if k.lower().startswith("x-nitric")
-        }
+        context_props = {_clean_header(k): v for k, v in headers.items() if k.lower().startswith("x-nitric")}
         self.context = Context(**context_props)
         self.payload = payload
         self.path = path

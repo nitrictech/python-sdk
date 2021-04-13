@@ -67,10 +67,7 @@ class RequestCases(unittest.TestCase):
 
         request = Request(test_headers, b"test content")
         # Make sure the unknown header didn't end up in the context and no errors are thrown.
-        assert (
-            len([key for key in request.context.__dict__.keys() if "unknown" in key])
-            == 0
-        )
+        assert len([key for key in request.context.__dict__.keys() if "unknown" in key]) == 0
 
     def test_get_object(self):
         test_headers = {

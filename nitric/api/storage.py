@@ -24,9 +24,7 @@ class StorageClient(BaseClient):
         :param body: data to be stored.
         :return: storage result.
         """
-        request = storage.StorageWriteRequest(
-            bucketName=bucket_name, key=key, body=body
-        )
+        request = storage.StorageWriteRequest(bucketName=bucket_name, key=key, body=body)
         response = self._exec("Write", request)
         return response
 

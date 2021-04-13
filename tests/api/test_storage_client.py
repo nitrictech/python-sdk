@@ -9,9 +9,7 @@ def test_write():
 
     content = b"test content"
 
-    with patch(
-        "nitric.api.StorageClient._get_method_function", mock_grpc_method_getter
-    ):
+    with patch("nitric.api.StorageClient._get_method_function", mock_grpc_method_getter):
         client = StorageClient()
         client.write("bucket_name", "key_name", content)
 
@@ -30,9 +28,7 @@ def test_read():
     mock_grpc_method_getter = Mock()
     mock_grpc_method_getter.return_value = mock_create = Mock()
 
-    with patch(
-        "nitric.api.StorageClient._get_method_function", mock_grpc_method_getter
-    ):
+    with patch("nitric.api.StorageClient._get_method_function", mock_grpc_method_getter):
         client = StorageClient()
         client.read("bucket_name", "key_name")
 
@@ -47,11 +43,5 @@ def test_read():
 
 def test_grpc_methods():
     client = StorageClient()
-    assert (
-        client._get_method_function("Read")._method
-        == b"/nitric.storage.v1.Storage/Read"
-    )
-    assert (
-        client._get_method_function("Write")._method
-        == b"/nitric.storage.v1.Storage/Write"
-    )
+    assert client._get_method_function("Read")._method == b"/nitric.storage.v1.Storage/Read"
+    assert client._get_method_function("Write")._method == b"/nitric.storage.v1.Storage/Write"

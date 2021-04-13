@@ -20,9 +20,7 @@ def format_status(response: Response) -> int:
     try:
         return int(response.status)
     except Exception:
-        raise Exception(
-            "Invalid response status [{0}], status must an int.".format(response.status)
-        )
+        raise Exception("Invalid response status [{0}], status must an int.".format(response.status))
 
 
 def format_body(response: Response):
@@ -66,9 +64,7 @@ def exception_to_html():
 
     limit = None
     exception_type, value, tb = sys.exc_info()
-    trace_list = traceback.format_tb(tb, limit) + traceback.format_exception_only(
-        exception_type, value
-    )
+    trace_list = traceback.format_tb(tb, limit) + traceback.format_exception_only(exception_type, value)
     body = "Traceback:\n" + "%-20s %s" % ("".join(trace_list[:-1]), trace_list[-1])
     return (
         "<html><head><title>Error</title></head><body><h2>An Error Occurred:</h2>\n<pre>"
@@ -104,9 +100,7 @@ def start(func: Callable[[Request], Union[Response, str]]):
     :param func: to use to handle new requests
     """
     app = Flask(__name__)
-    app.add_url_rule(
-        "/", "index", Handler(func), methods=["GET", "PUT", "POST", "PATCH", "DELETE"]
-    )
+    app.add_url_rule("/", "index", Handler(func), methods=["GET", "PUT", "POST", "PATCH", "DELETE"])
     app.add_url_rule(
         "/<path:path>",
         "path",

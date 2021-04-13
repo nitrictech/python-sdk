@@ -22,9 +22,7 @@ class StartCases(unittest.TestCase):
 class HandlerCases(unittest.TestCase):
     def test_full_response(self):
         mock_func = Mock()
-        mock_func.return_value = Response(
-            status=200, body="it works", headers={"a": "a header", "b": "b header"}
-        )
+        mock_func.return_value = Response(status=200, body="it works", headers={"a": "a header", "b": "b header"})
 
         with patch("nitric.faas.faas.construct_request", Mock()):
             handler = Handler(mock_func)
@@ -35,9 +33,7 @@ class HandlerCases(unittest.TestCase):
 
     def test_custom_status(self):
         mock_func = Mock()
-        mock_func.return_value = Response(
-            status=404
-        )  # Simulate a non 200 status, such as an error
+        mock_func.return_value = Response(status=404)  # Simulate a non 200 status, such as an error
 
         with patch("nitric.faas.faas.construct_request", Mock()):
             handler = Handler(mock_func)
@@ -71,9 +67,7 @@ class HandlerCases(unittest.TestCase):
             response = handler()
 
         # Ensure the debug details are provided along with the error status
-        assert response[0].startswith(
-            "<html><head><title>Error</title></head><body><h2>An Error Occurred:</h2>"
-        )
+        assert response[0].startswith("<html><head><title>Error</title></head><body><h2>An Error Occurred:</h2>")
         assert response[1] == 500  # Status code
 
     def test_str_response(self):

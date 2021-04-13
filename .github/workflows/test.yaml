@@ -22,8 +22,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: pip install -r requirements.txt
-    - name: Gen Protoc Sources
-      run: ./generate_grpc_client.sh
+    - name: Generate gRPC Client
+      run: make generate-proto
     - name: Install nitric
       run: pip install -e .
     - name: Run Tox
