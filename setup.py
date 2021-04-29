@@ -32,6 +32,7 @@ setuptools.setup(
             "pytest==6.0.1",
             "pytest-cov==2.10.1",
             "pre-commit==2.12.0",
+            "pip-licenses",
         ]
     },
     python_requires=">=3.7",
