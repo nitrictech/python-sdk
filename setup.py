@@ -5,10 +5,10 @@ with open("README.md", "r") as readme_file:
 
 setuptools.setup(
     name="nitric",
-    version="0.0.dev21",
+    version="0.0.dev23",
     author="Nitric",
     author_email="team@nitric.io",
-    description="The Nitric SDK, used to communicate with native cloud services",
+    description="The Nitric SDK for Python 3",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/nitrictech/python-sdk",
@@ -24,5 +24,15 @@ setuptools.setup(
         "six==1.15.0",
         "protobuf==3.13.0",
     ],
+    extras_require={
+        "dev": [
+            "grpcio-tools==1.33.2",
+            "tox==3.20.1",
+            "twine==3.2.0",
+            "pytest==6.0.1",
+            "pytest-cov==2.10.1",
+            "pre-commit==2.12.0",
+        ]
+    },
     python_requires=">=3.7",
 )
