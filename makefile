@@ -1,6 +1,6 @@
 install:
 	@echo Installing Project Dependencies
-	@pip3 install -r requirements.txt
+	@pip3 install -e .[dev]
 	@pre-commit install
 
 OUTPUT="./nitric/proto"
@@ -14,10 +14,12 @@ generate-proto:
 	@python3 ./tools/fix_grpc_imports.py
 	@find $(OUTPUT) -type d -exec touch {}/__init__.py \;
 
-build: install generate-proto
-	@echo Building sdist and wheel
+clean:
 	@rm -rf ./build
 	@rm -rf ./dist
+
+build: clean install generate-proto
+	@echo Building sdist and wheel
 	@python3 setup.py sdist bdist_wheel
 
 distribute: build
