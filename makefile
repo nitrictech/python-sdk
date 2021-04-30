@@ -18,7 +18,13 @@ clean:
 	@rm -rf ./build
 	@rm -rf ./dist
 
-build: clean install generate-proto
+apply-license:
+	@echo Applying Apache 2 header to source files
+	@licenseheaders -t tools/apache-2.tmpl -o "Nitric Technologies Pty Ltd" -y 2021 -n "Nitric Python 3 SDK" -u "https://github.com/nitrictech/python-sdk" -d nitric
+	@licenseheaders -t tools/apache-2.tmpl -o "Nitric Technologies Pty Ltd" -y 2021 -n "Nitric Python 3 SDK" -u "https://github.com/nitrictech/python-sdk" -d tests
+	@licenseheaders -t tools/apache-2.tmpl -o "Nitric Technologies Pty Ltd" -y 2021 -n "Nitric Python 3 SDK" -u "https://github.com/nitrictech/python-sdk" -d tools
+
+build: clean install generate-proto apply-license
 	@echo Building sdist and wheel
 	@python3 setup.py sdist bdist_wheel
 
