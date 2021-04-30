@@ -5,7 +5,7 @@ with open("README.md", "r") as readme_file:
 
 setuptools.setup(
     name="nitric",
-    version="0.0.dev23",
+    version="0.0.dev24",
     author="Nitric",
     author_email="team@nitric.io",
     description="The Nitric SDK for Python 3",
@@ -13,10 +13,12 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/nitrictech/python-sdk",
     packages=setuptools.find_packages(),
+    license_files=("LICENSE.txt",),
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
     ],
+    setup_requires=["wheel"],
     install_requires=[
         "flask==1.1.2",
         "waitress==1.4.4",
@@ -33,6 +35,7 @@ setuptools.setup(
             "pytest-cov==2.10.1",
             "pre-commit==2.12.0",
             "pip-licenses",
+            "licenseheaders",
         ]
     },
     python_requires=">=3.7",
