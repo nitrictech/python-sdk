@@ -43,6 +43,7 @@ setuptools.setup(
             "pydocstyle==6.0.0",
             "pip-licenses==3.3.1",
             "licenseheaders==0.8.8",
+            "pdoc3==0.9.2",
         ]
     },
     python_requires=">=3.7",

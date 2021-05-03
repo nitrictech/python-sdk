@@ -23,7 +23,7 @@ jobs:
     - name: Install
       run: make install
     - name: Generate gRPC Client
-      run: make generate-proto
+      run: make grpc-client
     - name: Run Tox
       # Run tox using the version of Python in `PATH`
       run: tox -e py
