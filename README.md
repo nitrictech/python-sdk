@@ -4,6 +4,8 @@ The Python SDK supports the use of the cloud-portable [Nitric](http://nitric.io)
 
 > The Nitric Python SDK is in early stage development and is currently only available on test.pypi.org.
 
+Read full documentation [here](https://nitrictech.github.io/python-sdk/).
+
 ## Usage
 
 ### Nitric Functions (FaaS):
