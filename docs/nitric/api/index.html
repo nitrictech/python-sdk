@@ -1,0 +1,831 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>nitric.api API documentation</title>
+<meta name="description" content="Nitric API SDK." />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>nitric.api</code></h1>
+</header>
+<section id="section-intro">
+<p>Nitric API SDK.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#
+# Copyright (c) 2021 Nitric Technologies Pty Ltd.
+#
+# This file is part of Nitric Python 3 SDK.
+# See https://github.com/nitrictech/python-sdk for further info.
+#
+# Licensed under the Apache License, Version 2.0 (the &#34;License&#34;);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an &#34;AS IS&#34; BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+&#34;&#34;&#34;Nitric API SDK.&#34;&#34;&#34;
+from nitric.api.event import EventClient, TopicClient
+from nitric.api.kv import KeyValueClient
+from nitric.api.queue import QueueClient
+from nitric.api.storage import StorageClient
+from nitric.api.models import Event, Task, FailedTask, Topic
+
+__all__ = [
+    &#34;EventClient&#34;,
+    &#34;TopicClient&#34;,
+    &#34;KeyValueClient&#34;,
+    &#34;QueueClient&#34;,
+    &#34;StorageClient&#34;,
+    &#34;Event&#34;,
+    &#34;Task&#34;,
+    &#34;FailedTask&#34;,
+    &#34;Topic&#34;,
+]</code></pre>
+</details>
+</section>
+<section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="nitric.api.event" href="event.html">nitric.api.event</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="nitric.api.exception" href="exception.html">nitric.api.exception</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="nitric.api.kv" href="kv.html">nitric.api.kv</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="nitric.api.models" href="models.html">nitric.api.models</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="nitric.api.queue" href="queue.html">nitric.api.queue</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="nitric.api.storage" href="storage.html">nitric.api.storage</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="nitric.api.Event"><code class="flex name class">
+<span>class <span class="ident">Event</span></span>
+<span>(</span><span>event_id: str, payload_type: str, payload: dict)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents a NitricEvent.</p>
+<p>Construct a new Event.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Event(object):
+    &#34;&#34;&#34;Represents a NitricEvent.&#34;&#34;&#34;
+
+    def __init__(self, event_id: str, payload_type: str, payload: dict):
+        &#34;&#34;&#34;Construct a new Event.&#34;&#34;&#34;
+        self.event_id = event_id
+        self.payload_type = payload_type
+        self.payload = payload</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.EventClient"><code class="flex name class">
+<span>class <span class="ident">EventClient</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Nitric generic publish/subscribe event client.</p>
+<p>This client insulates application code from stack specific event operations or SDKs.</p>
+<p>Construct a Nitric Event Client.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class EventClient(BaseClient):
+    &#34;&#34;&#34;
+    Nitric generic publish/subscribe event client.
+
+    This client insulates application code from stack specific event operations or SDKs.
+    &#34;&#34;&#34;
+
+    def __init__(self):
+        &#34;&#34;&#34;Construct a Nitric Event Client.&#34;&#34;&#34;
+        super(self.__class__, self).__init__()
+        self._stub = event_service.EventStub(self._channel)
+
+    def publish(
+        self,
+        topic_name: str,
+        payload: dict = None,
+        payload_type: str = &#34;&#34;,
+        event_id: str = None,
+    ) -&gt; str:
+        &#34;&#34;&#34;
+        Publish an event/message to a topic, which can be subscribed to by other services.
+
+        :param topic_name: the name of the topic to publish to
+        :param payload: content of the message to send
+        :param payload_type: fully qualified name of the event payload type, e.g. io.nitric.example.customer.created
+        :param event_id: a unique id, used to ensure idempotent processing of events. Defaults to a version 4 UUID.
+        :return: the request id on successful publish
+        &#34;&#34;&#34;
+        if payload is None:
+            payload = {}
+        payload_struct = Struct()
+        payload_struct.update(payload)
+        nitric_event = NitricEvent(id=event_id, payloadType=payload_type, payload=payload_struct)
+        request = event_model.EventPublishRequest(topic=topic_name, event=nitric_event)
+        self._exec(&#34;Publish&#34;, request)
+        return event_id</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>nitric.api._base_client.BaseClient</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.api.EventClient.publish"><code class="name flex">
+<span>def <span class="ident">publish</span></span>(<span>self, topic_name: str, payload: dict = None, payload_type: str = '', event_id: str = None) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Publish an event/message to a topic, which can be subscribed to by other services.</p>
+<p>:param topic_name: the name of the topic to publish to
+:param payload: content of the message to send
+:param payload_type: fully qualified name of the event payload type, e.g. io.nitric.example.customer.created
+:param event_id: a unique id, used to ensure idempotent processing of events. Defaults to a version 4 UUID.
+:return: the request id on successful publish</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def publish(
+    self,
+    topic_name: str,
+    payload: dict = None,
+    payload_type: str = &#34;&#34;,
+    event_id: str = None,
+) -&gt; str:
+    &#34;&#34;&#34;
+    Publish an event/message to a topic, which can be subscribed to by other services.
+
+    :param topic_name: the name of the topic to publish to
+    :param payload: content of the message to send
+    :param payload_type: fully qualified name of the event payload type, e.g. io.nitric.example.customer.created
+    :param event_id: a unique id, used to ensure idempotent processing of events. Defaults to a version 4 UUID.
+    :return: the request id on successful publish
+    &#34;&#34;&#34;
+    if payload is None:
+        payload = {}
+    payload_struct = Struct()
+    payload_struct.update(payload)
+    nitric_event = NitricEvent(id=event_id, payloadType=payload_type, payload=payload_struct)
+    request = event_model.EventPublishRequest(topic=topic_name, event=nitric_event)
+    self._exec(&#34;Publish&#34;, request)
+    return event_id</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.api.FailedTask"><code class="flex name class">
+<span>class <span class="ident">FailedTask</span></span>
+<span>(</span><span>task: <a title="nitric.api.models.Task" href="models.html#nitric.api.models.Task">Task</a>, message: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents a failed queue publish for an event.</p>
+<p>Construct a new Failed Event.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FailedTask(Task):
+    &#34;&#34;&#34;Represents a failed queue publish for an event.&#34;&#34;&#34;
+
+    def __init__(self, task: Task, message: str):
+        &#34;&#34;&#34;Construct a new Failed Event.&#34;&#34;&#34;
+        super().__init__(task.task_id, task.payload_type, task.payload, task.lease_id)
+        self.message = message</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.api.models.Task" href="models.html#nitric.api.models.Task">Task</a></li>
+</ul>
+</dd>
+<dt id="nitric.api.KeyValueClient"><code class="flex name class">
+<span>class <span class="ident">KeyValueClient</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Nitric generic document store/db client.</p>
+<p>This client insulates application code from stack specific document CRUD operations or SDKs.</p>
+<p>Construct a new DocumentClient.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class KeyValueClient(BaseClient):
+    &#34;&#34;&#34;
+    Nitric generic document store/db client.
+
+    This client insulates application code from stack specific document CRUD operations or SDKs.
+    &#34;&#34;&#34;
+
+    def __init__(self):
+        &#34;&#34;&#34;Construct a new DocumentClient.&#34;&#34;&#34;
+        super(self.__class__, self).__init__()
+        self._stub = key_value_service.KeyValueStub(self._channel)
+
+    def put(self, collection: str, key: str, value: dict):
+        &#34;&#34;&#34;Create a new document with the specified key in the specified collection.&#34;&#34;&#34;
+        value_struct = Struct()
+        value_struct.update(value)
+        request = key_value.KeyValuePutRequest(collection=collection, key=key, value=value_struct)
+        return self._exec(&#34;Put&#34;, request)
+
+    def get(self, collection: str, key: str) -&gt; dict:
+        &#34;&#34;&#34;Retrieve a document from the specified collection by its key.&#34;&#34;&#34;
+        request = key_value.KeyValueGetRequest(collection=collection, key=key)
+        reply: KeyValueGetResponse = self._exec(&#34;Get&#34;, request)
+        document = MessageToDict(reply)[&#34;value&#34;]
+        return document
+
+    def delete(self, collection: str, key: str):
+        &#34;&#34;&#34;Delete the specified document from the collection.&#34;&#34;&#34;
+        request = key_value.KeyValueDeleteRequest(collection=collection, key=key)
+        return self._exec(&#34;Delete&#34;, request)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>nitric.api._base_client.BaseClient</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.api.KeyValueClient.delete"><code class="name flex">
+<span>def <span class="ident">delete</span></span>(<span>self, collection: str, key: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Delete the specified document from the collection.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def delete(self, collection: str, key: str):
+    &#34;&#34;&#34;Delete the specified document from the collection.&#34;&#34;&#34;
+    request = key_value.KeyValueDeleteRequest(collection=collection, key=key)
+    return self._exec(&#34;Delete&#34;, request)</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.KeyValueClient.get"><code class="name flex">
+<span>def <span class="ident">get</span></span>(<span>self, collection: str, key: str) ‑> dict</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieve a document from the specified collection by its key.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get(self, collection: str, key: str) -&gt; dict:
+    &#34;&#34;&#34;Retrieve a document from the specified collection by its key.&#34;&#34;&#34;
+    request = key_value.KeyValueGetRequest(collection=collection, key=key)
+    reply: KeyValueGetResponse = self._exec(&#34;Get&#34;, request)
+    document = MessageToDict(reply)[&#34;value&#34;]
+    return document</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.KeyValueClient.put"><code class="name flex">
+<span>def <span class="ident">put</span></span>(<span>self, collection: str, key: str, value: dict)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a new document with the specified key in the specified collection.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def put(self, collection: str, key: str, value: dict):
+    &#34;&#34;&#34;Create a new document with the specified key in the specified collection.&#34;&#34;&#34;
+    value_struct = Struct()
+    value_struct.update(value)
+    request = key_value.KeyValuePutRequest(collection=collection, key=key, value=value_struct)
+    return self._exec(&#34;Put&#34;, request)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.api.QueueClient"><code class="flex name class">
+<span>class <span class="ident">QueueClient</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Nitric generic publish/subscribe tasking client.</p>
+<p>This client insulates application code from stack specific task/topic operations or SDKs.</p>
+<p>Construct a Nitric Queue Client.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class QueueClient(BaseClient):
+    &#34;&#34;&#34;
+    Nitric generic publish/subscribe tasking client.
+
+    This client insulates application code from stack specific task/topic operations or SDKs.
+    &#34;&#34;&#34;
+
+    def __init__(self):
+        &#34;&#34;&#34;Construct a Nitric Queue Client.&#34;&#34;&#34;
+        super(self.__class__, self).__init__()
+        self._stub = queue_service.QueueStub(self._channel)
+
+    def _task_to_wire(self, task: Task) -&gt; queue.NitricTask:
+        &#34;&#34;&#34;
+        Convert a Nitric Task to a Nitric Queue Task.
+
+        :param task: to convert
+        :return: converted task
+        &#34;&#34;&#34;
+        payload_struct = Struct()
+        payload_struct.update(task.payload)
+
+        return queue.NitricTask(
+            id=task.task_id,
+            payloadType=task.payload_type,
+            payload=payload_struct,
+        )
+
+    def _wire_to_task(self, task: queue.NitricTask) -&gt; Task:
+        &#34;&#34;&#34;
+        Convert a Nitric Queue Task (protobuf) to a Nitric Task (python SDK).
+
+        :param task: to convert
+        :return: converted task
+        &#34;&#34;&#34;
+        return Task(
+            task_id=task.id,
+            payload_type=task.payloadType,
+            payload=MessageToDict(task.payload),
+            lease_id=task.leaseId,
+        )
+
+    def _wire_to_failed_task(self, failed_task: queue.FailedTask) -&gt; FailedTask:
+        &#34;&#34;&#34;
+        Convert a queue task that failed to push into a Failed Task object.
+
+        :param failed_task: the failed task
+        :return: the Failed Task with failure message
+        &#34;&#34;&#34;
+        task = self._wire_to_task(failed_task.task)
+
+        return FailedTask(task=task, message=failed_task.message)
+
+    def send_batch(self, queue_name: str, tasks: List[Task] = None) -&gt; PushResponse:
+        &#34;&#34;&#34;
+        Push a collection of tasks to a queue, which can be retrieved by other services.
+
+        :param queue_name: the name of the queue to publish to
+        :param tasks: The tasks to push to the queue
+        :return: PushResponse containing a list containing details of any messages that failed to publish.
+        &#34;&#34;&#34;
+        if tasks is None:
+            tasks = []
+        wire_tasks = map(self._task_to_wire, tasks)
+
+        request = queue.QueueSendBatchRequest(queue=queue_name, tasks=wire_tasks)
+
+        response: queue.QueueSendBatchResponse = self._exec(&#34;SendBatch&#34;, request)
+
+        failed_tasks = map(self._wire_to_failed_task, response.failedMessages)
+
+        return PushResponse(failed_tasks=list(failed_tasks))
+
+    def receive(self, queue_name: str, depth: int = None) -&gt; List[Task]:
+        &#34;&#34;&#34;
+        Pop 1 or more items from the specified queue up to the depth limit.
+
+        Queue items are Nitric Tasks that are leased for a limited period of time, where they may be worked on.
+        Once complete or failed they must be acknowledged using the request specific leaseId.
+
+        If the lease on a queue item expires before it is acknowledged or the lease is extended the task will be
+        returned to the queue for reprocessing.
+
+        :param queue_name: Nitric name for the queue. This will be automatically resolved to the provider specific
+        identifier.
+        :param depth: The maximum number of queue items to return. Default: 1, Min: 1.
+        :return: Queue items popped from the specified queue.
+        &#34;&#34;&#34;
+        # Set the default and minimum depth to 1.
+        if depth is None or depth &lt; 1:
+            depth = 1
+
+        request = queue.QueueReceiveRequest(queue=queue_name, depth=depth)
+
+        response: queue.QueueReceiveResponse = self._exec(&#34;Receive&#34;, request)
+
+        # Map the response protobuf response items to Python SDK Nitric Queue Items
+        return [self._wire_to_task(item) for item in response.items]</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>nitric.api._base_client.BaseClient</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.api.QueueClient.receive"><code class="name flex">
+<span>def <span class="ident">receive</span></span>(<span>self, queue_name: str, depth: int = None) ‑> List[<a title="nitric.api.models.Task" href="models.html#nitric.api.models.Task">Task</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Pop 1 or more items from the specified queue up to the depth limit.</p>
+<p>Queue items are Nitric Tasks that are leased for a limited period of time, where they may be worked on.
+Once complete or failed they must be acknowledged using the request specific leaseId.</p>
+<p>If the lease on a queue item expires before it is acknowledged or the lease is extended the task will be
+returned to the queue for reprocessing.</p>
+<p>:param queue_name: Nitric name for the queue. This will be automatically resolved to the provider specific
+identifier.
+:param depth: The maximum number of queue items to return. Default: 1, Min: 1.
+:return: Queue items popped from the specified queue.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def receive(self, queue_name: str, depth: int = None) -&gt; List[Task]:
+    &#34;&#34;&#34;
+    Pop 1 or more items from the specified queue up to the depth limit.
+
+    Queue items are Nitric Tasks that are leased for a limited period of time, where they may be worked on.
+    Once complete or failed they must be acknowledged using the request specific leaseId.
+
+    If the lease on a queue item expires before it is acknowledged or the lease is extended the task will be
+    returned to the queue for reprocessing.
+
+    :param queue_name: Nitric name for the queue. This will be automatically resolved to the provider specific
+    identifier.
+    :param depth: The maximum number of queue items to return. Default: 1, Min: 1.
+    :return: Queue items popped from the specified queue.
+    &#34;&#34;&#34;
+    # Set the default and minimum depth to 1.
+    if depth is None or depth &lt; 1:
+        depth = 1
+
+    request = queue.QueueReceiveRequest(queue=queue_name, depth=depth)
+
+    response: queue.QueueReceiveResponse = self._exec(&#34;Receive&#34;, request)
+
+    # Map the response protobuf response items to Python SDK Nitric Queue Items
+    return [self._wire_to_task(item) for item in response.items]</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.QueueClient.send_batch"><code class="name flex">
+<span>def <span class="ident">send_batch</span></span>(<span>self, queue_name: str, tasks: List[<a title="nitric.api.models.Task" href="models.html#nitric.api.models.Task">Task</a>] = None) ‑> <a title="nitric.api.queue.PushResponse" href="queue.html#nitric.api.queue.PushResponse">PushResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Push a collection of tasks to a queue, which can be retrieved by other services.</p>
+<p>:param queue_name: the name of the queue to publish to
+:param tasks: The tasks to push to the queue
+:return: PushResponse containing a list containing details of any messages that failed to publish.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def send_batch(self, queue_name: str, tasks: List[Task] = None) -&gt; PushResponse:
+    &#34;&#34;&#34;
+    Push a collection of tasks to a queue, which can be retrieved by other services.
+
+    :param queue_name: the name of the queue to publish to
+    :param tasks: The tasks to push to the queue
+    :return: PushResponse containing a list containing details of any messages that failed to publish.
+    &#34;&#34;&#34;
+    if tasks is None:
+        tasks = []
+    wire_tasks = map(self._task_to_wire, tasks)
+
+    request = queue.QueueSendBatchRequest(queue=queue_name, tasks=wire_tasks)
+
+    response: queue.QueueSendBatchResponse = self._exec(&#34;SendBatch&#34;, request)
+
+    failed_tasks = map(self._wire_to_failed_task, response.failedMessages)
+
+    return PushResponse(failed_tasks=list(failed_tasks))</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.api.StorageClient"><code class="flex name class">
+<span>class <span class="ident">StorageClient</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Nitric generic blob storage client.</p>
+<p>This client insulates application code from stack specific blob store operations or SDKs.</p>
+<p>Construct a new StorageClient.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class StorageClient(BaseClient):
+    &#34;&#34;&#34;
+    Nitric generic blob storage client.
+
+    This client insulates application code from stack specific blob store operations or SDKs.
+    &#34;&#34;&#34;
+
+    def __init__(self):
+        &#34;&#34;&#34;Construct a new StorageClient.&#34;&#34;&#34;
+        super(self.__class__, self).__init__()
+        self._stub = storage_service.StorageStub(self._channel)
+
+    def write(self, bucket_name: str, key: str, body: bytes):
+        &#34;&#34;&#34;
+        Store a file.
+
+        :param bucket_name: name of the bucket to store the data in.
+        :param key: key within the bucket, where the file should be stored.
+        :param body: data to be stored.
+        :return: storage result.
+        &#34;&#34;&#34;
+        request = storage.StorageWriteRequest(bucketName=bucket_name, key=key, body=body)
+        response = self._exec(&#34;Write&#34;, request)
+        return response
+
+    def read(self, bucket_name: str, key: str) -&gt; bytes:
+        &#34;&#34;&#34;
+        Retrieve an existing file.
+
+        :param bucket_name: name of the bucket where the file was stored.
+        :param key: key for the file to retrieve.
+        :return: the file as bytes.
+        &#34;&#34;&#34;
+        request = storage.StorageReadRequest(bucketName=bucket_name, key=key)
+        response = self._exec(&#34;Read&#34;, request)
+        return response.body</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>nitric.api._base_client.BaseClient</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.api.StorageClient.read"><code class="name flex">
+<span>def <span class="ident">read</span></span>(<span>self, bucket_name: str, key: str) ‑> bytes</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieve an existing file.</p>
+<p>:param bucket_name: name of the bucket where the file was stored.
+:param key: key for the file to retrieve.
+:return: the file as bytes.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def read(self, bucket_name: str, key: str) -&gt; bytes:
+    &#34;&#34;&#34;
+    Retrieve an existing file.
+
+    :param bucket_name: name of the bucket where the file was stored.
+    :param key: key for the file to retrieve.
+    :return: the file as bytes.
+    &#34;&#34;&#34;
+    request = storage.StorageReadRequest(bucketName=bucket_name, key=key)
+    response = self._exec(&#34;Read&#34;, request)
+    return response.body</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.StorageClient.write"><code class="name flex">
+<span>def <span class="ident">write</span></span>(<span>self, bucket_name: str, key: str, body: bytes)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Store a file.</p>
+<p>:param bucket_name: name of the bucket to store the data in.
+:param key: key within the bucket, where the file should be stored.
+:param body: data to be stored.
+:return: storage result.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def write(self, bucket_name: str, key: str, body: bytes):
+    &#34;&#34;&#34;
+    Store a file.
+
+    :param bucket_name: name of the bucket to store the data in.
+    :param key: key within the bucket, where the file should be stored.
+    :param body: data to be stored.
+    :return: storage result.
+    &#34;&#34;&#34;
+    request = storage.StorageWriteRequest(bucketName=bucket_name, key=key, body=body)
+    response = self._exec(&#34;Write&#34;, request)
+    return response</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.api.Task"><code class="flex name class">
+<span>class <span class="ident">Task</span></span>
+<span>(</span><span>task_id: str, payload_type: str, payload: dict, lease_id: str = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents a NitricTask.</p>
+<p>Construct a new Task.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Task(object):
+    &#34;&#34;&#34;Represents a NitricTask.&#34;&#34;&#34;
+
+    def __init__(self, task_id: str, payload_type: str, payload: dict, lease_id: str = None):
+        &#34;&#34;&#34;Construct a new Task.&#34;&#34;&#34;
+        self.task_id = task_id
+        self.payload_type = payload_type
+        self.payload = payload
+        self.lease_id = lease_id</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="nitric.api.models.FailedTask" href="models.html#nitric.api.models.FailedTask">FailedTask</a></li>
+</ul>
+</dd>
+<dt id="nitric.api.Topic"><code class="flex name class">
+<span>class <span class="ident">Topic</span></span>
+<span>(</span><span>name: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents event topic metadata.</p>
+<p>Construct a new topic instance.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Topic(object):
+    &#34;&#34;&#34;Represents event topic metadata.&#34;&#34;&#34;
+
+    def __init__(self, name: str):
+        &#34;&#34;&#34;Construct a new topic instance.&#34;&#34;&#34;
+        self.name = name</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.TopicClient"><code class="flex name class">
+<span>class <span class="ident">TopicClient</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Nitric generic event topic client.</p>
+<p>This client insulates application code from stack specific topic operations or SDKs.</p>
+<p>Construct a Nitric Topic Client.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TopicClient(BaseClient):
+    &#34;&#34;&#34;
+    Nitric generic event topic client.
+
+    This client insulates application code from stack specific topic operations or SDKs.
+    &#34;&#34;&#34;
+
+    def __init__(self):
+        &#34;&#34;&#34;Construct a Nitric Topic Client.&#34;&#34;&#34;
+        super(self.__class__, self).__init__()
+        self._stub = event_service.TopicStub(self._channel)
+
+    def get_topics(self) -&gt; List[Topic]:
+        &#34;&#34;&#34;Get a list of topics available for publishing or subscription.&#34;&#34;&#34;
+        response: event.TopicListResponse = self._exec(&#34;List&#34;)
+        topics = [Topic(name=topic.name) for topic in response.topics]
+        return topics</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>nitric.api._base_client.BaseClient</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.api.TopicClient.get_topics"><code class="name flex">
+<span>def <span class="ident">get_topics</span></span>(<span>self) ‑> List[<a title="nitric.api.models.Topic" href="models.html#nitric.api.models.Topic">Topic</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get a list of topics available for publishing or subscription.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_topics(self) -&gt; List[Topic]:
+    &#34;&#34;&#34;Get a list of topics available for publishing or subscription.&#34;&#34;&#34;
+    response: event.TopicListResponse = self._exec(&#34;List&#34;)
+    topics = [Topic(name=topic.name) for topic in response.topics]
+    return topics</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="nitric" href="../index.html">nitric</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="nitric.api.event" href="event.html">nitric.api.event</a></code></li>
+<li><code><a title="nitric.api.exception" href="exception.html">nitric.api.exception</a></code></li>
+<li><code><a title="nitric.api.kv" href="kv.html">nitric.api.kv</a></code></li>
+<li><code><a title="nitric.api.models" href="models.html">nitric.api.models</a></code></li>
+<li><code><a title="nitric.api.queue" href="queue.html">nitric.api.queue</a></code></li>
+<li><code><a title="nitric.api.storage" href="storage.html">nitric.api.storage</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="nitric.api.Event" href="#nitric.api.Event">Event</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.api.EventClient" href="#nitric.api.EventClient">EventClient</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.EventClient.publish" href="#nitric.api.EventClient.publish">publish</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.api.FailedTask" href="#nitric.api.FailedTask">FailedTask</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.api.KeyValueClient" href="#nitric.api.KeyValueClient">KeyValueClient</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.KeyValueClient.delete" href="#nitric.api.KeyValueClient.delete">delete</a></code></li>
+<li><code><a title="nitric.api.KeyValueClient.get" href="#nitric.api.KeyValueClient.get">get</a></code></li>
+<li><code><a title="nitric.api.KeyValueClient.put" href="#nitric.api.KeyValueClient.put">put</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.api.QueueClient" href="#nitric.api.QueueClient">QueueClient</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.QueueClient.receive" href="#nitric.api.QueueClient.receive">receive</a></code></li>
+<li><code><a title="nitric.api.QueueClient.send_batch" href="#nitric.api.QueueClient.send_batch">send_batch</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.api.StorageClient" href="#nitric.api.StorageClient">StorageClient</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.StorageClient.read" href="#nitric.api.StorageClient.read">read</a></code></li>
+<li><code><a title="nitric.api.StorageClient.write" href="#nitric.api.StorageClient.write">write</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.api.Task" href="#nitric.api.Task">Task</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.api.Topic" href="#nitric.api.Topic">Topic</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.api.TopicClient" href="#nitric.api.TopicClient">TopicClient</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.TopicClient.get_topics" href="#nitric.api.TopicClient.get_topics">get_topics</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>

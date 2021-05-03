@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>nitric.proto.event.v1.event_pb2 API documentation</title>
+<meta name="description" content="Generated protocol buffer code." />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>nitric.proto.event.v1.event_pb2</code></h1>
+</header>
+<section id="section-intro">
+<p>Generated protocol buffer code.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python"># -*- coding: utf-8 -*-
+#
+# Copyright (c) 2021 Nitric Technologies Pty Ltd.
+#
+# This file is part of Nitric Python 3 SDK.
+# See https://github.com/nitrictech/python-sdk for further info.
+#
+# Licensed under the Apache License, Version 2.0 (the &#34;License&#34;);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an &#34;AS IS&#34; BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Generated by the protocol buffer compiler.  DO NOT EDIT!
+# source: event/v1/event.proto
+&#34;&#34;&#34;Generated protocol buffer code.&#34;&#34;&#34;
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf import reflection as _reflection
+from google.protobuf import symbol_database as _symbol_database
+# @@protoc_insertion_point(imports)
+
+_sym_db = _symbol_database.Default()
+
+
+from google.protobuf import struct_pb2 as google_dot_protobuf_dot_struct__pb2
+
+
+DESCRIPTOR = _descriptor.FileDescriptor(
+  name=&#39;event/v1/event.proto&#39;,
+  package=&#39;nitric.event.v1&#39;,
+  syntax=&#39;proto3&#39;,
+  serialized_options=b&#39;\n\030io.nitric.proto.event.v1B\005EventP\001Z\014nitric/v1;v1\252\002\025Nitric.Proto.Event.v1\312\002\025Nitric\\Proto\\Event\\V1&#39;,
+  create_key=_descriptor._internal_create_key,
+  serialized_pb=b&#39;\n\x14\x65vent/v1/event.proto\x12\x0fnitric.event.v1\x1a\x1cgoogle/protobuf/struct.proto\&#34;Q\n\x13\x45ventPublishRequest\x12\r\n\x05topic\x18\x01 \x01(\t\x12+\n\x05\x65vent\x18\x02 \x01(\x0b\x32\x1c.nitric.event.v1.NitricEvent\&#34;\x16\n\x14\x45ventPublishResponse\&#34;\x12\n\x10TopicListRequest\&#34;A\n\x11TopicListResponse\x12,\n\x06topics\x18\x01 \x03(\x0b\x32\x1c.nitric.event.v1.NitricTopic\&#34;\x1b\n\x0bNitricTopic\x12\x0c\n\x04name\x18\x01 \x01(\t\&#34;X\n\x0bNitricEvent\x12\n\n\x02id\x18\x01 \x01(\t\x12\x13\n\x0bpayloadType\x18\x02 \x01(\t\x12(\n\x07payload\x18\x03 \x01(\x0b\x32\x17.google.protobuf.Struct2_\n\x05\x45vent\x12V\n\x07Publish\x12$.nitric.event.v1.EventPublishRequest\x1a%.nitric.event.v1.EventPublishResponse2V\n\x05Topic\x12M\n\x04List\x12!.nitric.event.v1.TopicListRequest\x1a\&#34;.nitric.event.v1.TopicListResponseBa\n\x18io.nitric.proto.event.v1B\x05\x45ventP\x01Z\x0cnitric/v1;v1\xaa\x02\x15Nitric.Proto.Event.v1\xca\x02\x15Nitric\\Proto\\Event\\V1b\x06proto3&#39;
+  ,
+  dependencies=[google_dot_protobuf_dot_struct__pb2.DESCRIPTOR,])
+
+
+
+
+_EVENTPUBLISHREQUEST = _descriptor.Descriptor(
+  name=&#39;EventPublishRequest&#39;,
+  full_name=&#39;nitric.event.v1.EventPublishRequest&#39;,
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name=&#39;topic&#39;, full_name=&#39;nitric.event.v1.EventPublishRequest.topic&#39;, index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b&#34;&#34;.decode(&#39;utf-8&#39;),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name=&#39;event&#39;, full_name=&#39;nitric.event.v1.EventPublishRequest.event&#39;, index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax=&#39;proto3&#39;,
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=71,
+  serialized_end=152,
+)
+
+
+_EVENTPUBLISHRESPONSE = _descriptor.Descriptor(
+  name=&#39;EventPublishResponse&#39;,
+  full_name=&#39;nitric.event.v1.EventPublishResponse&#39;,
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax=&#39;proto3&#39;,
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=154,
+  serialized_end=176,
+)
+
+
+_TOPICLISTREQUEST = _descriptor.Descriptor(
+  name=&#39;TopicListRequest&#39;,
+  full_name=&#39;nitric.event.v1.TopicListRequest&#39;,
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax=&#39;proto3&#39;,
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=178,
+  serialized_end=196,
+)
+
+
+_TOPICLISTRESPONSE = _descriptor.Descriptor(
+  name=&#39;TopicListResponse&#39;,
+  full_name=&#39;nitric.event.v1.TopicListResponse&#39;,
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name=&#39;topics&#39;, full_name=&#39;nitric.event.v1.TopicListResponse.topics&#39;, index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax=&#39;proto3&#39;,
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=198,
+  serialized_end=263,
+)
+
+
+_NITRICTOPIC = _descriptor.Descriptor(
+  name=&#39;NitricTopic&#39;,
+  full_name=&#39;nitric.event.v1.NitricTopic&#39;,
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name=&#39;name&#39;, full_name=&#39;nitric.event.v1.NitricTopic.name&#39;, index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b&#34;&#34;.decode(&#39;utf-8&#39;),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax=&#39;proto3&#39;,
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=265,
+  serialized_end=292,
+)
+
+
+_NITRICEVENT = _descriptor.Descriptor(
+  name=&#39;NitricEvent&#39;,
+  full_name=&#39;nitric.event.v1.NitricEvent&#39;,
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name=&#39;id&#39;, full_name=&#39;nitric.event.v1.NitricEvent.id&#39;, index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b&#34;&#34;.decode(&#39;utf-8&#39;),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name=&#39;payloadType&#39;, full_name=&#39;nitric.event.v1.NitricEvent.payloadType&#39;, index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b&#34;&#34;.decode(&#39;utf-8&#39;),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name=&#39;payload&#39;, full_name=&#39;nitric.event.v1.NitricEvent.payload&#39;, index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax=&#39;proto3&#39;,
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=294,
+  serialized_end=382,
+)
+
+_EVENTPUBLISHREQUEST.fields_by_name[&#39;event&#39;].message_type = _NITRICEVENT
+_TOPICLISTRESPONSE.fields_by_name[&#39;topics&#39;].message_type = _NITRICTOPIC
+_NITRICEVENT.fields_by_name[&#39;payload&#39;].message_type = google_dot_protobuf_dot_struct__pb2._STRUCT
+DESCRIPTOR.message_types_by_name[&#39;EventPublishRequest&#39;] = _EVENTPUBLISHREQUEST
+DESCRIPTOR.message_types_by_name[&#39;EventPublishResponse&#39;] = _EVENTPUBLISHRESPONSE
+DESCRIPTOR.message_types_by_name[&#39;TopicListRequest&#39;] = _TOPICLISTREQUEST
+DESCRIPTOR.message_types_by_name[&#39;TopicListResponse&#39;] = _TOPICLISTRESPONSE
+DESCRIPTOR.message_types_by_name[&#39;NitricTopic&#39;] = _NITRICTOPIC
+DESCRIPTOR.message_types_by_name[&#39;NitricEvent&#39;] = _NITRICEVENT
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
+
+EventPublishRequest = _reflection.GeneratedProtocolMessageType(&#39;EventPublishRequest&#39;, (_message.Message,), {
+  &#39;DESCRIPTOR&#39; : _EVENTPUBLISHREQUEST,
+  &#39;__module__&#39; : &#39;event.v1.event_pb2&#39;
+  # @@protoc_insertion_point(class_scope:nitric.event.v1.EventPublishRequest)
+  })
+_sym_db.RegisterMessage(EventPublishRequest)
+
+EventPublishResponse = _reflection.GeneratedProtocolMessageType(&#39;EventPublishResponse&#39;, (_message.Message,), {
+  &#39;DESCRIPTOR&#39; : _EVENTPUBLISHRESPONSE,
+  &#39;__module__&#39; : &#39;event.v1.event_pb2&#39;
+  # @@protoc_insertion_point(class_scope:nitric.event.v1.EventPublishResponse)
+  })
+_sym_db.RegisterMessage(EventPublishResponse)
+
+TopicListRequest = _reflection.GeneratedProtocolMessageType(&#39;TopicListRequest&#39;, (_message.Message,), {
+  &#39;DESCRIPTOR&#39; : _TOPICLISTREQUEST,
+  &#39;__module__&#39; : &#39;event.v1.event_pb2&#39;
+  # @@protoc_insertion_point(class_scope:nitric.event.v1.TopicListRequest)
+  })
+_sym_db.RegisterMessage(TopicListRequest)
+
+TopicListResponse = _reflection.GeneratedProtocolMessageType(&#39;TopicListResponse&#39;, (_message.Message,), {
+  &#39;DESCRIPTOR&#39; : _TOPICLISTRESPONSE,
+  &#39;__module__&#39; : &#39;event.v1.event_pb2&#39;
+  # @@protoc_insertion_point(class_scope:nitric.event.v1.TopicListResponse)
+  })
+_sym_db.RegisterMessage(TopicListResponse)
+
+NitricTopic = _reflection.GeneratedProtocolMessageType(&#39;NitricTopic&#39;, (_message.Message,), {
+  &#39;DESCRIPTOR&#39; : _NITRICTOPIC,
+  &#39;__module__&#39; : &#39;event.v1.event_pb2&#39;
+  # @@protoc_insertion_point(class_scope:nitric.event.v1.NitricTopic)
+  })
+_sym_db.RegisterMessage(NitricTopic)
+
+NitricEvent = _reflection.GeneratedProtocolMessageType(&#39;NitricEvent&#39;, (_message.Message,), {
+  &#39;DESCRIPTOR&#39; : _NITRICEVENT,
+  &#39;__module__&#39; : &#39;event.v1.event_pb2&#39;
+  # @@protoc_insertion_point(class_scope:nitric.event.v1.NitricEvent)
+  })
+_sym_db.RegisterMessage(NitricEvent)
+
+
+DESCRIPTOR._options = None
+
+_EVENT = _descriptor.ServiceDescriptor(
+  name=&#39;Event&#39;,
+  full_name=&#39;nitric.event.v1.Event&#39;,
+  file=DESCRIPTOR,
+  index=0,
+  serialized_options=None,
+  create_key=_descriptor._internal_create_key,
+  serialized_start=384,
+  serialized_end=479,
+  methods=[
+  _descriptor.MethodDescriptor(
+    name=&#39;Publish&#39;,
+    full_name=&#39;nitric.event.v1.Event.Publish&#39;,
+    index=0,
+    containing_service=None,
+    input_type=_EVENTPUBLISHREQUEST,
+    output_type=_EVENTPUBLISHRESPONSE,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+])
+_sym_db.RegisterServiceDescriptor(_EVENT)
+
+DESCRIPTOR.services_by_name[&#39;Event&#39;] = _EVENT
+
+
+_TOPIC = _descriptor.ServiceDescriptor(
+  name=&#39;Topic&#39;,
+  full_name=&#39;nitric.event.v1.Topic&#39;,
+  file=DESCRIPTOR,
+  index=1,
+  serialized_options=None,
+  create_key=_descriptor._internal_create_key,
+  serialized_start=481,
+  serialized_end=567,
+  methods=[
+  _descriptor.MethodDescriptor(
+    name=&#39;List&#39;,
+    full_name=&#39;nitric.event.v1.Topic.List&#39;,
+    index=0,
+    containing_service=None,
+    input_type=_TOPICLISTREQUEST,
+    output_type=_TOPICLISTRESPONSE,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+])
+_sym_db.RegisterServiceDescriptor(_TOPIC)
+
+DESCRIPTOR.services_by_name[&#39;Topic&#39;] = _TOPIC
+
+# @@protoc_insertion_point(module_scope)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest"><code class="flex name class">
+<span>class <span class="ident">EventPublishRequest</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A ProtocolMessage</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>google.protobuf.pyext._message.CMessage</li>
+<li>google.protobuf.message.Message</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.DESCRIPTOR"><code class="name">var <span class="ident">DESCRIPTOR</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.event"><code class="name">var <span class="ident">event</span></code></dt>
+<dd>
+<div class="desc"><p>Field nitric.event.v1.EventPublishRequest.event</p></div>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.topic"><code class="name">var <span class="ident">topic</span></code></dt>
+<dd>
+<div class="desc"><p>Field nitric.event.v1.EventPublishRequest.topic</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishResponse"><code class="flex name class">
+<span>class <span class="ident">EventPublishResponse</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A ProtocolMessage</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>google.protobuf.pyext._message.CMessage</li>
+<li>google.protobuf.message.Message</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishResponse.DESCRIPTOR"><code class="name">var <span class="ident">DESCRIPTOR</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent"><code class="flex name class">
+<span>class <span class="ident">NitricEvent</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A ProtocolMessage</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>google.protobuf.pyext._message.CMessage</li>
+<li>google.protobuf.message.Message</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.DESCRIPTOR"><code class="name">var <span class="ident">DESCRIPTOR</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.id"><code class="name">var <span class="ident">id</span></code></dt>
+<dd>
+<div class="desc"><p>Field nitric.event.v1.NitricEvent.id</p></div>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.payload"><code class="name">var <span class="ident">payload</span></code></dt>
+<dd>
+<div class="desc"><p>Field nitric.event.v1.NitricEvent.payload</p></div>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.payloadType"><code class="name">var <span class="ident">payloadType</span></code></dt>
+<dd>
+<div class="desc"><p>Field nitric.event.v1.NitricEvent.payloadType</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricTopic"><code class="flex name class">
+<span>class <span class="ident">NitricTopic</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A ProtocolMessage</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>google.protobuf.pyext._message.CMessage</li>
+<li>google.protobuf.message.Message</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.NitricTopic.DESCRIPTOR"><code class="name">var <span class="ident">DESCRIPTOR</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.NitricTopic.name"><code class="name">var <span class="ident">name</span></code></dt>
+<dd>
+<div class="desc"><p>Field nitric.event.v1.NitricTopic.name</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListRequest"><code class="flex name class">
+<span>class <span class="ident">TopicListRequest</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A ProtocolMessage</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>google.protobuf.pyext._message.CMessage</li>
+<li>google.protobuf.message.Message</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListRequest.DESCRIPTOR"><code class="name">var <span class="ident">DESCRIPTOR</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListResponse"><code class="flex name class">
+<span>class <span class="ident">TopicListResponse</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A ProtocolMessage</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>google.protobuf.pyext._message.CMessage</li>
+<li>google.protobuf.message.Message</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListResponse.DESCRIPTOR"><code class="name">var <span class="ident">DESCRIPTOR</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListResponse.topics"><code class="name">var <span class="ident">topics</span></code></dt>
+<dd>
+<div class="desc"><p>Field nitric.event.v1.TopicListResponse.topics</p></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="nitric.proto.event.v1" href="index.html">nitric.proto.event.v1</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest">EventPublishRequest</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.DESCRIPTOR" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.DESCRIPTOR">DESCRIPTOR</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.event" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.event">event</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.topic" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.topic">topic</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.event.v1.event_pb2.EventPublishResponse" href="#nitric.proto.event.v1.event_pb2.EventPublishResponse">EventPublishResponse</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishResponse.DESCRIPTOR" href="#nitric.proto.event.v1.event_pb2.EventPublishResponse.DESCRIPTOR">DESCRIPTOR</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent" href="#nitric.proto.event.v1.event_pb2.NitricEvent">NitricEvent</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.DESCRIPTOR" href="#nitric.proto.event.v1.event_pb2.NitricEvent.DESCRIPTOR">DESCRIPTOR</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.id" href="#nitric.proto.event.v1.event_pb2.NitricEvent.id">id</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.payload" href="#nitric.proto.event.v1.event_pb2.NitricEvent.payload">payload</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.payloadType" href="#nitric.proto.event.v1.event_pb2.NitricEvent.payloadType">payloadType</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic" href="#nitric.proto.event.v1.event_pb2.NitricTopic">NitricTopic</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic.DESCRIPTOR" href="#nitric.proto.event.v1.event_pb2.NitricTopic.DESCRIPTOR">DESCRIPTOR</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic.name" href="#nitric.proto.event.v1.event_pb2.NitricTopic.name">name</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.event.v1.event_pb2.TopicListRequest" href="#nitric.proto.event.v1.event_pb2.TopicListRequest">TopicListRequest</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListRequest.DESCRIPTOR" href="#nitric.proto.event.v1.event_pb2.TopicListRequest.DESCRIPTOR">DESCRIPTOR</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse" href="#nitric.proto.event.v1.event_pb2.TopicListResponse">TopicListResponse</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse.DESCRIPTOR" href="#nitric.proto.event.v1.event_pb2.TopicListResponse.DESCRIPTOR">DESCRIPTOR</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse.topics" href="#nitric.proto.event.v1.event_pb2.TopicListResponse.topics">topics</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>
