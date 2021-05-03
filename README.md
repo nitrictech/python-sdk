@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./docs/assets/dot-matrix-logo-python.png" alt="Nitric Logo"/>
+</p>
+
 # Nitric Python SDK
 
 The Python SDK supports the use of the cloud-portable [Nitric](http://nitric.io) framework with Python 3.7+.
