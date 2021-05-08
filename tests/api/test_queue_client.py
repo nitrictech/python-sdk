@@ -36,10 +36,10 @@ def test_push():
 
     # Ensure the queue push method is called with the expected input
     mock_push.assert_called_once()
-    assert mock_push.call_args.args[0].queue == "test-queue"
-    assert mock_push.call_args.args[0].tasks[0].id == "1234"
-    assert mock_push.call_args.args[0].tasks[0].payloadType == "test-payload"
-    assert mock_push.call_args.args[0].tasks[0].payload["test"] == "test"
+    assert mock_push.call_args[0][0].queue == "test-queue"
+    assert mock_push.call_args[0][0].tasks[0].id == "1234"
+    assert mock_push.call_args[0][0].tasks[0].payloadType == "test-payload"
+    assert mock_push.call_args[0][0].tasks[0].payload["test"] == "test"
 
 
 def test_receive():
@@ -56,8 +56,8 @@ def test_receive():
 
     # Ensure the queue receive method is called with the expected input
     mock_receive.assert_called_once()
-    assert mock_receive.call_args.args[0].queue == "test-queue"
-    assert mock_receive.call_args.args[0].depth == 1
+    assert mock_receive.call_args[0][0].queue == "test-queue"
+    assert mock_receive.call_args[0][0].depth == 1
 
 
 def test_receive_no_depth():
@@ -70,7 +70,7 @@ def test_receive_no_depth():
         client.receive("test-queue")  # call receive without the optional depth parameter.
 
     # Ensure the default value 1 is used.
-    assert mock_receive.call_args.args[0].depth == 1
+    assert mock_receive.call_args[0][0].depth == 1
 
 
 def test_receive_none_depth():
@@ -83,7 +83,7 @@ def test_receive_none_depth():
         client.receive("test-queue", None)  # call receive with depth = None.
 
     # Ensure the default value 1 is used.
-    assert mock_receive.call_args.args[0].depth == 1
+    assert mock_receive.call_args[0][0].depth == 1
 
 
 def test_receive_negative_depth():
@@ -96,7 +96,7 @@ def test_receive_negative_depth():
         client.receive("test-queue", -2)  # call receive with a negative integer for depth.
 
     # Ensure the default value 1 is used.
-    assert mock_receive.call_args.args[0].depth == 1
+    assert mock_receive.call_args[0][0].depth == 1
 
 
 def test_grpc_methods():
