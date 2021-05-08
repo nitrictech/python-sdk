@@ -106,21 +106,32 @@ __all__ = [
 <span>(</span><span>event_id: str, payload_type: str, payload: dict)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Represents a NitricEvent.</p>
-<p>Construct a new Event.</p></div>
+<div class="desc"><p>Represents a NitricEvent.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Event(object):
     &#34;&#34;&#34;Represents a NitricEvent.&#34;&#34;&#34;
-
-    def __init__(self, event_id: str, payload_type: str, payload: dict):
-        &#34;&#34;&#34;Construct a new Event.&#34;&#34;&#34;
-        self.event_id = event_id
-        self.payload_type = payload_type
-        self.payload = payload</code></pre>
+    event_id: str
+    payload_type: str
+    payload: dict</code></pre>
 </details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.api.Event.event_id"><code class="name">var <span class="ident">event_id</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.Event.payload"><code class="name">var <span class="ident">payload</span> : dict</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.Event.payload_type"><code class="name">var <span class="ident">payload_type</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
 </dd>
 <dt id="nitric.api.EventClient"><code class="flex name class">
 <span>class <span class="ident">EventClient</span></span>
@@ -221,27 +232,29 @@ __all__ = [
 </dd>
 <dt id="nitric.api.FailedTask"><code class="flex name class">
 <span>class <span class="ident">FailedTask</span></span>
-<span>(</span><span>task: <a title="nitric.api.models.Task" href="models.html#nitric.api.models.Task">Task</a>, message: str)</span>
+<span>(</span><span>task_id: str, payload_type: str, payload: dict, lease_id: str = None, message: str = '')</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Represents a failed queue publish for an event.</p>
-<p>Construct a new Failed Event.</p></div>
+<div class="desc"><p>Represents a failed queue publish for an event.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class FailedTask(Task):
     &#34;&#34;&#34;Represents a failed queue publish for an event.&#34;&#34;&#34;
-
-    def __init__(self, task: Task, message: str):
-        &#34;&#34;&#34;Construct a new Failed Event.&#34;&#34;&#34;
-        super().__init__(task.task_id, task.payload_type, task.payload, task.lease_id)
-        self.message = message</code></pre>
+    message: str = field(default=&#34;&#34;)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="nitric.api.models.Task" href="models.html#nitric.api.models.Task">Task</a></li>
 </ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.api.FailedTask.message"><code class="name">var <span class="ident">message</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
 </dd>
 <dt id="nitric.api.KeyValueClient"><code class="flex name class">
 <span>class <span class="ident">KeyValueClient</span></span>
@@ -405,7 +418,11 @@ __all__ = [
         &#34;&#34;&#34;
         task = self._wire_to_task(failed_task.task)
 
-        return FailedTask(task=task, message=failed_task.message)
+        return FailedTask(task_id=task.task_id,
+                          payload_type=task.payload_type,
+                          payload=task.payload,
+                          lease_id=task.lease_id,
+                          message=failed_task.message)
 
     def send_batch(self, queue_name: str, tasks: List[Task] = None) -&gt; PushResponse:
         &#34;&#34;&#34;
@@ -653,45 +670,63 @@ identifier.
 <span>(</span><span>task_id: str, payload_type: str, payload: dict, lease_id: str = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Represents a NitricTask.</p>
-<p>Construct a new Task.</p></div>
+<div class="desc"><p>Represents a NitricTask.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Task(object):
     &#34;&#34;&#34;Represents a NitricTask.&#34;&#34;&#34;
-
-    def __init__(self, task_id: str, payload_type: str, payload: dict, lease_id: str = None):
-        &#34;&#34;&#34;Construct a new Task.&#34;&#34;&#34;
-        self.task_id = task_id
-        self.payload_type = payload_type
-        self.payload = payload
-        self.lease_id = lease_id</code></pre>
+    task_id: str
+    payload_type: str
+    payload: dict
+    lease_id: str = field(default=None)</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
 <li><a title="nitric.api.models.FailedTask" href="models.html#nitric.api.models.FailedTask">FailedTask</a></li>
 </ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.api.Task.lease_id"><code class="name">var <span class="ident">lease_id</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.Task.payload"><code class="name">var <span class="ident">payload</span> : dict</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.Task.payload_type"><code class="name">var <span class="ident">payload_type</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.Task.task_id"><code class="name">var <span class="ident">task_id</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
 </dd>
 <dt id="nitric.api.Topic"><code class="flex name class">
 <span>class <span class="ident">Topic</span></span>
 <span>(</span><span>name: str)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Represents event topic metadata.</p>
-<p>Construct a new topic instance.</p></div>
+<div class="desc"><p>Represents event topic metadata.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Topic(object):
     &#34;&#34;&#34;Represents event topic metadata.&#34;&#34;&#34;
-
-    def __init__(self, name: str):
-        &#34;&#34;&#34;Construct a new topic instance.&#34;&#34;&#34;
-        self.name = name</code></pre>
+    name: str</code></pre>
 </details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.api.Topic.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
 </dd>
 <dt id="nitric.api.TopicClient"><code class="flex name class">
 <span>class <span class="ident">TopicClient</span></span>
@@ -775,6 +810,11 @@ identifier.
 <ul>
 <li>
 <h4><code><a title="nitric.api.Event" href="#nitric.api.Event">Event</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.Event.event_id" href="#nitric.api.Event.event_id">event_id</a></code></li>
+<li><code><a title="nitric.api.Event.payload" href="#nitric.api.Event.payload">payload</a></code></li>
+<li><code><a title="nitric.api.Event.payload_type" href="#nitric.api.Event.payload_type">payload_type</a></code></li>
+</ul>
 </li>
 <li>
 <h4><code><a title="nitric.api.EventClient" href="#nitric.api.EventClient">EventClient</a></code></h4>
@@ -784,6 +824,9 @@ identifier.
 </li>
 <li>
 <h4><code><a title="nitric.api.FailedTask" href="#nitric.api.FailedTask">FailedTask</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.FailedTask.message" href="#nitric.api.FailedTask.message">message</a></code></li>
+</ul>
 </li>
 <li>
 <h4><code><a title="nitric.api.KeyValueClient" href="#nitric.api.KeyValueClient">KeyValueClient</a></code></h4>
@@ -809,9 +852,18 @@ identifier.
 </li>
 <li>
 <h4><code><a title="nitric.api.Task" href="#nitric.api.Task">Task</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.Task.lease_id" href="#nitric.api.Task.lease_id">lease_id</a></code></li>
+<li><code><a title="nitric.api.Task.payload" href="#nitric.api.Task.payload">payload</a></code></li>
+<li><code><a title="nitric.api.Task.payload_type" href="#nitric.api.Task.payload_type">payload_type</a></code></li>
+<li><code><a title="nitric.api.Task.task_id" href="#nitric.api.Task.task_id">task_id</a></code></li>
+</ul>
 </li>
 <li>
 <h4><code><a title="nitric.api.Topic" href="#nitric.api.Topic">Topic</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.Topic.name" href="#nitric.api.Topic.name">name</a></code></li>
+</ul>
 </li>
 <li>
 <h4><code><a title="nitric.api.TopicClient" href="#nitric.api.TopicClient">TopicClient</a></code></h4>
