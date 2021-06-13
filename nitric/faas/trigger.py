@@ -24,27 +24,25 @@ from nitric.faas.response import Response, TopicResponseContext, HttpResponseCon
 
 
 class HttpTriggerContext(object):
-    """Represents Trigger metadata from a HTTP subscription."""
+    """Represents Trigger metadata from a HTTP subscription"""
 
     def __init__(
         self,
         method: str,
-        path: str,
         headers: typing.Dict[str, str],
+        path_params: typing.Dict[str, str],
         query_params: typing.Dict[str, str],
     ):
-        """Create a Http trigger context."""
         self.method = method
-        self.path = path
         self.headers = headers
+        self.path_params = path_params
         self.query_params = query_params
 
 
 class TopicTriggerContext(object):
-    """Represents Trigger metadata from a topic subscription."""
+    """Represents Trigger metadata from a topic subscription"""
 
     def __init__(self, topic: str):
-        """Create a Topic trigger context."""
         self.topic = topic
 
 
@@ -56,38 +54,18 @@ class TriggerContext(object):
         self.context = context
 
     def is_http(self) -> bool:
-        """
-        Determine if trigger was raised by a http request.
-
-        :return true if trigger was raised by a HTTP request
-        """
         return isinstance(self.context, HttpTriggerContext)
 
     def as_http(self) -> typing.Union[HttpTriggerContext, None]:
-        """
-        Unwrap HttpTriggerContext.
-
-        :return HttpTriggerContext if is_http is true otherwise None
-        """
         if not self.is_http():
             return None
 
         return self.context
 
     def is_topic(self) -> bool:
-        """
-        Determine if trigger was raised by a topic event.
-
-        :return true if trigger is for a topic event
-        """
         return isinstance(self.context, TriggerContext)
 
     def as_topic(self) -> typing.Union[TopicTriggerContext, None]:
-        """
-        Unwrap TopicTriggerContext.
-
-        :return TopicTriggerContext if is_topic is true otherwise None
-        """
         if not self.is_topic():
             return None
 
@@ -95,18 +73,13 @@ class TriggerContext(object):
 
     @staticmethod
     def from_trigger_request(trigger_request: TriggerRequest):
-        """
-        Create a TriggerContext from a gRPC TriggerRequest.
-
-        :return Created TriggerContext
-        """
         if trigger_request.http is not None:
             return TriggerContext(
                 context=HttpTriggerContext(
-                    headers=dict(trigger_request.http.headers),
-                    path=trigger_request.http.path,
+                    headers=trigger_request.http.headers,
                     method=trigger_request.http.method,
-                    query_params=dict(trigger_request.http.query_params),
+                    query_params=trigger_request.http.query_params,
+                    path_params=trigger_request.http.path_params,
                 )
             )
         elif trigger_request.topic is not None:
@@ -115,6 +88,11 @@ class TriggerContext(object):
             # We have an error
             # should probably raise an exception
             return None
+
+
+def _clean_header(header_name: str):
+    """Convert a Nitric HTTP request header name into the equivalent Context property name."""
+    return header_name.lower().replace("x-nitric-", "").replace("-", "_")
 
 
 class Trigger(object):
@@ -147,12 +125,9 @@ class Trigger(object):
 
     def default_response(self) -> Response:
         """
-        Create a relevant default response.
-
+        Convenience method to construct a relevant default response
         The returned response can be interrogated with its context to determine the appropriate
-        response context e.g. response.context.is_http() or response.context.is_topic().
-
-        :returns Default response for this Trigger
+        response context e.g. response.context.is_http() or response.context.is_topic()
         """
         response_ctx = None
 
@@ -165,11 +140,6 @@ class Trigger(object):
 
     @staticmethod
     def from_trigger_request(trigger_request: TriggerRequest):
-        """
-        Create a Trigger from a gRPC TriggerRequest.
-
-        :returns Created Trigger
-        """
         context = TriggerContext.from_trigger_request(trigger_request)
 
         return Trigger(context=context, data=trigger_request.data)
