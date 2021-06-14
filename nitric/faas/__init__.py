@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 """Nitric Function as a Service (FaaS) Package."""
-from nitric.faas.trigger import Request, Context, SourceType
+from nitric.faas.trigger import TriggerRequest, TriggerContext
 from nitric.faas.response import Response
 from nitric.faas.faas import start
 

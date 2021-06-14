@@ -16,10 +16,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Awaitable, Coroutine, Callable, Union
+from typing import Callable, Union
 
 from nitric.config import settings
-from nitric.faas import Request, Response
+from nitric.faas import TriggerRequest, Response
 from grpc import aio
 
 from nitric.faas.trigger import Trigger
@@ -32,9 +32,7 @@ def get_stream(stub: faas_pb2_grpc.FaasStub) -> aio.StreamStreamCall[faas_pb2.Cl
     return stub.TriggerStream()
 
 
-async def loop(
-    func: Union[Callable[[Request], Union[Response, str]], Coroutine[Awaitable[Union[str, Response]], Request]]
-):
+async def loop(func: Union[Callable[[TriggerRequest], Union[Response, str]]]):
     """FaaS loop"""
     async with aio.insecure_channel(settings.SERVICE_BIND) as channel:
         stub = faas_pb2_grpc.FaasStub(channel)
@@ -56,13 +54,13 @@ async def loop(
                 # Break the loop
                 break
 
-            if msg.init_response is not None:
+            if msg.HasField("init_response"):
                 # Handle the init response
                 print("Function connected to Membrane")
                 # We don't need to reply
                 # Time to go to the next available message
                 continue
-            elif msg.trigger_request is not None:
+            elif msg.HasField("trigger_request"):
                 client_msg = faas_pb2.ClientMessage(
                     id=msg.id,
                 )
@@ -74,17 +72,19 @@ async def loop(
                     # This will allow the user to define non-blocking I/O within the scope
                     # of their function allowing the runtime to queue up more requests
                     if asyncio.iscoroutinefunction(func):
+                        print("call non-blocking")
                         response = await func(trigger)
                     else:
                         response = func(trigger)
+                        print("call blocking")
 
                     if isinstance(response, Response):
-                        client_msg.trigger_response = response.to_grpc_trigger_response_context()
+                        client_msg.trigger_response.CopyFrom(response.to_grpc_trigger_response_context())
                     elif isinstance(response, str):
                         # Construct a default response from the data
                         default_response = trigger.default_response()
                         default_response.data = response.encode()
-                        client_msg.trigger_response = default_response
+                        client_msg.trigger_response.CopyFrom(default_response.to_grpc_trigger_response_context())
 
                     # translate the response
                 except Exception:
@@ -100,7 +100,7 @@ async def loop(
                         topic_context = default_response.context.as_topic()
                         topic_context.success = False
 
-                    client_msg.trigger_response = default_response.to_grpc_trigger_response_context()
+                    client_msg.trigger_response.CopyFrom(default_response.to_grpc_trigger_response_context())
 
                 # Write it back to the server
                 await stream.write(client_msg)
@@ -110,7 +110,7 @@ async def loop(
 
 
 # TODO: We need to change this to an Awaitable or a Coroutine
-def start(func: Union[Callable[[Request], Union[Response, str]], Coroutine[Awaitable[Union[str, Response]], Request]]):
+def start(func: Union[Callable[[TriggerRequest], Union[Response, str]]]):
     """
     Register the provided function as the request handler and starts handling new requests.
 

@@ -17,15 +17,16 @@
 # limitations under the License.
 #
 from typing import Union, Dict
-from nitric.proto.faas.v1.faas_pb2 import TriggerResponse, HttpResponseContext, TopicResponseContext
+from nitric.proto.faas.v1 import faas_pb2
+from nitric.proto.faas.v1.faas_pb2 import TriggerResponse
 
 
 class TopicResponseContext(object):
     def __init__(self, success: bool = True):
         self.success = success
 
-    def to_grpc_topic_response_context(self) -> TopicResponseContext:
-        return TopicResponseContext(success=self.success)
+    def to_grpc_topic_response_context(self) -> faas_pb2.TopicResponseContext:
+        return faas_pb2.TopicResponseContext(success=self.success)
 
 
 class HttpResponseContext(object):
@@ -33,8 +34,8 @@ class HttpResponseContext(object):
         self.headers = headers
         self.status = status
 
-    def to_grpc_http_response_context(self) -> HttpResponseContext:
-        return HttpResponseContext(headers=self.headers, status=self.status)
+    def to_grpc_http_response_context(self) -> faas_pb2.HttpResponseContext:
+        return faas_pb2.HttpResponseContext(headers=self.headers, status=self.status)
 
 
 class ResponseContext(object):
@@ -81,9 +82,9 @@ class Response(object):
 
         if self.context.is_http():
             ctx = self.context.as_http()
-            response.http = ctx.to_grpc_http_response_context()
+            response.http.CopyFrom(ctx.to_grpc_http_response_context())
         elif self.context.is_topic():
             ctx = self.context.as_topic()
-            response.topic = ctx.to_grpc_topic_response_context()
+            response.topic.CopyFrom(ctx.to_grpc_topic_response_context())
 
         return response
