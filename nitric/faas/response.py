@@ -16,8 +16,50 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from http import HTTPStatus
-from typing import Union
+from typing import Union, Dict
+from nitric.proto.faas.v1 import faas_pb2
+from nitric.proto.faas.v1.faas_pb2 import TriggerResponse
+
+
+class TopicResponseContext(object):
+    def __init__(self, success: bool = True):
+        self.success = success
+
+    def to_grpc_topic_response_context(self) -> faas_pb2.TopicResponseContext:
+        return faas_pb2.TopicResponseContext(success=self.success)
+
+
+class HttpResponseContext(object):
+    def __init__(self, headers: Dict[str, str] = {}, status: int = 200):
+        self.headers = headers
+        self.status = status
+
+    def to_grpc_http_response_context(self) -> faas_pb2.HttpResponseContext:
+        return faas_pb2.HttpResponseContext(headers=self.headers, status=self.status)
+
+
+class ResponseContext(object):
+    def __init__(self, context: Union[TopicResponseContext, HttpResponseContext]):
+        self.context = context
+
+    def is_http(self):
+        return isinstance(self.context, HttpResponseContext)
+
+    def is_topic(self):
+        return isinstance(self.context, TopicResponseContext)
+
+    def as_http(self) -> Union[HttpResponseContext, None]:
+        if not self.is_http():
+            return None
+
+        return self.context
+
+    def as_topic(self) -> Union[TopicResponseContext, None]:
+        """Determine is ResponseContext is for a topic"""
+        if not self.is_topic():
+            return None
+
+        return self.context
 
 
 class Response(object):
@@ -25,16 +67,24 @@ class Response(object):
 
     def __init__(
         self,
-        body=None,
-        status: Union[int, HTTPStatus] = HTTPStatus.OK,
-        headers: dict = None,
+        context: ResponseContext,
+        data: Union[bytes] = None,
     ):
         """Construct a new Nitric Response."""
         # FIXME: Fix typing of the status parameter, add tests
-        if headers is None:
-            headers = {}
-        if body is None:
-            body = ""
-        self.status = status
-        self.headers = headers
-        self.body = body
+        self.context = context
+        self.data = data
+
+    def to_grpc_trigger_response_context(self) -> TriggerResponse:
+        """Translate a response object ready for on the wire transport"""
+
+        response = TriggerResponse(data=self.data)
+
+        if self.context.is_http():
+            ctx = self.context.as_http()
+            response.http.CopyFrom(ctx.to_grpc_http_response_context())
+        elif self.context.is_topic():
+            ctx = self.context.as_topic()
+            response.topic.CopyFrom(ctx.to_grpc_topic_response_context())
+
+        return response

@@ -18,9 +18,11 @@
 #
 from unittest.mock import patch, Mock
 import unittest
-from nitric.faas import Response
+from nitric.faas import Response, ResponseContext, HttpResponseContext
 from nitric.faas import start
 from nitric.faas.faas import Handler
+from nitric.proto.faas.v1.faas_pb2 import TriggerResponse
+from google.protobuf import json_format
 
 
 class StartCases(unittest.TestCase):
@@ -29,7 +31,7 @@ class StartCases(unittest.TestCase):
         mock_serve.return_value = None
 
         with patch("nitric.faas.faas.serve", mock_serve):
-            start(func=lambda a: Response("test mock response"))
+            start(func=lambda a: "test mock response")
 
         args, kwargs = mock_serve.call_args
         mock_serve.assert_called_once()
@@ -40,25 +42,22 @@ class StartCases(unittest.TestCase):
 class HandlerCases(unittest.TestCase):
     def test_full_response(self):
         mock_func = Mock()
-        mock_func.return_value = Response(status=200, body="it works", headers={"a": "a header", "b": "b header"})
+        mock_response = Response(
+            data="it works".encode(),
+            context=ResponseContext(
+                context=HttpResponseContext(headers={"a": "a header", "b": "b header"}, status=200)
+            ),
+        )
+        mock_func.return_value = mock_response
+
+        returnBody = json_format.MessageToJson(mock_response.to_grpc_trigger_response_context())
 
         with patch("nitric.faas.faas.construct_request", Mock()):
             handler = Handler(mock_func)
             response = handler()
 
         # Ensure the response is returned in the tuple format for Flask
-        assert response == ("it works", 200, {"a": "a header", "b": "b header"})
-
-    def test_custom_status(self):
-        mock_func = Mock()
-        mock_func.return_value = Response(status=404)  # Simulate a non 200 status, such as an error
-
-        with patch("nitric.faas.faas.construct_request", Mock()):
-            handler = Handler(mock_func)
-            response = handler()
-
-        # Ensure the response is returned in the tuple format for Flask
-        assert response == ("", 404, {})
+        assert response == (returnBody, 200, {"Content-Type": "application/json"})
 
     def test_unhandled_exception(self):
         # always return and error to test how it's handled internally
@@ -72,7 +71,8 @@ class HandlerCases(unittest.TestCase):
         # Ensure the 500 internal server error status is returned.
         # TODO: No body should be included outside of debug mode. Use this assert in future once that's implemented
         # assert response == ('', 500)
-        assert response[1] == 500  # For now, just check that the error status is set
+        # We'll return a 200 OK for errors, the actual response is encoded in the body
+        assert response[1] == 200  # For now, just check that the error status is set
 
     def test_debug_unhandled_exception(self):
         # TODO: set the debug environment variable (or equivalent) once available
@@ -84,9 +84,13 @@ class HandlerCases(unittest.TestCase):
             handler = Handler(error_func)
             response = handler()
 
+        trigger_response = json_format.Parse(response[0], TriggerResponse())
+
         # Ensure the debug details are provided along with the error status
-        assert response[0].startswith("<html><head><title>Error</title></head><body><h2>An Error Occurred:</h2>")
-        assert response[1] == 500  # Status code
+        assert trigger_response.data.decode().startswith(
+            "<html><head><title>Error</title></head><body><h2>An Error Occurred:</h2>"
+        )
+        assert response[1] == 200  # Status code
 
     def test_str_response(self):
         mock_func = Mock()
@@ -96,8 +100,11 @@ class HandlerCases(unittest.TestCase):
             handler = Handler(mock_func)
             response = handler()
 
+        trigger_response = json_format.Parse(response[0], TriggerResponse())
+
         # Ensure the response string was wrapped with http response values
-        assert response == ("test", 200, {})
+        assert trigger_response.data.decode() == "test"
+        assert response[1] == 200
 
     def test_no_response(self):
         def no_response(request):
@@ -108,5 +115,7 @@ class HandlerCases(unittest.TestCase):
             handler = Handler(no_response)
             response = handler()
 
+        trigger_response = json_format.Parse(response[0], TriggerResponse())
         # Ensure an empty response with a success status
-        assert response == ("", 200)
+        assert trigger_response.data.decode() == ""
+        assert response[1] == 200
