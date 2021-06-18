@@ -17,12 +17,14 @@
 # limitations under the License.
 #
 from typing import List
+
+from google.protobuf.json_format import MessageToDict
+from google.protobuf.struct_pb2 import Struct
+
+from nitric.api._base_client import BaseClient
+from nitric.api.models import FailedTask, Task
 from nitric.proto import queue
 from nitric.proto import queue_service
-from nitric.api._base_client import BaseClient
-from google.protobuf.struct_pb2 import Struct
-from nitric.api.models import FailedTask, Task
-from google.protobuf.json_format import MessageToDict
 
 
 class PushResponse(object):
@@ -57,7 +59,7 @@ class QueueClient(BaseClient):
 
         return queue.NitricTask(
             id=task.task_id,
-            payloadType=task.payload_type,
+            payload_type=task.payload_type,
             payload=payload_struct,
         )
 
@@ -70,9 +72,9 @@ class QueueClient(BaseClient):
         """
         return Task(
             task_id=task.id,
-            payload_type=task.payloadType,
+            payload_type=task.payload_type,
             payload=MessageToDict(task.payload),
-            lease_id=task.leaseId,
+            lease_id=task.lease_id,
         )
 
     def _wire_to_failed_task(self, failed_task: queue.FailedTask) -> FailedTask:
@@ -84,7 +86,13 @@ class QueueClient(BaseClient):
         """
         task = self._wire_to_task(failed_task.task)
 
-        return FailedTask(task=task, message=failed_task.message)
+        return FailedTask(
+            task_id=task.task_id,
+            payload_type=task.payload_type,
+            payload=task.payload,
+            lease_id=task.lease_id,
+            message=failed_task.message,
+        )
 
     def send_batch(self, queue_name: str, tasks: List[Task] = None) -> PushResponse:
         """

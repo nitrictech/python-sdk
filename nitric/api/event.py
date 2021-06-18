@@ -59,7 +59,7 @@ class EventClient(BaseClient):
             payload = {}
         payload_struct = Struct()
         payload_struct.update(payload)
-        nitric_event = NitricEvent(id=event_id, payloadType=payload_type, payload=payload_struct)
+        nitric_event = NitricEvent(id=event_id, payload_type=payload_type, payload=payload_struct)
         request = event_model.EventPublishRequest(topic=topic_name, event=nitric_event)
         self._exec("Publish", request)
         return event_id

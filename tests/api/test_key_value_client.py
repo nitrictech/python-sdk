@@ -40,9 +40,9 @@ def test_put_key_value():
 
     # Ensure the get topics method is called with the expected input
     mock_create.assert_called_once()  # No input data required to get topics
-    assert mock_create.call_args.args[0].collection == "collection_name"
-    assert mock_create.call_args.args[0].key == "kv_key"
-    assert mock_create.call_args.args[0].value["content"] == "some text content"
+    assert mock_create.call_args[0][0].collection == "collection_name"
+    assert mock_create.call_args[0][0].key == "kv_key"
+    assert mock_create.call_args[0][0].value["content"] == "some text content"
 
 
 # Get
@@ -77,8 +77,8 @@ def test_delete_key_value():
 
     # Ensure the get topics method is called with the expected input
     mock_create.assert_called_once()  # No input data required to get topics
-    assert mock_create.call_args.args[0].collection == "collection_name"
-    assert mock_create.call_args.args[0].key == "kv_key"
+    assert mock_create.call_args[0][0].collection == "collection_name"
+    assert mock_create.call_args[0][0].key == "kv_key"
 
 
 def test_grpc_methods():

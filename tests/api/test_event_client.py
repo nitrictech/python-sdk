@@ -40,10 +40,10 @@ def test_publish():
 
     # Ensure the publish method is called with the expected input
     mock_publish.assert_called_once()
-    assert mock_publish.call_args.args[0].topic == "topic_name"
-    assert mock_publish.call_args.args[0].event.id == "abc-123"
-    assert mock_publish.call_args.args[0].event.payloadType == "payload.type"
-    assert mock_publish.call_args.args[0].event.payload["content"] == "of event"
+    assert mock_publish.call_args[0][0].topic == "topic_name"
+    assert mock_publish.call_args[0][0].event.id == "abc-123"
+    assert mock_publish.call_args[0][0].event.payload_type == "payload.type"
+    assert mock_publish.call_args[0][0].event.payload["content"] == "of event"
 
 
 def test_empty_payload():
@@ -57,7 +57,7 @@ def test_empty_payload():
 
     # Ensure the gRPC method is called, with an empty Struct as the payload.
     mock_publish.assert_called_once()
-    assert mock_publish.call_args.args[0].event.payload == Struct()
+    assert mock_publish.call_args[0][0].event.payload == Struct()
 
 
 def test_grpc_methods():

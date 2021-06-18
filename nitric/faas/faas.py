@@ -18,60 +18,32 @@
 #
 from typing import Callable, Union
 
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from waitress import serve
 
+from nitric.proto.faas.v1.faas_pb2 import TriggerRequest, TriggerResponse
 from nitric.config import settings
-from nitric.faas import Request, Response
+from nitric.faas import Trigger, Response
+from google.protobuf import json_format
 
 
-def construct_request() -> Request:
+def construct_request() -> TriggerRequest:
     """Construct a Nitric Request object from the Flask HTTP Request."""
     # full_path used to better match behavior in other SDKs
-    return Request(dict(request.headers), request.get_data(), path=request.full_path)
+    # return TriggerRequest(dict(request.headers), request.get_data(), path=request.full_path)
+    message = json_format.Parse(request.get_data(), TriggerRequest(), ignore_unknown_fields=False)
+    return message
 
 
-def format_status(response: Response) -> int:
-    """Return a HTTP status code int from the status of a Nitric Response object."""
-    if response.status is None:
-        return 200
-    try:
-        return int(response.status)
-    except Exception:
-        raise Exception("Invalid response status [{0}], status must an int.".format(response.status))
-
-
-def format_body(response: Response):
-    """
-    Return a response for Flask which is a str or bytes, based on the contents of the Nitric Response body.
-
-    str and bytes objects are unchanged
-    dicts will be converted to a json string
-    all other objects are cast to str type
-    """
-    if response.body is None:
-        return ""
-    if type(response.body) == dict:
-        return jsonify(response.body)
-    if type(response.body) == bytes or type(response.body) == str:
-        return response.body
-
-    return str(response.body)
-
-
-def http_response(response: Union[Response, str]):
+def http_response(response: TriggerResponse):
     """
     Return a full HTTP response tuple based on the Nitric Response contents.
 
     The response includes a body, status and headers as appropriate.
     """
-    if response is None:
-        return "", 200
-    if isinstance(response, str):
-        # Convert to Nitric Response for consistent handling
-        response = Response(response)
+    headers = {"Content-Type": "application/json"}
 
-    return format_body(response), format_status(response), response.headers
+    return json_format.MessageToJson(response), 200, headers
 
 
 def exception_to_html():
@@ -94,24 +66,52 @@ def exception_to_html():
 class Handler(object):
     """Nitric Function handler."""
 
-    def __init__(self, func: Callable[[Request], Union[Response, str]]):
+    def __init__(self, func: Callable[[Trigger], Union[Response, str]]):
         """Construct a new handler using the provided function to handle new requests."""
         self.func = func
 
     def __call__(self, path="", *args):
         """Construct Nitric Request from HTTP Request."""
-        nitric_request = construct_request()
+        trigger_request = construct_request()
+
+        grpc_trigger_response: TriggerResponse
+
+        # convert it to a trigger
+        trigger = Trigger.from_trigger_request(trigger_request)
+
         try:
             # Execute the handler function
-            response: Union[Response, str] = self.func(nitric_request)
+            response: Union[Response, str] = self.func(trigger)
+
+            final_response: Response
+            if isinstance(response, str):
+                final_response = trigger.default_response()
+                final_response.data = response.encode()
+            elif isinstance(response, Response):
+                final_response = response
+            else:
+                # assume None
+                final_response = trigger.default_response()
+                final_response.data = "".encode()
+
+            grpc_trigger_response = final_response.to_grpc_trigger_response_context()
+
         except Exception:
-            # TODO: Only return error detail in debug mode.
-            return exception_to_html(), 500
+            trigger_response = trigger.default_response()
+            if trigger_response.context.is_http():
+                trigger_response.context.as_http().status = 500
+                trigger_response.context.as_http().headers = {"Content-Type": "text/html"}
+                trigger_response.data = exception_to_html().encode()
+            elif trigger_response.context.is_topic():
+                trigger_response.data = "Error processing message"
+                trigger_response.context.as_topic().success = False
 
-        return http_response(response)
+            grpc_trigger_response = trigger_response.to_grpc_trigger_response_context()
+
+        return http_response(grpc_trigger_response)
 
 
-def start(func: Callable[[Request], Union[Response, str]]):
+def start(func: Callable[[Trigger], Union[Response, str]]):
     """
     Register the provided function as the request handler and starts handling new requests.
 
