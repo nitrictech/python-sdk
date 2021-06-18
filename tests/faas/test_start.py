@@ -44,20 +44,18 @@ class HandlerCases(unittest.TestCase):
         mock_func = Mock()
         mock_response = Response(
             data="it works".encode(),
-            context=ResponseContext(
-                context=HttpResponseContext(headers={"a": "a header", "b": "b header"}, status=200)
-            ),
+            context=ResponseContext(context=HttpResponseContext(headers={"a": "a header"}, status=200)),
         )
         mock_func.return_value = mock_response
 
-        returnBody = json_format.MessageToJson(mock_response.to_grpc_trigger_response_context())
+        return_body = json_format.MessageToJson(mock_response.to_grpc_trigger_response_context())
 
         with patch("nitric.faas.faas.construct_request", Mock()):
             handler = Handler(mock_func)
             response = handler()
 
         # Ensure the response is returned in the tuple format for Flask
-        assert response == (returnBody, 200, {"Content-Type": "application/json"})
+        assert response == (return_body, 200, {"Content-Type": "application/json"})
 
     def test_unhandled_exception(self):
         # always return and error to test how it's handled internally
