@@ -38,7 +38,7 @@ def test_push():
     mock_push.assert_called_once()
     assert mock_push.call_args[0][0].queue == "test-queue"
     assert mock_push.call_args[0][0].tasks[0].id == "1234"
-    assert mock_push.call_args[0][0].tasks[0].payloadType == "test-payload"
+    assert mock_push.call_args[0][0].tasks[0].payload_type == "test-payload"
     assert mock_push.call_args[0][0].tasks[0].payload["test"] == "test"
 
 

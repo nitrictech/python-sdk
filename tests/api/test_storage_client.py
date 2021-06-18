@@ -36,7 +36,7 @@ def test_write():
 
     # Ensure the 'Put' method is called with the expected input
     mock_create.assert_called_once()  # No input data required to get topics
-    assert mock_create.call_args[0][0].bucketName == "bucket_name"
+    assert mock_create.call_args[0][0].bucket_name == "bucket_name"
     assert mock_create.call_args[0][0].key == "key_name"
     assert mock_create.call_args[0][0].body == content
 
@@ -55,7 +55,7 @@ def test_read():
 
     # Ensure the 'Get' method is called with the expected input
     mock_create.assert_called_once()  # No input data required to get topics
-    assert mock_create.call_args[0][0].bucketName == "bucket_name"
+    assert mock_create.call_args[0][0].bucket_name == "bucket_name"
     assert mock_create.call_args[0][0].key == "key_name"
 
 

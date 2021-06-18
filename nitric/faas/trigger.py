@@ -24,7 +24,7 @@ from nitric.faas.response import Response, TopicResponseContext, HttpResponseCon
 
 
 class HttpTriggerContext(object):
-    """Represents Trigger metadata from a HTTP subscription"""
+    """Represents Trigger metadata from a HTTP subscription."""
 
     def __init__(
         self,
@@ -33,6 +33,7 @@ class HttpTriggerContext(object):
         headers: typing.Dict[str, str],
         query_params: typing.Dict[str, str],
     ):
+        """Create a Http trigger context."""
         self.method = method
         self.path = path
         self.headers = headers
@@ -40,9 +41,10 @@ class HttpTriggerContext(object):
 
 
 class TopicTriggerContext(object):
-    """Represents Trigger metadata from a topic subscription"""
+    """Represents Trigger metadata from a topic subscription."""
 
     def __init__(self, topic: str):
+        """Create a Topic trigger context."""
         self.topic = topic
 
 
@@ -54,18 +56,38 @@ class TriggerContext(object):
         self.context = context
 
     def is_http(self) -> bool:
+        """
+        Determine if trigger was raised by a http request.
+
+        :return true if trigger was raised by a HTTP request
+        """
         return isinstance(self.context, HttpTriggerContext)
 
     def as_http(self) -> typing.Union[HttpTriggerContext, None]:
+        """
+        Unwrap HttpTriggerContext.
+
+        :return HttpTriggerContext if is_http is true otherwise None
+        """
         if not self.is_http():
             return None
 
         return self.context
 
     def is_topic(self) -> bool:
+        """
+        Determine if trigger was raised by a topic event.
+
+        :return true if trigger is for a topic event
+        """
         return isinstance(self.context, TriggerContext)
 
     def as_topic(self) -> typing.Union[TopicTriggerContext, None]:
+        """
+        Unwrap TopicTriggerContext.
+
+        :return TopicTriggerContext if is_topic is true otherwise None
+        """
         if not self.is_topic():
             return None
 
@@ -73,6 +95,11 @@ class TriggerContext(object):
 
     @staticmethod
     def from_trigger_request(trigger_request: TriggerRequest):
+        """
+        Create a TriggerContext from a gRPC TriggerRequest.
+
+        :return Created TriggerContext
+        """
         if trigger_request.http is not None:
             return TriggerContext(
                 context=HttpTriggerContext(
@@ -120,9 +147,12 @@ class Trigger(object):
 
     def default_response(self) -> Response:
         """
-        Convenience method to construct a relevant default response
+        Create a relevant default response.
+
         The returned response can be interrogated with its context to determine the appropriate
-        response context e.g. response.context.is_http() or response.context.is_topic()
+        response context e.g. response.context.is_http() or response.context.is_topic().
+
+        :returns Default response for this Trigger
         """
         response_ctx = None
 
@@ -135,6 +165,11 @@ class Trigger(object):
 
     @staticmethod
     def from_trigger_request(trigger_request: TriggerRequest):
+        """
+        Create a Trigger from a gRPC TriggerRequest.
+
+        :returns Created Trigger
+        """
         context = TriggerContext.from_trigger_request(trigger_request)
 
         return Trigger(context=context, data=trigger_request.data)

@@ -42,7 +42,7 @@ def test_publish():
     mock_publish.assert_called_once()
     assert mock_publish.call_args[0][0].topic == "topic_name"
     assert mock_publish.call_args[0][0].event.id == "abc-123"
-    assert mock_publish.call_args[0][0].event.payloadType == "payload.type"
+    assert mock_publish.call_args[0][0].event.payload_type == "payload.type"
     assert mock_publish.call_args[0][0].event.payload["content"] == "of event"
 
 

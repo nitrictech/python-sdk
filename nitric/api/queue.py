@@ -59,7 +59,7 @@ class QueueClient(BaseClient):
 
         return queue.NitricTask(
             id=task.task_id,
-            payloadType=task.payload_type,
+            payload_type=task.payload_type,
             payload=payload_struct,
         )
 
@@ -72,9 +72,9 @@ class QueueClient(BaseClient):
         """
         return Task(
             task_id=task.id,
-            payload_type=task.payloadType,
+            payload_type=task.payload_type,
             payload=MessageToDict(task.payload),
-            lease_id=task.leaseId,
+            lease_id=task.lease_id,
         )
 
     def _wire_to_failed_task(self, failed_task: queue.FailedTask) -> FailedTask:
