@@ -111,8 +111,10 @@ __all__ = [
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Event(object):
+<pre><code class="python">@dataclass(frozen=True, order=True)
+class Event(object):
     &#34;&#34;&#34;Represents a NitricEvent.&#34;&#34;&#34;
+
     event_id: str
     payload_type: str
     payload: dict</code></pre>
@@ -176,7 +178,7 @@ __all__ = [
             payload = {}
         payload_struct = Struct()
         payload_struct.update(payload)
-        nitric_event = NitricEvent(id=event_id, payloadType=payload_type, payload=payload_struct)
+        nitric_event = NitricEvent(id=event_id, payload_type=payload_type, payload=payload_struct)
         request = event_model.EventPublishRequest(topic=topic_name, event=nitric_event)
         self._exec(&#34;Publish&#34;, request)
         return event_id</code></pre>
@@ -222,7 +224,7 @@ __all__ = [
         payload = {}
     payload_struct = Struct()
     payload_struct.update(payload)
-    nitric_event = NitricEvent(id=event_id, payloadType=payload_type, payload=payload_struct)
+    nitric_event = NitricEvent(id=event_id, payload_type=payload_type, payload=payload_struct)
     request = event_model.EventPublishRequest(topic=topic_name, event=nitric_event)
     self._exec(&#34;Publish&#34;, request)
     return event_id</code></pre>
@@ -240,8 +242,10 @@ __all__ = [
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class FailedTask(Task):
+<pre><code class="python">@dataclass(frozen=True, order=True)
+class FailedTask(Task):
     &#34;&#34;&#34;Represents a failed queue publish for an event.&#34;&#34;&#34;
+
     message: str = field(default=&#34;&#34;)</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -391,7 +395,7 @@ __all__ = [
 
         return queue.NitricTask(
             id=task.task_id,
-            payloadType=task.payload_type,
+            payload_type=task.payload_type,
             payload=payload_struct,
         )
 
@@ -404,9 +408,9 @@ __all__ = [
         &#34;&#34;&#34;
         return Task(
             task_id=task.id,
-            payload_type=task.payloadType,
+            payload_type=task.payload_type,
             payload=MessageToDict(task.payload),
-            lease_id=task.leaseId,
+            lease_id=task.lease_id,
         )
 
     def _wire_to_failed_task(self, failed_task: queue.FailedTask) -&gt; FailedTask:
@@ -418,11 +422,13 @@ __all__ = [
         &#34;&#34;&#34;
         task = self._wire_to_task(failed_task.task)
 
-        return FailedTask(task_id=task.task_id,
-                          payload_type=task.payload_type,
-                          payload=task.payload,
-                          lease_id=task.lease_id,
-                          message=failed_task.message)
+        return FailedTask(
+            task_id=task.task_id,
+            payload_type=task.payload_type,
+            payload=task.payload,
+            lease_id=task.lease_id,
+            message=failed_task.message,
+        )
 
     def send_batch(self, queue_name: str, tasks: List[Task] = None) -&gt; PushResponse:
         &#34;&#34;&#34;
@@ -588,7 +594,7 @@ identifier.
         :param body: data to be stored.
         :return: storage result.
         &#34;&#34;&#34;
-        request = storage.StorageWriteRequest(bucketName=bucket_name, key=key, body=body)
+        request = storage.StorageWriteRequest(bucket_name=bucket_name, key=key, body=body)
         response = self._exec(&#34;Write&#34;, request)
         return response
 
@@ -600,7 +606,7 @@ identifier.
         :param key: key for the file to retrieve.
         :return: the file as bytes.
         &#34;&#34;&#34;
-        request = storage.StorageReadRequest(bucketName=bucket_name, key=key)
+        request = storage.StorageReadRequest(bucket_name=bucket_name, key=key)
         response = self._exec(&#34;Read&#34;, request)
         return response.body</code></pre>
 </details>
@@ -631,7 +637,7 @@ identifier.
     :param key: key for the file to retrieve.
     :return: the file as bytes.
     &#34;&#34;&#34;
-    request = storage.StorageReadRequest(bucketName=bucket_name, key=key)
+    request = storage.StorageReadRequest(bucket_name=bucket_name, key=key)
     response = self._exec(&#34;Read&#34;, request)
     return response.body</code></pre>
 </details>
@@ -658,7 +664,7 @@ identifier.
     :param body: data to be stored.
     :return: storage result.
     &#34;&#34;&#34;
-    request = storage.StorageWriteRequest(bucketName=bucket_name, key=key, body=body)
+    request = storage.StorageWriteRequest(bucket_name=bucket_name, key=key, body=body)
     response = self._exec(&#34;Write&#34;, request)
     return response</code></pre>
 </details>
@@ -675,8 +681,10 @@ identifier.
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Task(object):
+<pre><code class="python">@dataclass(frozen=True, order=True)
+class Task(object):
     &#34;&#34;&#34;Represents a NitricTask.&#34;&#34;&#34;
+
     task_id: str
     payload_type: str
     payload: dict
@@ -716,8 +724,10 @@ identifier.
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Topic(object):
+<pre><code class="python">@dataclass(frozen=True, order=True)
+class Topic(object):
     &#34;&#34;&#34;Represents event topic metadata.&#34;&#34;&#34;
+
     name: str</code></pre>
 </details>
 <h3>Class variables</h3>

@@ -46,11 +46,19 @@
 # limitations under the License.
 #
 &#34;&#34;&#34;Nitric Function as a Service (FaaS) Package.&#34;&#34;&#34;
-from nitric.faas.request import Request, Context, SourceType
-from nitric.faas.response import Response
+from nitric.faas.trigger import Trigger, TriggerContext
+from nitric.faas.response import Response, ResponseContext, HttpResponseContext, TopicResponseContext
 from nitric.faas.faas import start
 
-__all__ = [&#34;Request&#34;, &#34;Response&#34;, &#34;Context&#34;, &#34;SourceType&#34;, &#34;start&#34;]</code></pre>
+__all__ = [
+    &#34;Trigger&#34;,
+    &#34;Response&#34;,
+    &#34;ResponseContext&#34;,
+    &#34;HttpResponseContext&#34;,
+    &#34;TopicResponseContext&#34;,
+    &#34;TriggerContext&#34;,
+    &#34;start&#34;,
+]</code></pre>
 </details>
 </section>
 <section>
@@ -60,11 +68,11 @@ __all__ = [&#34;Request&#34;, &#34;Response&#34;, &#34;Context&#34;, &#34;Source
 <dd>
 <div class="desc"></div>
 </dd>
-<dt><code class="name"><a title="nitric.faas.request" href="request.html">nitric.faas.request</a></code></dt>
+<dt><code class="name"><a title="nitric.faas.response" href="response.html">nitric.faas.response</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt><code class="name"><a title="nitric.faas.response" href="response.html">nitric.faas.response</a></code></dt>
+<dt><code class="name"><a title="nitric.faas.trigger" href="trigger.html">nitric.faas.trigger</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -76,7 +84,7 @@ __all__ = [&#34;Request&#34;, &#34;Response&#34;, &#34;Context&#34;, &#34;Source
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="nitric.faas.start"><code class="name flex">
-<span>def <span class="ident">start</span></span>(<span>func: Callable[[<a title="nitric.faas.request.Request" href="request.html#nitric.faas.request.Request">Request</a>], Union[<a title="nitric.faas.response.Response" href="response.html#nitric.faas.response.Response">Response</a>, str]])</span>
+<span>def <span class="ident">start</span></span>(<span>func: Callable[[<a title="nitric.faas.trigger.Trigger" href="trigger.html#nitric.faas.trigger.Trigger">Trigger</a>], Union[<a title="nitric.faas.response.Response" href="response.html#nitric.faas.response.Response">Response</a>, str]])</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Register the provided function as the request handler and starts handling new requests.</p>
@@ -85,7 +93,7 @@ __all__ = [&#34;Request&#34;, &#34;Response&#34;, &#34;Context&#34;, &#34;Source
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def start(func: Callable[[Request], Union[Response, str]]):
+<pre><code class="python">def start(func: Callable[[Trigger], Union[Response, str]]):
     &#34;&#34;&#34;
     Register the provided function as the request handler and starts handling new requests.
 
@@ -110,33 +118,299 @@ __all__ = [&#34;Request&#34;, &#34;Response&#34;, &#34;Context&#34;, &#34;Source
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="nitric.faas.Context"><code class="flex name class">
-<span>class <span class="ident">Context</span></span>
-<span>(</span><span>*, request_id: str = None, source: str = None, source_type: str = None, payload_type: str = None, **kwargs)</span>
+<dt id="nitric.faas.HttpResponseContext"><code class="flex name class">
+<span>class <span class="ident">HttpResponseContext</span></span>
+<span>(</span><span>headers: Dict[str, str] = None, status: int = 200)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Represents the contextual metadata for a Nitric function request.</p>
-<p>Construct a Nitric Request Content object.</p></div>
+<div class="desc"><p>Response context for triggers raised by a HTTP request.</p>
+<p>Create a HTTP response context.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Context(object):
-    &#34;&#34;&#34;Represents the contextual metadata for a Nitric function request.&#34;&#34;&#34;
+<pre><code class="python">class HttpResponseContext(object):
+    &#34;&#34;&#34;Response context for triggers raised by a HTTP request.&#34;&#34;&#34;
 
-    def __init__(
-        self, *, request_id: str = None, source: str = None, source_type: str = None, payload_type: str = None, **kwargs
-    ):
-        &#34;&#34;&#34;Construct a Nitric Request Content object.&#34;&#34;&#34;
-        self.request_id = request_id
-        self.source = source
-        self.source_type = source_type
-        self.payload_type = payload_type</code></pre>
+    def __init__(self, headers: Dict[str, str] = None, status: int = 200):
+        &#34;&#34;&#34;Create a HTTP response context.&#34;&#34;&#34;
+        if headers is None:
+            self.headers = {}
+        else:
+            self.headers = headers
+        self.status = status
+
+    def to_grpc_http_response_context(self) -&gt; faas_pb2.HttpResponseContext:
+        &#34;&#34;&#34;Translate a HTTP response context for on wire transport.&#34;&#34;&#34;
+        return faas_pb2.HttpResponseContext(headers=self.headers, status=self.status)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.faas.HttpResponseContext.to_grpc_http_response_context"><code class="name flex">
+<span>def <span class="ident">to_grpc_http_response_context</span></span>(<span>self) ‑> faas.v1.faas_pb2.HttpResponseContext</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Translate a HTTP response context for on wire transport.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_grpc_http_response_context(self) -&gt; faas_pb2.HttpResponseContext:
+    &#34;&#34;&#34;Translate a HTTP response context for on wire transport.&#34;&#34;&#34;
+    return faas_pb2.HttpResponseContext(headers=self.headers, status=self.status)</code></pre>
 </details>
 </dd>
-<dt id="nitric.faas.Request"><code class="flex name class">
-<span>class <span class="ident">Request</span></span>
-<span>(</span><span>headers: Dict[str, str], payload: bytes, path: str = '')</span>
+</dl>
+</dd>
+<dt id="nitric.faas.Response"><code class="flex name class">
+<span>class <span class="ident">Response</span></span>
+<span>(</span><span>context: <a title="nitric.faas.response.ResponseContext" href="response.html#nitric.faas.response.ResponseContext">ResponseContext</a>, data: bytes = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Nitric Function as a Service (FaaS) response class.</p>
+<p>Construct a new Nitric Response.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Response(object):
+    &#34;&#34;&#34;Nitric Function as a Service (FaaS) response class.&#34;&#34;&#34;
+
+    def __init__(
+        self,
+        context: ResponseContext,
+        data: Union[bytes] = None,
+    ):
+        &#34;&#34;&#34;Construct a new Nitric Response.&#34;&#34;&#34;
+        # FIXME: Fix typing of the status parameter, add tests
+        self.context = context
+        self.data = data
+
+    def to_grpc_trigger_response_context(self) -&gt; TriggerResponse:
+        &#34;&#34;&#34;Translate a response object ready for on the wire transport.&#34;&#34;&#34;
+        response = TriggerResponse(data=self.data)
+
+        if self.context.is_http():
+            ctx = self.context.as_http()
+            response.http.CopyFrom(ctx.to_grpc_http_response_context())
+        elif self.context.is_topic():
+            ctx = self.context.as_topic()
+            response.topic.CopyFrom(ctx.to_grpc_topic_response_context())
+
+        return response</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.faas.Response.to_grpc_trigger_response_context"><code class="name flex">
+<span>def <span class="ident">to_grpc_trigger_response_context</span></span>(<span>self) ‑> faas.v1.faas_pb2.TriggerResponse</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Translate a response object ready for on the wire transport.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_grpc_trigger_response_context(self) -&gt; TriggerResponse:
+    &#34;&#34;&#34;Translate a response object ready for on the wire transport.&#34;&#34;&#34;
+    response = TriggerResponse(data=self.data)
+
+    if self.context.is_http():
+        ctx = self.context.as_http()
+        response.http.CopyFrom(ctx.to_grpc_http_response_context())
+    elif self.context.is_topic():
+        ctx = self.context.as_topic()
+        response.topic.CopyFrom(ctx.to_grpc_topic_response_context())
+
+    return response</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.faas.ResponseContext"><code class="flex name class">
+<span>class <span class="ident">ResponseContext</span></span>
+<span>(</span><span>context: Union[<a title="nitric.faas.response.TopicResponseContext" href="response.html#nitric.faas.response.TopicResponseContext">TopicResponseContext</a>, <a title="nitric.faas.response.HttpResponseContext" href="response.html#nitric.faas.response.HttpResponseContext">HttpResponseContext</a>])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Wrapper for typed response context for triggers.</p>
+<p>Create a new response context wrapper.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ResponseContext(object):
+    &#34;&#34;&#34;Wrapper for typed response context for triggers.&#34;&#34;&#34;
+
+    def __init__(self, context: Union[TopicResponseContext, HttpResponseContext]):
+        &#34;&#34;&#34;Create a new response context wrapper.&#34;&#34;&#34;
+        self.context = context
+
+    def is_http(self):
+        &#34;&#34;&#34;
+        Determine if response is for a HTTP request.
+
+        :return true if context is for a HTTP request.
+        &#34;&#34;&#34;
+        return isinstance(self.context, HttpResponseContext)
+
+    def is_topic(self):
+        &#34;&#34;&#34;
+        Determine if response is for an event raised by a topic.
+
+        :return true if context is for a topic event.
+        &#34;&#34;&#34;
+        return isinstance(self.context, TopicResponseContext)
+
+    def as_http(self) -&gt; Union[HttpResponseContext, None]:
+        &#34;&#34;&#34;
+        Unwraps response context as Http response context.
+
+        :return HttpResponseContext if is_http is true otherwise return None
+        &#34;&#34;&#34;
+        if not self.is_http():
+            return None
+
+        return self.context
+
+    def as_topic(self) -&gt; Union[TopicResponseContext, None]:
+        &#34;&#34;&#34;
+        Unwraps response context as Topic response context.
+
+        :return TopicResponseContext if is_topic is true otherwise return None
+        &#34;&#34;&#34;
+        if not self.is_topic():
+            return None
+
+        return self.context</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.faas.ResponseContext.as_http"><code class="name flex">
+<span>def <span class="ident">as_http</span></span>(<span>self) ‑> Optional[<a title="nitric.faas.response.HttpResponseContext" href="response.html#nitric.faas.response.HttpResponseContext">HttpResponseContext</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Unwraps response context as Http response context.</p>
+<p>:return HttpResponseContext if is_http is true otherwise return None</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def as_http(self) -&gt; Union[HttpResponseContext, None]:
+    &#34;&#34;&#34;
+    Unwraps response context as Http response context.
+
+    :return HttpResponseContext if is_http is true otherwise return None
+    &#34;&#34;&#34;
+    if not self.is_http():
+        return None
+
+    return self.context</code></pre>
+</details>
+</dd>
+<dt id="nitric.faas.ResponseContext.as_topic"><code class="name flex">
+<span>def <span class="ident">as_topic</span></span>(<span>self) ‑> Optional[<a title="nitric.faas.response.TopicResponseContext" href="response.html#nitric.faas.response.TopicResponseContext">TopicResponseContext</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Unwraps response context as Topic response context.</p>
+<p>:return TopicResponseContext if is_topic is true otherwise return None</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def as_topic(self) -&gt; Union[TopicResponseContext, None]:
+    &#34;&#34;&#34;
+    Unwraps response context as Topic response context.
+
+    :return TopicResponseContext if is_topic is true otherwise return None
+    &#34;&#34;&#34;
+    if not self.is_topic():
+        return None
+
+    return self.context</code></pre>
+</details>
+</dd>
+<dt id="nitric.faas.ResponseContext.is_http"><code class="name flex">
+<span>def <span class="ident">is_http</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Determine if response is for a HTTP request.</p>
+<p>:return true if context is for a HTTP request.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_http(self):
+    &#34;&#34;&#34;
+    Determine if response is for a HTTP request.
+
+    :return true if context is for a HTTP request.
+    &#34;&#34;&#34;
+    return isinstance(self.context, HttpResponseContext)</code></pre>
+</details>
+</dd>
+<dt id="nitric.faas.ResponseContext.is_topic"><code class="name flex">
+<span>def <span class="ident">is_topic</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Determine if response is for an event raised by a topic.</p>
+<p>:return true if context is for a topic event.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_topic(self):
+    &#34;&#34;&#34;
+    Determine if response is for an event raised by a topic.
+
+    :return true if context is for a topic event.
+    &#34;&#34;&#34;
+    return isinstance(self.context, TopicResponseContext)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.faas.TopicResponseContext"><code class="flex name class">
+<span>class <span class="ident">TopicResponseContext</span></span>
+<span>(</span><span>success: bool = True)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Response context for triggers raised by a topic event.</p>
+<p>Create a Topic response context.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TopicResponseContext(object):
+    &#34;&#34;&#34;Response context for triggers raised by a topic event.&#34;&#34;&#34;
+
+    def __init__(self, success: bool = True):
+        &#34;&#34;&#34;Create a Topic response context.&#34;&#34;&#34;
+        self.success = success
+
+    def to_grpc_topic_response_context(self) -&gt; faas_pb2.TopicResponseContext:
+        &#34;&#34;&#34;Translate a topic response context for wire transport.&#34;&#34;&#34;
+        return faas_pb2.TopicResponseContext(success=self.success)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.faas.TopicResponseContext.to_grpc_topic_response_context"><code class="name flex">
+<span>def <span class="ident">to_grpc_topic_response_context</span></span>(<span>self) ‑> faas.v1.faas_pb2.TopicResponseContext</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Translate a topic response context for wire transport.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_grpc_topic_response_context(self) -&gt; faas_pb2.TopicResponseContext:
+    &#34;&#34;&#34;Translate a topic response context for wire transport.&#34;&#34;&#34;
+    return faas_pb2.TopicResponseContext(success=self.success)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.faas.Trigger"><code class="flex name class">
+<span>class <span class="ident">Trigger</span></span>
+<span>(</span><span>context: <a title="nitric.faas.trigger.TriggerContext" href="trigger.html#nitric.faas.trigger.TriggerContext">TriggerContext</a>, data: bytes)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Represents a standard Nitric function request.</p>
@@ -146,24 +420,21 @@ __all__ = [&#34;Request&#34;, &#34;Response&#34;, &#34;Context&#34;, &#34;Source
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Request(object):
+<pre><code class="python">class Trigger(object):
     &#34;&#34;&#34;
     Represents a standard Nitric function request.
 
     These requests are normalized from their original stack-specific structures.
     &#34;&#34;&#34;
 
-    def __init__(self, headers: typing.Dict[str, str], payload: bytes, path: str = &#34;&#34;):
+    def __init__(self, context: TriggerContext, data: bytes):
         &#34;&#34;&#34;Construct a Nitric Function Request.&#34;&#34;&#34;
-        # Map headers to context properties
-        context_props = {_clean_header(k): v for k, v in headers.items() if k.lower().startswith(&#34;x-nitric&#34;)}
-        self.context = Context(**context_props)
-        self.payload = payload
-        self.path = path
+        self.context = context
+        self.data = data
 
     def get_body(self) -&gt; bytes:
         &#34;&#34;&#34;Return the bytes of the body of the request.&#34;&#34;&#34;
-        return self.payload
+        return self.data
 
     def get_object(self) -&gt; dict:
         &#34;&#34;&#34;
@@ -175,11 +446,96 @@ __all__ = [&#34;Request&#34;, &#34;Response&#34;, &#34;Context&#34;, &#34;Source
         &#34;&#34;&#34;
         import json
 
-        return json.loads(self.payload)</code></pre>
+        return json.loads(self.data)
+
+    def default_response(self) -&gt; Response:
+        &#34;&#34;&#34;
+        Create a relevant default response.
+
+        The returned response can be interrogated with its context to determine the appropriate
+        response context e.g. response.context.is_http() or response.context.is_topic().
+
+        :returns Default response for this Trigger
+        &#34;&#34;&#34;
+        response_ctx = None
+
+        if self.context.is_http():
+            response_ctx = ResponseContext(context=HttpResponseContext())
+        elif self.context.is_topic():
+            response_ctx = ResponseContext(context=TopicResponseContext())
+
+        return Response(data=None, context=response_ctx)
+
+    @staticmethod
+    def from_trigger_request(trigger_request: TriggerRequest):
+        &#34;&#34;&#34;
+        Create a Trigger from a gRPC TriggerRequest.
+
+        :returns Created Trigger
+        &#34;&#34;&#34;
+        context = TriggerContext.from_trigger_request(trigger_request)
+
+        return Trigger(context=context, data=trigger_request.data)</code></pre>
 </details>
+<h3>Static methods</h3>
+<dl>
+<dt id="nitric.faas.Trigger.from_trigger_request"><code class="name flex">
+<span>def <span class="ident">from_trigger_request</span></span>(<span>trigger_request: faas.v1.faas_pb2.TriggerRequest)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a Trigger from a gRPC TriggerRequest.</p>
+<p>:returns Created Trigger</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def from_trigger_request(trigger_request: TriggerRequest):
+    &#34;&#34;&#34;
+    Create a Trigger from a gRPC TriggerRequest.
+
+    :returns Created Trigger
+    &#34;&#34;&#34;
+    context = TriggerContext.from_trigger_request(trigger_request)
+
+    return Trigger(context=context, data=trigger_request.data)</code></pre>
+</details>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
-<dt id="nitric.faas.Request.get_body"><code class="name flex">
+<dt id="nitric.faas.Trigger.default_response"><code class="name flex">
+<span>def <span class="ident">default_response</span></span>(<span>self) ‑> <a title="nitric.faas.response.Response" href="response.html#nitric.faas.response.Response">Response</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a relevant default response.</p>
+<p>The returned response can be interrogated with its context to determine the appropriate
+response context e.g. response.context.is_http() or response.context.is_topic().</p>
+<p>:returns Default response for this Trigger</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def default_response(self) -&gt; Response:
+    &#34;&#34;&#34;
+    Create a relevant default response.
+
+    The returned response can be interrogated with its context to determine the appropriate
+    response context e.g. response.context.is_http() or response.context.is_topic().
+
+    :returns Default response for this Trigger
+    &#34;&#34;&#34;
+    response_ctx = None
+
+    if self.context.is_http():
+        response_ctx = ResponseContext(context=HttpResponseContext())
+    elif self.context.is_topic():
+        response_ctx = ResponseContext(context=TopicResponseContext())
+
+    return Response(data=None, context=response_ctx)</code></pre>
+</details>
+</dd>
+<dt id="nitric.faas.Trigger.get_body"><code class="name flex">
 <span>def <span class="ident">get_body</span></span>(<span>self) ‑> bytes</span>
 </code></dt>
 <dd>
@@ -190,10 +546,10 @@ __all__ = [&#34;Request&#34;, &#34;Response&#34;, &#34;Context&#34;, &#34;Source
 </summary>
 <pre><code class="python">def get_body(self) -&gt; bytes:
     &#34;&#34;&#34;Return the bytes of the body of the request.&#34;&#34;&#34;
-    return self.payload</code></pre>
+    return self.data</code></pre>
 </details>
 </dd>
-<dt id="nitric.faas.Request.get_object"><code class="name flex">
+<dt id="nitric.faas.Trigger.get_object"><code class="name flex">
 <span>def <span class="ident">get_object</span></span>(<span>self) ‑> dict</span>
 </code></dt>
 <dd>
@@ -214,71 +570,210 @@ __all__ = [&#34;Request&#34;, &#34;Response&#34;, &#34;Context&#34;, &#34;Source
     &#34;&#34;&#34;
     import json
 
-    return json.loads(self.payload)</code></pre>
+    return json.loads(self.data)</code></pre>
 </details>
 </dd>
 </dl>
 </dd>
-<dt id="nitric.faas.Response"><code class="flex name class">
-<span>class <span class="ident">Response</span></span>
-<span>(</span><span>body=None, status: Union[int, http.HTTPStatus] = HTTPStatus.OK, headers: dict = None)</span>
+<dt id="nitric.faas.TriggerContext"><code class="flex name class">
+<span>class <span class="ident">TriggerContext</span></span>
+<span>(</span><span>context: Union[<a title="nitric.faas.trigger.TopicTriggerContext" href="trigger.html#nitric.faas.trigger.TopicTriggerContext">TopicTriggerContext</a>, <a title="nitric.faas.trigger.HttpTriggerContext" href="trigger.html#nitric.faas.trigger.HttpTriggerContext">HttpTriggerContext</a>])</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Nitric Function as a Service (FaaS) response class.</p>
-<p>Construct a new Nitric Response.</p></div>
+<div class="desc"><p>Represents the contextual metadata for a Nitric function request.</p>
+<p>Construct a Nitric Trigger Context.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Response(object):
-    &#34;&#34;&#34;Nitric Function as a Service (FaaS) response class.&#34;&#34;&#34;
+<pre><code class="python">class TriggerContext(object):
+    &#34;&#34;&#34;Represents the contextual metadata for a Nitric function request.&#34;&#34;&#34;
 
-    def __init__(
-        self,
-        body=None,
-        status: Union[int, HTTPStatus] = HTTPStatus.OK,
-        headers: dict = None,
-    ):
-        &#34;&#34;&#34;Construct a new Nitric Response.&#34;&#34;&#34;
-        # FIXME: Fix typing of the status parameter, add tests
-        if headers is None:
-            headers = {}
-        if body is None:
-            body = &#34;&#34;
-        self.status = status
-        self.headers = headers
-        self.body = body</code></pre>
-</details>
-</dd>
-<dt id="nitric.faas.SourceType"><code class="flex name class">
-<span>class <span class="ident">SourceType</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>The type of the source of an event.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class SourceType(Enum):
-    &#34;&#34;&#34;The type of the source of an event.&#34;&#34;&#34;
+    def __init__(self, context: typing.Union[TopicTriggerContext, HttpTriggerContext]):
+        &#34;&#34;&#34;Construct a Nitric Trigger Context.&#34;&#34;&#34;
+        self.context = context
 
-    SUBSCRIPTION = &#34;subscription&#34;
-    REQUEST = &#34;request&#34;</code></pre>
+    def is_http(self) -&gt; bool:
+        &#34;&#34;&#34;
+        Determine if trigger was raised by a http request.
+
+        :return true if trigger was raised by a HTTP request
+        &#34;&#34;&#34;
+        return isinstance(self.context, HttpTriggerContext)
+
+    def as_http(self) -&gt; typing.Union[HttpTriggerContext, None]:
+        &#34;&#34;&#34;
+        Unwrap HttpTriggerContext.
+
+        :return HttpTriggerContext if is_http is true otherwise None
+        &#34;&#34;&#34;
+        if not self.is_http():
+            return None
+
+        return self.context
+
+    def is_topic(self) -&gt; bool:
+        &#34;&#34;&#34;
+        Determine if trigger was raised by a topic event.
+
+        :return true if trigger is for a topic event
+        &#34;&#34;&#34;
+        return isinstance(self.context, TriggerContext)
+
+    def as_topic(self) -&gt; typing.Union[TopicTriggerContext, None]:
+        &#34;&#34;&#34;
+        Unwrap TopicTriggerContext.
+
+        :return TopicTriggerContext if is_topic is true otherwise None
+        &#34;&#34;&#34;
+        if not self.is_topic():
+            return None
+
+        return self.context
+
+    @staticmethod
+    def from_trigger_request(trigger_request: TriggerRequest):
+        &#34;&#34;&#34;
+        Create a TriggerContext from a gRPC TriggerRequest.
+
+        :return Created TriggerContext
+        &#34;&#34;&#34;
+        if trigger_request.http is not None:
+            return TriggerContext(
+                context=HttpTriggerContext(
+                    headers=trigger_request.http.headers,
+                    path=trigger_request.http.path,
+                    method=trigger_request.http.method,
+                    query_params=trigger_request.http.query_params,
+                )
+            )
+        elif trigger_request.topic is not None:
+            return TriggerContext(context=TopicTriggerContext(topic=trigger_request.topic.topic))
+        else:
+            # We have an error
+            # should probably raise an exception
+            return None</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>enum.Enum</li>
-</ul>
-<h3>Class variables</h3>
+<h3>Static methods</h3>
 <dl>
-<dt id="nitric.faas.SourceType.REQUEST"><code class="name">var <span class="ident">REQUEST</span></code></dt>
+<dt id="nitric.faas.TriggerContext.from_trigger_request"><code class="name flex">
+<span>def <span class="ident">from_trigger_request</span></span>(<span>trigger_request: faas.v1.faas_pb2.TriggerRequest)</span>
+</code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Create a TriggerContext from a gRPC TriggerRequest.</p>
+<p>:return Created TriggerContext</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def from_trigger_request(trigger_request: TriggerRequest):
+    &#34;&#34;&#34;
+    Create a TriggerContext from a gRPC TriggerRequest.
+
+    :return Created TriggerContext
+    &#34;&#34;&#34;
+    if trigger_request.http is not None:
+        return TriggerContext(
+            context=HttpTriggerContext(
+                headers=trigger_request.http.headers,
+                path=trigger_request.http.path,
+                method=trigger_request.http.method,
+                query_params=trigger_request.http.query_params,
+            )
+        )
+    elif trigger_request.topic is not None:
+        return TriggerContext(context=TopicTriggerContext(topic=trigger_request.topic.topic))
+    else:
+        # We have an error
+        # should probably raise an exception
+        return None</code></pre>
+</details>
 </dd>
-<dt id="nitric.faas.SourceType.SUBSCRIPTION"><code class="name">var <span class="ident">SUBSCRIPTION</span></code></dt>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.faas.TriggerContext.as_http"><code class="name flex">
+<span>def <span class="ident">as_http</span></span>(<span>self) ‑> Optional[<a title="nitric.faas.trigger.HttpTriggerContext" href="trigger.html#nitric.faas.trigger.HttpTriggerContext">HttpTriggerContext</a>]</span>
+</code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Unwrap HttpTriggerContext.</p>
+<p>:return HttpTriggerContext if is_http is true otherwise None</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def as_http(self) -&gt; typing.Union[HttpTriggerContext, None]:
+    &#34;&#34;&#34;
+    Unwrap HttpTriggerContext.
+
+    :return HttpTriggerContext if is_http is true otherwise None
+    &#34;&#34;&#34;
+    if not self.is_http():
+        return None
+
+    return self.context</code></pre>
+</details>
+</dd>
+<dt id="nitric.faas.TriggerContext.as_topic"><code class="name flex">
+<span>def <span class="ident">as_topic</span></span>(<span>self) ‑> Optional[<a title="nitric.faas.trigger.TopicTriggerContext" href="trigger.html#nitric.faas.trigger.TopicTriggerContext">TopicTriggerContext</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Unwrap TopicTriggerContext.</p>
+<p>:return TopicTriggerContext if is_topic is true otherwise None</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def as_topic(self) -&gt; typing.Union[TopicTriggerContext, None]:
+    &#34;&#34;&#34;
+    Unwrap TopicTriggerContext.
+
+    :return TopicTriggerContext if is_topic is true otherwise None
+    &#34;&#34;&#34;
+    if not self.is_topic():
+        return None
+
+    return self.context</code></pre>
+</details>
+</dd>
+<dt id="nitric.faas.TriggerContext.is_http"><code class="name flex">
+<span>def <span class="ident">is_http</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Determine if trigger was raised by a http request.</p>
+<p>:return true if trigger was raised by a HTTP request</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_http(self) -&gt; bool:
+    &#34;&#34;&#34;
+    Determine if trigger was raised by a http request.
+
+    :return true if trigger was raised by a HTTP request
+    &#34;&#34;&#34;
+    return isinstance(self.context, HttpTriggerContext)</code></pre>
+</details>
+</dd>
+<dt id="nitric.faas.TriggerContext.is_topic"><code class="name flex">
+<span>def <span class="ident">is_topic</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Determine if trigger was raised by a topic event.</p>
+<p>:return true if trigger is for a topic event</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_topic(self) -&gt; bool:
+    &#34;&#34;&#34;
+    Determine if trigger was raised by a topic event.
+
+    :return true if trigger is for a topic event
+    &#34;&#34;&#34;
+    return isinstance(self.context, TriggerContext)</code></pre>
+</details>
 </dd>
 </dl>
 </dd>
@@ -299,8 +794,8 @@ __all__ = [&#34;Request&#34;, &#34;Response&#34;, &#34;Context&#34;, &#34;Source
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
 <li><code><a title="nitric.faas.faas" href="faas.html">nitric.faas.faas</a></code></li>
-<li><code><a title="nitric.faas.request" href="request.html">nitric.faas.request</a></code></li>
 <li><code><a title="nitric.faas.response" href="response.html">nitric.faas.response</a></code></li>
+<li><code><a title="nitric.faas.trigger" href="trigger.html">nitric.faas.trigger</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
@@ -311,23 +806,49 @@ __all__ = [&#34;Request&#34;, &#34;Response&#34;, &#34;Context&#34;, &#34;Source
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="nitric.faas.Context" href="#nitric.faas.Context">Context</a></code></h4>
-</li>
-<li>
-<h4><code><a title="nitric.faas.Request" href="#nitric.faas.Request">Request</a></code></h4>
+<h4><code><a title="nitric.faas.HttpResponseContext" href="#nitric.faas.HttpResponseContext">HttpResponseContext</a></code></h4>
 <ul class="">
-<li><code><a title="nitric.faas.Request.get_body" href="#nitric.faas.Request.get_body">get_body</a></code></li>
-<li><code><a title="nitric.faas.Request.get_object" href="#nitric.faas.Request.get_object">get_object</a></code></li>
+<li><code><a title="nitric.faas.HttpResponseContext.to_grpc_http_response_context" href="#nitric.faas.HttpResponseContext.to_grpc_http_response_context">to_grpc_http_response_context</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="nitric.faas.Response" href="#nitric.faas.Response">Response</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.faas.Response.to_grpc_trigger_response_context" href="#nitric.faas.Response.to_grpc_trigger_response_context">to_grpc_trigger_response_context</a></code></li>
+</ul>
 </li>
 <li>
-<h4><code><a title="nitric.faas.SourceType" href="#nitric.faas.SourceType">SourceType</a></code></h4>
+<h4><code><a title="nitric.faas.ResponseContext" href="#nitric.faas.ResponseContext">ResponseContext</a></code></h4>
 <ul class="">
-<li><code><a title="nitric.faas.SourceType.REQUEST" href="#nitric.faas.SourceType.REQUEST">REQUEST</a></code></li>
-<li><code><a title="nitric.faas.SourceType.SUBSCRIPTION" href="#nitric.faas.SourceType.SUBSCRIPTION">SUBSCRIPTION</a></code></li>
+<li><code><a title="nitric.faas.ResponseContext.as_http" href="#nitric.faas.ResponseContext.as_http">as_http</a></code></li>
+<li><code><a title="nitric.faas.ResponseContext.as_topic" href="#nitric.faas.ResponseContext.as_topic">as_topic</a></code></li>
+<li><code><a title="nitric.faas.ResponseContext.is_http" href="#nitric.faas.ResponseContext.is_http">is_http</a></code></li>
+<li><code><a title="nitric.faas.ResponseContext.is_topic" href="#nitric.faas.ResponseContext.is_topic">is_topic</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.faas.TopicResponseContext" href="#nitric.faas.TopicResponseContext">TopicResponseContext</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.faas.TopicResponseContext.to_grpc_topic_response_context" href="#nitric.faas.TopicResponseContext.to_grpc_topic_response_context">to_grpc_topic_response_context</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.faas.Trigger" href="#nitric.faas.Trigger">Trigger</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.faas.Trigger.default_response" href="#nitric.faas.Trigger.default_response">default_response</a></code></li>
+<li><code><a title="nitric.faas.Trigger.from_trigger_request" href="#nitric.faas.Trigger.from_trigger_request">from_trigger_request</a></code></li>
+<li><code><a title="nitric.faas.Trigger.get_body" href="#nitric.faas.Trigger.get_body">get_body</a></code></li>
+<li><code><a title="nitric.faas.Trigger.get_object" href="#nitric.faas.Trigger.get_object">get_object</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.faas.TriggerContext" href="#nitric.faas.TriggerContext">TriggerContext</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.faas.TriggerContext.as_http" href="#nitric.faas.TriggerContext.as_http">as_http</a></code></li>
+<li><code><a title="nitric.faas.TriggerContext.as_topic" href="#nitric.faas.TriggerContext.as_topic">as_topic</a></code></li>
+<li><code><a title="nitric.faas.TriggerContext.from_trigger_request" href="#nitric.faas.TriggerContext.from_trigger_request">from_trigger_request</a></code></li>
+<li><code><a title="nitric.faas.TriggerContext.is_http" href="#nitric.faas.TriggerContext.is_http">is_http</a></code></li>
+<li><code><a title="nitric.faas.TriggerContext.is_topic" href="#nitric.faas.TriggerContext.is_topic">is_topic</a></code></li>
 </ul>
 </li>
 </ul>

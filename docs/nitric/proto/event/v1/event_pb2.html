@@ -66,9 +66,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name=&#39;event/v1/event.proto&#39;,
   package=&#39;nitric.event.v1&#39;,
   syntax=&#39;proto3&#39;,
-  serialized_options=b&#39;\n\030io.nitric.proto.event.v1B\005EventP\001Z\014nitric/v1;v1\252\002\025Nitric.Proto.Event.v1\312\002\025Nitric\\Proto\\Event\\V1&#39;,
+  serialized_options=b&#39;\n\030io.nitric.proto.event.v1B\006EventsP\001Z\014nitric/v1;v1\252\002\025Nitric.Proto.Event.v1\312\002\025Nitric\\Proto\\Event\\V1&#39;,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b&#39;\n\x14\x65vent/v1/event.proto\x12\x0fnitric.event.v1\x1a\x1cgoogle/protobuf/struct.proto\&#34;Q\n\x13\x45ventPublishRequest\x12\r\n\x05topic\x18\x01 \x01(\t\x12+\n\x05\x65vent\x18\x02 \x01(\x0b\x32\x1c.nitric.event.v1.NitricEvent\&#34;\x16\n\x14\x45ventPublishResponse\&#34;\x12\n\x10TopicListRequest\&#34;A\n\x11TopicListResponse\x12,\n\x06topics\x18\x01 \x03(\x0b\x32\x1c.nitric.event.v1.NitricTopic\&#34;\x1b\n\x0bNitricTopic\x12\x0c\n\x04name\x18\x01 \x01(\t\&#34;X\n\x0bNitricEvent\x12\n\n\x02id\x18\x01 \x01(\t\x12\x13\n\x0bpayloadType\x18\x02 \x01(\t\x12(\n\x07payload\x18\x03 \x01(\x0b\x32\x17.google.protobuf.Struct2_\n\x05\x45vent\x12V\n\x07Publish\x12$.nitric.event.v1.EventPublishRequest\x1a%.nitric.event.v1.EventPublishResponse2V\n\x05Topic\x12M\n\x04List\x12!.nitric.event.v1.TopicListRequest\x1a\&#34;.nitric.event.v1.TopicListResponseBa\n\x18io.nitric.proto.event.v1B\x05\x45ventP\x01Z\x0cnitric/v1;v1\xaa\x02\x15Nitric.Proto.Event.v1\xca\x02\x15Nitric\\Proto\\Event\\V1b\x06proto3&#39;
+  serialized_pb=b&#39;\n\x14\x65vent/v1/event.proto\x12\x0fnitric.event.v1\x1a\x1cgoogle/protobuf/struct.proto\&#34;Q\n\x13\x45ventPublishRequest\x12\r\n\x05topic\x18\x01 \x01(\t\x12+\n\x05\x65vent\x18\x02 \x01(\x0b\x32\x1c.nitric.event.v1.NitricEvent\&#34;\&#34;\n\x14\x45ventPublishResponse\x12\n\n\x02id\x18\x01 \x01(\t\&#34;\x12\n\x10TopicListRequest\&#34;A\n\x11TopicListResponse\x12,\n\x06topics\x18\x01 \x03(\x0b\x32\x1c.nitric.event.v1.NitricTopic\&#34;\x1b\n\x0bNitricTopic\x12\x0c\n\x04name\x18\x01 \x01(\t\&#34;Y\n\x0bNitricEvent\x12\n\n\x02id\x18\x01 \x01(\t\x12\x14\n\x0cpayload_type\x18\x02 \x01(\t\x12(\n\x07payload\x18\x03 \x01(\x0b\x32\x17.google.protobuf.Struct2_\n\x05\x45vent\x12V\n\x07Publish\x12$.nitric.event.v1.EventPublishRequest\x1a%.nitric.event.v1.EventPublishResponse2V\n\x05Topic\x12M\n\x04List\x12!.nitric.event.v1.TopicListRequest\x1a\&#34;.nitric.event.v1.TopicListResponseBb\n\x18io.nitric.proto.event.v1B\x06\x45ventsP\x01Z\x0cnitric/v1;v1\xaa\x02\x15Nitric.Proto.Event.v1\xca\x02\x15Nitric\\Proto\\Event\\V1b\x06proto3&#39;
   ,
   dependencies=[google_dot_protobuf_dot_struct__pb2.DESCRIPTOR,])
 
@@ -122,6 +122,13 @@ _EVENTPUBLISHRESPONSE = _descriptor.Descriptor(
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
+    _descriptor.FieldDescriptor(
+      name=&#39;id&#39;, full_name=&#39;nitric.event.v1.EventPublishResponse.id&#39;, index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b&#34;&#34;.decode(&#39;utf-8&#39;),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -135,7 +142,7 @@ _EVENTPUBLISHRESPONSE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=154,
-  serialized_end=176,
+  serialized_end=188,
 )
 
 
@@ -159,8 +166,8 @@ _TOPICLISTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=178,
-  serialized_end=196,
+  serialized_start=190,
+  serialized_end=208,
 )
 
 
@@ -191,8 +198,8 @@ _TOPICLISTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=198,
-  serialized_end=263,
+  serialized_start=210,
+  serialized_end=275,
 )
 
 
@@ -223,8 +230,8 @@ _NITRICTOPIC = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=265,
-  serialized_end=292,
+  serialized_start=277,
+  serialized_end=304,
 )
 
 
@@ -244,7 +251,7 @@ _NITRICEVENT = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name=&#39;payloadType&#39;, full_name=&#39;nitric.event.v1.NitricEvent.payloadType&#39;, index=1,
+      name=&#39;payload_type&#39;, full_name=&#39;nitric.event.v1.NitricEvent.payload_type&#39;, index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b&#34;&#34;.decode(&#39;utf-8&#39;),
       message_type=None, enum_type=None, containing_type=None,
@@ -269,8 +276,8 @@ _NITRICEVENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=294,
-  serialized_end=382,
+  serialized_start=306,
+  serialized_end=395,
 )
 
 _EVENTPUBLISHREQUEST.fields_by_name[&#39;event&#39;].message_type = _NITRICEVENT
@@ -336,8 +343,8 @@ _EVENT = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=384,
-  serialized_end=479,
+  serialized_start=397,
+  serialized_end=492,
   methods=[
   _descriptor.MethodDescriptor(
     name=&#39;Publish&#39;,
@@ -362,8 +369,8 @@ _TOPIC = _descriptor.ServiceDescriptor(
   index=1,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=481,
-  serialized_end=567,
+  serialized_start=494,
+  serialized_end=580,
   methods=[
   _descriptor.MethodDescriptor(
     name=&#39;List&#39;,
@@ -394,13 +401,16 @@ DESCRIPTOR.services_by_name[&#39;Topic&#39;] = _TOPIC
 <dl>
 <dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest"><code class="flex name class">
 <span>class <span class="ident">EventPublishRequest</span></span>
-<span>(</span><span>*args, **kwargs)</span>
+<span>(</span><span>**kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A ProtocolMessage</p></div>
+<div class="desc"><p>Abstract base class for protocol messages.</p>
+<p>Protocol message classes are almost always generated by the protocol
+compiler.
+These generated types subclass Message and implement the methods
+shown below.</p></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>google.protobuf.pyext._message.CMessage</li>
 <li>google.protobuf.message.Message</li>
 </ul>
 <h3>Class variables</h3>
@@ -409,28 +419,565 @@ DESCRIPTOR.services_by_name[&#39;Topic&#39;] = _TOPIC
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.EVENT_FIELD_NUMBER"><code class="name">var <span class="ident">EVENT_FIELD_NUMBER</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.TOPIC_FIELD_NUMBER"><code class="name">var <span class="ident">TOPIC_FIELD_NUMBER</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.FromString"><code class="name flex">
+<span>def <span class="ident">FromString</span></span>(<span>s)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def FromString(s):
+  message = cls()
+  message.MergeFromString(s)
+  return message</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.RegisterExtension"><code class="name flex">
+<span>def <span class="ident">RegisterExtension</span></span>(<span>extension_handle)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def RegisterExtension(extension_handle):
+  extension_handle.containing_type = cls.DESCRIPTOR
+  # TODO(amauryfa): Use cls.MESSAGE_FACTORY.pool when available.
+  # pylint: disable=protected-access
+  cls.DESCRIPTOR.file.pool._AddExtensionDescriptor(extension_handle)
+  _AttachFieldHelpers(cls, extension_handle)</code></pre>
+</details>
+</dd>
 </dl>
 <h3>Instance variables</h3>
 <dl>
 <dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.event"><code class="name">var <span class="ident">event</span></code></dt>
 <dd>
-<div class="desc"><p>Field nitric.event.v1.EventPublishRequest.event</p></div>
+<div class="desc"><p>Getter for event.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getter(self):
+  field_value = self._fields.get(field)
+  if field_value is None:
+    # Construct a new object to represent this field.
+    field_value = field._default_constructor(self)
+
+    # Atomically check if another thread has preempted us and, if not, swap
+    # in the new object we just created.  If someone has preempted us, we
+    # take that object and discard ours.
+    # WARNING:  We are relying on setdefault() being atomic.  This is true
+    #   in CPython but we haven&#39;t investigated others.  This warning appears
+    #   in several other locations in this file.
+    field_value = self._fields.setdefault(field, field_value)
+  return field_value</code></pre>
+</details>
 </dd>
 <dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.topic"><code class="name">var <span class="ident">topic</span></code></dt>
 <dd>
-<div class="desc"><p>Field nitric.event.v1.EventPublishRequest.topic</p></div>
+<div class="desc"><p>Getter for topic.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getter(self):
+  # TODO(protobuf-team): This may be broken since there may not be
+  # default_value.  Combine with has_default_value somehow.
+  return self._fields.get(field, default_value)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.ByteSize"><code class="name flex">
+<span>def <span class="ident">ByteSize</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ByteSize(self):
+  if not self._cached_byte_size_dirty:
+    return self._cached_byte_size
+
+  size = 0
+  descriptor = self.DESCRIPTOR
+  if descriptor.GetOptions().map_entry:
+    # Fields of map entry should always be serialized.
+    size = descriptor.fields_by_name[&#39;key&#39;]._sizer(self.key)
+    size += descriptor.fields_by_name[&#39;value&#39;]._sizer(self.value)
+  else:
+    for field_descriptor, field_value in self.ListFields():
+      size += field_descriptor._sizer(field_value)
+    for tag_bytes, value_bytes in self._unknown_fields:
+      size += len(tag_bytes) + len(value_bytes)
+
+  self._cached_byte_size = size
+  self._cached_byte_size_dirty = False
+  self._listener_for_children.dirty = False
+  return size</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.Clear"><code class="name flex">
+<span>def <span class="ident">Clear</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def _Clear(self):
+  # Clear fields.
+  self._fields = {}
+  self._unknown_fields = ()
+  # pylint: disable=protected-access
+  if self._unknown_field_set is not None:
+    self._unknown_field_set._clear()
+    self._unknown_field_set = None
+
+  self._oneofs = {}
+  self._Modified()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.ClearField"><code class="name flex">
+<span>def <span class="ident">ClearField</span></span>(<span>self, field_name)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ClearField(self, field_name):
+  try:
+    field = message_descriptor.fields_by_name[field_name]
+  except KeyError:
+    try:
+      field = message_descriptor.oneofs_by_name[field_name]
+      if field in self._oneofs:
+        field = self._oneofs[field]
+      else:
+        return
+    except KeyError:
+      raise ValueError(&#39;Protocol message %s has no &#34;%s&#34; field.&#39; %
+                       (message_descriptor.name, field_name))
+
+  if field in self._fields:
+    # To match the C++ implementation, we need to invalidate iterators
+    # for map fields when ClearField() happens.
+    if hasattr(self._fields[field], &#39;InvalidateIterators&#39;):
+      self._fields[field].InvalidateIterators()
+
+    # Note:  If the field is a sub-message, its listener will still point
+    #   at us.  That&#39;s fine, because the worst than can happen is that it
+    #   will call _Modified() and invalidate our byte size.  Big deal.
+    del self._fields[field]
+
+    if self._oneofs.get(field.containing_oneof, None) is field:
+      del self._oneofs[field.containing_oneof]
+
+  # Always call _Modified() -- even if nothing was changed, this is
+  # a mutating method, and thus calling it should cause the field to become
+  # present in the parent message.
+  self._Modified()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.DiscardUnknownFields"><code class="name flex">
+<span>def <span class="ident">DiscardUnknownFields</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def _DiscardUnknownFields(self):
+  self._unknown_fields = []
+  self._unknown_field_set = None      # pylint: disable=protected-access
+  for field, value in self.ListFields():
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      if _IsMapField(field):
+        if _IsMessageMapField(field):
+          for key in value:
+            value[key].DiscardUnknownFields()
+      elif field.label == _FieldDescriptor.LABEL_REPEATED:
+        for sub_message in value:
+          sub_message.DiscardUnknownFields()
+      else:
+        value.DiscardUnknownFields()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.FindInitializationErrors"><code class="name flex">
+<span>def <span class="ident">FindInitializationErrors</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Finds required fields which are not initialized.</p>
+<h2 id="returns">Returns</h2>
+<p>A list of strings.
+Each string is a path to an uninitialized field from
+the top-level message, e.g. "foo.bar[5].baz".</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def FindInitializationErrors(self):
+  &#34;&#34;&#34;Finds required fields which are not initialized.
+
+  Returns:
+    A list of strings.  Each string is a path to an uninitialized field from
+    the top-level message, e.g. &#34;foo.bar[5].baz&#34;.
+  &#34;&#34;&#34;
+
+  errors = []  # simplify things
+
+  for field in required_fields:
+    if not self.HasField(field.name):
+      errors.append(field.name)
+
+  for field, value in self.ListFields():
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      if field.is_extension:
+        name = &#39;(%s)&#39; % field.full_name
+      else:
+        name = field.name
+
+      if _IsMapField(field):
+        if _IsMessageMapField(field):
+          for key in value:
+            element = value[key]
+            prefix = &#39;%s[%s].&#39; % (name, key)
+            sub_errors = element.FindInitializationErrors()
+            errors += [prefix + error for error in sub_errors]
+        else:
+          # ScalarMaps can&#39;t have any initialization errors.
+          pass
+      elif field.label == _FieldDescriptor.LABEL_REPEATED:
+        for i in range(len(value)):
+          element = value[i]
+          prefix = &#39;%s[%d].&#39; % (name, i)
+          sub_errors = element.FindInitializationErrors()
+          errors += [prefix + error for error in sub_errors]
+      else:
+        prefix = name + &#39;.&#39;
+        sub_errors = value.FindInitializationErrors()
+        errors += [prefix + error for error in sub_errors]
+
+  return errors</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.HasField"><code class="name flex">
+<span>def <span class="ident">HasField</span></span>(<span>self, field_name)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def HasField(self, field_name):
+  try:
+    field = hassable_fields[field_name]
+  except KeyError:
+    raise ValueError(error_msg % (message_descriptor.full_name, field_name))
+
+  if isinstance(field, descriptor_mod.OneofDescriptor):
+    try:
+      return HasField(self, self._oneofs[field].name)
+    except KeyError:
+      return False
+  else:
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      value = self._fields.get(field)
+      return value is not None and value._is_present_in_parent
+    else:
+      return field in self._fields</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.IsInitialized"><code class="name flex">
+<span>def <span class="ident">IsInitialized</span></span>(<span>self, errors=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Checks if all required fields of a message are set.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>errors</code></strong></dt>
+<dd>A list which, if provided, will be populated with the field
+paths of all missing required fields.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>True iff the specified message has all required fields set.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def IsInitialized(self, errors=None):
+  &#34;&#34;&#34;Checks if all required fields of a message are set.
+
+  Args:
+    errors:  A list which, if provided, will be populated with the field
+             paths of all missing required fields.
+
+  Returns:
+    True iff the specified message has all required fields set.
+  &#34;&#34;&#34;
+
+  # Performance is critical so we avoid HasField() and ListFields().
+
+  for field in required_fields:
+    if (field not in self._fields or
+        (field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE and
+         not self._fields[field]._is_present_in_parent)):
+      if errors is not None:
+        errors.extend(self.FindInitializationErrors())
+      return False
+
+  for field, value in list(self._fields.items()):  # dict can change size!
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      if field.label == _FieldDescriptor.LABEL_REPEATED:
+        if (field.message_type.has_options and
+            field.message_type.GetOptions().map_entry):
+          continue
+        for element in value:
+          if not element.IsInitialized():
+            if errors is not None:
+              errors.extend(self.FindInitializationErrors())
+            return False
+      elif value._is_present_in_parent and not value.IsInitialized():
+        if errors is not None:
+          errors.extend(self.FindInitializationErrors())
+        return False
+
+  return True</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.ListFields"><code class="name flex">
+<span>def <span class="ident">ListFields</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ListFields(self):
+  all_fields = [item for item in self._fields.items() if _IsPresent(item)]
+  all_fields.sort(key = lambda item: item[0].number)
+  return all_fields</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.MergeFrom"><code class="name flex">
+<span>def <span class="ident">MergeFrom</span></span>(<span>self, msg)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def MergeFrom(self, msg):
+  if not isinstance(msg, cls):
+    raise TypeError(
+        &#39;Parameter to MergeFrom() must be instance of same class: &#39;
+        &#39;expected %s got %s.&#39; % (cls.__name__, msg.__class__.__name__))
+
+  assert msg is not self
+  self._Modified()
+
+  fields = self._fields
+
+  for field, value in msg._fields.items():
+    if field.label == LABEL_REPEATED:
+      field_value = fields.get(field)
+      if field_value is None:
+        # Construct a new object to represent this field.
+        field_value = field._default_constructor(self)
+        fields[field] = field_value
+      field_value.MergeFrom(value)
+    elif field.cpp_type == CPPTYPE_MESSAGE:
+      if value._is_present_in_parent:
+        field_value = fields.get(field)
+        if field_value is None:
+          # Construct a new object to represent this field.
+          field_value = field._default_constructor(self)
+          fields[field] = field_value
+        field_value.MergeFrom(value)
+    else:
+      self._fields[field] = value
+      if field.containing_oneof:
+        self._UpdateOneofState(field)
+
+  if msg._unknown_fields:
+    if not self._unknown_fields:
+      self._unknown_fields = []
+    self._unknown_fields.extend(msg._unknown_fields)
+    # pylint: disable=protected-access
+    if self._unknown_field_set is None:
+      self._unknown_field_set = containers.UnknownFieldSet()
+    self._unknown_field_set._extend(msg._unknown_field_set)</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.MergeFromString"><code class="name flex">
+<span>def <span class="ident">MergeFromString</span></span>(<span>self, serialized)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def MergeFromString(self, serialized):
+  if isinstance(serialized, memoryview) and six.PY2:
+    raise TypeError(
+        &#39;memoryview not supported in Python 2 with the pure Python proto &#39;
+        &#39;implementation: this is to maintain compatibility with the C++ &#39;
+        &#39;implementation&#39;)
+
+  serialized = memoryview(serialized)
+  length = len(serialized)
+  try:
+    if self._InternalParse(serialized, 0, length) != length:
+      # The only reason _InternalParse would return early is if it
+      # encountered an end-group tag.
+      raise message_mod.DecodeError(&#39;Unexpected end-group tag.&#39;)
+  except (IndexError, TypeError):
+    # Now ord(buf[p:p+1]) == ord(&#39;&#39;) gets TypeError.
+    raise message_mod.DecodeError(&#39;Truncated message.&#39;)
+  except struct.error as e:
+    raise message_mod.DecodeError(e)
+  return length   # Return this for legacy reasons.</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.SerializePartialToString"><code class="name flex">
+<span>def <span class="ident">SerializePartialToString</span></span>(<span>self, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def SerializePartialToString(self, **kwargs):
+  out = BytesIO()
+  self._InternalSerialize(out.write, **kwargs)
+  return out.getvalue()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.SerializeToString"><code class="name flex">
+<span>def <span class="ident">SerializeToString</span></span>(<span>self, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def SerializeToString(self, **kwargs):
+  # Check if the message has all of its required fields set.
+  if not self.IsInitialized():
+    raise message_mod.EncodeError(
+        &#39;Message %s is missing required fields: %s&#39; % (
+        self.DESCRIPTOR.full_name, &#39;,&#39;.join(self.FindInitializationErrors())))
+  return self.SerializePartialToString(**kwargs)</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.SetInParent"><code class="name flex">
+<span>def <span class="ident">SetInParent</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sets the _cached_byte_size_dirty bit to true,
+and propagates this to our listener iff this was a state change.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def Modified(self):
+  &#34;&#34;&#34;Sets the _cached_byte_size_dirty bit to true,
+  and propagates this to our listener iff this was a state change.
+  &#34;&#34;&#34;
+
+  # Note:  Some callers check _cached_byte_size_dirty before calling
+  #   _Modified() as an extra optimization.  So, if this method is ever
+  #   changed such that it does stuff even when _cached_byte_size_dirty is
+  #   already true, the callers need to be updated.
+  if not self._cached_byte_size_dirty:
+    self._cached_byte_size_dirty = True
+    self._listener_for_children.dirty = True
+    self._is_present_in_parent = True
+    self._listener.Modified()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.UnknownFields"><code class="name flex">
+<span>def <span class="ident">UnknownFields</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def _UnknownFields(self):
+  if self._unknown_field_set is None:  # pylint: disable=protected-access
+    # pylint: disable=protected-access
+    self._unknown_field_set = containers.UnknownFieldSet()
+  return self._unknown_field_set    # pylint: disable=protected-access</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishRequest.WhichOneof"><code class="name flex">
+<span>def <span class="ident">WhichOneof</span></span>(<span>self, oneof_name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns the name of the currently set field inside a oneof, or None.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def WhichOneof(self, oneof_name):
+  &#34;&#34;&#34;Returns the name of the currently set field inside a oneof, or None.&#34;&#34;&#34;
+  try:
+    field = message_descriptor.oneofs_by_name[oneof_name]
+  except KeyError:
+    raise ValueError(
+        &#39;Protocol message has no oneof &#34;%s&#34; field.&#39; % oneof_name)
+
+  nested_field = self._oneofs.get(field, None)
+  if nested_field is not None and self.HasField(nested_field.name):
+    return nested_field.name
+  else:
+    return None</code></pre>
+</details>
 </dd>
 </dl>
 </dd>
 <dt id="nitric.proto.event.v1.event_pb2.EventPublishResponse"><code class="flex name class">
 <span>class <span class="ident">EventPublishResponse</span></span>
-<span>(</span><span>*args, **kwargs)</span>
+<span>(</span><span>**kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A ProtocolMessage</p></div>
+<div class="desc"><p>Abstract base class for protocol messages.</p>
+<p>Protocol message classes are almost always generated by the protocol
+compiler.
+These generated types subclass Message and implement the methods
+shown below.</p></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>google.protobuf.pyext._message.CMessage</li>
 <li>google.protobuf.message.Message</li>
 </ul>
 <h3>Class variables</h3>
@@ -439,17 +986,538 @@ DESCRIPTOR.services_by_name[&#39;Topic&#39;] = _TOPIC
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishResponse.ID_FIELD_NUMBER"><code class="name">var <span class="ident">ID_FIELD_NUMBER</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishResponse.FromString"><code class="name flex">
+<span>def <span class="ident">FromString</span></span>(<span>s)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def FromString(s):
+  message = cls()
+  message.MergeFromString(s)
+  return message</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishResponse.RegisterExtension"><code class="name flex">
+<span>def <span class="ident">RegisterExtension</span></span>(<span>extension_handle)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def RegisterExtension(extension_handle):
+  extension_handle.containing_type = cls.DESCRIPTOR
+  # TODO(amauryfa): Use cls.MESSAGE_FACTORY.pool when available.
+  # pylint: disable=protected-access
+  cls.DESCRIPTOR.file.pool._AddExtensionDescriptor(extension_handle)
+  _AttachFieldHelpers(cls, extension_handle)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishResponse.id"><code class="name">var <span class="ident">id</span></code></dt>
+<dd>
+<div class="desc"><p>Getter for id.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getter(self):
+  # TODO(protobuf-team): This may be broken since there may not be
+  # default_value.  Combine with has_default_value somehow.
+  return self._fields.get(field, default_value)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishResponse.ByteSize"><code class="name flex">
+<span>def <span class="ident">ByteSize</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ByteSize(self):
+  if not self._cached_byte_size_dirty:
+    return self._cached_byte_size
+
+  size = 0
+  descriptor = self.DESCRIPTOR
+  if descriptor.GetOptions().map_entry:
+    # Fields of map entry should always be serialized.
+    size = descriptor.fields_by_name[&#39;key&#39;]._sizer(self.key)
+    size += descriptor.fields_by_name[&#39;value&#39;]._sizer(self.value)
+  else:
+    for field_descriptor, field_value in self.ListFields():
+      size += field_descriptor._sizer(field_value)
+    for tag_bytes, value_bytes in self._unknown_fields:
+      size += len(tag_bytes) + len(value_bytes)
+
+  self._cached_byte_size = size
+  self._cached_byte_size_dirty = False
+  self._listener_for_children.dirty = False
+  return size</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishResponse.Clear"><code class="name flex">
+<span>def <span class="ident">Clear</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def _Clear(self):
+  # Clear fields.
+  self._fields = {}
+  self._unknown_fields = ()
+  # pylint: disable=protected-access
+  if self._unknown_field_set is not None:
+    self._unknown_field_set._clear()
+    self._unknown_field_set = None
+
+  self._oneofs = {}
+  self._Modified()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishResponse.ClearField"><code class="name flex">
+<span>def <span class="ident">ClearField</span></span>(<span>self, field_name)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ClearField(self, field_name):
+  try:
+    field = message_descriptor.fields_by_name[field_name]
+  except KeyError:
+    try:
+      field = message_descriptor.oneofs_by_name[field_name]
+      if field in self._oneofs:
+        field = self._oneofs[field]
+      else:
+        return
+    except KeyError:
+      raise ValueError(&#39;Protocol message %s has no &#34;%s&#34; field.&#39; %
+                       (message_descriptor.name, field_name))
+
+  if field in self._fields:
+    # To match the C++ implementation, we need to invalidate iterators
+    # for map fields when ClearField() happens.
+    if hasattr(self._fields[field], &#39;InvalidateIterators&#39;):
+      self._fields[field].InvalidateIterators()
+
+    # Note:  If the field is a sub-message, its listener will still point
+    #   at us.  That&#39;s fine, because the worst than can happen is that it
+    #   will call _Modified() and invalidate our byte size.  Big deal.
+    del self._fields[field]
+
+    if self._oneofs.get(field.containing_oneof, None) is field:
+      del self._oneofs[field.containing_oneof]
+
+  # Always call _Modified() -- even if nothing was changed, this is
+  # a mutating method, and thus calling it should cause the field to become
+  # present in the parent message.
+  self._Modified()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishResponse.DiscardUnknownFields"><code class="name flex">
+<span>def <span class="ident">DiscardUnknownFields</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def _DiscardUnknownFields(self):
+  self._unknown_fields = []
+  self._unknown_field_set = None      # pylint: disable=protected-access
+  for field, value in self.ListFields():
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      if _IsMapField(field):
+        if _IsMessageMapField(field):
+          for key in value:
+            value[key].DiscardUnknownFields()
+      elif field.label == _FieldDescriptor.LABEL_REPEATED:
+        for sub_message in value:
+          sub_message.DiscardUnknownFields()
+      else:
+        value.DiscardUnknownFields()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishResponse.FindInitializationErrors"><code class="name flex">
+<span>def <span class="ident">FindInitializationErrors</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Finds required fields which are not initialized.</p>
+<h2 id="returns">Returns</h2>
+<p>A list of strings.
+Each string is a path to an uninitialized field from
+the top-level message, e.g. "foo.bar[5].baz".</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def FindInitializationErrors(self):
+  &#34;&#34;&#34;Finds required fields which are not initialized.
+
+  Returns:
+    A list of strings.  Each string is a path to an uninitialized field from
+    the top-level message, e.g. &#34;foo.bar[5].baz&#34;.
+  &#34;&#34;&#34;
+
+  errors = []  # simplify things
+
+  for field in required_fields:
+    if not self.HasField(field.name):
+      errors.append(field.name)
+
+  for field, value in self.ListFields():
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      if field.is_extension:
+        name = &#39;(%s)&#39; % field.full_name
+      else:
+        name = field.name
+
+      if _IsMapField(field):
+        if _IsMessageMapField(field):
+          for key in value:
+            element = value[key]
+            prefix = &#39;%s[%s].&#39; % (name, key)
+            sub_errors = element.FindInitializationErrors()
+            errors += [prefix + error for error in sub_errors]
+        else:
+          # ScalarMaps can&#39;t have any initialization errors.
+          pass
+      elif field.label == _FieldDescriptor.LABEL_REPEATED:
+        for i in range(len(value)):
+          element = value[i]
+          prefix = &#39;%s[%d].&#39; % (name, i)
+          sub_errors = element.FindInitializationErrors()
+          errors += [prefix + error for error in sub_errors]
+      else:
+        prefix = name + &#39;.&#39;
+        sub_errors = value.FindInitializationErrors()
+        errors += [prefix + error for error in sub_errors]
+
+  return errors</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishResponse.HasField"><code class="name flex">
+<span>def <span class="ident">HasField</span></span>(<span>self, field_name)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def HasField(self, field_name):
+  try:
+    field = hassable_fields[field_name]
+  except KeyError:
+    raise ValueError(error_msg % (message_descriptor.full_name, field_name))
+
+  if isinstance(field, descriptor_mod.OneofDescriptor):
+    try:
+      return HasField(self, self._oneofs[field].name)
+    except KeyError:
+      return False
+  else:
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      value = self._fields.get(field)
+      return value is not None and value._is_present_in_parent
+    else:
+      return field in self._fields</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishResponse.IsInitialized"><code class="name flex">
+<span>def <span class="ident">IsInitialized</span></span>(<span>self, errors=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Checks if all required fields of a message are set.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>errors</code></strong></dt>
+<dd>A list which, if provided, will be populated with the field
+paths of all missing required fields.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>True iff the specified message has all required fields set.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def IsInitialized(self, errors=None):
+  &#34;&#34;&#34;Checks if all required fields of a message are set.
+
+  Args:
+    errors:  A list which, if provided, will be populated with the field
+             paths of all missing required fields.
+
+  Returns:
+    True iff the specified message has all required fields set.
+  &#34;&#34;&#34;
+
+  # Performance is critical so we avoid HasField() and ListFields().
+
+  for field in required_fields:
+    if (field not in self._fields or
+        (field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE and
+         not self._fields[field]._is_present_in_parent)):
+      if errors is not None:
+        errors.extend(self.FindInitializationErrors())
+      return False
+
+  for field, value in list(self._fields.items()):  # dict can change size!
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      if field.label == _FieldDescriptor.LABEL_REPEATED:
+        if (field.message_type.has_options and
+            field.message_type.GetOptions().map_entry):
+          continue
+        for element in value:
+          if not element.IsInitialized():
+            if errors is not None:
+              errors.extend(self.FindInitializationErrors())
+            return False
+      elif value._is_present_in_parent and not value.IsInitialized():
+        if errors is not None:
+          errors.extend(self.FindInitializationErrors())
+        return False
+
+  return True</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishResponse.ListFields"><code class="name flex">
+<span>def <span class="ident">ListFields</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ListFields(self):
+  all_fields = [item for item in self._fields.items() if _IsPresent(item)]
+  all_fields.sort(key = lambda item: item[0].number)
+  return all_fields</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishResponse.MergeFrom"><code class="name flex">
+<span>def <span class="ident">MergeFrom</span></span>(<span>self, msg)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def MergeFrom(self, msg):
+  if not isinstance(msg, cls):
+    raise TypeError(
+        &#39;Parameter to MergeFrom() must be instance of same class: &#39;
+        &#39;expected %s got %s.&#39; % (cls.__name__, msg.__class__.__name__))
+
+  assert msg is not self
+  self._Modified()
+
+  fields = self._fields
+
+  for field, value in msg._fields.items():
+    if field.label == LABEL_REPEATED:
+      field_value = fields.get(field)
+      if field_value is None:
+        # Construct a new object to represent this field.
+        field_value = field._default_constructor(self)
+        fields[field] = field_value
+      field_value.MergeFrom(value)
+    elif field.cpp_type == CPPTYPE_MESSAGE:
+      if value._is_present_in_parent:
+        field_value = fields.get(field)
+        if field_value is None:
+          # Construct a new object to represent this field.
+          field_value = field._default_constructor(self)
+          fields[field] = field_value
+        field_value.MergeFrom(value)
+    else:
+      self._fields[field] = value
+      if field.containing_oneof:
+        self._UpdateOneofState(field)
+
+  if msg._unknown_fields:
+    if not self._unknown_fields:
+      self._unknown_fields = []
+    self._unknown_fields.extend(msg._unknown_fields)
+    # pylint: disable=protected-access
+    if self._unknown_field_set is None:
+      self._unknown_field_set = containers.UnknownFieldSet()
+    self._unknown_field_set._extend(msg._unknown_field_set)</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishResponse.MergeFromString"><code class="name flex">
+<span>def <span class="ident">MergeFromString</span></span>(<span>self, serialized)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def MergeFromString(self, serialized):
+  if isinstance(serialized, memoryview) and six.PY2:
+    raise TypeError(
+        &#39;memoryview not supported in Python 2 with the pure Python proto &#39;
+        &#39;implementation: this is to maintain compatibility with the C++ &#39;
+        &#39;implementation&#39;)
+
+  serialized = memoryview(serialized)
+  length = len(serialized)
+  try:
+    if self._InternalParse(serialized, 0, length) != length:
+      # The only reason _InternalParse would return early is if it
+      # encountered an end-group tag.
+      raise message_mod.DecodeError(&#39;Unexpected end-group tag.&#39;)
+  except (IndexError, TypeError):
+    # Now ord(buf[p:p+1]) == ord(&#39;&#39;) gets TypeError.
+    raise message_mod.DecodeError(&#39;Truncated message.&#39;)
+  except struct.error as e:
+    raise message_mod.DecodeError(e)
+  return length   # Return this for legacy reasons.</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishResponse.SerializePartialToString"><code class="name flex">
+<span>def <span class="ident">SerializePartialToString</span></span>(<span>self, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def SerializePartialToString(self, **kwargs):
+  out = BytesIO()
+  self._InternalSerialize(out.write, **kwargs)
+  return out.getvalue()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishResponse.SerializeToString"><code class="name flex">
+<span>def <span class="ident">SerializeToString</span></span>(<span>self, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def SerializeToString(self, **kwargs):
+  # Check if the message has all of its required fields set.
+  if not self.IsInitialized():
+    raise message_mod.EncodeError(
+        &#39;Message %s is missing required fields: %s&#39; % (
+        self.DESCRIPTOR.full_name, &#39;,&#39;.join(self.FindInitializationErrors())))
+  return self.SerializePartialToString(**kwargs)</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishResponse.SetInParent"><code class="name flex">
+<span>def <span class="ident">SetInParent</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sets the _cached_byte_size_dirty bit to true,
+and propagates this to our listener iff this was a state change.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def Modified(self):
+  &#34;&#34;&#34;Sets the _cached_byte_size_dirty bit to true,
+  and propagates this to our listener iff this was a state change.
+  &#34;&#34;&#34;
+
+  # Note:  Some callers check _cached_byte_size_dirty before calling
+  #   _Modified() as an extra optimization.  So, if this method is ever
+  #   changed such that it does stuff even when _cached_byte_size_dirty is
+  #   already true, the callers need to be updated.
+  if not self._cached_byte_size_dirty:
+    self._cached_byte_size_dirty = True
+    self._listener_for_children.dirty = True
+    self._is_present_in_parent = True
+    self._listener.Modified()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishResponse.UnknownFields"><code class="name flex">
+<span>def <span class="ident">UnknownFields</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def _UnknownFields(self):
+  if self._unknown_field_set is None:  # pylint: disable=protected-access
+    # pylint: disable=protected-access
+    self._unknown_field_set = containers.UnknownFieldSet()
+  return self._unknown_field_set    # pylint: disable=protected-access</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.EventPublishResponse.WhichOneof"><code class="name flex">
+<span>def <span class="ident">WhichOneof</span></span>(<span>self, oneof_name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns the name of the currently set field inside a oneof, or None.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def WhichOneof(self, oneof_name):
+  &#34;&#34;&#34;Returns the name of the currently set field inside a oneof, or None.&#34;&#34;&#34;
+  try:
+    field = message_descriptor.oneofs_by_name[oneof_name]
+  except KeyError:
+    raise ValueError(
+        &#39;Protocol message has no oneof &#34;%s&#34; field.&#39; % oneof_name)
+
+  nested_field = self._oneofs.get(field, None)
+  if nested_field is not None and self.HasField(nested_field.name):
+    return nested_field.name
+  else:
+    return None</code></pre>
+</details>
+</dd>
 </dl>
 </dd>
 <dt id="nitric.proto.event.v1.event_pb2.NitricEvent"><code class="flex name class">
 <span>class <span class="ident">NitricEvent</span></span>
-<span>(</span><span>*args, **kwargs)</span>
+<span>(</span><span>**kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A ProtocolMessage</p></div>
+<div class="desc"><p>Abstract base class for protocol messages.</p>
+<p>Protocol message classes are almost always generated by the protocol
+compiler.
+These generated types subclass Message and implement the methods
+shown below.</p></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>google.protobuf.pyext._message.CMessage</li>
 <li>google.protobuf.message.Message</li>
 </ul>
 <h3>Class variables</h3>
@@ -458,32 +1526,582 @@ DESCRIPTOR.services_by_name[&#39;Topic&#39;] = _TOPIC
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.ID_FIELD_NUMBER"><code class="name">var <span class="ident">ID_FIELD_NUMBER</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.PAYLOAD_FIELD_NUMBER"><code class="name">var <span class="ident">PAYLOAD_FIELD_NUMBER</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.PAYLOAD_TYPE_FIELD_NUMBER"><code class="name">var <span class="ident">PAYLOAD_TYPE_FIELD_NUMBER</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.FromString"><code class="name flex">
+<span>def <span class="ident">FromString</span></span>(<span>s)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def FromString(s):
+  message = cls()
+  message.MergeFromString(s)
+  return message</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.RegisterExtension"><code class="name flex">
+<span>def <span class="ident">RegisterExtension</span></span>(<span>extension_handle)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def RegisterExtension(extension_handle):
+  extension_handle.containing_type = cls.DESCRIPTOR
+  # TODO(amauryfa): Use cls.MESSAGE_FACTORY.pool when available.
+  # pylint: disable=protected-access
+  cls.DESCRIPTOR.file.pool._AddExtensionDescriptor(extension_handle)
+  _AttachFieldHelpers(cls, extension_handle)</code></pre>
+</details>
+</dd>
 </dl>
 <h3>Instance variables</h3>
 <dl>
 <dt id="nitric.proto.event.v1.event_pb2.NitricEvent.id"><code class="name">var <span class="ident">id</span></code></dt>
 <dd>
-<div class="desc"><p>Field nitric.event.v1.NitricEvent.id</p></div>
+<div class="desc"><p>Getter for id.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getter(self):
+  # TODO(protobuf-team): This may be broken since there may not be
+  # default_value.  Combine with has_default_value somehow.
+  return self._fields.get(field, default_value)</code></pre>
+</details>
 </dd>
 <dt id="nitric.proto.event.v1.event_pb2.NitricEvent.payload"><code class="name">var <span class="ident">payload</span></code></dt>
 <dd>
-<div class="desc"><p>Field nitric.event.v1.NitricEvent.payload</p></div>
+<div class="desc"><p>Getter for payload.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getter(self):
+  field_value = self._fields.get(field)
+  if field_value is None:
+    # Construct a new object to represent this field.
+    field_value = field._default_constructor(self)
+
+    # Atomically check if another thread has preempted us and, if not, swap
+    # in the new object we just created.  If someone has preempted us, we
+    # take that object and discard ours.
+    # WARNING:  We are relying on setdefault() being atomic.  This is true
+    #   in CPython but we haven&#39;t investigated others.  This warning appears
+    #   in several other locations in this file.
+    field_value = self._fields.setdefault(field, field_value)
+  return field_value</code></pre>
+</details>
 </dd>
-<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.payloadType"><code class="name">var <span class="ident">payloadType</span></code></dt>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.payload_type"><code class="name">var <span class="ident">payload_type</span></code></dt>
 <dd>
-<div class="desc"><p>Field nitric.event.v1.NitricEvent.payloadType</p></div>
+<div class="desc"><p>Getter for payload_type.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getter(self):
+  # TODO(protobuf-team): This may be broken since there may not be
+  # default_value.  Combine with has_default_value somehow.
+  return self._fields.get(field, default_value)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.ByteSize"><code class="name flex">
+<span>def <span class="ident">ByteSize</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ByteSize(self):
+  if not self._cached_byte_size_dirty:
+    return self._cached_byte_size
+
+  size = 0
+  descriptor = self.DESCRIPTOR
+  if descriptor.GetOptions().map_entry:
+    # Fields of map entry should always be serialized.
+    size = descriptor.fields_by_name[&#39;key&#39;]._sizer(self.key)
+    size += descriptor.fields_by_name[&#39;value&#39;]._sizer(self.value)
+  else:
+    for field_descriptor, field_value in self.ListFields():
+      size += field_descriptor._sizer(field_value)
+    for tag_bytes, value_bytes in self._unknown_fields:
+      size += len(tag_bytes) + len(value_bytes)
+
+  self._cached_byte_size = size
+  self._cached_byte_size_dirty = False
+  self._listener_for_children.dirty = False
+  return size</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.Clear"><code class="name flex">
+<span>def <span class="ident">Clear</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def _Clear(self):
+  # Clear fields.
+  self._fields = {}
+  self._unknown_fields = ()
+  # pylint: disable=protected-access
+  if self._unknown_field_set is not None:
+    self._unknown_field_set._clear()
+    self._unknown_field_set = None
+
+  self._oneofs = {}
+  self._Modified()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.ClearField"><code class="name flex">
+<span>def <span class="ident">ClearField</span></span>(<span>self, field_name)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ClearField(self, field_name):
+  try:
+    field = message_descriptor.fields_by_name[field_name]
+  except KeyError:
+    try:
+      field = message_descriptor.oneofs_by_name[field_name]
+      if field in self._oneofs:
+        field = self._oneofs[field]
+      else:
+        return
+    except KeyError:
+      raise ValueError(&#39;Protocol message %s has no &#34;%s&#34; field.&#39; %
+                       (message_descriptor.name, field_name))
+
+  if field in self._fields:
+    # To match the C++ implementation, we need to invalidate iterators
+    # for map fields when ClearField() happens.
+    if hasattr(self._fields[field], &#39;InvalidateIterators&#39;):
+      self._fields[field].InvalidateIterators()
+
+    # Note:  If the field is a sub-message, its listener will still point
+    #   at us.  That&#39;s fine, because the worst than can happen is that it
+    #   will call _Modified() and invalidate our byte size.  Big deal.
+    del self._fields[field]
+
+    if self._oneofs.get(field.containing_oneof, None) is field:
+      del self._oneofs[field.containing_oneof]
+
+  # Always call _Modified() -- even if nothing was changed, this is
+  # a mutating method, and thus calling it should cause the field to become
+  # present in the parent message.
+  self._Modified()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.DiscardUnknownFields"><code class="name flex">
+<span>def <span class="ident">DiscardUnknownFields</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def _DiscardUnknownFields(self):
+  self._unknown_fields = []
+  self._unknown_field_set = None      # pylint: disable=protected-access
+  for field, value in self.ListFields():
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      if _IsMapField(field):
+        if _IsMessageMapField(field):
+          for key in value:
+            value[key].DiscardUnknownFields()
+      elif field.label == _FieldDescriptor.LABEL_REPEATED:
+        for sub_message in value:
+          sub_message.DiscardUnknownFields()
+      else:
+        value.DiscardUnknownFields()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.FindInitializationErrors"><code class="name flex">
+<span>def <span class="ident">FindInitializationErrors</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Finds required fields which are not initialized.</p>
+<h2 id="returns">Returns</h2>
+<p>A list of strings.
+Each string is a path to an uninitialized field from
+the top-level message, e.g. "foo.bar[5].baz".</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def FindInitializationErrors(self):
+  &#34;&#34;&#34;Finds required fields which are not initialized.
+
+  Returns:
+    A list of strings.  Each string is a path to an uninitialized field from
+    the top-level message, e.g. &#34;foo.bar[5].baz&#34;.
+  &#34;&#34;&#34;
+
+  errors = []  # simplify things
+
+  for field in required_fields:
+    if not self.HasField(field.name):
+      errors.append(field.name)
+
+  for field, value in self.ListFields():
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      if field.is_extension:
+        name = &#39;(%s)&#39; % field.full_name
+      else:
+        name = field.name
+
+      if _IsMapField(field):
+        if _IsMessageMapField(field):
+          for key in value:
+            element = value[key]
+            prefix = &#39;%s[%s].&#39; % (name, key)
+            sub_errors = element.FindInitializationErrors()
+            errors += [prefix + error for error in sub_errors]
+        else:
+          # ScalarMaps can&#39;t have any initialization errors.
+          pass
+      elif field.label == _FieldDescriptor.LABEL_REPEATED:
+        for i in range(len(value)):
+          element = value[i]
+          prefix = &#39;%s[%d].&#39; % (name, i)
+          sub_errors = element.FindInitializationErrors()
+          errors += [prefix + error for error in sub_errors]
+      else:
+        prefix = name + &#39;.&#39;
+        sub_errors = value.FindInitializationErrors()
+        errors += [prefix + error for error in sub_errors]
+
+  return errors</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.HasField"><code class="name flex">
+<span>def <span class="ident">HasField</span></span>(<span>self, field_name)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def HasField(self, field_name):
+  try:
+    field = hassable_fields[field_name]
+  except KeyError:
+    raise ValueError(error_msg % (message_descriptor.full_name, field_name))
+
+  if isinstance(field, descriptor_mod.OneofDescriptor):
+    try:
+      return HasField(self, self._oneofs[field].name)
+    except KeyError:
+      return False
+  else:
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      value = self._fields.get(field)
+      return value is not None and value._is_present_in_parent
+    else:
+      return field in self._fields</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.IsInitialized"><code class="name flex">
+<span>def <span class="ident">IsInitialized</span></span>(<span>self, errors=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Checks if all required fields of a message are set.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>errors</code></strong></dt>
+<dd>A list which, if provided, will be populated with the field
+paths of all missing required fields.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>True iff the specified message has all required fields set.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def IsInitialized(self, errors=None):
+  &#34;&#34;&#34;Checks if all required fields of a message are set.
+
+  Args:
+    errors:  A list which, if provided, will be populated with the field
+             paths of all missing required fields.
+
+  Returns:
+    True iff the specified message has all required fields set.
+  &#34;&#34;&#34;
+
+  # Performance is critical so we avoid HasField() and ListFields().
+
+  for field in required_fields:
+    if (field not in self._fields or
+        (field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE and
+         not self._fields[field]._is_present_in_parent)):
+      if errors is not None:
+        errors.extend(self.FindInitializationErrors())
+      return False
+
+  for field, value in list(self._fields.items()):  # dict can change size!
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      if field.label == _FieldDescriptor.LABEL_REPEATED:
+        if (field.message_type.has_options and
+            field.message_type.GetOptions().map_entry):
+          continue
+        for element in value:
+          if not element.IsInitialized():
+            if errors is not None:
+              errors.extend(self.FindInitializationErrors())
+            return False
+      elif value._is_present_in_parent and not value.IsInitialized():
+        if errors is not None:
+          errors.extend(self.FindInitializationErrors())
+        return False
+
+  return True</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.ListFields"><code class="name flex">
+<span>def <span class="ident">ListFields</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ListFields(self):
+  all_fields = [item for item in self._fields.items() if _IsPresent(item)]
+  all_fields.sort(key = lambda item: item[0].number)
+  return all_fields</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.MergeFrom"><code class="name flex">
+<span>def <span class="ident">MergeFrom</span></span>(<span>self, msg)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def MergeFrom(self, msg):
+  if not isinstance(msg, cls):
+    raise TypeError(
+        &#39;Parameter to MergeFrom() must be instance of same class: &#39;
+        &#39;expected %s got %s.&#39; % (cls.__name__, msg.__class__.__name__))
+
+  assert msg is not self
+  self._Modified()
+
+  fields = self._fields
+
+  for field, value in msg._fields.items():
+    if field.label == LABEL_REPEATED:
+      field_value = fields.get(field)
+      if field_value is None:
+        # Construct a new object to represent this field.
+        field_value = field._default_constructor(self)
+        fields[field] = field_value
+      field_value.MergeFrom(value)
+    elif field.cpp_type == CPPTYPE_MESSAGE:
+      if value._is_present_in_parent:
+        field_value = fields.get(field)
+        if field_value is None:
+          # Construct a new object to represent this field.
+          field_value = field._default_constructor(self)
+          fields[field] = field_value
+        field_value.MergeFrom(value)
+    else:
+      self._fields[field] = value
+      if field.containing_oneof:
+        self._UpdateOneofState(field)
+
+  if msg._unknown_fields:
+    if not self._unknown_fields:
+      self._unknown_fields = []
+    self._unknown_fields.extend(msg._unknown_fields)
+    # pylint: disable=protected-access
+    if self._unknown_field_set is None:
+      self._unknown_field_set = containers.UnknownFieldSet()
+    self._unknown_field_set._extend(msg._unknown_field_set)</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.MergeFromString"><code class="name flex">
+<span>def <span class="ident">MergeFromString</span></span>(<span>self, serialized)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def MergeFromString(self, serialized):
+  if isinstance(serialized, memoryview) and six.PY2:
+    raise TypeError(
+        &#39;memoryview not supported in Python 2 with the pure Python proto &#39;
+        &#39;implementation: this is to maintain compatibility with the C++ &#39;
+        &#39;implementation&#39;)
+
+  serialized = memoryview(serialized)
+  length = len(serialized)
+  try:
+    if self._InternalParse(serialized, 0, length) != length:
+      # The only reason _InternalParse would return early is if it
+      # encountered an end-group tag.
+      raise message_mod.DecodeError(&#39;Unexpected end-group tag.&#39;)
+  except (IndexError, TypeError):
+    # Now ord(buf[p:p+1]) == ord(&#39;&#39;) gets TypeError.
+    raise message_mod.DecodeError(&#39;Truncated message.&#39;)
+  except struct.error as e:
+    raise message_mod.DecodeError(e)
+  return length   # Return this for legacy reasons.</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.SerializePartialToString"><code class="name flex">
+<span>def <span class="ident">SerializePartialToString</span></span>(<span>self, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def SerializePartialToString(self, **kwargs):
+  out = BytesIO()
+  self._InternalSerialize(out.write, **kwargs)
+  return out.getvalue()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.SerializeToString"><code class="name flex">
+<span>def <span class="ident">SerializeToString</span></span>(<span>self, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def SerializeToString(self, **kwargs):
+  # Check if the message has all of its required fields set.
+  if not self.IsInitialized():
+    raise message_mod.EncodeError(
+        &#39;Message %s is missing required fields: %s&#39; % (
+        self.DESCRIPTOR.full_name, &#39;,&#39;.join(self.FindInitializationErrors())))
+  return self.SerializePartialToString(**kwargs)</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.SetInParent"><code class="name flex">
+<span>def <span class="ident">SetInParent</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sets the _cached_byte_size_dirty bit to true,
+and propagates this to our listener iff this was a state change.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def Modified(self):
+  &#34;&#34;&#34;Sets the _cached_byte_size_dirty bit to true,
+  and propagates this to our listener iff this was a state change.
+  &#34;&#34;&#34;
+
+  # Note:  Some callers check _cached_byte_size_dirty before calling
+  #   _Modified() as an extra optimization.  So, if this method is ever
+  #   changed such that it does stuff even when _cached_byte_size_dirty is
+  #   already true, the callers need to be updated.
+  if not self._cached_byte_size_dirty:
+    self._cached_byte_size_dirty = True
+    self._listener_for_children.dirty = True
+    self._is_present_in_parent = True
+    self._listener.Modified()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.UnknownFields"><code class="name flex">
+<span>def <span class="ident">UnknownFields</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def _UnknownFields(self):
+  if self._unknown_field_set is None:  # pylint: disable=protected-access
+    # pylint: disable=protected-access
+    self._unknown_field_set = containers.UnknownFieldSet()
+  return self._unknown_field_set    # pylint: disable=protected-access</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricEvent.WhichOneof"><code class="name flex">
+<span>def <span class="ident">WhichOneof</span></span>(<span>self, oneof_name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns the name of the currently set field inside a oneof, or None.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def WhichOneof(self, oneof_name):
+  &#34;&#34;&#34;Returns the name of the currently set field inside a oneof, or None.&#34;&#34;&#34;
+  try:
+    field = message_descriptor.oneofs_by_name[oneof_name]
+  except KeyError:
+    raise ValueError(
+        &#39;Protocol message has no oneof &#34;%s&#34; field.&#39; % oneof_name)
+
+  nested_field = self._oneofs.get(field, None)
+  if nested_field is not None and self.HasField(nested_field.name):
+    return nested_field.name
+  else:
+    return None</code></pre>
+</details>
 </dd>
 </dl>
 </dd>
 <dt id="nitric.proto.event.v1.event_pb2.NitricTopic"><code class="flex name class">
 <span>class <span class="ident">NitricTopic</span></span>
-<span>(</span><span>*args, **kwargs)</span>
+<span>(</span><span>**kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A ProtocolMessage</p></div>
+<div class="desc"><p>Abstract base class for protocol messages.</p>
+<p>Protocol message classes are almost always generated by the protocol
+compiler.
+These generated types subclass Message and implement the methods
+shown below.</p></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>google.protobuf.pyext._message.CMessage</li>
 <li>google.protobuf.message.Message</li>
 </ul>
 <h3>Class variables</h3>
@@ -492,24 +2110,538 @@ DESCRIPTOR.services_by_name[&#39;Topic&#39;] = _TOPIC
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricTopic.NAME_FIELD_NUMBER"><code class="name">var <span class="ident">NAME_FIELD_NUMBER</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.NitricTopic.FromString"><code class="name flex">
+<span>def <span class="ident">FromString</span></span>(<span>s)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def FromString(s):
+  message = cls()
+  message.MergeFromString(s)
+  return message</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricTopic.RegisterExtension"><code class="name flex">
+<span>def <span class="ident">RegisterExtension</span></span>(<span>extension_handle)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def RegisterExtension(extension_handle):
+  extension_handle.containing_type = cls.DESCRIPTOR
+  # TODO(amauryfa): Use cls.MESSAGE_FACTORY.pool when available.
+  # pylint: disable=protected-access
+  cls.DESCRIPTOR.file.pool._AddExtensionDescriptor(extension_handle)
+  _AttachFieldHelpers(cls, extension_handle)</code></pre>
+</details>
+</dd>
 </dl>
 <h3>Instance variables</h3>
 <dl>
 <dt id="nitric.proto.event.v1.event_pb2.NitricTopic.name"><code class="name">var <span class="ident">name</span></code></dt>
 <dd>
-<div class="desc"><p>Field nitric.event.v1.NitricTopic.name</p></div>
+<div class="desc"><p>Getter for name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getter(self):
+  # TODO(protobuf-team): This may be broken since there may not be
+  # default_value.  Combine with has_default_value somehow.
+  return self._fields.get(field, default_value)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.NitricTopic.ByteSize"><code class="name flex">
+<span>def <span class="ident">ByteSize</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ByteSize(self):
+  if not self._cached_byte_size_dirty:
+    return self._cached_byte_size
+
+  size = 0
+  descriptor = self.DESCRIPTOR
+  if descriptor.GetOptions().map_entry:
+    # Fields of map entry should always be serialized.
+    size = descriptor.fields_by_name[&#39;key&#39;]._sizer(self.key)
+    size += descriptor.fields_by_name[&#39;value&#39;]._sizer(self.value)
+  else:
+    for field_descriptor, field_value in self.ListFields():
+      size += field_descriptor._sizer(field_value)
+    for tag_bytes, value_bytes in self._unknown_fields:
+      size += len(tag_bytes) + len(value_bytes)
+
+  self._cached_byte_size = size
+  self._cached_byte_size_dirty = False
+  self._listener_for_children.dirty = False
+  return size</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricTopic.Clear"><code class="name flex">
+<span>def <span class="ident">Clear</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def _Clear(self):
+  # Clear fields.
+  self._fields = {}
+  self._unknown_fields = ()
+  # pylint: disable=protected-access
+  if self._unknown_field_set is not None:
+    self._unknown_field_set._clear()
+    self._unknown_field_set = None
+
+  self._oneofs = {}
+  self._Modified()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricTopic.ClearField"><code class="name flex">
+<span>def <span class="ident">ClearField</span></span>(<span>self, field_name)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ClearField(self, field_name):
+  try:
+    field = message_descriptor.fields_by_name[field_name]
+  except KeyError:
+    try:
+      field = message_descriptor.oneofs_by_name[field_name]
+      if field in self._oneofs:
+        field = self._oneofs[field]
+      else:
+        return
+    except KeyError:
+      raise ValueError(&#39;Protocol message %s has no &#34;%s&#34; field.&#39; %
+                       (message_descriptor.name, field_name))
+
+  if field in self._fields:
+    # To match the C++ implementation, we need to invalidate iterators
+    # for map fields when ClearField() happens.
+    if hasattr(self._fields[field], &#39;InvalidateIterators&#39;):
+      self._fields[field].InvalidateIterators()
+
+    # Note:  If the field is a sub-message, its listener will still point
+    #   at us.  That&#39;s fine, because the worst than can happen is that it
+    #   will call _Modified() and invalidate our byte size.  Big deal.
+    del self._fields[field]
+
+    if self._oneofs.get(field.containing_oneof, None) is field:
+      del self._oneofs[field.containing_oneof]
+
+  # Always call _Modified() -- even if nothing was changed, this is
+  # a mutating method, and thus calling it should cause the field to become
+  # present in the parent message.
+  self._Modified()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricTopic.DiscardUnknownFields"><code class="name flex">
+<span>def <span class="ident">DiscardUnknownFields</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def _DiscardUnknownFields(self):
+  self._unknown_fields = []
+  self._unknown_field_set = None      # pylint: disable=protected-access
+  for field, value in self.ListFields():
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      if _IsMapField(field):
+        if _IsMessageMapField(field):
+          for key in value:
+            value[key].DiscardUnknownFields()
+      elif field.label == _FieldDescriptor.LABEL_REPEATED:
+        for sub_message in value:
+          sub_message.DiscardUnknownFields()
+      else:
+        value.DiscardUnknownFields()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricTopic.FindInitializationErrors"><code class="name flex">
+<span>def <span class="ident">FindInitializationErrors</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Finds required fields which are not initialized.</p>
+<h2 id="returns">Returns</h2>
+<p>A list of strings.
+Each string is a path to an uninitialized field from
+the top-level message, e.g. "foo.bar[5].baz".</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def FindInitializationErrors(self):
+  &#34;&#34;&#34;Finds required fields which are not initialized.
+
+  Returns:
+    A list of strings.  Each string is a path to an uninitialized field from
+    the top-level message, e.g. &#34;foo.bar[5].baz&#34;.
+  &#34;&#34;&#34;
+
+  errors = []  # simplify things
+
+  for field in required_fields:
+    if not self.HasField(field.name):
+      errors.append(field.name)
+
+  for field, value in self.ListFields():
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      if field.is_extension:
+        name = &#39;(%s)&#39; % field.full_name
+      else:
+        name = field.name
+
+      if _IsMapField(field):
+        if _IsMessageMapField(field):
+          for key in value:
+            element = value[key]
+            prefix = &#39;%s[%s].&#39; % (name, key)
+            sub_errors = element.FindInitializationErrors()
+            errors += [prefix + error for error in sub_errors]
+        else:
+          # ScalarMaps can&#39;t have any initialization errors.
+          pass
+      elif field.label == _FieldDescriptor.LABEL_REPEATED:
+        for i in range(len(value)):
+          element = value[i]
+          prefix = &#39;%s[%d].&#39; % (name, i)
+          sub_errors = element.FindInitializationErrors()
+          errors += [prefix + error for error in sub_errors]
+      else:
+        prefix = name + &#39;.&#39;
+        sub_errors = value.FindInitializationErrors()
+        errors += [prefix + error for error in sub_errors]
+
+  return errors</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricTopic.HasField"><code class="name flex">
+<span>def <span class="ident">HasField</span></span>(<span>self, field_name)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def HasField(self, field_name):
+  try:
+    field = hassable_fields[field_name]
+  except KeyError:
+    raise ValueError(error_msg % (message_descriptor.full_name, field_name))
+
+  if isinstance(field, descriptor_mod.OneofDescriptor):
+    try:
+      return HasField(self, self._oneofs[field].name)
+    except KeyError:
+      return False
+  else:
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      value = self._fields.get(field)
+      return value is not None and value._is_present_in_parent
+    else:
+      return field in self._fields</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricTopic.IsInitialized"><code class="name flex">
+<span>def <span class="ident">IsInitialized</span></span>(<span>self, errors=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Checks if all required fields of a message are set.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>errors</code></strong></dt>
+<dd>A list which, if provided, will be populated with the field
+paths of all missing required fields.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>True iff the specified message has all required fields set.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def IsInitialized(self, errors=None):
+  &#34;&#34;&#34;Checks if all required fields of a message are set.
+
+  Args:
+    errors:  A list which, if provided, will be populated with the field
+             paths of all missing required fields.
+
+  Returns:
+    True iff the specified message has all required fields set.
+  &#34;&#34;&#34;
+
+  # Performance is critical so we avoid HasField() and ListFields().
+
+  for field in required_fields:
+    if (field not in self._fields or
+        (field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE and
+         not self._fields[field]._is_present_in_parent)):
+      if errors is not None:
+        errors.extend(self.FindInitializationErrors())
+      return False
+
+  for field, value in list(self._fields.items()):  # dict can change size!
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      if field.label == _FieldDescriptor.LABEL_REPEATED:
+        if (field.message_type.has_options and
+            field.message_type.GetOptions().map_entry):
+          continue
+        for element in value:
+          if not element.IsInitialized():
+            if errors is not None:
+              errors.extend(self.FindInitializationErrors())
+            return False
+      elif value._is_present_in_parent and not value.IsInitialized():
+        if errors is not None:
+          errors.extend(self.FindInitializationErrors())
+        return False
+
+  return True</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricTopic.ListFields"><code class="name flex">
+<span>def <span class="ident">ListFields</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ListFields(self):
+  all_fields = [item for item in self._fields.items() if _IsPresent(item)]
+  all_fields.sort(key = lambda item: item[0].number)
+  return all_fields</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricTopic.MergeFrom"><code class="name flex">
+<span>def <span class="ident">MergeFrom</span></span>(<span>self, msg)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def MergeFrom(self, msg):
+  if not isinstance(msg, cls):
+    raise TypeError(
+        &#39;Parameter to MergeFrom() must be instance of same class: &#39;
+        &#39;expected %s got %s.&#39; % (cls.__name__, msg.__class__.__name__))
+
+  assert msg is not self
+  self._Modified()
+
+  fields = self._fields
+
+  for field, value in msg._fields.items():
+    if field.label == LABEL_REPEATED:
+      field_value = fields.get(field)
+      if field_value is None:
+        # Construct a new object to represent this field.
+        field_value = field._default_constructor(self)
+        fields[field] = field_value
+      field_value.MergeFrom(value)
+    elif field.cpp_type == CPPTYPE_MESSAGE:
+      if value._is_present_in_parent:
+        field_value = fields.get(field)
+        if field_value is None:
+          # Construct a new object to represent this field.
+          field_value = field._default_constructor(self)
+          fields[field] = field_value
+        field_value.MergeFrom(value)
+    else:
+      self._fields[field] = value
+      if field.containing_oneof:
+        self._UpdateOneofState(field)
+
+  if msg._unknown_fields:
+    if not self._unknown_fields:
+      self._unknown_fields = []
+    self._unknown_fields.extend(msg._unknown_fields)
+    # pylint: disable=protected-access
+    if self._unknown_field_set is None:
+      self._unknown_field_set = containers.UnknownFieldSet()
+    self._unknown_field_set._extend(msg._unknown_field_set)</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricTopic.MergeFromString"><code class="name flex">
+<span>def <span class="ident">MergeFromString</span></span>(<span>self, serialized)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def MergeFromString(self, serialized):
+  if isinstance(serialized, memoryview) and six.PY2:
+    raise TypeError(
+        &#39;memoryview not supported in Python 2 with the pure Python proto &#39;
+        &#39;implementation: this is to maintain compatibility with the C++ &#39;
+        &#39;implementation&#39;)
+
+  serialized = memoryview(serialized)
+  length = len(serialized)
+  try:
+    if self._InternalParse(serialized, 0, length) != length:
+      # The only reason _InternalParse would return early is if it
+      # encountered an end-group tag.
+      raise message_mod.DecodeError(&#39;Unexpected end-group tag.&#39;)
+  except (IndexError, TypeError):
+    # Now ord(buf[p:p+1]) == ord(&#39;&#39;) gets TypeError.
+    raise message_mod.DecodeError(&#39;Truncated message.&#39;)
+  except struct.error as e:
+    raise message_mod.DecodeError(e)
+  return length   # Return this for legacy reasons.</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricTopic.SerializePartialToString"><code class="name flex">
+<span>def <span class="ident">SerializePartialToString</span></span>(<span>self, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def SerializePartialToString(self, **kwargs):
+  out = BytesIO()
+  self._InternalSerialize(out.write, **kwargs)
+  return out.getvalue()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricTopic.SerializeToString"><code class="name flex">
+<span>def <span class="ident">SerializeToString</span></span>(<span>self, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def SerializeToString(self, **kwargs):
+  # Check if the message has all of its required fields set.
+  if not self.IsInitialized():
+    raise message_mod.EncodeError(
+        &#39;Message %s is missing required fields: %s&#39; % (
+        self.DESCRIPTOR.full_name, &#39;,&#39;.join(self.FindInitializationErrors())))
+  return self.SerializePartialToString(**kwargs)</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricTopic.SetInParent"><code class="name flex">
+<span>def <span class="ident">SetInParent</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sets the _cached_byte_size_dirty bit to true,
+and propagates this to our listener iff this was a state change.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def Modified(self):
+  &#34;&#34;&#34;Sets the _cached_byte_size_dirty bit to true,
+  and propagates this to our listener iff this was a state change.
+  &#34;&#34;&#34;
+
+  # Note:  Some callers check _cached_byte_size_dirty before calling
+  #   _Modified() as an extra optimization.  So, if this method is ever
+  #   changed such that it does stuff even when _cached_byte_size_dirty is
+  #   already true, the callers need to be updated.
+  if not self._cached_byte_size_dirty:
+    self._cached_byte_size_dirty = True
+    self._listener_for_children.dirty = True
+    self._is_present_in_parent = True
+    self._listener.Modified()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricTopic.UnknownFields"><code class="name flex">
+<span>def <span class="ident">UnknownFields</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def _UnknownFields(self):
+  if self._unknown_field_set is None:  # pylint: disable=protected-access
+    # pylint: disable=protected-access
+    self._unknown_field_set = containers.UnknownFieldSet()
+  return self._unknown_field_set    # pylint: disable=protected-access</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.NitricTopic.WhichOneof"><code class="name flex">
+<span>def <span class="ident">WhichOneof</span></span>(<span>self, oneof_name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns the name of the currently set field inside a oneof, or None.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def WhichOneof(self, oneof_name):
+  &#34;&#34;&#34;Returns the name of the currently set field inside a oneof, or None.&#34;&#34;&#34;
+  try:
+    field = message_descriptor.oneofs_by_name[oneof_name]
+  except KeyError:
+    raise ValueError(
+        &#39;Protocol message has no oneof &#34;%s&#34; field.&#39; % oneof_name)
+
+  nested_field = self._oneofs.get(field, None)
+  if nested_field is not None and self.HasField(nested_field.name):
+    return nested_field.name
+  else:
+    return None</code></pre>
+</details>
 </dd>
 </dl>
 </dd>
 <dt id="nitric.proto.event.v1.event_pb2.TopicListRequest"><code class="flex name class">
 <span>class <span class="ident">TopicListRequest</span></span>
-<span>(</span><span>*args, **kwargs)</span>
+<span>(</span><span>**kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A ProtocolMessage</p></div>
+<div class="desc"><p>Abstract base class for protocol messages.</p>
+<p>Protocol message classes are almost always generated by the protocol
+compiler.
+These generated types subclass Message and implement the methods
+shown below.</p></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>google.protobuf.pyext._message.CMessage</li>
 <li>google.protobuf.message.Message</li>
 </ul>
 <h3>Class variables</h3>
@@ -519,16 +2651,517 @@ DESCRIPTOR.services_by_name[&#39;Topic&#39;] = _TOPIC
 <div class="desc"></div>
 </dd>
 </dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListRequest.FromString"><code class="name flex">
+<span>def <span class="ident">FromString</span></span>(<span>s)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def FromString(s):
+  message = cls()
+  message.MergeFromString(s)
+  return message</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListRequest.RegisterExtension"><code class="name flex">
+<span>def <span class="ident">RegisterExtension</span></span>(<span>extension_handle)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def RegisterExtension(extension_handle):
+  extension_handle.containing_type = cls.DESCRIPTOR
+  # TODO(amauryfa): Use cls.MESSAGE_FACTORY.pool when available.
+  # pylint: disable=protected-access
+  cls.DESCRIPTOR.file.pool._AddExtensionDescriptor(extension_handle)
+  _AttachFieldHelpers(cls, extension_handle)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListRequest.ByteSize"><code class="name flex">
+<span>def <span class="ident">ByteSize</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ByteSize(self):
+  if not self._cached_byte_size_dirty:
+    return self._cached_byte_size
+
+  size = 0
+  descriptor = self.DESCRIPTOR
+  if descriptor.GetOptions().map_entry:
+    # Fields of map entry should always be serialized.
+    size = descriptor.fields_by_name[&#39;key&#39;]._sizer(self.key)
+    size += descriptor.fields_by_name[&#39;value&#39;]._sizer(self.value)
+  else:
+    for field_descriptor, field_value in self.ListFields():
+      size += field_descriptor._sizer(field_value)
+    for tag_bytes, value_bytes in self._unknown_fields:
+      size += len(tag_bytes) + len(value_bytes)
+
+  self._cached_byte_size = size
+  self._cached_byte_size_dirty = False
+  self._listener_for_children.dirty = False
+  return size</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListRequest.Clear"><code class="name flex">
+<span>def <span class="ident">Clear</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def _Clear(self):
+  # Clear fields.
+  self._fields = {}
+  self._unknown_fields = ()
+  # pylint: disable=protected-access
+  if self._unknown_field_set is not None:
+    self._unknown_field_set._clear()
+    self._unknown_field_set = None
+
+  self._oneofs = {}
+  self._Modified()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListRequest.ClearField"><code class="name flex">
+<span>def <span class="ident">ClearField</span></span>(<span>self, field_name)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ClearField(self, field_name):
+  try:
+    field = message_descriptor.fields_by_name[field_name]
+  except KeyError:
+    try:
+      field = message_descriptor.oneofs_by_name[field_name]
+      if field in self._oneofs:
+        field = self._oneofs[field]
+      else:
+        return
+    except KeyError:
+      raise ValueError(&#39;Protocol message %s has no &#34;%s&#34; field.&#39; %
+                       (message_descriptor.name, field_name))
+
+  if field in self._fields:
+    # To match the C++ implementation, we need to invalidate iterators
+    # for map fields when ClearField() happens.
+    if hasattr(self._fields[field], &#39;InvalidateIterators&#39;):
+      self._fields[field].InvalidateIterators()
+
+    # Note:  If the field is a sub-message, its listener will still point
+    #   at us.  That&#39;s fine, because the worst than can happen is that it
+    #   will call _Modified() and invalidate our byte size.  Big deal.
+    del self._fields[field]
+
+    if self._oneofs.get(field.containing_oneof, None) is field:
+      del self._oneofs[field.containing_oneof]
+
+  # Always call _Modified() -- even if nothing was changed, this is
+  # a mutating method, and thus calling it should cause the field to become
+  # present in the parent message.
+  self._Modified()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListRequest.DiscardUnknownFields"><code class="name flex">
+<span>def <span class="ident">DiscardUnknownFields</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def _DiscardUnknownFields(self):
+  self._unknown_fields = []
+  self._unknown_field_set = None      # pylint: disable=protected-access
+  for field, value in self.ListFields():
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      if _IsMapField(field):
+        if _IsMessageMapField(field):
+          for key in value:
+            value[key].DiscardUnknownFields()
+      elif field.label == _FieldDescriptor.LABEL_REPEATED:
+        for sub_message in value:
+          sub_message.DiscardUnknownFields()
+      else:
+        value.DiscardUnknownFields()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListRequest.FindInitializationErrors"><code class="name flex">
+<span>def <span class="ident">FindInitializationErrors</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Finds required fields which are not initialized.</p>
+<h2 id="returns">Returns</h2>
+<p>A list of strings.
+Each string is a path to an uninitialized field from
+the top-level message, e.g. "foo.bar[5].baz".</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def FindInitializationErrors(self):
+  &#34;&#34;&#34;Finds required fields which are not initialized.
+
+  Returns:
+    A list of strings.  Each string is a path to an uninitialized field from
+    the top-level message, e.g. &#34;foo.bar[5].baz&#34;.
+  &#34;&#34;&#34;
+
+  errors = []  # simplify things
+
+  for field in required_fields:
+    if not self.HasField(field.name):
+      errors.append(field.name)
+
+  for field, value in self.ListFields():
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      if field.is_extension:
+        name = &#39;(%s)&#39; % field.full_name
+      else:
+        name = field.name
+
+      if _IsMapField(field):
+        if _IsMessageMapField(field):
+          for key in value:
+            element = value[key]
+            prefix = &#39;%s[%s].&#39; % (name, key)
+            sub_errors = element.FindInitializationErrors()
+            errors += [prefix + error for error in sub_errors]
+        else:
+          # ScalarMaps can&#39;t have any initialization errors.
+          pass
+      elif field.label == _FieldDescriptor.LABEL_REPEATED:
+        for i in range(len(value)):
+          element = value[i]
+          prefix = &#39;%s[%d].&#39; % (name, i)
+          sub_errors = element.FindInitializationErrors()
+          errors += [prefix + error for error in sub_errors]
+      else:
+        prefix = name + &#39;.&#39;
+        sub_errors = value.FindInitializationErrors()
+        errors += [prefix + error for error in sub_errors]
+
+  return errors</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListRequest.HasField"><code class="name flex">
+<span>def <span class="ident">HasField</span></span>(<span>self, field_name)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def HasField(self, field_name):
+  try:
+    field = hassable_fields[field_name]
+  except KeyError:
+    raise ValueError(error_msg % (message_descriptor.full_name, field_name))
+
+  if isinstance(field, descriptor_mod.OneofDescriptor):
+    try:
+      return HasField(self, self._oneofs[field].name)
+    except KeyError:
+      return False
+  else:
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      value = self._fields.get(field)
+      return value is not None and value._is_present_in_parent
+    else:
+      return field in self._fields</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListRequest.IsInitialized"><code class="name flex">
+<span>def <span class="ident">IsInitialized</span></span>(<span>self, errors=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Checks if all required fields of a message are set.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>errors</code></strong></dt>
+<dd>A list which, if provided, will be populated with the field
+paths of all missing required fields.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>True iff the specified message has all required fields set.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def IsInitialized(self, errors=None):
+  &#34;&#34;&#34;Checks if all required fields of a message are set.
+
+  Args:
+    errors:  A list which, if provided, will be populated with the field
+             paths of all missing required fields.
+
+  Returns:
+    True iff the specified message has all required fields set.
+  &#34;&#34;&#34;
+
+  # Performance is critical so we avoid HasField() and ListFields().
+
+  for field in required_fields:
+    if (field not in self._fields or
+        (field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE and
+         not self._fields[field]._is_present_in_parent)):
+      if errors is not None:
+        errors.extend(self.FindInitializationErrors())
+      return False
+
+  for field, value in list(self._fields.items()):  # dict can change size!
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      if field.label == _FieldDescriptor.LABEL_REPEATED:
+        if (field.message_type.has_options and
+            field.message_type.GetOptions().map_entry):
+          continue
+        for element in value:
+          if not element.IsInitialized():
+            if errors is not None:
+              errors.extend(self.FindInitializationErrors())
+            return False
+      elif value._is_present_in_parent and not value.IsInitialized():
+        if errors is not None:
+          errors.extend(self.FindInitializationErrors())
+        return False
+
+  return True</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListRequest.ListFields"><code class="name flex">
+<span>def <span class="ident">ListFields</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ListFields(self):
+  all_fields = [item for item in self._fields.items() if _IsPresent(item)]
+  all_fields.sort(key = lambda item: item[0].number)
+  return all_fields</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListRequest.MergeFrom"><code class="name flex">
+<span>def <span class="ident">MergeFrom</span></span>(<span>self, msg)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def MergeFrom(self, msg):
+  if not isinstance(msg, cls):
+    raise TypeError(
+        &#39;Parameter to MergeFrom() must be instance of same class: &#39;
+        &#39;expected %s got %s.&#39; % (cls.__name__, msg.__class__.__name__))
+
+  assert msg is not self
+  self._Modified()
+
+  fields = self._fields
+
+  for field, value in msg._fields.items():
+    if field.label == LABEL_REPEATED:
+      field_value = fields.get(field)
+      if field_value is None:
+        # Construct a new object to represent this field.
+        field_value = field._default_constructor(self)
+        fields[field] = field_value
+      field_value.MergeFrom(value)
+    elif field.cpp_type == CPPTYPE_MESSAGE:
+      if value._is_present_in_parent:
+        field_value = fields.get(field)
+        if field_value is None:
+          # Construct a new object to represent this field.
+          field_value = field._default_constructor(self)
+          fields[field] = field_value
+        field_value.MergeFrom(value)
+    else:
+      self._fields[field] = value
+      if field.containing_oneof:
+        self._UpdateOneofState(field)
+
+  if msg._unknown_fields:
+    if not self._unknown_fields:
+      self._unknown_fields = []
+    self._unknown_fields.extend(msg._unknown_fields)
+    # pylint: disable=protected-access
+    if self._unknown_field_set is None:
+      self._unknown_field_set = containers.UnknownFieldSet()
+    self._unknown_field_set._extend(msg._unknown_field_set)</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListRequest.MergeFromString"><code class="name flex">
+<span>def <span class="ident">MergeFromString</span></span>(<span>self, serialized)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def MergeFromString(self, serialized):
+  if isinstance(serialized, memoryview) and six.PY2:
+    raise TypeError(
+        &#39;memoryview not supported in Python 2 with the pure Python proto &#39;
+        &#39;implementation: this is to maintain compatibility with the C++ &#39;
+        &#39;implementation&#39;)
+
+  serialized = memoryview(serialized)
+  length = len(serialized)
+  try:
+    if self._InternalParse(serialized, 0, length) != length:
+      # The only reason _InternalParse would return early is if it
+      # encountered an end-group tag.
+      raise message_mod.DecodeError(&#39;Unexpected end-group tag.&#39;)
+  except (IndexError, TypeError):
+    # Now ord(buf[p:p+1]) == ord(&#39;&#39;) gets TypeError.
+    raise message_mod.DecodeError(&#39;Truncated message.&#39;)
+  except struct.error as e:
+    raise message_mod.DecodeError(e)
+  return length   # Return this for legacy reasons.</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListRequest.SerializePartialToString"><code class="name flex">
+<span>def <span class="ident">SerializePartialToString</span></span>(<span>self, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def SerializePartialToString(self, **kwargs):
+  out = BytesIO()
+  self._InternalSerialize(out.write, **kwargs)
+  return out.getvalue()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListRequest.SerializeToString"><code class="name flex">
+<span>def <span class="ident">SerializeToString</span></span>(<span>self, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def SerializeToString(self, **kwargs):
+  # Check if the message has all of its required fields set.
+  if not self.IsInitialized():
+    raise message_mod.EncodeError(
+        &#39;Message %s is missing required fields: %s&#39; % (
+        self.DESCRIPTOR.full_name, &#39;,&#39;.join(self.FindInitializationErrors())))
+  return self.SerializePartialToString(**kwargs)</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListRequest.SetInParent"><code class="name flex">
+<span>def <span class="ident">SetInParent</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sets the _cached_byte_size_dirty bit to true,
+and propagates this to our listener iff this was a state change.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def Modified(self):
+  &#34;&#34;&#34;Sets the _cached_byte_size_dirty bit to true,
+  and propagates this to our listener iff this was a state change.
+  &#34;&#34;&#34;
+
+  # Note:  Some callers check _cached_byte_size_dirty before calling
+  #   _Modified() as an extra optimization.  So, if this method is ever
+  #   changed such that it does stuff even when _cached_byte_size_dirty is
+  #   already true, the callers need to be updated.
+  if not self._cached_byte_size_dirty:
+    self._cached_byte_size_dirty = True
+    self._listener_for_children.dirty = True
+    self._is_present_in_parent = True
+    self._listener.Modified()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListRequest.UnknownFields"><code class="name flex">
+<span>def <span class="ident">UnknownFields</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def _UnknownFields(self):
+  if self._unknown_field_set is None:  # pylint: disable=protected-access
+    # pylint: disable=protected-access
+    self._unknown_field_set = containers.UnknownFieldSet()
+  return self._unknown_field_set    # pylint: disable=protected-access</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListRequest.WhichOneof"><code class="name flex">
+<span>def <span class="ident">WhichOneof</span></span>(<span>self, oneof_name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns the name of the currently set field inside a oneof, or None.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def WhichOneof(self, oneof_name):
+  &#34;&#34;&#34;Returns the name of the currently set field inside a oneof, or None.&#34;&#34;&#34;
+  try:
+    field = message_descriptor.oneofs_by_name[oneof_name]
+  except KeyError:
+    raise ValueError(
+        &#39;Protocol message has no oneof &#34;%s&#34; field.&#39; % oneof_name)
+
+  nested_field = self._oneofs.get(field, None)
+  if nested_field is not None and self.HasField(nested_field.name):
+    return nested_field.name
+  else:
+    return None</code></pre>
+</details>
+</dd>
+</dl>
 </dd>
 <dt id="nitric.proto.event.v1.event_pb2.TopicListResponse"><code class="flex name class">
 <span>class <span class="ident">TopicListResponse</span></span>
-<span>(</span><span>*args, **kwargs)</span>
+<span>(</span><span>**kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>A ProtocolMessage</p></div>
+<div class="desc"><p>Abstract base class for protocol messages.</p>
+<p>Protocol message classes are almost always generated by the protocol
+compiler.
+These generated types subclass Message and implement the methods
+shown below.</p></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>google.protobuf.pyext._message.CMessage</li>
 <li>google.protobuf.message.Message</li>
 </ul>
 <h3>Class variables</h3>
@@ -537,12 +3170,533 @@ DESCRIPTOR.services_by_name[&#39;Topic&#39;] = _TOPIC
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListResponse.TOPICS_FIELD_NUMBER"><code class="name">var <span class="ident">TOPICS_FIELD_NUMBER</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListResponse.FromString"><code class="name flex">
+<span>def <span class="ident">FromString</span></span>(<span>s)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def FromString(s):
+  message = cls()
+  message.MergeFromString(s)
+  return message</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListResponse.RegisterExtension"><code class="name flex">
+<span>def <span class="ident">RegisterExtension</span></span>(<span>extension_handle)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def RegisterExtension(extension_handle):
+  extension_handle.containing_type = cls.DESCRIPTOR
+  # TODO(amauryfa): Use cls.MESSAGE_FACTORY.pool when available.
+  # pylint: disable=protected-access
+  cls.DESCRIPTOR.file.pool._AddExtensionDescriptor(extension_handle)
+  _AttachFieldHelpers(cls, extension_handle)</code></pre>
+</details>
+</dd>
 </dl>
 <h3>Instance variables</h3>
 <dl>
 <dt id="nitric.proto.event.v1.event_pb2.TopicListResponse.topics"><code class="name">var <span class="ident">topics</span></code></dt>
 <dd>
-<div class="desc"><p>Field nitric.event.v1.TopicListResponse.topics</p></div>
+<div class="desc"><p>Getter for topics.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def getter(self):
+  field_value = self._fields.get(field)
+  if field_value is None:
+    # Construct a new object to represent this field.
+    field_value = field._default_constructor(self)
+
+    # Atomically check if another thread has preempted us and, if not, swap
+    # in the new object we just created.  If someone has preempted us, we
+    # take that object and discard ours.
+    # WARNING:  We are relying on setdefault() being atomic.  This is true
+    #   in CPython but we haven&#39;t investigated others.  This warning appears
+    #   in several other locations in this file.
+    field_value = self._fields.setdefault(field, field_value)
+  return field_value</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListResponse.ByteSize"><code class="name flex">
+<span>def <span class="ident">ByteSize</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ByteSize(self):
+  if not self._cached_byte_size_dirty:
+    return self._cached_byte_size
+
+  size = 0
+  descriptor = self.DESCRIPTOR
+  if descriptor.GetOptions().map_entry:
+    # Fields of map entry should always be serialized.
+    size = descriptor.fields_by_name[&#39;key&#39;]._sizer(self.key)
+    size += descriptor.fields_by_name[&#39;value&#39;]._sizer(self.value)
+  else:
+    for field_descriptor, field_value in self.ListFields():
+      size += field_descriptor._sizer(field_value)
+    for tag_bytes, value_bytes in self._unknown_fields:
+      size += len(tag_bytes) + len(value_bytes)
+
+  self._cached_byte_size = size
+  self._cached_byte_size_dirty = False
+  self._listener_for_children.dirty = False
+  return size</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListResponse.Clear"><code class="name flex">
+<span>def <span class="ident">Clear</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def _Clear(self):
+  # Clear fields.
+  self._fields = {}
+  self._unknown_fields = ()
+  # pylint: disable=protected-access
+  if self._unknown_field_set is not None:
+    self._unknown_field_set._clear()
+    self._unknown_field_set = None
+
+  self._oneofs = {}
+  self._Modified()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListResponse.ClearField"><code class="name flex">
+<span>def <span class="ident">ClearField</span></span>(<span>self, field_name)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ClearField(self, field_name):
+  try:
+    field = message_descriptor.fields_by_name[field_name]
+  except KeyError:
+    try:
+      field = message_descriptor.oneofs_by_name[field_name]
+      if field in self._oneofs:
+        field = self._oneofs[field]
+      else:
+        return
+    except KeyError:
+      raise ValueError(&#39;Protocol message %s has no &#34;%s&#34; field.&#39; %
+                       (message_descriptor.name, field_name))
+
+  if field in self._fields:
+    # To match the C++ implementation, we need to invalidate iterators
+    # for map fields when ClearField() happens.
+    if hasattr(self._fields[field], &#39;InvalidateIterators&#39;):
+      self._fields[field].InvalidateIterators()
+
+    # Note:  If the field is a sub-message, its listener will still point
+    #   at us.  That&#39;s fine, because the worst than can happen is that it
+    #   will call _Modified() and invalidate our byte size.  Big deal.
+    del self._fields[field]
+
+    if self._oneofs.get(field.containing_oneof, None) is field:
+      del self._oneofs[field.containing_oneof]
+
+  # Always call _Modified() -- even if nothing was changed, this is
+  # a mutating method, and thus calling it should cause the field to become
+  # present in the parent message.
+  self._Modified()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListResponse.DiscardUnknownFields"><code class="name flex">
+<span>def <span class="ident">DiscardUnknownFields</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def _DiscardUnknownFields(self):
+  self._unknown_fields = []
+  self._unknown_field_set = None      # pylint: disable=protected-access
+  for field, value in self.ListFields():
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      if _IsMapField(field):
+        if _IsMessageMapField(field):
+          for key in value:
+            value[key].DiscardUnknownFields()
+      elif field.label == _FieldDescriptor.LABEL_REPEATED:
+        for sub_message in value:
+          sub_message.DiscardUnknownFields()
+      else:
+        value.DiscardUnknownFields()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListResponse.FindInitializationErrors"><code class="name flex">
+<span>def <span class="ident">FindInitializationErrors</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Finds required fields which are not initialized.</p>
+<h2 id="returns">Returns</h2>
+<p>A list of strings.
+Each string is a path to an uninitialized field from
+the top-level message, e.g. "foo.bar[5].baz".</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def FindInitializationErrors(self):
+  &#34;&#34;&#34;Finds required fields which are not initialized.
+
+  Returns:
+    A list of strings.  Each string is a path to an uninitialized field from
+    the top-level message, e.g. &#34;foo.bar[5].baz&#34;.
+  &#34;&#34;&#34;
+
+  errors = []  # simplify things
+
+  for field in required_fields:
+    if not self.HasField(field.name):
+      errors.append(field.name)
+
+  for field, value in self.ListFields():
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      if field.is_extension:
+        name = &#39;(%s)&#39; % field.full_name
+      else:
+        name = field.name
+
+      if _IsMapField(field):
+        if _IsMessageMapField(field):
+          for key in value:
+            element = value[key]
+            prefix = &#39;%s[%s].&#39; % (name, key)
+            sub_errors = element.FindInitializationErrors()
+            errors += [prefix + error for error in sub_errors]
+        else:
+          # ScalarMaps can&#39;t have any initialization errors.
+          pass
+      elif field.label == _FieldDescriptor.LABEL_REPEATED:
+        for i in range(len(value)):
+          element = value[i]
+          prefix = &#39;%s[%d].&#39; % (name, i)
+          sub_errors = element.FindInitializationErrors()
+          errors += [prefix + error for error in sub_errors]
+      else:
+        prefix = name + &#39;.&#39;
+        sub_errors = value.FindInitializationErrors()
+        errors += [prefix + error for error in sub_errors]
+
+  return errors</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListResponse.HasField"><code class="name flex">
+<span>def <span class="ident">HasField</span></span>(<span>self, field_name)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def HasField(self, field_name):
+  try:
+    field = hassable_fields[field_name]
+  except KeyError:
+    raise ValueError(error_msg % (message_descriptor.full_name, field_name))
+
+  if isinstance(field, descriptor_mod.OneofDescriptor):
+    try:
+      return HasField(self, self._oneofs[field].name)
+    except KeyError:
+      return False
+  else:
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      value = self._fields.get(field)
+      return value is not None and value._is_present_in_parent
+    else:
+      return field in self._fields</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListResponse.IsInitialized"><code class="name flex">
+<span>def <span class="ident">IsInitialized</span></span>(<span>self, errors=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Checks if all required fields of a message are set.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>errors</code></strong></dt>
+<dd>A list which, if provided, will be populated with the field
+paths of all missing required fields.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>True iff the specified message has all required fields set.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def IsInitialized(self, errors=None):
+  &#34;&#34;&#34;Checks if all required fields of a message are set.
+
+  Args:
+    errors:  A list which, if provided, will be populated with the field
+             paths of all missing required fields.
+
+  Returns:
+    True iff the specified message has all required fields set.
+  &#34;&#34;&#34;
+
+  # Performance is critical so we avoid HasField() and ListFields().
+
+  for field in required_fields:
+    if (field not in self._fields or
+        (field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE and
+         not self._fields[field]._is_present_in_parent)):
+      if errors is not None:
+        errors.extend(self.FindInitializationErrors())
+      return False
+
+  for field, value in list(self._fields.items()):  # dict can change size!
+    if field.cpp_type == _FieldDescriptor.CPPTYPE_MESSAGE:
+      if field.label == _FieldDescriptor.LABEL_REPEATED:
+        if (field.message_type.has_options and
+            field.message_type.GetOptions().map_entry):
+          continue
+        for element in value:
+          if not element.IsInitialized():
+            if errors is not None:
+              errors.extend(self.FindInitializationErrors())
+            return False
+      elif value._is_present_in_parent and not value.IsInitialized():
+        if errors is not None:
+          errors.extend(self.FindInitializationErrors())
+        return False
+
+  return True</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListResponse.ListFields"><code class="name flex">
+<span>def <span class="ident">ListFields</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ListFields(self):
+  all_fields = [item for item in self._fields.items() if _IsPresent(item)]
+  all_fields.sort(key = lambda item: item[0].number)
+  return all_fields</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListResponse.MergeFrom"><code class="name flex">
+<span>def <span class="ident">MergeFrom</span></span>(<span>self, msg)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def MergeFrom(self, msg):
+  if not isinstance(msg, cls):
+    raise TypeError(
+        &#39;Parameter to MergeFrom() must be instance of same class: &#39;
+        &#39;expected %s got %s.&#39; % (cls.__name__, msg.__class__.__name__))
+
+  assert msg is not self
+  self._Modified()
+
+  fields = self._fields
+
+  for field, value in msg._fields.items():
+    if field.label == LABEL_REPEATED:
+      field_value = fields.get(field)
+      if field_value is None:
+        # Construct a new object to represent this field.
+        field_value = field._default_constructor(self)
+        fields[field] = field_value
+      field_value.MergeFrom(value)
+    elif field.cpp_type == CPPTYPE_MESSAGE:
+      if value._is_present_in_parent:
+        field_value = fields.get(field)
+        if field_value is None:
+          # Construct a new object to represent this field.
+          field_value = field._default_constructor(self)
+          fields[field] = field_value
+        field_value.MergeFrom(value)
+    else:
+      self._fields[field] = value
+      if field.containing_oneof:
+        self._UpdateOneofState(field)
+
+  if msg._unknown_fields:
+    if not self._unknown_fields:
+      self._unknown_fields = []
+    self._unknown_fields.extend(msg._unknown_fields)
+    # pylint: disable=protected-access
+    if self._unknown_field_set is None:
+      self._unknown_field_set = containers.UnknownFieldSet()
+    self._unknown_field_set._extend(msg._unknown_field_set)</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListResponse.MergeFromString"><code class="name flex">
+<span>def <span class="ident">MergeFromString</span></span>(<span>self, serialized)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def MergeFromString(self, serialized):
+  if isinstance(serialized, memoryview) and six.PY2:
+    raise TypeError(
+        &#39;memoryview not supported in Python 2 with the pure Python proto &#39;
+        &#39;implementation: this is to maintain compatibility with the C++ &#39;
+        &#39;implementation&#39;)
+
+  serialized = memoryview(serialized)
+  length = len(serialized)
+  try:
+    if self._InternalParse(serialized, 0, length) != length:
+      # The only reason _InternalParse would return early is if it
+      # encountered an end-group tag.
+      raise message_mod.DecodeError(&#39;Unexpected end-group tag.&#39;)
+  except (IndexError, TypeError):
+    # Now ord(buf[p:p+1]) == ord(&#39;&#39;) gets TypeError.
+    raise message_mod.DecodeError(&#39;Truncated message.&#39;)
+  except struct.error as e:
+    raise message_mod.DecodeError(e)
+  return length   # Return this for legacy reasons.</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListResponse.SerializePartialToString"><code class="name flex">
+<span>def <span class="ident">SerializePartialToString</span></span>(<span>self, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def SerializePartialToString(self, **kwargs):
+  out = BytesIO()
+  self._InternalSerialize(out.write, **kwargs)
+  return out.getvalue()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListResponse.SerializeToString"><code class="name flex">
+<span>def <span class="ident">SerializeToString</span></span>(<span>self, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def SerializeToString(self, **kwargs):
+  # Check if the message has all of its required fields set.
+  if not self.IsInitialized():
+    raise message_mod.EncodeError(
+        &#39;Message %s is missing required fields: %s&#39; % (
+        self.DESCRIPTOR.full_name, &#39;,&#39;.join(self.FindInitializationErrors())))
+  return self.SerializePartialToString(**kwargs)</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListResponse.SetInParent"><code class="name flex">
+<span>def <span class="ident">SetInParent</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sets the _cached_byte_size_dirty bit to true,
+and propagates this to our listener iff this was a state change.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def Modified(self):
+  &#34;&#34;&#34;Sets the _cached_byte_size_dirty bit to true,
+  and propagates this to our listener iff this was a state change.
+  &#34;&#34;&#34;
+
+  # Note:  Some callers check _cached_byte_size_dirty before calling
+  #   _Modified() as an extra optimization.  So, if this method is ever
+  #   changed such that it does stuff even when _cached_byte_size_dirty is
+  #   already true, the callers need to be updated.
+  if not self._cached_byte_size_dirty:
+    self._cached_byte_size_dirty = True
+    self._listener_for_children.dirty = True
+    self._is_present_in_parent = True
+    self._listener.Modified()</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListResponse.UnknownFields"><code class="name flex">
+<span>def <span class="ident">UnknownFields</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def _UnknownFields(self):
+  if self._unknown_field_set is None:  # pylint: disable=protected-access
+    # pylint: disable=protected-access
+    self._unknown_field_set = containers.UnknownFieldSet()
+  return self._unknown_field_set    # pylint: disable=protected-access</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.event.v1.event_pb2.TopicListResponse.WhichOneof"><code class="name flex">
+<span>def <span class="ident">WhichOneof</span></span>(<span>self, oneof_name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns the name of the currently set field inside a oneof, or None.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def WhichOneof(self, oneof_name):
+  &#34;&#34;&#34;Returns the name of the currently set field inside a oneof, or None.&#34;&#34;&#34;
+  try:
+    field = message_descriptor.oneofs_by_name[oneof_name]
+  except KeyError:
+    raise ValueError(
+        &#39;Protocol message has no oneof &#34;%s&#34; field.&#39; % oneof_name)
+
+  nested_field = self._oneofs.get(field, None)
+  if nested_field is not None and self.HasField(nested_field.name):
+    return nested_field.name
+  else:
+    return None</code></pre>
+</details>
 </dd>
 </dl>
 </dd>
@@ -565,7 +3719,26 @@ DESCRIPTOR.services_by_name[&#39;Topic&#39;] = _TOPIC
 <li>
 <h4><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest">EventPublishRequest</a></code></h4>
 <ul class="">
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.ByteSize" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.ByteSize">ByteSize</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.Clear" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.Clear">Clear</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.ClearField" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.ClearField">ClearField</a></code></li>
 <li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.DESCRIPTOR" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.DESCRIPTOR">DESCRIPTOR</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.DiscardUnknownFields" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.DiscardUnknownFields">DiscardUnknownFields</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.EVENT_FIELD_NUMBER" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.EVENT_FIELD_NUMBER">EVENT_FIELD_NUMBER</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.FindInitializationErrors" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.FindInitializationErrors">FindInitializationErrors</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.FromString" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.FromString">FromString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.HasField" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.HasField">HasField</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.IsInitialized" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.IsInitialized">IsInitialized</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.ListFields" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.ListFields">ListFields</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.MergeFrom" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.MergeFrom">MergeFrom</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.MergeFromString" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.MergeFromString">MergeFromString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.RegisterExtension" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.RegisterExtension">RegisterExtension</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.SerializePartialToString" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.SerializePartialToString">SerializePartialToString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.SerializeToString" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.SerializeToString">SerializeToString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.SetInParent" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.SetInParent">SetInParent</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.TOPIC_FIELD_NUMBER" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.TOPIC_FIELD_NUMBER">TOPIC_FIELD_NUMBER</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.UnknownFields" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.UnknownFields">UnknownFields</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.WhichOneof" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.WhichOneof">WhichOneof</a></code></li>
 <li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.event" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.event">event</a></code></li>
 <li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishRequest.topic" href="#nitric.proto.event.v1.event_pb2.EventPublishRequest.topic">topic</a></code></li>
 </ul>
@@ -573,35 +3746,127 @@ DESCRIPTOR.services_by_name[&#39;Topic&#39;] = _TOPIC
 <li>
 <h4><code><a title="nitric.proto.event.v1.event_pb2.EventPublishResponse" href="#nitric.proto.event.v1.event_pb2.EventPublishResponse">EventPublishResponse</a></code></h4>
 <ul class="">
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishResponse.ByteSize" href="#nitric.proto.event.v1.event_pb2.EventPublishResponse.ByteSize">ByteSize</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishResponse.Clear" href="#nitric.proto.event.v1.event_pb2.EventPublishResponse.Clear">Clear</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishResponse.ClearField" href="#nitric.proto.event.v1.event_pb2.EventPublishResponse.ClearField">ClearField</a></code></li>
 <li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishResponse.DESCRIPTOR" href="#nitric.proto.event.v1.event_pb2.EventPublishResponse.DESCRIPTOR">DESCRIPTOR</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishResponse.DiscardUnknownFields" href="#nitric.proto.event.v1.event_pb2.EventPublishResponse.DiscardUnknownFields">DiscardUnknownFields</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishResponse.FindInitializationErrors" href="#nitric.proto.event.v1.event_pb2.EventPublishResponse.FindInitializationErrors">FindInitializationErrors</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishResponse.FromString" href="#nitric.proto.event.v1.event_pb2.EventPublishResponse.FromString">FromString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishResponse.HasField" href="#nitric.proto.event.v1.event_pb2.EventPublishResponse.HasField">HasField</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishResponse.ID_FIELD_NUMBER" href="#nitric.proto.event.v1.event_pb2.EventPublishResponse.ID_FIELD_NUMBER">ID_FIELD_NUMBER</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishResponse.IsInitialized" href="#nitric.proto.event.v1.event_pb2.EventPublishResponse.IsInitialized">IsInitialized</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishResponse.ListFields" href="#nitric.proto.event.v1.event_pb2.EventPublishResponse.ListFields">ListFields</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishResponse.MergeFrom" href="#nitric.proto.event.v1.event_pb2.EventPublishResponse.MergeFrom">MergeFrom</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishResponse.MergeFromString" href="#nitric.proto.event.v1.event_pb2.EventPublishResponse.MergeFromString">MergeFromString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishResponse.RegisterExtension" href="#nitric.proto.event.v1.event_pb2.EventPublishResponse.RegisterExtension">RegisterExtension</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishResponse.SerializePartialToString" href="#nitric.proto.event.v1.event_pb2.EventPublishResponse.SerializePartialToString">SerializePartialToString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishResponse.SerializeToString" href="#nitric.proto.event.v1.event_pb2.EventPublishResponse.SerializeToString">SerializeToString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishResponse.SetInParent" href="#nitric.proto.event.v1.event_pb2.EventPublishResponse.SetInParent">SetInParent</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishResponse.UnknownFields" href="#nitric.proto.event.v1.event_pb2.EventPublishResponse.UnknownFields">UnknownFields</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishResponse.WhichOneof" href="#nitric.proto.event.v1.event_pb2.EventPublishResponse.WhichOneof">WhichOneof</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.EventPublishResponse.id" href="#nitric.proto.event.v1.event_pb2.EventPublishResponse.id">id</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent" href="#nitric.proto.event.v1.event_pb2.NitricEvent">NitricEvent</a></code></h4>
 <ul class="">
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.ByteSize" href="#nitric.proto.event.v1.event_pb2.NitricEvent.ByteSize">ByteSize</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.Clear" href="#nitric.proto.event.v1.event_pb2.NitricEvent.Clear">Clear</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.ClearField" href="#nitric.proto.event.v1.event_pb2.NitricEvent.ClearField">ClearField</a></code></li>
 <li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.DESCRIPTOR" href="#nitric.proto.event.v1.event_pb2.NitricEvent.DESCRIPTOR">DESCRIPTOR</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.DiscardUnknownFields" href="#nitric.proto.event.v1.event_pb2.NitricEvent.DiscardUnknownFields">DiscardUnknownFields</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.FindInitializationErrors" href="#nitric.proto.event.v1.event_pb2.NitricEvent.FindInitializationErrors">FindInitializationErrors</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.FromString" href="#nitric.proto.event.v1.event_pb2.NitricEvent.FromString">FromString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.HasField" href="#nitric.proto.event.v1.event_pb2.NitricEvent.HasField">HasField</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.ID_FIELD_NUMBER" href="#nitric.proto.event.v1.event_pb2.NitricEvent.ID_FIELD_NUMBER">ID_FIELD_NUMBER</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.IsInitialized" href="#nitric.proto.event.v1.event_pb2.NitricEvent.IsInitialized">IsInitialized</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.ListFields" href="#nitric.proto.event.v1.event_pb2.NitricEvent.ListFields">ListFields</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.MergeFrom" href="#nitric.proto.event.v1.event_pb2.NitricEvent.MergeFrom">MergeFrom</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.MergeFromString" href="#nitric.proto.event.v1.event_pb2.NitricEvent.MergeFromString">MergeFromString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.PAYLOAD_FIELD_NUMBER" href="#nitric.proto.event.v1.event_pb2.NitricEvent.PAYLOAD_FIELD_NUMBER">PAYLOAD_FIELD_NUMBER</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.PAYLOAD_TYPE_FIELD_NUMBER" href="#nitric.proto.event.v1.event_pb2.NitricEvent.PAYLOAD_TYPE_FIELD_NUMBER">PAYLOAD_TYPE_FIELD_NUMBER</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.RegisterExtension" href="#nitric.proto.event.v1.event_pb2.NitricEvent.RegisterExtension">RegisterExtension</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.SerializePartialToString" href="#nitric.proto.event.v1.event_pb2.NitricEvent.SerializePartialToString">SerializePartialToString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.SerializeToString" href="#nitric.proto.event.v1.event_pb2.NitricEvent.SerializeToString">SerializeToString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.SetInParent" href="#nitric.proto.event.v1.event_pb2.NitricEvent.SetInParent">SetInParent</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.UnknownFields" href="#nitric.proto.event.v1.event_pb2.NitricEvent.UnknownFields">UnknownFields</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.WhichOneof" href="#nitric.proto.event.v1.event_pb2.NitricEvent.WhichOneof">WhichOneof</a></code></li>
 <li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.id" href="#nitric.proto.event.v1.event_pb2.NitricEvent.id">id</a></code></li>
 <li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.payload" href="#nitric.proto.event.v1.event_pb2.NitricEvent.payload">payload</a></code></li>
-<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.payloadType" href="#nitric.proto.event.v1.event_pb2.NitricEvent.payloadType">payloadType</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricEvent.payload_type" href="#nitric.proto.event.v1.event_pb2.NitricEvent.payload_type">payload_type</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic" href="#nitric.proto.event.v1.event_pb2.NitricTopic">NitricTopic</a></code></h4>
 <ul class="">
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic.ByteSize" href="#nitric.proto.event.v1.event_pb2.NitricTopic.ByteSize">ByteSize</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic.Clear" href="#nitric.proto.event.v1.event_pb2.NitricTopic.Clear">Clear</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic.ClearField" href="#nitric.proto.event.v1.event_pb2.NitricTopic.ClearField">ClearField</a></code></li>
 <li><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic.DESCRIPTOR" href="#nitric.proto.event.v1.event_pb2.NitricTopic.DESCRIPTOR">DESCRIPTOR</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic.DiscardUnknownFields" href="#nitric.proto.event.v1.event_pb2.NitricTopic.DiscardUnknownFields">DiscardUnknownFields</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic.FindInitializationErrors" href="#nitric.proto.event.v1.event_pb2.NitricTopic.FindInitializationErrors">FindInitializationErrors</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic.FromString" href="#nitric.proto.event.v1.event_pb2.NitricTopic.FromString">FromString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic.HasField" href="#nitric.proto.event.v1.event_pb2.NitricTopic.HasField">HasField</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic.IsInitialized" href="#nitric.proto.event.v1.event_pb2.NitricTopic.IsInitialized">IsInitialized</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic.ListFields" href="#nitric.proto.event.v1.event_pb2.NitricTopic.ListFields">ListFields</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic.MergeFrom" href="#nitric.proto.event.v1.event_pb2.NitricTopic.MergeFrom">MergeFrom</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic.MergeFromString" href="#nitric.proto.event.v1.event_pb2.NitricTopic.MergeFromString">MergeFromString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic.NAME_FIELD_NUMBER" href="#nitric.proto.event.v1.event_pb2.NitricTopic.NAME_FIELD_NUMBER">NAME_FIELD_NUMBER</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic.RegisterExtension" href="#nitric.proto.event.v1.event_pb2.NitricTopic.RegisterExtension">RegisterExtension</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic.SerializePartialToString" href="#nitric.proto.event.v1.event_pb2.NitricTopic.SerializePartialToString">SerializePartialToString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic.SerializeToString" href="#nitric.proto.event.v1.event_pb2.NitricTopic.SerializeToString">SerializeToString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic.SetInParent" href="#nitric.proto.event.v1.event_pb2.NitricTopic.SetInParent">SetInParent</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic.UnknownFields" href="#nitric.proto.event.v1.event_pb2.NitricTopic.UnknownFields">UnknownFields</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic.WhichOneof" href="#nitric.proto.event.v1.event_pb2.NitricTopic.WhichOneof">WhichOneof</a></code></li>
 <li><code><a title="nitric.proto.event.v1.event_pb2.NitricTopic.name" href="#nitric.proto.event.v1.event_pb2.NitricTopic.name">name</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="nitric.proto.event.v1.event_pb2.TopicListRequest" href="#nitric.proto.event.v1.event_pb2.TopicListRequest">TopicListRequest</a></code></h4>
 <ul class="">
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListRequest.ByteSize" href="#nitric.proto.event.v1.event_pb2.TopicListRequest.ByteSize">ByteSize</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListRequest.Clear" href="#nitric.proto.event.v1.event_pb2.TopicListRequest.Clear">Clear</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListRequest.ClearField" href="#nitric.proto.event.v1.event_pb2.TopicListRequest.ClearField">ClearField</a></code></li>
 <li><code><a title="nitric.proto.event.v1.event_pb2.TopicListRequest.DESCRIPTOR" href="#nitric.proto.event.v1.event_pb2.TopicListRequest.DESCRIPTOR">DESCRIPTOR</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListRequest.DiscardUnknownFields" href="#nitric.proto.event.v1.event_pb2.TopicListRequest.DiscardUnknownFields">DiscardUnknownFields</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListRequest.FindInitializationErrors" href="#nitric.proto.event.v1.event_pb2.TopicListRequest.FindInitializationErrors">FindInitializationErrors</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListRequest.FromString" href="#nitric.proto.event.v1.event_pb2.TopicListRequest.FromString">FromString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListRequest.HasField" href="#nitric.proto.event.v1.event_pb2.TopicListRequest.HasField">HasField</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListRequest.IsInitialized" href="#nitric.proto.event.v1.event_pb2.TopicListRequest.IsInitialized">IsInitialized</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListRequest.ListFields" href="#nitric.proto.event.v1.event_pb2.TopicListRequest.ListFields">ListFields</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListRequest.MergeFrom" href="#nitric.proto.event.v1.event_pb2.TopicListRequest.MergeFrom">MergeFrom</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListRequest.MergeFromString" href="#nitric.proto.event.v1.event_pb2.TopicListRequest.MergeFromString">MergeFromString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListRequest.RegisterExtension" href="#nitric.proto.event.v1.event_pb2.TopicListRequest.RegisterExtension">RegisterExtension</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListRequest.SerializePartialToString" href="#nitric.proto.event.v1.event_pb2.TopicListRequest.SerializePartialToString">SerializePartialToString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListRequest.SerializeToString" href="#nitric.proto.event.v1.event_pb2.TopicListRequest.SerializeToString">SerializeToString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListRequest.SetInParent" href="#nitric.proto.event.v1.event_pb2.TopicListRequest.SetInParent">SetInParent</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListRequest.UnknownFields" href="#nitric.proto.event.v1.event_pb2.TopicListRequest.UnknownFields">UnknownFields</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListRequest.WhichOneof" href="#nitric.proto.event.v1.event_pb2.TopicListRequest.WhichOneof">WhichOneof</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse" href="#nitric.proto.event.v1.event_pb2.TopicListResponse">TopicListResponse</a></code></h4>
 <ul class="">
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse.ByteSize" href="#nitric.proto.event.v1.event_pb2.TopicListResponse.ByteSize">ByteSize</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse.Clear" href="#nitric.proto.event.v1.event_pb2.TopicListResponse.Clear">Clear</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse.ClearField" href="#nitric.proto.event.v1.event_pb2.TopicListResponse.ClearField">ClearField</a></code></li>
 <li><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse.DESCRIPTOR" href="#nitric.proto.event.v1.event_pb2.TopicListResponse.DESCRIPTOR">DESCRIPTOR</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse.DiscardUnknownFields" href="#nitric.proto.event.v1.event_pb2.TopicListResponse.DiscardUnknownFields">DiscardUnknownFields</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse.FindInitializationErrors" href="#nitric.proto.event.v1.event_pb2.TopicListResponse.FindInitializationErrors">FindInitializationErrors</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse.FromString" href="#nitric.proto.event.v1.event_pb2.TopicListResponse.FromString">FromString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse.HasField" href="#nitric.proto.event.v1.event_pb2.TopicListResponse.HasField">HasField</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse.IsInitialized" href="#nitric.proto.event.v1.event_pb2.TopicListResponse.IsInitialized">IsInitialized</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse.ListFields" href="#nitric.proto.event.v1.event_pb2.TopicListResponse.ListFields">ListFields</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse.MergeFrom" href="#nitric.proto.event.v1.event_pb2.TopicListResponse.MergeFrom">MergeFrom</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse.MergeFromString" href="#nitric.proto.event.v1.event_pb2.TopicListResponse.MergeFromString">MergeFromString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse.RegisterExtension" href="#nitric.proto.event.v1.event_pb2.TopicListResponse.RegisterExtension">RegisterExtension</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse.SerializePartialToString" href="#nitric.proto.event.v1.event_pb2.TopicListResponse.SerializePartialToString">SerializePartialToString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse.SerializeToString" href="#nitric.proto.event.v1.event_pb2.TopicListResponse.SerializeToString">SerializeToString</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse.SetInParent" href="#nitric.proto.event.v1.event_pb2.TopicListResponse.SetInParent">SetInParent</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse.TOPICS_FIELD_NUMBER" href="#nitric.proto.event.v1.event_pb2.TopicListResponse.TOPICS_FIELD_NUMBER">TOPICS_FIELD_NUMBER</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse.UnknownFields" href="#nitric.proto.event.v1.event_pb2.TopicListResponse.UnknownFields">UnknownFields</a></code></li>
+<li><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse.WhichOneof" href="#nitric.proto.event.v1.event_pb2.TopicListResponse.WhichOneof">WhichOneof</a></code></li>
 <li><code><a title="nitric.proto.event.v1.event_pb2.TopicListResponse.topics" href="#nitric.proto.event.v1.event_pb2.TopicListResponse.topics">topics</a></code></li>
 </ul>
 </li>

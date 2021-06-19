@@ -70,7 +70,7 @@ class StorageClient(BaseClient):
         :param body: data to be stored.
         :return: storage result.
         &#34;&#34;&#34;
-        request = storage.StorageWriteRequest(bucketName=bucket_name, key=key, body=body)
+        request = storage.StorageWriteRequest(bucket_name=bucket_name, key=key, body=body)
         response = self._exec(&#34;Write&#34;, request)
         return response
 
@@ -82,7 +82,7 @@ class StorageClient(BaseClient):
         :param key: key for the file to retrieve.
         :return: the file as bytes.
         &#34;&#34;&#34;
-        request = storage.StorageReadRequest(bucketName=bucket_name, key=key)
+        request = storage.StorageReadRequest(bucket_name=bucket_name, key=key)
         response = self._exec(&#34;Read&#34;, request)
         return response.body</code></pre>
 </details>
@@ -128,7 +128,7 @@ class StorageClient(BaseClient):
         :param body: data to be stored.
         :return: storage result.
         &#34;&#34;&#34;
-        request = storage.StorageWriteRequest(bucketName=bucket_name, key=key, body=body)
+        request = storage.StorageWriteRequest(bucket_name=bucket_name, key=key, body=body)
         response = self._exec(&#34;Write&#34;, request)
         return response
 
@@ -140,7 +140,7 @@ class StorageClient(BaseClient):
         :param key: key for the file to retrieve.
         :return: the file as bytes.
         &#34;&#34;&#34;
-        request = storage.StorageReadRequest(bucketName=bucket_name, key=key)
+        request = storage.StorageReadRequest(bucket_name=bucket_name, key=key)
         response = self._exec(&#34;Read&#34;, request)
         return response.body</code></pre>
 </details>
@@ -171,7 +171,7 @@ class StorageClient(BaseClient):
     :param key: key for the file to retrieve.
     :return: the file as bytes.
     &#34;&#34;&#34;
-    request = storage.StorageReadRequest(bucketName=bucket_name, key=key)
+    request = storage.StorageReadRequest(bucket_name=bucket_name, key=key)
     response = self._exec(&#34;Read&#34;, request)
     return response.body</code></pre>
 </details>
@@ -198,7 +198,7 @@ class StorageClient(BaseClient):
     :param body: data to be stored.
     :return: storage result.
     &#34;&#34;&#34;
-    request = storage.StorageWriteRequest(bucketName=bucket_name, key=key, body=body)
+    request = storage.StorageWriteRequest(bucket_name=bucket_name, key=key, body=body)
     response = self._exec(&#34;Write&#34;, request)
     return response</code></pre>
 </details>
