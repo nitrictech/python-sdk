@@ -21,7 +21,7 @@ import unittest
 from nitric.faas import Response, ResponseContext, HttpResponseContext
 from nitric.faas import start
 from nitric.faas.faas import Handler
-from nitric.proto.faas.v1.faas_pb2 import TriggerResponse
+from nitric.proto.faas.v1.faas_pb2 import TriggerResponse, TriggerRequest
 from google.protobuf import json_format
 
 
@@ -50,7 +50,10 @@ class HandlerCases(unittest.TestCase):
 
         return_body = json_format.MessageToJson(mock_response.to_grpc_trigger_response_context())
 
-        with patch("nitric.faas.faas.construct_request", Mock()):
+        construct_request_mock = Mock()
+        construct_request_mock.return_value = TriggerRequest()
+
+        with patch("nitric.faas.faas.construct_request", construct_request_mock):
             handler = Handler(mock_func)
             response = handler()
 
@@ -62,7 +65,10 @@ class HandlerCases(unittest.TestCase):
         def error_func():
             raise Exception("mock error")
 
-        with patch("nitric.faas.faas.construct_request", Mock()):
+        construct_request_mock = Mock()
+        construct_request_mock.return_value = TriggerRequest()
+
+        with patch("nitric.faas.faas.construct_request", construct_request_mock):
             handler = Handler(error_func)
             response = handler()
 
@@ -78,7 +84,10 @@ class HandlerCases(unittest.TestCase):
         def error_func():
             raise Exception("mock error")
 
-        with patch("nitric.faas.faas.construct_request", Mock()):
+        construct_request_mock = Mock()
+        construct_request_mock.return_value = TriggerRequest()
+
+        with patch("nitric.faas.faas.construct_request", construct_request_mock):
             handler = Handler(error_func)
             response = handler()
 
@@ -94,7 +103,10 @@ class HandlerCases(unittest.TestCase):
         mock_func = Mock()
         mock_func.return_value = "test"
 
-        with patch("nitric.faas.faas.construct_request", Mock()):
+        construct_request_mock = Mock()
+        construct_request_mock.return_value = TriggerRequest()
+
+        with patch("nitric.faas.faas.construct_request", construct_request_mock):
             handler = Handler(mock_func)
             response = handler()
 
@@ -109,7 +121,10 @@ class HandlerCases(unittest.TestCase):
             # do nothing
             mock = Mock()
 
-        with patch("nitric.faas.faas.construct_request", Mock()):
+        construct_request_mock = Mock()
+        construct_request_mock.return_value = TriggerRequest()
+
+        with patch("nitric.faas.faas.construct_request", construct_request_mock):
             handler = Handler(no_response)
             response = handler()
 

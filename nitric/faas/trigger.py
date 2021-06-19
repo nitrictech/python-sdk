@@ -103,10 +103,10 @@ class TriggerContext(object):
         if trigger_request.http is not None:
             return TriggerContext(
                 context=HttpTriggerContext(
-                    headers=trigger_request.http.headers,
+                    headers=dict(trigger_request.http.headers),
                     path=trigger_request.http.path,
                     method=trigger_request.http.method,
-                    query_params=trigger_request.http.query_params,
+                    query_params=dict(trigger_request.http.query_params),
                 )
             )
         elif trigger_request.topic is not None:
