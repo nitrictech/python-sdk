@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
-<title>nitric.config API documentation</title>
-<meta name="description" content="Nitric SDK Configuration Settings." />
+<title>nitric.proto.faas API documentation</title>
+<meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,10 +19,9 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>nitric.config</code></h1>
+<h1 class="title">Module <code>nitric.proto.faas</code></h1>
 </header>
 <section id="section-intro">
-<p>Nitric SDK Configuration Settings.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -44,34 +43,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-&#34;&#34;&#34;Nitric SDK Configuration Settings.&#34;&#34;&#34;
-import os
-
-from nitric.config import default_settings
-
-
-class Settings:
-    &#34;&#34;&#34;Nitric default and env settings helper class.&#34;&#34;&#34;
-
-    def __init__(self):
-        &#34;&#34;&#34;Construct a new Nitric settings helper object.&#34;&#34;&#34;
-        for setting in dir(default_settings):
-            default_value = getattr(default_settings, setting)
-            env_variable = os.environ.get(setting)
-            setattr(self, setting, env_variable or default_value)
-
-    # def __getattr__(self, name):
-    #     return getattr(self, name)
-
-
-settings = Settings()</code></pre>
+#</code></pre>
 </details>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="nitric.config.default_settings" href="default_settings.html">nitric.config.default_settings</a></code></dt>
+<dt><code class="name"><a title="nitric.proto.faas.v1" href="v1/index.html">nitric.proto.faas.v1</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -82,33 +60,6 @@ settings = Settings()</code></pre>
 <section>
 </section>
 <section>
-<h2 class="section-title" id="header-classes">Classes</h2>
-<dl>
-<dt id="nitric.config.Settings"><code class="flex name class">
-<span>class <span class="ident">Settings</span></span>
-</code></dt>
-<dd>
-<div class="desc"><p>Nitric default and env settings helper class.</p>
-<p>Construct a new Nitric settings helper object.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class Settings:
-    &#34;&#34;&#34;Nitric default and env settings helper class.&#34;&#34;&#34;
-
-    def __init__(self):
-        &#34;&#34;&#34;Construct a new Nitric settings helper object.&#34;&#34;&#34;
-        for setting in dir(default_settings):
-            default_value = getattr(default_settings, setting)
-            env_variable = os.environ.get(setting)
-            setattr(self, setting, env_variable or default_value)
-
-    # def __getattr__(self, name):
-    #     return getattr(self, name)</code></pre>
-</details>
-</dd>
-</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -119,19 +70,12 @@ settings = Settings()</code></pre>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="nitric" href="../index.html">nitric</a></code></li>
+<li><code><a title="nitric.proto" href="../index.html">nitric.proto</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="nitric.config.default_settings" href="default_settings.html">nitric.config.default_settings</a></code></li>
-</ul>
-</li>
-<li><h3><a href="#header-classes">Classes</a></h3>
-<ul>
-<li>
-<h4><code><a title="nitric.config.Settings" href="#nitric.config.Settings">Settings</a></code></h4>
-</li>
+<li><code><a title="nitric.proto.faas.v1" href="v1/index.html">nitric.proto.faas.v1</a></code></li>
 </ul>
 </li>
 </ul>

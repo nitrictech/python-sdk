@@ -75,7 +75,7 @@ class EventServicer(object):
     &#34;&#34;&#34;
 
     def Publish(self, request, context):
-        &#34;&#34;&#34;Publish a message to a given topic
+        &#34;&#34;&#34;Publishes an message to a given topic
         &#34;&#34;&#34;
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details(&#39;Method not implemented!&#39;)
@@ -314,7 +314,7 @@ def Publish(request,
     &#34;&#34;&#34;
 
     def Publish(self, request, context):
-        &#34;&#34;&#34;Publish a message to a given topic
+        &#34;&#34;&#34;Publishes an message to a given topic
         &#34;&#34;&#34;
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details(&#39;Method not implemented!&#39;)
@@ -326,13 +326,13 @@ def Publish(request,
 <span>def <span class="ident">Publish</span></span>(<span>self, request, context)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Publish a message to a given topic</p></div>
+<div class="desc"><p>Publishes an message to a given topic</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def Publish(self, request, context):
-    &#34;&#34;&#34;Publish a message to a given topic
+    &#34;&#34;&#34;Publishes an message to a given topic
     &#34;&#34;&#34;
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details(&#39;Method not implemented!&#39;)

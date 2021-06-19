@@ -54,7 +54,7 @@ from nitric.proto.kv.v1 import kv_pb2 as kv_dot_v1_dot_kv__pb2
 
 
 class KeyValueStub(object):
-    &#34;&#34;&#34;Services for storage and retrieval of simple JSON keyValue
+    &#34;&#34;&#34;Service for storage and retrieval of simple JSON keyValue
     &#34;&#34;&#34;
 
     def __init__(self, channel):
@@ -81,23 +81,26 @@ class KeyValueStub(object):
 
 
 class KeyValueServicer(object):
-    &#34;&#34;&#34;Services for storage and retrieval of simple JSON keyValue
+    &#34;&#34;&#34;Service for storage and retrieval of simple JSON keyValue
     &#34;&#34;&#34;
 
     def Get(self, request, context):
-        &#34;&#34;&#34;Missing associated documentation comment in .proto file.&#34;&#34;&#34;
+        &#34;&#34;&#34;Get an existing key
+        &#34;&#34;&#34;
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details(&#39;Method not implemented!&#39;)
         raise NotImplementedError(&#39;Method not implemented!&#39;)
 
     def Put(self, request, context):
-        &#34;&#34;&#34;Missing associated documentation comment in .proto file.&#34;&#34;&#34;
+        &#34;&#34;&#34;Create a new or overwrite and existing key
+        &#34;&#34;&#34;
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details(&#39;Method not implemented!&#39;)
         raise NotImplementedError(&#39;Method not implemented!&#39;)
 
     def Delete(self, request, context):
-        &#34;&#34;&#34;Missing associated documentation comment in .proto file.&#34;&#34;&#34;
+        &#34;&#34;&#34;Delete an existing
+        &#34;&#34;&#34;
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details(&#39;Method not implemented!&#39;)
         raise NotImplementedError(&#39;Method not implemented!&#39;)
@@ -128,7 +131,7 @@ def add_KeyValueServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class KeyValue(object):
-    &#34;&#34;&#34;Services for storage and retrieval of simple JSON keyValue
+    &#34;&#34;&#34;Service for storage and retrieval of simple JSON keyValue
     &#34;&#34;&#34;
 
     @staticmethod
@@ -231,13 +234,13 @@ class KeyValue(object):
 <span>class <span class="ident">KeyValue</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Services for storage and retrieval of simple JSON keyValue</p></div>
+<div class="desc"><p>Service for storage and retrieval of simple JSON keyValue</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class KeyValue(object):
-    &#34;&#34;&#34;Services for storage and retrieval of simple JSON keyValue
+    &#34;&#34;&#34;Service for storage and retrieval of simple JSON keyValue
     &#34;&#34;&#34;
 
     @staticmethod
@@ -380,29 +383,32 @@ def Put(request,
 <span>class <span class="ident">KeyValueServicer</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Services for storage and retrieval of simple JSON keyValue</p></div>
+<div class="desc"><p>Service for storage and retrieval of simple JSON keyValue</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class KeyValueServicer(object):
-    &#34;&#34;&#34;Services for storage and retrieval of simple JSON keyValue
+    &#34;&#34;&#34;Service for storage and retrieval of simple JSON keyValue
     &#34;&#34;&#34;
 
     def Get(self, request, context):
-        &#34;&#34;&#34;Missing associated documentation comment in .proto file.&#34;&#34;&#34;
+        &#34;&#34;&#34;Get an existing key
+        &#34;&#34;&#34;
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details(&#39;Method not implemented!&#39;)
         raise NotImplementedError(&#39;Method not implemented!&#39;)
 
     def Put(self, request, context):
-        &#34;&#34;&#34;Missing associated documentation comment in .proto file.&#34;&#34;&#34;
+        &#34;&#34;&#34;Create a new or overwrite and existing key
+        &#34;&#34;&#34;
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details(&#39;Method not implemented!&#39;)
         raise NotImplementedError(&#39;Method not implemented!&#39;)
 
     def Delete(self, request, context):
-        &#34;&#34;&#34;Missing associated documentation comment in .proto file.&#34;&#34;&#34;
+        &#34;&#34;&#34;Delete an existing
+        &#34;&#34;&#34;
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details(&#39;Method not implemented!&#39;)
         raise NotImplementedError(&#39;Method not implemented!&#39;)</code></pre>
@@ -413,13 +419,14 @@ def Put(request,
 <span>def <span class="ident">Delete</span></span>(<span>self, request, context)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Missing associated documentation comment in .proto file.</p></div>
+<div class="desc"><p>Delete an existing</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def Delete(self, request, context):
-    &#34;&#34;&#34;Missing associated documentation comment in .proto file.&#34;&#34;&#34;
+    &#34;&#34;&#34;Delete an existing
+    &#34;&#34;&#34;
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details(&#39;Method not implemented!&#39;)
     raise NotImplementedError(&#39;Method not implemented!&#39;)</code></pre>
@@ -429,13 +436,14 @@ def Put(request,
 <span>def <span class="ident">Get</span></span>(<span>self, request, context)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Missing associated documentation comment in .proto file.</p></div>
+<div class="desc"><p>Get an existing key</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def Get(self, request, context):
-    &#34;&#34;&#34;Missing associated documentation comment in .proto file.&#34;&#34;&#34;
+    &#34;&#34;&#34;Get an existing key
+    &#34;&#34;&#34;
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details(&#39;Method not implemented!&#39;)
     raise NotImplementedError(&#39;Method not implemented!&#39;)</code></pre>
@@ -445,13 +453,14 @@ def Put(request,
 <span>def <span class="ident">Put</span></span>(<span>self, request, context)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Missing associated documentation comment in .proto file.</p></div>
+<div class="desc"><p>Create a new or overwrite and existing key</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def Put(self, request, context):
-    &#34;&#34;&#34;Missing associated documentation comment in .proto file.&#34;&#34;&#34;
+    &#34;&#34;&#34;Create a new or overwrite and existing key
+    &#34;&#34;&#34;
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details(&#39;Method not implemented!&#39;)
     raise NotImplementedError(&#39;Method not implemented!&#39;)</code></pre>
@@ -464,7 +473,7 @@ def Put(request,
 <span>(</span><span>channel)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Services for storage and retrieval of simple JSON keyValue</p>
+<div class="desc"><p>Service for storage and retrieval of simple JSON keyValue</p>
 <p>Constructor.</p>
 <h2 id="args">Args</h2>
 <dl>
@@ -476,7 +485,7 @@ def Put(request,
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class KeyValueStub(object):
-    &#34;&#34;&#34;Services for storage and retrieval of simple JSON keyValue
+    &#34;&#34;&#34;Service for storage and retrieval of simple JSON keyValue
     &#34;&#34;&#34;
 
     def __init__(self, channel):
