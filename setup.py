@@ -1,18 +1,19 @@
 import setuptools
+from tools.git_tag import get_current_version_tag
 
 with open("README.md", "r") as readme_file:
     long_description = readme_file.read()
 
 setuptools.setup(
     name="nitric",
-    version="0.1.0",
+    version=get_current_version_tag(),
     author="Nitric",
     author_email="team@nitric.io",
     description="The Nitric SDK for Python 3",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/nitrictech/python-sdk",
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(".", exclude=["tests", "tools"]),
     license_files=("LICENSE.txt",),
     classifiers=[
         "Programming Language :: Python :: 3",
