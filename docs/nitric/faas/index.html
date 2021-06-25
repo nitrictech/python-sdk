@@ -285,7 +285,7 @@ __all__ = [
 <h3>Methods</h3>
 <dl>
 <dt id="nitric.faas.ResponseContext.as_http"><code class="name flex">
-<span>def <span class="ident">as_http</span></span>(<span>self) ‑> Optional[<a title="nitric.faas.response.HttpResponseContext" href="response.html#nitric.faas.response.HttpResponseContext">HttpResponseContext</a>]</span>
+<span>def <span class="ident">as_http</span></span>(<span>self) ‑> Union[<a title="nitric.faas.response.HttpResponseContext" href="response.html#nitric.faas.response.HttpResponseContext">HttpResponseContext</a>, NoneType]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Unwraps response context as Http response context.</p>
@@ -307,7 +307,7 @@ __all__ = [
 </details>
 </dd>
 <dt id="nitric.faas.ResponseContext.as_topic"><code class="name flex">
-<span>def <span class="ident">as_topic</span></span>(<span>self) ‑> Optional[<a title="nitric.faas.response.TopicResponseContext" href="response.html#nitric.faas.response.TopicResponseContext">TopicResponseContext</a>]</span>
+<span>def <span class="ident">as_topic</span></span>(<span>self) ‑> Union[<a title="nitric.faas.response.TopicResponseContext" href="response.html#nitric.faas.response.TopicResponseContext">TopicResponseContext</a>, NoneType]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Unwraps response context as Topic response context.</p>
@@ -641,10 +641,10 @@ response context e.g. response.context.is_http() or response.context.is_topic().
         if trigger_request.http is not None:
             return TriggerContext(
                 context=HttpTriggerContext(
-                    headers=trigger_request.http.headers,
+                    headers=dict(trigger_request.http.headers),
                     path=trigger_request.http.path,
                     method=trigger_request.http.method,
-                    query_params=trigger_request.http.query_params,
+                    query_params=dict(trigger_request.http.query_params),
                 )
             )
         elif trigger_request.topic is not None:
@@ -676,10 +676,10 @@ def from_trigger_request(trigger_request: TriggerRequest):
     if trigger_request.http is not None:
         return TriggerContext(
             context=HttpTriggerContext(
-                headers=trigger_request.http.headers,
+                headers=dict(trigger_request.http.headers),
                 path=trigger_request.http.path,
                 method=trigger_request.http.method,
-                query_params=trigger_request.http.query_params,
+                query_params=dict(trigger_request.http.query_params),
             )
         )
     elif trigger_request.topic is not None:
@@ -694,7 +694,7 @@ def from_trigger_request(trigger_request: TriggerRequest):
 <h3>Methods</h3>
 <dl>
 <dt id="nitric.faas.TriggerContext.as_http"><code class="name flex">
-<span>def <span class="ident">as_http</span></span>(<span>self) ‑> Optional[<a title="nitric.faas.trigger.HttpTriggerContext" href="trigger.html#nitric.faas.trigger.HttpTriggerContext">HttpTriggerContext</a>]</span>
+<span>def <span class="ident">as_http</span></span>(<span>self) ‑> Union[<a title="nitric.faas.trigger.HttpTriggerContext" href="trigger.html#nitric.faas.trigger.HttpTriggerContext">HttpTriggerContext</a>, NoneType]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Unwrap HttpTriggerContext.</p>
@@ -716,7 +716,7 @@ def from_trigger_request(trigger_request: TriggerRequest):
 </details>
 </dd>
 <dt id="nitric.faas.TriggerContext.as_topic"><code class="name flex">
-<span>def <span class="ident">as_topic</span></span>(<span>self) ‑> Optional[<a title="nitric.faas.trigger.TopicTriggerContext" href="trigger.html#nitric.faas.trigger.TopicTriggerContext">TopicTriggerContext</a>]</span>
+<span>def <span class="ident">as_topic</span></span>(<span>self) ‑> Union[<a title="nitric.faas.trigger.TopicTriggerContext" href="trigger.html#nitric.faas.trigger.TopicTriggerContext">TopicTriggerContext</a>, NoneType]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Unwrap TopicTriggerContext.</p>
