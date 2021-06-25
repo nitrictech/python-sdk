@@ -15,7 +15,7 @@ Read full documentation [here](https://nitrictech.github.io/python-sdk/).
 ### Nitric Functions (FaaS):
 
  - Install Python 3.7+
- - Install the [Nitric CLI](https://nitric.io/docs/installation)
+ - Install the [Nitric CLI](https://nitric.io/docs/installation?lang=python)
  - Create / Open a Nitric Project
  - Make a Python37 function
  
