@@ -19,7 +19,7 @@ def get_current_version_tag():
         base_tag, num_commits = dev_tags.pop().split("-")[:2]
         return "{}.dev{}".format(base_tag, num_commits)[1:]
     else:
-        raise Exception("Unable to determine or construct version from git tags.")
+        return "0.0.0.dev0"
 
 
 with open("README.md", "r") as readme_file:
