@@ -15,7 +15,7 @@ jobs:
       with:
         token: ${{secrets.SUBMOD_PAT}}
         submodules: recursive
-        #lfs: true
+        fetch-depth: 0 # needed to retrieve most recent tag
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
