@@ -22,12 +22,14 @@ setuptools.setup(
     install_requires=[
         "flask==1.1.2",
         "waitress==1.4.4",
-        "grpcio==1.33.2",
         "six==1.15.0",
         "protobuf==3.13.0",
+        "betterproto==1.2.5",
     ],
     extras_require={
         "dev": [
+            "betterproto[compiler]==1.2.5",
+            "grpcio==1.33.2",
             "grpcio-tools==1.33.2",
             "tox==3.20.1",
             "twine==3.2.0",

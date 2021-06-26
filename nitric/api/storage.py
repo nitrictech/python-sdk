@@ -16,44 +16,49 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from nitric.proto import storage
-from nitric.proto import storage_service
-from nitric.api._base_client import BaseClient
+from nitric.api._utils import new_default_channel
+from nitric.proto.nitric.storage.v1 import StorageStub
 
 
-class StorageClient(BaseClient):
+class StorageClient(object):
     """
     Nitric generic blob storage client.
 
     This client insulates application code from stack specific blob store operations or SDKs.
     """
 
-    def __init__(self):
-        """Construct a new StorageClient."""
-        super(self.__class__, self).__init__()
-        self._stub = storage_service.StorageStub(self._channel)
-
-    def write(self, bucket_name: str, key: str, body: bytes):
+    def __init__(self, bucket: str):
         """
-        Store a file.
+        Construct a Nitric Event Client.
 
-        :param bucket_name: name of the bucket to store the data in.
+        :param bucket: name of the bucket to perform operations on.
+        """
+        self.bucket = bucket
+        self._stub = StorageStub(channel=new_default_channel())
+
+    async def write(self, key: str, body: bytes):
+        """
+        Write a file to the bucket under the given key.
+
         :param key: key within the bucket, where the file should be stored.
         :param body: data to be stored.
-        :return: storage result.
         """
-        request = storage.StorageWriteRequest(bucket_name=bucket_name, key=key, body=body)
-        response = self._exec("Write", request)
-        return response
+        await self._stub.write(bucket_name=self.bucket, key=key, body=body)
 
-    def read(self, bucket_name: str, key: str) -> bytes:
+    async def read(self, key: str) -> bytes:
         """
         Retrieve an existing file.
 
-        :param bucket_name: name of the bucket where the file was stored.
         :param key: key for the file to retrieve.
         :return: the file as bytes.
         """
-        request = storage.StorageReadRequest(bucket_name=bucket_name, key=key)
-        response = self._exec("Read", request)
+        response = await self._stub.read(bucket_name=self.bucket, key=key)
         return response.body
+
+    async def delete(self, key: str):
+        """
+        Delete an existing file.
+
+        :param key: key of the file to delete.
+        """
+        await self._stub.delete(bucket_name=self.bucket, key=key)

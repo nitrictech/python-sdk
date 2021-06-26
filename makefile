@@ -12,9 +12,7 @@ grpc-client:
 	@echo Generating Proto Sources
 	@echo $(OUTPUT)
 	@mkdir -p $(OUTPUT)
-	@python3 -m grpc_tools.protoc -I $(CONTRACTS)  --python_out=$(OUTPUT) --grpc_python_out=$(OUTPUT) ./contracts/proto/**/**/*.proto
-	@python3 ./tools/fix_grpc_imports.py
-	@find $(OUTPUT) -type d -exec touch {}/__init__.py \;
+	@python3 -m grpc_tools.protoc -I $(CONTRACTS)  --python_betterproto_out=$(OUTPUT) ./contracts/proto/**/**/*.proto
 
 docs:
 	@echo Generating SDK Documentation
