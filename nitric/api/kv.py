@@ -16,41 +16,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from nitric.proto import key_value
-from nitric.proto import key_value_service
-from nitric.api._base_client import BaseClient
-from google.protobuf.struct_pb2 import Struct
-from google.protobuf.json_format import MessageToDict
-from nitric.proto.kv.v1.kv_pb2 import KeyValueGetResponse
+from nitric.api._utils import new_default_channel
+from nitric.proto.nitric.kv.v1 import KeyValueStub
+from betterproto.lib.google.protobuf import Struct
 
 
-class KeyValueClient(BaseClient):
+class KeyValueClient(object):
     """
     Nitric generic document store/db client.
 
     This client insulates application code from stack specific document CRUD operations or SDKs.
     """
 
-    def __init__(self):
-        """Construct a new DocumentClient."""
-        super(self.__class__, self).__init__()
-        self._stub = key_value_service.KeyValueStub(self._channel)
+    def __init__(self, collection: str):
+        """
+        Construct a new DocumentClient.
 
-    def put(self, collection: str, key: str, value: dict):
-        """Create a new document with the specified key in the specified collection."""
-        value_struct = Struct()
-        value_struct.update(value)
-        request = key_value.KeyValuePutRequest(collection=collection, key=key, value=value_struct)
-        return self._exec("Put", request)
+        :param collection: name of the key/value collection
+        """
+        self.collection = collection
+        self._stub = KeyValueStub(channel=new_default_channel())
 
-    def get(self, collection: str, key: str) -> dict:
-        """Retrieve a document from the specified collection by its key."""
-        request = key_value.KeyValueGetRequest(collection=collection, key=key)
-        reply: KeyValueGetResponse = self._exec("Get", request)
-        document = MessageToDict(reply)["value"]
-        return document
+    async def put(self, key: str, value: dict):
+        """Create a new document with the specified key."""
+        await self._stub.put(collection=self.collection, key=key, value=Struct().from_dict(value))
 
-    def delete(self, collection: str, key: str):
+    async def get(self, key: str) -> dict:
+        """Retrieve a document from the specified key."""
+        response = await self._stub.get(collection=self.collection, key=key)
+        return response.value.to_dict()
+
+    async def delete(self, key: str):
         """Delete the specified document from the collection."""
-        request = key_value.KeyValueDeleteRequest(collection=collection, key=key)
-        return self._exec("Delete", request)
+        await self._stub.delete(collection=self.collection, key=key)
