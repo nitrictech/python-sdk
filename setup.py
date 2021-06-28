@@ -24,11 +24,12 @@ setuptools.setup(
         "waitress==1.4.4",
         "six==1.15.0",
         "protobuf==3.13.0",
-        "betterproto==1.2.5",
+        "betterproto==2.0.0b3",
+        "asyncio",
     ],
     extras_require={
         "dev": [
-            "betterproto[compiler]==1.2.5",
+            "betterproto[compiler]==2.0.0b3",
             "grpcio==1.33.2",
             "grpcio-tools==1.33.2",
             "tox==3.20.1",
@@ -48,5 +49,5 @@ setuptools.setup(
             "pdoc3==0.9.2",
         ]
     },
-    python_requires=">=3.7",
+    python_requires=">=3.8",
 )
