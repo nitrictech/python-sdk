@@ -17,17 +17,9 @@
 # limitations under the License.
 #
 from typing import List, Union
-from nitric.api._utils import new_default_channel
+from nitric.api._utils import new_default_channel, _struct_from_dict
 from nitric.proto.nitric.event.v1 import EventStub, NitricEvent, TopicStub
-from betterproto.lib.google.protobuf import Struct
 from dataclasses import dataclass, field
-
-
-@dataclass(frozen=True, order=True)
-class Topic(object):
-    """Represents event topic metadata."""
-
-    name: str
 
 
 @dataclass(frozen=True, order=True)
@@ -42,22 +34,17 @@ class Event(object):
 def _event_to_wire(event: Event) -> NitricEvent:
     return NitricEvent(
         id=event.id,
-        payload=Struct().from_dict(event.payload),
+        payload=_struct_from_dict(event.payload),
         payload_type=event.payload_type,
     )
 
 
-class EventClient(object):
-    """
-    Nitric generic publish/subscribe event client.
+@dataclass(frozen=True, order=True)
+class Topic(object):
+    """Represents event topic metadata."""
 
-    This client insulates application code from stack specific event operations or SDKs.
-    """
-
-    def __init__(self, topic: str):
-        """Construct a Nitric Event Client."""
-        self.topic = topic
-        self._stub = EventStub(channel=new_default_channel())
+    _stub: EventStub
+    name: str
 
     async def publish(
         self,
@@ -73,24 +60,30 @@ class EventClient(object):
             event = Event()
 
         if isinstance(event, dict):
+            # TODO: handle events that are just a payload
             event = Event(**event)
 
-        response = await self._stub.publish(topic=self.topic, event=_event_to_wire(event))
+        response = await self._stub.publish(topic=self.name, event=_event_to_wire(event))
         return Event(**{**event.__dict__.copy(), **{"id": response.id}})
 
 
-class TopicClient(object):
+class EventClient(object):
     """
-    Nitric generic event topic client.
+    Nitric generic publish/subscribe event client.
 
-    This client insulates application code from stack specific topic operations or SDKs.
+    This client insulates application code from stack specific event operations or SDKs.
     """
 
     def __init__(self):
-        """Construct a Nitric Topic Client."""
-        self._stub = TopicStub(channel=new_default_channel())
+        """Construct a Nitric Event Client."""
+        channel = new_default_channel()
+        self._stub = EventStub(channel=channel)
+        self._topic_stub = TopicStub(channel=channel)
 
-    async def get_topics(self) -> List[Topic]:
+    async def topics(self) -> List[Topic]:
         """Get a list of topics available for publishing or subscription."""
-        response = await self._stub.list()
-        return [Topic(name=topic.name) for topic in response.topics]
+        response = await self._topic_stub.list()
+        return [self.topic(topic.name) for topic in response.topics]
+
+    def topic(self, topic: str) -> Topic:
+        return Topic(_stub=self._stub, name=topic)

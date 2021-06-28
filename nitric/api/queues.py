@@ -17,10 +17,7 @@
 # limitations under the License.
 #
 from typing import List, Union
-
-from betterproto.lib.google.protobuf import Struct
-
-from nitric.api._utils import new_default_channel
+from nitric.api._utils import new_default_channel, _struct_from_dict
 from nitric.proto.nitric.queue.v1 import QueueStub, NitricTask, FailedTask as WireFailedTask
 from dataclasses import dataclass, field
 
@@ -52,7 +49,7 @@ def _task_to_wire(task: Task) -> NitricTask:
     return NitricTask(
         id=task.id,
         payload_type=task.payload_type,
-        payload=Struct().from_dict(task.payload),
+        payload=_struct_from_dict(task.payload),
     )
 
 
@@ -120,7 +117,7 @@ class QueueClient(object):
 
         return [_wire_to_failed_task(failed_task) for failed_task in response.failed_tasks]
 
-    def receive(self, depth: int = None) -> List[Task]:
+    async def receive(self, depth: int = None) -> List[Task]:
         """
         Pop 1 or more items from the specified queue up to the depth limit.
 
@@ -141,4 +138,4 @@ class QueueClient(object):
         response = await self._stub.receive(queue=self.queue, depth=depth)
 
         # Map the response protobuf response items to Python SDK Nitric Queue Items
-        return [_wire_to_task(item) for item in response.items]
+        return [_wire_to_task(task) for task in response.tasks]

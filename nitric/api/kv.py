@@ -16,9 +16,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from nitric.api._utils import new_default_channel
+from nitric.api._utils import new_default_channel, _struct_from_dict
 from nitric.proto.nitric.kv.v1 import KeyValueStub
-from betterproto.lib.google.protobuf import Struct
 
 
 class KeyValueClient(object):
@@ -39,7 +38,7 @@ class KeyValueClient(object):
 
     async def put(self, key: str, value: dict):
         """Create a new document with the specified key."""
-        await self._stub.put(collection=self.collection, key=key, value=Struct().from_dict(value))
+        await self._stub.put(collection=self.collection, key=key, value=_struct_from_dict(value))
 
     async def get(self, key: str) -> dict:
         """Retrieve a document from the specified key."""

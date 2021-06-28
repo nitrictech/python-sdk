@@ -16,54 +16,95 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from unittest.mock import patch, Mock
-from nitric.api import EventClient
-from google.protobuf.struct_pb2 import Struct
-from uuid import UUID
+from unittest import IsolatedAsyncioTestCase
+from unittest.mock import patch, AsyncMock
+
+from betterproto.lib.google.protobuf import Struct
+
+from nitric.api import EventClient, Event
+from nitric.api._utils import _struct_from_dict
 
 
-def test_publish():
-    mock_grpc_method_getter = Mock()
-    mock_grpc_method_getter.return_value = mock_publish = Mock()
-    mock_publish.return_value.topics = []
-
-    payload = {"content": "of event"}
-
-    with patch("nitric.api.EventClient._get_method_function", mock_grpc_method_getter):
-        client = EventClient()
-        request_id = client.publish("topic_name", payload, "payload.type", event_id="abc-123")
-
-    # Ensure the correct gRPC method is retrieved
-    mock_grpc_method_getter.assert_called_with("Publish")
-    payload_struct = Struct()
-    payload_struct.update(payload)
-
-    # Ensure the publish method is called with the expected input
-    mock_publish.assert_called_once()
-    assert mock_publish.call_args[0][0].topic == "topic_name"
-    assert mock_publish.call_args[0][0].event.id == "abc-123"
-    assert mock_publish.call_args[0][0].event.payload_type == "payload.type"
-    assert mock_publish.call_args[0][0].event.payload["content"] == "of event"
+class Object(object):
+    pass
 
 
-def test_empty_payload():
-    mock_grpc_method_getter = Mock()
-    mock_grpc_method_getter.return_value = mock_publish = Mock()
-    mock_publish.return_value.topics = []
+class EventClientTest(IsolatedAsyncioTestCase):
+    async def test_publish(self):
+        mock_publish = AsyncMock()
+        mock_response = Object()
+        mock_response.id = "test-id"
+        mock_publish.return_value = mock_response
 
-    with patch("nitric.api.EventClient._get_method_function", mock_grpc_method_getter):
-        client = EventClient()
-        client.publish(topic_name="topic_name", payload_type="payload.type")
+        payload = {"content": "of event"}
 
-    # Ensure the gRPC method is called, with an empty Struct as the payload.
-    mock_publish.assert_called_once()
-    assert mock_publish.call_args[0][0].event.payload == Struct()
+        with patch("nitric.proto.nitric.event.v1.EventStub.publish", mock_publish):
+            topic = EventClient().topic("test-topic")
+            event = await topic.publish(Event(payload=payload))
 
+        # Check the returned ID was set on the event
+        assert event.id == "test-id"
 
-def test_grpc_methods():
-    client = EventClient()
-    assert client._get_method_function("Publish")._method == b"/nitric.event.v1.Event/Publish"
+        # Check expected values were passed to Stub
+        mock_publish.assert_called_once()
+        assert mock_publish.call_args.kwargs["topic"] == "test-topic"
+        assert mock_publish.call_args.kwargs["event"].id == ""
+        assert mock_publish.call_args.kwargs["event"].payload_type == ""
+        assert len(mock_publish.call_args.kwargs["event"].payload.fields) == 1
+        assert mock_publish.call_args.kwargs["event"].payload == _struct_from_dict(payload)
 
+    async def test_publish_dict(self):
+        mock_publish = AsyncMock()
+        mock_response = Object()
+        mock_response.id = "123"
+        mock_publish.return_value = mock_response
 
-def test_create_client():
-    client = EventClient()
+        payload = {"content": "of event"}
+
+        with patch("nitric.proto.nitric.event.v1.EventStub.publish", mock_publish):
+            topic = EventClient().topic("test-topic")
+            await topic.publish({"id": "123", "payload": payload})
+
+        # Check expected values were passed to Stub
+        mock_publish.assert_called_once()
+        assert mock_publish.call_args.kwargs["topic"] == "test-topic"
+        assert mock_publish.call_args.kwargs["event"].id == "123"
+        assert mock_publish.call_args.kwargs["event"].payload_type == ""
+        assert len(mock_publish.call_args.kwargs["event"].payload.fields) == 1
+        assert mock_publish.call_args.kwargs["event"].payload == _struct_from_dict(payload)
+
+    async def test_publish_invalid_type(self):
+        mock_publish = AsyncMock()
+        mock_response = Object()
+        mock_response.id = "test-id"
+        mock_publish.return_value = mock_response
+
+        payload = {"content": "of event"}
+
+        with patch("nitric.proto.nitric.event.v1.EventStub.publish", mock_publish):
+            topic = EventClient().topic("test-topic")
+            try:
+                await topic.publish((1, 2, 3))
+                assert False
+            except AttributeError:
+                # Exception raised if expected duck type attributes are missing
+                assert True
+
+    async def test_publish_none(self):
+        mock_publish = AsyncMock()
+        mock_response = Object()
+        mock_response.id = "123"
+        mock_publish.return_value = mock_response
+
+        payload = {"content": "of event"}
+
+        with patch("nitric.proto.nitric.event.v1.EventStub.publish", mock_publish):
+            topic = EventClient().topic("test-topic")
+            await topic.publish()
+
+        # Check expected values were passed to Stub
+        mock_publish.assert_called_once()
+        assert mock_publish.call_args.kwargs["topic"] == "test-topic"
+        assert mock_publish.call_args.kwargs["event"].id == ""
+        assert mock_publish.call_args.kwargs["event"].payload_type == ""
+        assert mock_publish.call_args.kwargs["event"].payload == Struct()
