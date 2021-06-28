@@ -30,12 +30,25 @@ class Task(object):
     payload_type: str = field(default=None)
     payload: dict = field(default_factory=dict)
     lease_id: str = field(default=None)
+    _queue_stub: QueueStub = field(default=None)
+    _queue: str = field(default=None)
+
+    async def complete(self):
+        if self._queue_stub is None or self._queue is None or self._queue == "":
+            raise Exception("Task was not created via Queue.")
+        if self.lease_id is None:
+            raise Exception(
+                "No lease_id available for task. Tasks must be received using Queue.receive to have a "
+                "valid lease_id."
+            )
+        await self._queue_stub.complete(queue=self._queue, lease_id=self.lease_id)
 
 
 @dataclass(frozen=True, order=True)
 class FailedTask(Task):
     """Represents a failed queue publish for an event."""
 
+    lease_id: str = None  # failed tasks should never have a lease id.
     message: str = field(default="")
 
 
@@ -86,19 +99,29 @@ def _wire_to_failed_task(failed_task: WireFailedTask) -> FailedTask:
     )
 
 
-class QueueClient(object):
-    """
-    Nitric generic publish/subscribe tasking client.
+@dataclass(frozen=True, order=True)
+class Queue(object):
 
-    This client insulates application code from stack specific task/topic operations or SDKs.
-    """
+    _queue_stub: QueueStub
+    name: str
 
-    def __init__(self, queue: str):
-        """Construct a Nitric Queue Client."""
-        self.queue = queue
-        self._stub = QueueStub(channel=new_default_channel())
+    async def send(
+        self, tasks: Union[Task, dict, List[Union[Task, dict]]] = None
+    ) -> Union[Task, List[Union[Task, FailedTask]]]:
+        if isinstance(tasks, list):
+            return await self._send_batch(tasks)
 
-    async def send_batch(
+        task = tasks
+        if task is None:
+            task = Task()
+
+        if isinstance(task, dict):
+            # TODO: handle tasks that are just a payload
+            task = Task(**task)
+
+        await self._queue_stub.send(queue=self.name, task=_task_to_wire(task))
+
+    async def _send_batch(
         self, tasks: List[Union[Task, dict]] = None, raise_on_failure: bool = True
     ) -> List[FailedTask]:
         """
@@ -113,11 +136,11 @@ class QueueClient(object):
 
         wire_tasks = [_task_to_wire(Task(**task) if isinstance(task, dict) else task) for task in tasks]
 
-        response = await self._stub.send_batch(queue=self.queue, tasks=wire_tasks)
+        response = await self._queue_stub.send_batch(queue=self.name, tasks=wire_tasks)
 
         return [_wire_to_failed_task(failed_task) for failed_task in response.failed_tasks]
 
-    async def receive(self, depth: int = None) -> List[Task]:
+    async def receive(self, limit: int = None) -> List[Task]:
         """
         Pop 1 or more items from the specified queue up to the depth limit.
 
@@ -127,15 +150,29 @@ class QueueClient(object):
         If the lease on a queue item expires before it is acknowledged or the lease is extended the task will be
         returned to the queue for reprocessing.
 
-        identifier.
-        :param depth: The maximum number of queue items to return. Default: 1, Min: 1.
+        :param limit: The maximum number of queue items to return. Default: 1, Min: 1.
         :return: Queue items popped from the specified queue.
         """
         # Set the default and minimum depth to 1.
-        if depth is None or depth < 1:
-            depth = 1
+        if limit is None or limit < 1:
+            limit = 1
 
-        response = await self._stub.receive(queue=self.queue, depth=depth)
+        response = await self._queue_stub.receive(queue=self.name, depth=limit)
 
-        # Map the response protobuf response items to Python SDK Nitric Queue Items
+        # Map the response protobuf response items to Python SDK Nitric Tasks
         return [_wire_to_task(task) for task in response.tasks]
+
+
+class QueueClient(object):
+    """
+    Nitric generic publish/subscribe tasking client.
+
+    This client insulates application code from stack specific task/topic operations or SDKs.
+    """
+
+    def __init__(self):
+        """Construct a Nitric Queue Client."""
+        self._queue_stub = QueueStub(channel=new_default_channel())
+
+    def queue(self, name: str):
+        return Queue(_queue_stub=self._queue_stub, name=name)
