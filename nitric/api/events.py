@@ -27,8 +27,8 @@ class Event(object):
     """Represents a NitricEvent."""
 
     payload: dict = field(default_factory=dict)
-    id: str = ""
-    payload_type: str = ""
+    id: str = field(default=None)
+    payload_type: str = field(default=None)
 
 
 def _event_to_wire(event: Event) -> NitricEvent:
@@ -85,5 +85,5 @@ class EventClient(object):
         response = await self._topic_stub.list()
         return [self.topic(topic.name) for topic in response.topics]
 
-    def topic(self, topic: str) -> Topic:
-        return Topic(_stub=self._stub, name=topic)
+    def topic(self, name: str) -> Topic:
+        return Topic(_stub=self._stub, name=name)

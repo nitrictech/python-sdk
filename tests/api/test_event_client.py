@@ -48,8 +48,8 @@ class EventClientTest(IsolatedAsyncioTestCase):
         # Check expected values were passed to Stub
         mock_publish.assert_called_once()
         assert mock_publish.call_args.kwargs["topic"] == "test-topic"
-        assert mock_publish.call_args.kwargs["event"].id == ""
-        assert mock_publish.call_args.kwargs["event"].payload_type == ""
+        assert mock_publish.call_args.kwargs["event"].id is None
+        assert mock_publish.call_args.kwargs["event"].payload_type is None
         assert len(mock_publish.call_args.kwargs["event"].payload.fields) == 1
         assert mock_publish.call_args.kwargs["event"].payload == _struct_from_dict(payload)
 
@@ -69,7 +69,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         mock_publish.assert_called_once()
         assert mock_publish.call_args.kwargs["topic"] == "test-topic"
         assert mock_publish.call_args.kwargs["event"].id == "123"
-        assert mock_publish.call_args.kwargs["event"].payload_type == ""
+        assert mock_publish.call_args.kwargs["event"].payload_type is None
         assert len(mock_publish.call_args.kwargs["event"].payload.fields) == 1
         assert mock_publish.call_args.kwargs["event"].payload == _struct_from_dict(payload)
 
@@ -105,6 +105,6 @@ class EventClientTest(IsolatedAsyncioTestCase):
         # Check expected values were passed to Stub
         mock_publish.assert_called_once()
         assert mock_publish.call_args.kwargs["topic"] == "test-topic"
-        assert mock_publish.call_args.kwargs["event"].id == ""
-        assert mock_publish.call_args.kwargs["event"].payload_type == ""
+        assert mock_publish.call_args.kwargs["event"].id is None
+        assert mock_publish.call_args.kwargs["event"].payload_type is None
         assert mock_publish.call_args.kwargs["event"].payload == Struct()
