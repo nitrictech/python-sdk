@@ -44,12 +44,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from nitric.proto import storage
-from nitric.proto import storage_service
-from nitric.api._base_client import BaseClient
+from dataclasses import dataclass
+
+from nitric.utils import new_default_channel
+from nitric.proto.nitric.storage.v1 import StorageStub
 
 
-class StorageClient(BaseClient):
+class StorageClient(object):
     &#34;&#34;&#34;
     Nitric generic blob storage client.
 
@@ -57,34 +58,50 @@ class StorageClient(BaseClient):
     &#34;&#34;&#34;
 
     def __init__(self):
-        &#34;&#34;&#34;Construct a new StorageClient.&#34;&#34;&#34;
-        super(self.__class__, self).__init__()
-        self._stub = storage_service.StorageStub(self._channel)
+        &#34;&#34;&#34;Construct a Nitric Storage Client.&#34;&#34;&#34;
+        self._storage_stub = StorageStub(channel=new_default_channel())
 
-    def write(self, bucket_name: str, key: str, body: bytes):
-        &#34;&#34;&#34;
-        Store a file.
+    def bucket(self, name: str):
+        &#34;&#34;&#34;Return a reference to a bucket from the connected storage service.&#34;&#34;&#34;
+        return Bucket(_storage_stub=self._storage_stub, name=name)
 
-        :param bucket_name: name of the bucket to store the data in.
-        :param key: key within the bucket, where the file should be stored.
-        :param body: data to be stored.
-        :return: storage result.
-        &#34;&#34;&#34;
-        request = storage.StorageWriteRequest(bucket_name=bucket_name, key=key, body=body)
-        response = self._exec(&#34;Write&#34;, request)
-        return response
 
-    def read(self, bucket_name: str, key: str) -&gt; bytes:
-        &#34;&#34;&#34;
-        Retrieve an existing file.
+@dataclass(frozen=True, order=True)
+class Bucket(object):
+    &#34;&#34;&#34;A reference to a bucket in a storage service, used to the perform operations on that bucket.&#34;&#34;&#34;
 
-        :param bucket_name: name of the bucket where the file was stored.
-        :param key: key for the file to retrieve.
-        :return: the file as bytes.
+    _storage_stub: StorageStub
+    name: str
+
+    def file(self, key: str):
+        &#34;&#34;&#34;Return a reference to a file in this bucket.&#34;&#34;&#34;
+        return File(_storage_stub=self._storage_stub, _bucket=self.name, key=key)
+
+
+@dataclass(frozen=True, order=True)
+class File(object):
+    &#34;&#34;&#34;A reference to a file in a bucket, used to perform operations on that file.&#34;&#34;&#34;
+
+    _storage_stub: StorageStub
+    _bucket: str
+    key: str
+
+    async def write(self, body: bytes):
         &#34;&#34;&#34;
-        request = storage.StorageReadRequest(bucket_name=bucket_name, key=key)
-        response = self._exec(&#34;Read&#34;, request)
-        return response.body</code></pre>
+        Write the bytes as the content of this file.
+
+        Will create the file if it doesn&#39;t already exist.
+        &#34;&#34;&#34;
+        await self._storage_stub.write(bucket_name=self._bucket, key=self.key, body=body)
+
+    async def read(self) -&gt; bytes:
+        &#34;&#34;&#34;Read this files contents from the bucket.&#34;&#34;&#34;
+        response = await self._storage_stub.read(bucket_name=self._bucket, key=self.key)
+        return response.body
+
+    async def delete(self):
+        &#34;&#34;&#34;Delete this file from the bucket.&#34;&#34;&#34;
+        await self._storage_stub.delete(bucket_name=self._bucket, key=self.key)</code></pre>
 </details>
 </section>
 <section>
@@ -96,18 +113,156 @@ class StorageClient(BaseClient):
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="nitric.api.storage.Bucket"><code class="flex name class">
+<span>class <span class="ident">Bucket</span></span>
+<span>(</span><span>_storage_stub: <a title="nitric.proto.nitric.storage.v1.StorageStub" href="../proto/nitric/storage/v1/index.html#nitric.proto.nitric.storage.v1.StorageStub">StorageStub</a>, name: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A reference to a bucket in a storage service, used to the perform operations on that bucket.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Bucket(object):
+    &#34;&#34;&#34;A reference to a bucket in a storage service, used to the perform operations on that bucket.&#34;&#34;&#34;
+
+    _storage_stub: StorageStub
+    name: str
+
+    def file(self, key: str):
+        &#34;&#34;&#34;Return a reference to a file in this bucket.&#34;&#34;&#34;
+        return File(_storage_stub=self._storage_stub, _bucket=self.name, key=key)</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.api.storage.Bucket.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.api.storage.Bucket.file"><code class="name flex">
+<span>def <span class="ident">file</span></span>(<span>self, key: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a reference to a file in this bucket.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def file(self, key: str):
+    &#34;&#34;&#34;Return a reference to a file in this bucket.&#34;&#34;&#34;
+    return File(_storage_stub=self._storage_stub, _bucket=self.name, key=key)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.api.storage.File"><code class="flex name class">
+<span>class <span class="ident">File</span></span>
+<span>(</span><span>_storage_stub: <a title="nitric.proto.nitric.storage.v1.StorageStub" href="../proto/nitric/storage/v1/index.html#nitric.proto.nitric.storage.v1.StorageStub">StorageStub</a>, _bucket: str, key: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A reference to a file in a bucket, used to perform operations on that file.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class File(object):
+    &#34;&#34;&#34;A reference to a file in a bucket, used to perform operations on that file.&#34;&#34;&#34;
+
+    _storage_stub: StorageStub
+    _bucket: str
+    key: str
+
+    async def write(self, body: bytes):
+        &#34;&#34;&#34;
+        Write the bytes as the content of this file.
+
+        Will create the file if it doesn&#39;t already exist.
+        &#34;&#34;&#34;
+        await self._storage_stub.write(bucket_name=self._bucket, key=self.key, body=body)
+
+    async def read(self) -&gt; bytes:
+        &#34;&#34;&#34;Read this files contents from the bucket.&#34;&#34;&#34;
+        response = await self._storage_stub.read(bucket_name=self._bucket, key=self.key)
+        return response.body
+
+    async def delete(self):
+        &#34;&#34;&#34;Delete this file from the bucket.&#34;&#34;&#34;
+        await self._storage_stub.delete(bucket_name=self._bucket, key=self.key)</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.api.storage.File.key"><code class="name">var <span class="ident">key</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.api.storage.File.delete"><code class="name flex">
+<span>async def <span class="ident">delete</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Delete this file from the bucket.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def delete(self):
+    &#34;&#34;&#34;Delete this file from the bucket.&#34;&#34;&#34;
+    await self._storage_stub.delete(bucket_name=self._bucket, key=self.key)</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.storage.File.read"><code class="name flex">
+<span>async def <span class="ident">read</span></span>(<span>self) ‑> bytes</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Read this files contents from the bucket.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def read(self) -&gt; bytes:
+    &#34;&#34;&#34;Read this files contents from the bucket.&#34;&#34;&#34;
+    response = await self._storage_stub.read(bucket_name=self._bucket, key=self.key)
+    return response.body</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.storage.File.write"><code class="name flex">
+<span>async def <span class="ident">write</span></span>(<span>self, body: bytes)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Write the bytes as the content of this file.</p>
+<p>Will create the file if it doesn't already exist.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def write(self, body: bytes):
+    &#34;&#34;&#34;
+    Write the bytes as the content of this file.
+
+    Will create the file if it doesn&#39;t already exist.
+    &#34;&#34;&#34;
+    await self._storage_stub.write(bucket_name=self._bucket, key=self.key, body=body)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
 <dt id="nitric.api.storage.StorageClient"><code class="flex name class">
 <span>class <span class="ident">StorageClient</span></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Nitric generic blob storage client.</p>
 <p>This client insulates application code from stack specific blob store operations or SDKs.</p>
-<p>Construct a new StorageClient.</p></div>
+<p>Construct a Nitric Storage Client.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class StorageClient(BaseClient):
+<pre><code class="python">class StorageClient(object):
     &#34;&#34;&#34;
     Nitric generic blob storage client.
 
@@ -115,92 +270,27 @@ class StorageClient(BaseClient):
     &#34;&#34;&#34;
 
     def __init__(self):
-        &#34;&#34;&#34;Construct a new StorageClient.&#34;&#34;&#34;
-        super(self.__class__, self).__init__()
-        self._stub = storage_service.StorageStub(self._channel)
+        &#34;&#34;&#34;Construct a Nitric Storage Client.&#34;&#34;&#34;
+        self._storage_stub = StorageStub(channel=new_default_channel())
 
-    def write(self, bucket_name: str, key: str, body: bytes):
-        &#34;&#34;&#34;
-        Store a file.
-
-        :param bucket_name: name of the bucket to store the data in.
-        :param key: key within the bucket, where the file should be stored.
-        :param body: data to be stored.
-        :return: storage result.
-        &#34;&#34;&#34;
-        request = storage.StorageWriteRequest(bucket_name=bucket_name, key=key, body=body)
-        response = self._exec(&#34;Write&#34;, request)
-        return response
-
-    def read(self, bucket_name: str, key: str) -&gt; bytes:
-        &#34;&#34;&#34;
-        Retrieve an existing file.
-
-        :param bucket_name: name of the bucket where the file was stored.
-        :param key: key for the file to retrieve.
-        :return: the file as bytes.
-        &#34;&#34;&#34;
-        request = storage.StorageReadRequest(bucket_name=bucket_name, key=key)
-        response = self._exec(&#34;Read&#34;, request)
-        return response.body</code></pre>
+    def bucket(self, name: str):
+        &#34;&#34;&#34;Return a reference to a bucket from the connected storage service.&#34;&#34;&#34;
+        return Bucket(_storage_stub=self._storage_stub, name=name)</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>nitric.api._base_client.BaseClient</li>
-<li>abc.ABC</li>
-</ul>
 <h3>Methods</h3>
 <dl>
-<dt id="nitric.api.storage.StorageClient.read"><code class="name flex">
-<span>def <span class="ident">read</span></span>(<span>self, bucket_name: str, key: str) ‑> bytes</span>
+<dt id="nitric.api.storage.StorageClient.bucket"><code class="name flex">
+<span>def <span class="ident">bucket</span></span>(<span>self, name: str)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Retrieve an existing file.</p>
-<p>:param bucket_name: name of the bucket where the file was stored.
-:param key: key for the file to retrieve.
-:return: the file as bytes.</p></div>
+<div class="desc"><p>Return a reference to a bucket from the connected storage service.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def read(self, bucket_name: str, key: str) -&gt; bytes:
-    &#34;&#34;&#34;
-    Retrieve an existing file.
-
-    :param bucket_name: name of the bucket where the file was stored.
-    :param key: key for the file to retrieve.
-    :return: the file as bytes.
-    &#34;&#34;&#34;
-    request = storage.StorageReadRequest(bucket_name=bucket_name, key=key)
-    response = self._exec(&#34;Read&#34;, request)
-    return response.body</code></pre>
-</details>
-</dd>
-<dt id="nitric.api.storage.StorageClient.write"><code class="name flex">
-<span>def <span class="ident">write</span></span>(<span>self, bucket_name: str, key: str, body: bytes)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Store a file.</p>
-<p>:param bucket_name: name of the bucket to store the data in.
-:param key: key within the bucket, where the file should be stored.
-:param body: data to be stored.
-:return: storage result.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def write(self, bucket_name: str, key: str, body: bytes):
-    &#34;&#34;&#34;
-    Store a file.
-
-    :param bucket_name: name of the bucket to store the data in.
-    :param key: key within the bucket, where the file should be stored.
-    :param body: data to be stored.
-    :return: storage result.
-    &#34;&#34;&#34;
-    request = storage.StorageWriteRequest(bucket_name=bucket_name, key=key, body=body)
-    response = self._exec(&#34;Write&#34;, request)
-    return response</code></pre>
+<pre><code class="python">def bucket(self, name: str):
+    &#34;&#34;&#34;Return a reference to a bucket from the connected storage service.&#34;&#34;&#34;
+    return Bucket(_storage_stub=self._storage_stub, name=name)</code></pre>
 </details>
 </dd>
 </dl>
@@ -222,10 +312,25 @@ class StorageClient(BaseClient):
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
+<h4><code><a title="nitric.api.storage.Bucket" href="#nitric.api.storage.Bucket">Bucket</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.storage.Bucket.file" href="#nitric.api.storage.Bucket.file">file</a></code></li>
+<li><code><a title="nitric.api.storage.Bucket.name" href="#nitric.api.storage.Bucket.name">name</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.api.storage.File" href="#nitric.api.storage.File">File</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.storage.File.delete" href="#nitric.api.storage.File.delete">delete</a></code></li>
+<li><code><a title="nitric.api.storage.File.key" href="#nitric.api.storage.File.key">key</a></code></li>
+<li><code><a title="nitric.api.storage.File.read" href="#nitric.api.storage.File.read">read</a></code></li>
+<li><code><a title="nitric.api.storage.File.write" href="#nitric.api.storage.File.write">write</a></code></li>
+</ul>
+</li>
+<li>
 <h4><code><a title="nitric.api.storage.StorageClient" href="#nitric.api.storage.StorageClient">StorageClient</a></code></h4>
 <ul class="">
-<li><code><a title="nitric.api.storage.StorageClient.read" href="#nitric.api.storage.StorageClient.read">read</a></code></li>
-<li><code><a title="nitric.api.storage.StorageClient.write" href="#nitric.api.storage.StorageClient.write">write</a></code></li>
+<li><code><a title="nitric.api.storage.StorageClient.bucket" href="#nitric.api.storage.StorageClient.bucket">bucket</a></code></li>
 </ul>
 </li>
 </ul>

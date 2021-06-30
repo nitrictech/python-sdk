@@ -16,106 +16,82 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Callable, Union
+import traceback
+from typing import Callable, Union, Coroutine, Any
 
-from nitric.config import settings
-from nitric.faas import TriggerRequest, Response
-from grpc import aio
+import betterproto
+from betterproto.grpc.util.async_channel import AsyncChannel
 
-from nitric.faas.trigger import Trigger
-from nitric.proto.faas.v1 import faas_pb2, faas_pb2_grpc
-
+from nitric.utils import new_default_channel
+from nitric.faas import Trigger, Response
+from nitric.proto.nitric.faas.v1 import FaasStub, InitRequest, ClientMessage
 import asyncio
 
 
-def get_stream(stub: faas_pb2_grpc.FaasStub) -> aio.StreamStreamCall[faas_pb2.ClientMessage, faas_pb2.ServerMessage]:
-    return stub.TriggerStream()
+async def _register_faas_worker(
+    func: Callable[[Trigger], Union[Coroutine[Any, Any, Union[Response, None, dict]], Union[Response, None, dict]]]
+):
+    """
+    Register a new FaaS worker with the Membrane, using the provided function as the handler.
 
+    :param func: handler function for incoming triggers. Can be sync or async, async is preferred.
+    """
+    channel = new_default_channel()
+    client = FaasStub(channel)
+    request_channel = AsyncChannel(close=True)
+    # We can start be sending all the requests we already have
+    try:
+        await request_channel.send(ClientMessage(init_request=InitRequest()))
+        async for srv_msg in client.trigger_stream(request_channel):
+            # The response iterator will remain active until the connection is closed
+            msg_type, val = betterproto.which_one_of(srv_msg, "content")
 
-async def loop(func: Union[Callable[[TriggerRequest], Union[Response, str]]]):
-    """FaaS loop"""
-    async with aio.insecure_channel(settings.SERVICE_BIND) as channel:
-        stub = faas_pb2_grpc.FaasStub(channel)
-        stream = get_stream(stub)
-
-        # Let the server know we're ready to work
-        await stream.write(faas_pb2.ClientMessage(init_request=faas_pb2.InitRequest()))
-
-        # Infinite loop
-        while 1:
-            # Receive a message, will block until a message is available
-            # This can be one of ServerMessage of EOFType
-            # If its an EOFType we may terminate the stream
-            # Otherwise we keep running
-            msg = await stream.read()
-
-            # EOF we can exit now
-            if msg is None:
-                # Break the loop
-                break
-
-            if msg.HasField("init_response"):
-                # Handle the init response
-                print("Function connected to Membrane")
+            if msg_type == "init_response":
+                print("function connected to Membrane")
                 # We don't need to reply
-                # Time to go to the next available message
+                # proceed to the next available message
                 continue
-            elif msg.HasField("trigger_request"):
-                client_msg = faas_pb2.ClientMessage(
-                    id=msg.id,
-                )
-
-                trigger = Trigger.from_trigger_request(trigger_request=msg.trigger_request)
-                # Invoke the handler here
+            if msg_type == "trigger_request":
+                trigger = Trigger.from_trigger_request(srv_msg.trigger_request)
                 try:
-                    # FIXME: Await the function as an async function
-                    # This will allow the user to define non-blocking I/O within the scope
-                    # of their function allowing the runtime to queue up more requests
-                    if asyncio.iscoroutinefunction(func):
-                        print("call non-blocking")
-                        response = await func(trigger)
-                    else:
-                        response = func(trigger)
-                        print("call blocking")
-
-                    if isinstance(response, Response):
-                        client_msg.trigger_response.CopyFrom(response.to_grpc_trigger_response_context())
-                    elif isinstance(response, str):
-                        # Construct a default response from the data
-                        default_response = trigger.default_response()
-                        default_response.data = response.encode()
-                        client_msg.trigger_response.CopyFrom(default_response.to_grpc_trigger_response_context())
-
-                    # translate the response
+                    response = await func(trigger) if asyncio.iscoroutinefunction(func) else func(trigger)
                 except Exception:
-                    # Handle the exception here
-                    # write an exception back to the server
-                    default_response = trigger.default_response()
-                    default_response.data = "Internal Error".encode()
-                    if default_response.context.is_http():
-                        http_context = default_response.context.as_http()
-                        http_context.status = 500
-                        http_context.headers = {"Content-Type": "text/plain"}
-                    elif default_response.context.is_topic():
-                        topic_context = default_response.context.as_topic()
-                        topic_context.success = False
+                    print("Error calling handler function")
+                    traceback.print_exc()
+                    response = trigger.default_response()
+                    if response.context.is_http():
+                        response.context.as_http().status = 500
+                    else:
+                        response.context.as_topic().success = False
 
-                    client_msg.trigger_response.CopyFrom(default_response.to_grpc_trigger_response_context())
+                # Handle lite responses with just data, assume a success in these cases
+                if not isinstance(response, Response):
+                    full_response = trigger.default_response()
+                    full_response.data = bytes(str(response), "utf-8")
+                    response = full_response
 
-                # Write it back to the server
-                await stream.write(client_msg)
-                # Continue the loop
+                # Send function response back to server
+                await request_channel.send(
+                    ClientMessage(id=srv_msg.id, trigger_response=response.to_grpc_trigger_response_context())
+                )
+            else:
+                print("unhandled message type {0}, skipping".format(msg_type))
+                continue
+            if request_channel.done():
+                break
+    except Exception:
+        traceback.print_exc()
+    finally:
+        print("stream from Membrane closed, closing client stream")
+        # The channel must be closed to complete the gRPC connection
+        request_channel.close()
+        channel.close()
 
-        print("Function Exiting")
 
-
-# TODO: We need to change this to an Awaitable or a Coroutine
-def start(func: Union[Callable[[TriggerRequest], Union[Response, str]]]):
+def start(handler: Callable[[Trigger], Coroutine[Any, Any, Union[Response, None, dict]]]):
     """
-    Register the provided function as the request handler and starts handling new requests.
+    Register the provided function as the trigger handler and starts handling new trigger requests.
 
-    :param func: to use to handle new requests
+    :param handler: handler function for incoming triggers. Can be sync or async, async is preferred.
     """
-
-    # Begin the event loop
-    asyncio.run(loop(func))
+    asyncio.run(_register_faas_worker(handler))

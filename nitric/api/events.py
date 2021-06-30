@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 from typing import List, Union
-from nitric.api._utils import new_default_channel, _struct_from_dict
+from nitric.utils import new_default_channel, _struct_from_dict
 from nitric.proto.nitric.event.v1 import EventStub, NitricEvent, TopicStub
 from dataclasses import dataclass, field
 
@@ -41,7 +41,7 @@ def _event_to_wire(event: Event) -> NitricEvent:
 
 @dataclass(frozen=True, order=True)
 class Topic(object):
-    """Represents event topic metadata."""
+    """A reference to a topic on an event service, used to perform operations on that topic."""
 
     _stub: EventStub
     name: str
@@ -86,4 +86,5 @@ class EventClient(object):
         return [self.topic(topic.name) for topic in response.topics]
 
     def topic(self, name: str) -> Topic:
+        """Return a reference a topic from the connected event service."""
         return Topic(_stub=self._stub, name=name)

@@ -19,10 +19,7 @@
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import patch, AsyncMock
 
-from betterproto.lib.google.protobuf import Struct
-
 from nitric.api import StorageClient
-from nitric.api._utils import _struct_from_dict
 
 
 class Object(object):

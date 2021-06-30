@@ -22,7 +22,7 @@ from unittest.mock import patch, AsyncMock
 from betterproto.lib.google.protobuf import Struct
 
 from nitric.api import QueueClient, Task
-from nitric.api._utils import _struct_from_dict
+from nitric.utils import _struct_from_dict
 
 
 class Object(object):

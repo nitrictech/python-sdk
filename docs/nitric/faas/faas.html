@@ -44,119 +44,85 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Callable, Union
+import traceback
+from typing import Callable, Union, Coroutine, Any
 
-from flask import Flask, request
-from waitress import serve
+import betterproto
+from betterproto.grpc.util.async_channel import AsyncChannel
 
-from nitric.proto.faas.v1.faas_pb2 import TriggerRequest, TriggerResponse
-from nitric.config import settings
+from nitric.utils import new_default_channel
 from nitric.faas import Trigger, Response
-from google.protobuf import json_format
+from nitric.proto.nitric.faas.v1 import FaasStub, InitRequest, ClientMessage
+import asyncio
 
 
-def construct_request() -&gt; TriggerRequest:
-    &#34;&#34;&#34;Construct a Nitric Request object from the Flask HTTP Request.&#34;&#34;&#34;
-    # full_path used to better match behavior in other SDKs
-    # return TriggerRequest(dict(request.headers), request.get_data(), path=request.full_path)
-    message = json_format.Parse(request.get_data(), TriggerRequest(), ignore_unknown_fields=False)
-    return message
-
-
-def http_response(response: TriggerResponse):
+async def _register_faas_worker(
+    func: Callable[[Trigger], Union[Coroutine[Any, Any, Union[Response, None, dict]], Union[Response, None, dict]]]
+):
     &#34;&#34;&#34;
-    Return a full HTTP response tuple based on the Nitric Response contents.
+    Register a new FaaS worker with the Membrane, using the provided function as the handler.
 
-    The response includes a body, status and headers as appropriate.
+    :param func: handler function for incoming triggers. Can be sync or async, async is preferred.
     &#34;&#34;&#34;
-    headers = {&#34;Content-Type&#34;: &#34;application/json&#34;}
+    channel = new_default_channel()
+    client = FaasStub(channel)
+    request_channel = AsyncChannel(close=True)
+    # We can start be sending all the requests we already have
+    try:
+        await request_channel.send(ClientMessage(init_request=InitRequest()))
+        async for srv_msg in client.trigger_stream(request_channel):
+            # The response iterator will remain active until the connection is closed
+            msg_type, val = betterproto.which_one_of(srv_msg, &#34;content&#34;)
 
-    return json_format.MessageToJson(response), 200, headers
+            if msg_type == &#34;init_response&#34;:
+                print(&#34;function connected to Membrane&#34;)
+                # We don&#39;t need to reply
+                # proceed to the next available message
+                continue
+            if msg_type == &#34;trigger_request&#34;:
+                trigger = Trigger.from_trigger_request(srv_msg.trigger_request)
+                try:
+                    response = await func(trigger) if asyncio.iscoroutinefunction(func) else func(trigger)
+                except Exception:
+                    print(&#34;Error calling handler function&#34;)
+                    traceback.print_exc()
+                    response = trigger.default_response()
+                    if response.context.is_http():
+                        response.context.as_http().status = 500
+                    else:
+                        response.context.as_topic().success = False
 
+                # Handle lite responses with just data, assume a success in these cases
+                if not isinstance(response, Response):
+                    full_response = trigger.default_response()
+                    full_response.data = bytes(str(response), &#34;utf-8&#34;)
+                    response = full_response
 
-def exception_to_html():
-    &#34;&#34;&#34;Return a traceback as HTML.&#34;&#34;&#34;
-    import traceback
-    import sys
-    import html
-
-    limit = None
-    exception_type, value, tb = sys.exc_info()
-    trace_list = traceback.format_tb(tb, limit) + traceback.format_exception_only(exception_type, value)
-    body = &#34;Traceback:\n&#34; + &#34;%-20s %s&#34; % (&#34;&#34;.join(trace_list[:-1]), trace_list[-1])
-    return (
-        &#34;&lt;html&gt;&lt;head&gt;&lt;title&gt;Error&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&lt;h2&gt;An Error Occurred:&lt;/h2&gt;\n&lt;pre&gt;&#34;
-        + html.escape(body)
-        + &#34;&lt;/pre&gt;&lt;/body&gt;&lt;/html&gt;\n&#34;
-    )
-
-
-class Handler(object):
-    &#34;&#34;&#34;Nitric Function handler.&#34;&#34;&#34;
-
-    def __init__(self, func: Callable[[Trigger], Union[Response, str]]):
-        &#34;&#34;&#34;Construct a new handler using the provided function to handle new requests.&#34;&#34;&#34;
-        self.func = func
-
-    def __call__(self, path=&#34;&#34;, *args):
-        &#34;&#34;&#34;Construct Nitric Request from HTTP Request.&#34;&#34;&#34;
-        trigger_request = construct_request()
-
-        grpc_trigger_response: TriggerResponse
-
-        # convert it to a trigger
-        trigger = Trigger.from_trigger_request(trigger_request)
-
-        try:
-            # Execute the handler function
-            response: Union[Response, str] = self.func(trigger)
-
-            final_response: Response
-            if isinstance(response, str):
-                final_response = trigger.default_response()
-                final_response.data = response.encode()
-            elif isinstance(response, Response):
-                final_response = response
+                # Send function response back to server
+                await request_channel.send(
+                    ClientMessage(id=srv_msg.id, trigger_response=response.to_grpc_trigger_response_context())
+                )
             else:
-                # assume None
-                final_response = trigger.default_response()
-                final_response.data = &#34;&#34;.encode()
-
-            grpc_trigger_response = final_response.to_grpc_trigger_response_context()
-
-        except Exception:
-            trigger_response = trigger.default_response()
-            if trigger_response.context.is_http():
-                trigger_response.context.as_http().status = 500
-                trigger_response.context.as_http().headers = {&#34;Content-Type&#34;: &#34;text/html&#34;}
-                trigger_response.data = exception_to_html().encode()
-            elif trigger_response.context.is_topic():
-                trigger_response.data = &#34;Error processing message&#34;
-                trigger_response.context.as_topic().success = False
-
-            grpc_trigger_response = trigger_response.to_grpc_trigger_response_context()
-
-        return http_response(grpc_trigger_response)
+                print(&#34;unhandled message type {0}, skipping&#34;.format(msg_type))
+                continue
+            if request_channel.done():
+                break
+    except Exception:
+        traceback.print_exc()
+    finally:
+        print(&#34;stream from Membrane closed, closing client stream&#34;)
+        # The channel must be closed to complete the gRPC connection
+        request_channel.close()
+        channel.close()
 
 
-def start(func: Callable[[Trigger], Union[Response, str]]):
+def start(handler: Callable[[Trigger], Coroutine[Any, Any, Union[Response, None, dict]]]):
     &#34;&#34;&#34;
-    Register the provided function as the request handler and starts handling new requests.
+    Register the provided function as the trigger handler and starts handling new trigger requests.
 
-    :param func: to use to handle new requests
+    :param handler: handler function for incoming triggers. Can be sync or async, async is preferred.
     &#34;&#34;&#34;
-    app = Flask(__name__)
-    app.add_url_rule(&#34;/&#34;, &#34;index&#34;, Handler(func), methods=[&#34;GET&#34;, &#34;PUT&#34;, &#34;POST&#34;, &#34;PATCH&#34;, &#34;DELETE&#34;])
-    app.add_url_rule(
-        &#34;/&lt;path:path&gt;&#34;,
-        &#34;path&#34;,
-        Handler(func),
-        methods=[&#34;GET&#34;, &#34;PUT&#34;, &#34;POST&#34;, &#34;PATCH&#34;, &#34;DELETE&#34;],
-    )
-
-    host, port = f&#34;{settings.CHILD_ADDRESS}&#34;.split(&#34;:&#34;)
-    # Start the function HTTP server
-    serve(app, host=host, port=int(port))</code></pre>
+    asyncio.run(_register_faas_worker(handler))</code></pre>
 </details>
 </section>
 <section>
@@ -166,103 +132,29 @@ def start(func: Callable[[Trigger], Union[Response, str]]):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="nitric.faas.faas.construct_request"><code class="name flex">
-<span>def <span class="ident">construct_request</span></span>(<span>) ‑> faas.v1.faas_pb2.TriggerRequest</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Construct a Nitric Request object from the Flask HTTP Request.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def construct_request() -&gt; TriggerRequest:
-    &#34;&#34;&#34;Construct a Nitric Request object from the Flask HTTP Request.&#34;&#34;&#34;
-    # full_path used to better match behavior in other SDKs
-    # return TriggerRequest(dict(request.headers), request.get_data(), path=request.full_path)
-    message = json_format.Parse(request.get_data(), TriggerRequest(), ignore_unknown_fields=False)
-    return message</code></pre>
-</details>
-</dd>
-<dt id="nitric.faas.faas.exception_to_html"><code class="name flex">
-<span>def <span class="ident">exception_to_html</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Return a traceback as HTML.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def exception_to_html():
-    &#34;&#34;&#34;Return a traceback as HTML.&#34;&#34;&#34;
-    import traceback
-    import sys
-    import html
-
-    limit = None
-    exception_type, value, tb = sys.exc_info()
-    trace_list = traceback.format_tb(tb, limit) + traceback.format_exception_only(exception_type, value)
-    body = &#34;Traceback:\n&#34; + &#34;%-20s %s&#34; % (&#34;&#34;.join(trace_list[:-1]), trace_list[-1])
-    return (
-        &#34;&lt;html&gt;&lt;head&gt;&lt;title&gt;Error&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&lt;h2&gt;An Error Occurred:&lt;/h2&gt;\n&lt;pre&gt;&#34;
-        + html.escape(body)
-        + &#34;&lt;/pre&gt;&lt;/body&gt;&lt;/html&gt;\n&#34;
-    )</code></pre>
-</details>
-</dd>
-<dt id="nitric.faas.faas.http_response"><code class="name flex">
-<span>def <span class="ident">http_response</span></span>(<span>response: faas.v1.faas_pb2.TriggerResponse)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Return a full HTTP response tuple based on the Nitric Response contents.</p>
-<p>The response includes a body, status and headers as appropriate.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def http_response(response: TriggerResponse):
-    &#34;&#34;&#34;
-    Return a full HTTP response tuple based on the Nitric Response contents.
-
-    The response includes a body, status and headers as appropriate.
-    &#34;&#34;&#34;
-    headers = {&#34;Content-Type&#34;: &#34;application/json&#34;}
-
-    return json_format.MessageToJson(response), 200, headers</code></pre>
-</details>
-</dd>
 <dt id="nitric.faas.faas.start"><code class="name flex">
-<span>def <span class="ident">start</span></span>(<span>func: Callable[[<a title="nitric.faas.trigger.Trigger" href="trigger.html#nitric.faas.trigger.Trigger">Trigger</a>], Union[<a title="nitric.faas.response.Response" href="response.html#nitric.faas.response.Response">Response</a>, str]])</span>
+<span>def <span class="ident">start</span></span>(<span>handler: Callable[[<a title="nitric.faas.trigger.Trigger" href="trigger.html#nitric.faas.trigger.Trigger">Trigger</a>], Coroutine[Any, Any, Union[<a title="nitric.faas.response.Response" href="response.html#nitric.faas.response.Response">Response</a>, NoneType, dict]]])</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Register the provided function as the request handler and starts handling new requests.</p>
-<p>:param func: to use to handle new requests</p></div>
+<div class="desc"><p>Register the provided function as the trigger handler and starts handling new trigger requests.</p>
+<p>:param handler: handler function for incoming triggers. Can be sync or async, async is preferred.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def start(func: Callable[[Trigger], Union[Response, str]]):
+<pre><code class="python">def start(handler: Callable[[Trigger], Coroutine[Any, Any, Union[Response, None, dict]]]):
     &#34;&#34;&#34;
-    Register the provided function as the request handler and starts handling new requests.
+    Register the provided function as the trigger handler and starts handling new trigger requests.
 
-    :param func: to use to handle new requests
+    :param handler: handler function for incoming triggers. Can be sync or async, async is preferred.
     &#34;&#34;&#34;
-    app = Flask(__name__)
-    app.add_url_rule(&#34;/&#34;, &#34;index&#34;, Handler(func), methods=[&#34;GET&#34;, &#34;PUT&#34;, &#34;POST&#34;, &#34;PATCH&#34;, &#34;DELETE&#34;])
-    app.add_url_rule(
-        &#34;/&lt;path:path&gt;&#34;,
-        &#34;path&#34;,
-        Handler(func),
-        methods=[&#34;GET&#34;, &#34;PUT&#34;, &#34;POST&#34;, &#34;PATCH&#34;, &#34;DELETE&#34;],
-    )
-
-    host, port = f&#34;{settings.CHILD_ADDRESS}&#34;.split(&#34;:&#34;)
-    # Start the function HTTP server
-    serve(app, host=host, port=int(port))</code></pre>
+    asyncio.run(_register_faas_worker(handler))</code></pre>
 </details>
 </dd>
 </dl>
 </section>
 <section>
+<<<<<<< refs/remotes/origin/main
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
 <dt id="nitric.faas.faas.Handler"><code class="flex name class">
@@ -397,6 +289,8 @@ def start(func: Callable[[Trigger], Union[Response, str]]):
 </dl>
 </dd>
 </dl>
+=======
+>>>>>>> feat: port faas.start to bi-di streaming with membrane
 </section>
 </article>
 <nav id="sidebar">
@@ -412,12 +306,10 @@ def start(func: Callable[[Trigger], Union[Response, str]]):
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="nitric.faas.faas.construct_request" href="#nitric.faas.faas.construct_request">construct_request</a></code></li>
-<li><code><a title="nitric.faas.faas.exception_to_html" href="#nitric.faas.faas.exception_to_html">exception_to_html</a></code></li>
-<li><code><a title="nitric.faas.faas.http_response" href="#nitric.faas.faas.http_response">http_response</a></code></li>
 <li><code><a title="nitric.faas.faas.start" href="#nitric.faas.faas.start">start</a></code></li>
 </ul>
 </li>
+<<<<<<< refs/remotes/origin/main
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
@@ -444,6 +336,8 @@ def start(func: Callable[[Trigger], Union[Response, str]]):
 </li>
 </ul>
 </li>
+=======
+>>>>>>> feat: port faas.start to bi-di streaming with membrane
 </ul>
 </nav>
 </main>

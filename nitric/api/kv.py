@@ -16,7 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from nitric.api._utils import new_default_channel, _struct_from_dict
+from nitric.utils import new_default_channel, _struct_from_dict
 from nitric.proto.nitric.kv.v1 import KeyValueStub
 
 

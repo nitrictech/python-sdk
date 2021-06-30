@@ -17,55 +17,73 @@
 # limitations under the License.
 #
 import typing
+from dataclasses import dataclass, field
 
-from nitric.proto.faas.v1.faas_pb2 import TriggerRequest
+from nitric.faas import Trigger
+from nitric.proto.nitric.faas.v1 import TriggerRequest
 
 from nitric.faas.response import Response, TopicResponseContext, HttpResponseContext, ResponseContext
 
 
+@dataclass(order=True)
 class HttpTriggerContext(object):
-    """Represents Trigger metadata from a HTTP subscription"""
+    """Represents Trigger metadata from a HTTP subscription."""
 
-    def __init__(
-        self,
-        method: str,
-        headers: typing.Dict[str, str],
-        path_params: typing.Dict[str, str],
-        query_params: typing.Dict[str, str],
-    ):
-        self.method = method
-        self.headers = headers
-        self.path_params = path_params
-        self.query_params = query_params
+    method: str
+    path: str
+    headers: typing.Dict[str, str]
+    query_params: typing.Dict[str, str]
 
 
 class TopicTriggerContext(object):
-    """Represents Trigger metadata from a topic subscription"""
+    """Represents Trigger metadata from a topic subscription."""
 
     def __init__(self, topic: str):
+        """Construct a new TopicTriggerContext, including the name of the source topic for this trigger."""
         self.topic = topic
 
 
+@dataclass(order=True)
 class TriggerContext(object):
     """Represents the contextual metadata for a Nitric function request."""
 
-    def __init__(self, context: typing.Union[TopicTriggerContext, HttpTriggerContext]):
-        """Construct a Nitric Trigger Context."""
-        self.context = context
+    context: typing.Union[TopicTriggerContext, HttpTriggerContext]
 
     def is_http(self) -> bool:
+        """
+        Indicate whether the trigger was from an HTTP request.
+
+        This indicates the availability of additional HTTP specific context such as path, query parameters and headers.
+        """
         return isinstance(self.context, HttpTriggerContext)
 
     def as_http(self) -> typing.Union[HttpTriggerContext, None]:
+        """
+        Return this context as an HTTP context type.
+
+        If the trigger wasn't an HTTP request, this function returns None.
+        is_http() should be used first to determine if this was an HTTP request trigger.
+        """
         if not self.is_http():
             return None
 
         return self.context
 
     def is_topic(self) -> bool:
+        """
+        Indicate whether the trigger was from a topic (event).
+
+        This indicates the availability of additional topic/event specific context such as the topic name.
+        """
         return isinstance(self.context, TriggerContext)
 
     def as_topic(self) -> typing.Union[TopicTriggerContext, None]:
+        """
+        Return this context as a topic context type.
+
+        If the trigger wasn't an event from a topic, this function returns None.
+        is_topic() should be used first to determine if this was a topic trigger.
+        """
         if not self.is_topic():
             return None
 
@@ -73,13 +91,14 @@ class TriggerContext(object):
 
     @staticmethod
     def from_trigger_request(trigger_request: TriggerRequest):
+        """Return a TriggerContext from a TriggerRequest."""
         if trigger_request.http is not None:
             return TriggerContext(
                 context=HttpTriggerContext(
                     headers=trigger_request.http.headers,
                     method=trigger_request.http.method,
                     query_params=trigger_request.http.query_params,
-                    path_params=trigger_request.http.path_params,
+                    path=trigger_request.http.path,
                 )
             )
         elif trigger_request.topic is not None:
@@ -95,6 +114,7 @@ def _clean_header(header_name: str):
     return header_name.lower().replace("x-nitric-", "").replace("-", "_")
 
 
+@dataclass(order=True)
 class Trigger(object):
     """
     Represents a standard Nitric function request.
@@ -102,10 +122,8 @@ class Trigger(object):
     These requests are normalized from their original stack-specific structures.
     """
 
-    def __init__(self, context: TriggerContext, data: bytes):
-        """Construct a Nitric Function Request."""
-        self.context = context
-        self.data = data
+    context: TriggerContext
+    data: bytes = field(default_factory=bytes)
 
     def get_body(self) -> bytes:
         """Return the bytes of the body of the request."""
@@ -125,9 +143,10 @@ class Trigger(object):
 
     def default_response(self) -> Response:
         """
-        Convenience method to construct a relevant default response
+        Return the trigger response, based on the trigger context type.
+
         The returned response can be interrogated with its context to determine the appropriate
-        response context e.g. response.context.is_http() or response.context.is_topic()
+        response context e.g. response.context.is_http() or response.context.is_topic().
         """
         response_ctx = None
 
@@ -136,10 +155,11 @@ class Trigger(object):
         elif self.context.is_topic():
             response_ctx = ResponseContext(context=TopicResponseContext())
 
-        return Response(data=None, context=response_ctx)
+        return Response(context=response_ctx)
 
     @staticmethod
-    def from_trigger_request(trigger_request: TriggerRequest):
+    def from_trigger_request(trigger_request: TriggerRequest) -> Trigger:
+        """Return the python SDK implementation of a Trigger from a protobuf representation."""
         context = TriggerContext.from_trigger_request(trigger_request)
 
         return Trigger(context=context, data=trigger_request.data)

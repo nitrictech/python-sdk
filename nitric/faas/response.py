@@ -16,75 +16,90 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Union, Dict
-from nitric.proto.faas.v1 import faas_pb2
-from nitric.proto.faas.v1.faas_pb2 import TriggerResponse
+from dataclasses import dataclass, field
+from typing import Union
+from nitric.proto.nitric.faas import v1
+from nitric.proto.nitric.faas.v1 import TriggerResponse
 
 
+@dataclass(order=True)
 class TopicResponseContext(object):
-    def __init__(self, success: bool = True):
-        self.success = success
+    """Represents a topic/event specific response context data such as whether the event was processed successfully."""
 
-    def to_grpc_topic_response_context(self) -> faas_pb2.TopicResponseContext:
-        return faas_pb2.TopicResponseContext(success=self.success)
+    success: bool = True
+
+    def to_grpc_topic_response_context(self) -> v1.TopicResponseContext:
+        """Reformat this topic response context for on the wire transfer."""
+        return v1.TopicResponseContext(success=self.success)
 
 
+@dataclass(order=True)
 class HttpResponseContext(object):
-    def __init__(self, headers: Dict[str, str] = {}, status: int = 200):
-        self.headers = headers
-        self.status = status
+    """Represents HTTP specific response context data such as an HTTP status and headers."""
 
-    def to_grpc_http_response_context(self) -> faas_pb2.HttpResponseContext:
-        return faas_pb2.HttpResponseContext(headers=self.headers, status=self.status)
+    headers: dict = field(default_factory=lambda: {})
+    status: int = 200
+
+    def to_grpc_http_response_context(self) -> v1.HttpResponseContext:
+        """Reformat this http response context for on the wire transfer."""
+        return v1.HttpResponseContext(headers=self.headers, status=self.status)
 
 
+@dataclass(order=True)
 class ResponseContext(object):
-    def __init__(self, context: Union[TopicResponseContext, HttpResponseContext]):
-        self.context = context
+    """Additional context data for a trigger response, specific to the original trigger type."""
+
+    context: Union[TopicResponseContext, HttpResponseContext]
 
     def is_http(self):
+        """Indicate whether the trigger was from an HTTP request."""
         return isinstance(self.context, HttpResponseContext)
 
     def is_topic(self):
+        """Indicate whether the trigger was from a topic (event)."""
         return isinstance(self.context, TopicResponseContext)
 
     def as_http(self) -> Union[HttpResponseContext, None]:
+        """
+        Return this context as an HTTP context type.
+
+        If the trigger wasn't an HTTP request, this function returns None.
+        is_http() should be used first to determine if this was an HTTP request trigger.
+        """
         if not self.is_http():
             return None
 
         return self.context
 
     def as_topic(self) -> Union[TopicResponseContext, None]:
-        """Determine is ResponseContext is for a topic"""
+        """
+        Return this context as a topic context type.
+
+        If the trigger wasn't an event from a topic, this function returns None.
+        is_topic() should be used first to determine if this was a topic trigger.
+        """
         if not self.is_topic():
             return None
 
         return self.context
 
 
+@dataclass(order=True)
 class Response(object):
     """Nitric Function as a Service (FaaS) response class."""
 
-    def __init__(
-        self,
-        context: ResponseContext,
-        data: Union[bytes] = None,
-    ):
-        """Construct a new Nitric Response."""
-        # FIXME: Fix typing of the status parameter, add tests
-        self.context = context
-        self.data = data
+    context: ResponseContext
+    data: bytes = field(default_factory=bytes)
 
     def to_grpc_trigger_response_context(self) -> TriggerResponse:
-        """Translate a response object ready for on the wire transport"""
-
+        """Translate a response object ready for on the wire transport."""
         response = TriggerResponse(data=self.data)
 
         if self.context.is_http():
             ctx = self.context.as_http()
-            response.http.CopyFrom(ctx.to_grpc_http_response_context())
+            response.http = ctx.to_grpc_http_response_context()
         elif self.context.is_topic():
             ctx = self.context.as_topic()
-            response.topic.CopyFrom(ctx.to_grpc_topic_response_context())
+            response.topic = ctx.to_grpc_topic_response_context()
 
         return response

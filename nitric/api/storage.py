@@ -18,7 +18,7 @@
 #
 from dataclasses import dataclass
 
-from nitric.api._utils import new_default_channel
+from nitric.utils import new_default_channel
 from nitric.proto.nitric.storage.v1 import StorageStub
 
 
@@ -34,20 +34,26 @@ class StorageClient(object):
         self._storage_stub = StorageStub(channel=new_default_channel())
 
     def bucket(self, name: str):
+        """Return a reference to a bucket from the connected storage service."""
         return Bucket(_storage_stub=self._storage_stub, name=name)
 
 
 @dataclass(frozen=True, order=True)
 class Bucket(object):
+    """A reference to a bucket in a storage service, used to the perform operations on that bucket."""
+
     _storage_stub: StorageStub
     name: str
 
     def file(self, key: str):
+        """Return a reference to a file in this bucket."""
         return File(_storage_stub=self._storage_stub, _bucket=self.name, key=key)
 
 
 @dataclass(frozen=True, order=True)
 class File(object):
+    """A reference to a file in a bucket, used to perform operations on that file."""
+
     _storage_stub: StorageStub
     _bucket: str
     key: str

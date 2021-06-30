@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 from typing import List, Union
-from nitric.api._utils import new_default_channel, _struct_from_dict
+from nitric.utils import new_default_channel, _struct_from_dict
 from nitric.proto.nitric.queue.v1 import QueueStub, NitricTask, FailedTask as WireFailedTask
 from dataclasses import dataclass, field
 
@@ -34,6 +34,7 @@ class Task(object):
     _queue: str = field(default=None)
 
     async def complete(self):
+        """Mark this task as complete and remove it from the queue."""
         if self._queue_stub is None or self._queue is None or self._queue == "":
             raise Exception("Task was not created via Queue.")
         if self.lease_id is None:
@@ -101,6 +102,7 @@ def _wire_to_failed_task(failed_task: WireFailedTask) -> FailedTask:
 
 @dataclass(frozen=True, order=True)
 class Queue(object):
+    """A reference to a queue from a queue service, used to perform operations on that queue."""
 
     _queue_stub: QueueStub
     name: str
@@ -108,6 +110,14 @@ class Queue(object):
     async def send(
         self, tasks: Union[Task, dict, List[Union[Task, dict]]] = None
     ) -> Union[Task, List[Union[Task, FailedTask]]]:
+        """
+        Send one or more tasks to this queue.
+
+        If a list of tasks is provided this function will return a list containing any tasks that failed to be sent to
+        the queue.
+
+        :param tasks: A task or list of tasks to send to the queue.
+        """
         if isinstance(tasks, list):
             return await self._send_batch(tasks)
 
@@ -175,4 +185,5 @@ class QueueClient(object):
         self._queue_stub = QueueStub(channel=new_default_channel())
 
     def queue(self, name: str):
+        """Return a reference to a queue from the connected queue service."""
         return Queue(_queue_stub=self._queue_stub, name=name)
