@@ -16,4 +16,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Nitric Python SDK API Documentation. See: https://nitric.io/docs for full framework documentation."""
+"""Nitric Python SDK API Documentation. See: https://nitric.io/docs?lang=python for full framework documentation."""

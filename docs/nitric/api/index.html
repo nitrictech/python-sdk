@@ -111,8 +111,7 @@ __all__ = [
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@dataclass(frozen=True, order=True)
-class Event(object):
+<pre><code class="python">class Event(object):
     &#34;&#34;&#34;Represents a NitricEvent.&#34;&#34;&#34;
 
     event_id: str
@@ -242,8 +241,7 @@ class Event(object):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@dataclass(frozen=True, order=True)
-class FailedTask(Task):
+<pre><code class="python">class FailedTask(Task):
     &#34;&#34;&#34;Represents a failed queue publish for an event.&#34;&#34;&#34;
 
     message: str = field(default=&#34;&#34;)</code></pre>
@@ -681,8 +679,7 @@ identifier.
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@dataclass(frozen=True, order=True)
-class Task(object):
+<pre><code class="python">class Task(object):
     &#34;&#34;&#34;Represents a NitricTask.&#34;&#34;&#34;
 
     task_id: str
@@ -724,8 +721,7 @@ class Task(object):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@dataclass(frozen=True, order=True)
-class Topic(object):
+<pre><code class="python">class Topic(object):
     &#34;&#34;&#34;Represents event topic metadata.&#34;&#34;&#34;
 
     name: str</code></pre>
