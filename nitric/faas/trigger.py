@@ -18,10 +18,7 @@
 #
 import typing
 from dataclasses import dataclass, field
-
-from nitric.faas import Trigger
 from nitric.proto.nitric.faas.v1 import TriggerRequest
-
 from nitric.faas.response import Response, TopicResponseContext, HttpResponseContext, ResponseContext
 
 
@@ -158,7 +155,7 @@ class Trigger(object):
         return Response(context=response_ctx)
 
     @staticmethod
-    def from_trigger_request(trigger_request: TriggerRequest) -> Trigger:
+    def from_trigger_request(trigger_request: TriggerRequest):
         """Return the python SDK implementation of a Trigger from a protobuf representation."""
         context = TriggerContext.from_trigger_request(trigger_request)
 

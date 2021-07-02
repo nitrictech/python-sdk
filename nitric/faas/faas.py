@@ -16,6 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import json
 import traceback
 from typing import Callable, Union, Coroutine, Any
 
@@ -29,7 +30,9 @@ import asyncio
 
 
 async def _register_faas_worker(
-    func: Callable[[Trigger], Union[Coroutine[Any, Any, Union[Response, None, dict]], Union[Response, None, dict]]]
+    func: Callable[
+        [Trigger], Union[Coroutine[Any, Any, Union[Response, None, dict, bytes]], Union[Response, None, dict, bytes]]
+    ]
 ):
     """
     Register a new FaaS worker with the Membrane, using the provided function as the handler.
@@ -54,7 +57,7 @@ async def _register_faas_worker(
             if msg_type == "trigger_request":
                 trigger = Trigger.from_trigger_request(srv_msg.trigger_request)
                 try:
-                    response = await func(trigger) if asyncio.iscoroutinefunction(func) else func(trigger)
+                    response = (await func(trigger)) if asyncio.iscoroutinefunction(func) else func(trigger)
                 except Exception:
                     print("Error calling handler function")
                     traceback.print_exc()
@@ -67,7 +70,16 @@ async def _register_faas_worker(
                 # Handle lite responses with just data, assume a success in these cases
                 if not isinstance(response, Response):
                     full_response = trigger.default_response()
-                    full_response.data = bytes(str(response), "utf-8")
+                    # don't modify bytes responses
+                    if isinstance(response, bytes):
+                        full_response.data = response
+                    # convert dict responses to JSON
+                    elif isinstance(response, dict):
+                        full_response.data = bytes(json.dumps(response), "utf-8")
+                    # convert anything else to a string
+                    # TODO: this might not always be safe. investigate alternatives
+                    else:
+                        full_response.data = bytes(str(response), "utf-8")
                     response = full_response
 
                 # Send function response back to server
@@ -88,7 +100,7 @@ async def _register_faas_worker(
         channel.close()
 
 
-def start(handler: Callable[[Trigger], Coroutine[Any, Any, Union[Response, None, dict]]]):
+def start(handler: Callable[[Trigger], Coroutine[Any, Any, Union[Response, None, dict, bytes]]]):
     """
     Register the provided function as the trigger handler and starts handling new trigger requests.
 
