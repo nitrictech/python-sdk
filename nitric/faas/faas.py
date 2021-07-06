@@ -76,6 +76,8 @@ async def _register_faas_worker(
                     # convert dict responses to JSON
                     elif isinstance(response, dict):
                         full_response.data = bytes(json.dumps(response), "utf-8")
+                        if full_response.context.is_http():
+                            full_response.context.as_http().headers["Content-Type"] = "application/json"
                     # convert anything else to a string
                     # TODO: this might not always be safe. investigate alternatives
                     else:
