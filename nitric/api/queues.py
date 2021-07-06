@@ -67,7 +67,7 @@ def _task_to_wire(task: Task) -> NitricTask:
     )
 
 
-def _wire_to_task(task: NitricTask, queue_stub: QueueStub = None) -> Task:
+def _wire_to_task(task: NitricTask, queue_stub: QueueStub = None, queue: str = None) -> Task:
     """
     Convert a Nitric Queue Task (protobuf) to a Nitric Task (python SDK).
 
@@ -80,6 +80,7 @@ def _wire_to_task(task: NitricTask, queue_stub: QueueStub = None) -> Task:
         payload=task.payload.to_dict(),
         lease_id=task.lease_id,
         _queue_stub=queue_stub,
+        _queue=queue,
     )
 
 
@@ -171,7 +172,7 @@ class Queue(object):
         response = await self._queue_stub.receive(queue=self.name, depth=limit)
 
         # Map the response protobuf response items to Python SDK Nitric Tasks
-        return [_wire_to_task(task=task, queue_stub=self._queue_stub) for task in response.tasks]
+        return [_wire_to_task(task=task, queue_stub=self._queue_stub, queue=self.name) for task in response.tasks]
 
 
 class QueueClient(object):
