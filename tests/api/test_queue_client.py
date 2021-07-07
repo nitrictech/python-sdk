@@ -19,9 +19,11 @@
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import patch, AsyncMock
 
+import pytest
 from betterproto.lib.google.protobuf import Struct
 
-from nitric.api import QueueClient, Task
+from nitric.api import Queueing, Task
+from nitric.proto.nitric.queue.v1 import QueueReceiveResponse, NitricTask, QueueCompleteResponse
 from nitric.utils import _struct_from_dict
 
 
@@ -38,7 +40,7 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         payload = {"content": "of task"}
 
         with patch("nitric.proto.nitric.queue.v1.QueueStub.send", mock_send):
-            queue = QueueClient().queue("test-queue")
+            queue = Queueing().queue("test-queue")
             await queue.send(Task(payload=payload))
 
         # Check expected values were passed to Stub
@@ -57,7 +59,7 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         payload = {"content": "of task"}
 
         with patch("nitric.proto.nitric.queue.v1.QueueStub.send", mock_send):
-            queue = QueueClient().queue("test-queue")
+            queue = Queueing().queue("test-queue")
             await queue.send({"id": "123", "payload": payload})
 
         # Check expected values were passed to Stub
@@ -76,7 +78,7 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         payload = {"content": "of task"}
 
         with patch("nitric.proto.nitric.queue.v1.QueueStub.send", mock_send):
-            queue = QueueClient().queue("test-queue")
+            queue = Queueing().queue("test-queue")
             try:
                 await queue.send((1, 2, 3))
                 assert False
@@ -92,7 +94,7 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         payload = {"content": "of task"}
 
         with patch("nitric.proto.nitric.queue.v1.QueueStub.send", mock_send):
-            queue = QueueClient().queue("test-queue")
+            queue = Queueing().queue("test-queue")
             await queue.send()
 
         # Check expected values were passed to Stub
@@ -101,3 +103,112 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         assert mock_send.call_args.kwargs["task"].id is None
         assert mock_send.call_args.kwargs["task"].payload_type is None
         assert mock_send.call_args.kwargs["task"].payload == Struct()
+
+    async def test_receive(self):
+        payload = {"content": "of task"}
+
+        mock_receive = AsyncMock()
+        mock_receive.return_value = QueueReceiveResponse(
+            tasks=[
+                NitricTask(
+                    id="test-task", lease_id="test-lease", payload_type="test-type", payload=_struct_from_dict(payload)
+                )
+            ]
+        )
+
+        with patch("nitric.proto.nitric.queue.v1.QueueStub.receive", mock_receive):
+            queueing = Queueing()
+            queue = queueing.queue("test-queue")
+            (task,) = await queue.receive()
+
+        # Check expected values were passed to Stub
+        mock_receive.assert_called_once()
+        self.assertEqual("test-queue", mock_receive.call_args.kwargs["queue"])
+        self.assertEqual(1, mock_receive.call_args.kwargs["depth"])
+
+        self.assertEqual("test-task", task.id)
+        self.assertEqual("test-lease", task.lease_id)
+        self.assertEqual("test-type", task.payload_type)
+        self.assertEqual(payload, task.payload)
+        self.assertEqual(queueing, task._queueing)
+        self.assertEqual(queue, task._queue)
+
+    async def test_receive_custom_limit(self):
+        mock_receive = AsyncMock()
+        mock_receive.return_value = QueueReceiveResponse(
+            tasks=[
+                NitricTask(
+                    id="test-task",
+                    lease_id="test-lease",
+                    payload_type="test-type",
+                    payload=_struct_from_dict({"content": "of task"}),
+                )
+            ]
+        )
+
+        with patch("nitric.proto.nitric.queue.v1.QueueStub.receive", mock_receive):
+            await Queueing().queue("test-queue").receive(limit=3)  # explicitly set a limit
+
+        # Check expected values were passed to Stub
+        mock_receive.assert_called_once()
+        self.assertEqual(3, mock_receive.call_args.kwargs["depth"])
+
+    async def test_receive_below_minimum_limit(self):
+        mock_receive = AsyncMock()
+        mock_receive.return_value = QueueReceiveResponse(
+            tasks=[
+                NitricTask(
+                    id="test-task",
+                    lease_id="test-lease",
+                    payload_type="test-type",
+                    payload=_struct_from_dict({"content": "of task"}),
+                )
+            ]
+        )
+
+        with patch("nitric.proto.nitric.queue.v1.QueueStub.receive", mock_receive):
+            await Queueing().queue("test-queue").receive(limit=0)  # explicitly set a limit
+
+        # Check expected values were passed to Stub
+        mock_receive.assert_called_once()
+        self.assertEqual(1, mock_receive.call_args.kwargs["depth"])
+
+    async def test_receive_task_without_payload(self):
+        mock_receive = AsyncMock()
+        mock_receive.return_value = QueueReceiveResponse(tasks=[NitricTask(id="test-task", lease_id="test-lease")])
+
+        with patch("nitric.proto.nitric.queue.v1.QueueStub.receive", mock_receive):
+            (task,) = await Queueing().queue("test-queue").receive(limit=0)  # explicitly set a limit
+
+        # Verify that an empty dict is returned for payload and no payload type.
+        mock_receive.assert_called_once()
+        self.assertEquals("", task.payload_type)
+        self.assertEquals({}, task.payload)
+
+    async def test_complete(self):
+        mock_complete = AsyncMock()
+        mock_complete.return_value = QueueCompleteResponse()
+
+        queueing = Queueing()
+        task = Task(lease_id="test-lease", _queueing=queueing, _queue=queueing.queue("test-queue"))
+
+        with patch("nitric.proto.nitric.queue.v1.QueueStub.complete", mock_complete):
+            await task.complete()
+
+        # Check expected values were passed to Stub
+        mock_complete.assert_called_once()
+        self.assertEqual("test-queue", mock_complete.call_args.kwargs["queue"])
+        self.assertEqual("test-lease", mock_complete.call_args.kwargs["lease_id"])
+
+    async def test_complete_unleased_task(self):
+        mock_complete = AsyncMock()
+        mock_complete.return_value = QueueCompleteResponse()
+
+        queueing = Queueing()
+        # lease_id omitted.
+        task = Task(_queueing=queueing, _queue=queueing.queue("test-queue"))
+
+        with patch("nitric.proto.nitric.queue.v1.QueueStub.complete", mock_complete):
+            with pytest.raises(Exception) as e:
+                await task.complete()
+            self.assertIn("Tasks must be received", str(e.value))

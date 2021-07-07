@@ -23,15 +23,17 @@ from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True, order=True)
-class Event(object):
-    """Represents a NitricEvent."""
+class Eventing(object):
+    """
+    Eventing client, providing access to Topic and Event references and operations on those entities.
+    """
 
     payload: dict = field(default_factory=dict)
     id: str = field(default=None)
     payload_type: str = field(default=None)
 
 
-def _event_to_wire(event: Event) -> NitricEvent:
+def _event_to_wire(event: Eventing) -> NitricEvent:
     return NitricEvent(
         id=event.id,
         payload=_struct_from_dict(event.payload),
@@ -48,8 +50,8 @@ class Topic(object):
 
     async def publish(
         self,
-        event: Union[Event, dict] = None,
-    ) -> Event:
+        event: Union[Eventing, dict] = None,
+    ) -> Eventing:
         """
         Publish an event/message to a topic, which can be subscribed to by other services.
 
@@ -57,14 +59,14 @@ class Topic(object):
         :return: the published event, with the id added if one was auto-generated
         """
         if event is None:
-            event = Event()
+            event = Eventing()
 
         if isinstance(event, dict):
             # TODO: handle events that are just a payload
-            event = Event(**event)
+            event = Eventing(**event)
 
         response = await self._stub.publish(topic=self.name, event=_event_to_wire(event))
-        return Event(**{**event.__dict__.copy(), **{"id": response.id}})
+        return Eventing(**{**event.__dict__.copy(), **{"id": response.id}})
 
 
 class EventClient(object):
@@ -86,5 +88,5 @@ class EventClient(object):
         return [self.topic(topic.name) for topic in response.topics]
 
     def topic(self, name: str) -> Topic:
-        """Return a reference a topic from the connected event service."""
+        """Return a reference to a topic."""
         return Topic(_stub=self._stub, name=name)

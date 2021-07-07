@@ -22,7 +22,7 @@ from nitric.utils import new_default_channel
 from nitric.proto.nitric.storage.v1 import StorageStub
 
 
-class StorageClient(object):
+class Storage(object):
     """
     Nitric generic blob storage client.
 

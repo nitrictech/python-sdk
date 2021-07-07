@@ -19,7 +19,7 @@
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import patch, AsyncMock
 
-from nitric.api import StorageClient
+from nitric.api import Storage
 
 
 class Object(object):
@@ -35,7 +35,7 @@ class StorageClientTest(IsolatedAsyncioTestCase):
         contents = b"some text as bytes"
 
         with patch("nitric.proto.nitric.storage.v1.StorageStub.write", mock_write):
-            bucket = StorageClient().bucket("test-bucket")
+            bucket = Storage().bucket("test-bucket")
             file = bucket.file("test-file")
             await file.write(contents)
 
@@ -54,7 +54,7 @@ class StorageClientTest(IsolatedAsyncioTestCase):
         mock_read.return_value = mock_response
 
         with patch("nitric.proto.nitric.storage.v1.StorageStub.read", mock_read):
-            bucket = StorageClient().bucket("test-bucket")
+            bucket = Storage().bucket("test-bucket")
             file = bucket.file("test-file")
             response = await file.read()
 
@@ -70,7 +70,7 @@ class StorageClientTest(IsolatedAsyncioTestCase):
         mock_read.return_value = Object()
 
         with patch("nitric.proto.nitric.storage.v1.StorageStub.delete", mock_read):
-            bucket = StorageClient().bucket("test-bucket")
+            bucket = Storage().bucket("test-bucket")
             file = bucket.file("test-file")
             await file.delete()
 

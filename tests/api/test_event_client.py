@@ -21,7 +21,7 @@ from unittest.mock import patch, AsyncMock
 
 from betterproto.lib.google.protobuf import Struct
 
-from nitric.api import EventClient, Event
+from nitric.api import EventClient, Eventing
 from nitric.utils import _struct_from_dict
 
 
@@ -40,7 +40,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
 
         with patch("nitric.proto.nitric.event.v1.EventStub.publish", mock_publish):
             topic = EventClient().topic("test-topic")
-            event = await topic.publish(Event(payload=payload))
+            event = await topic.publish(Eventing(payload=payload))
 
         # Check the returned ID was set on the event
         assert event.id == "test-id"

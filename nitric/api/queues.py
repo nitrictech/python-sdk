@@ -16,33 +16,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from __future__ import annotations
+
 from typing import List, Union
-from nitric.utils import new_default_channel, _struct_from_dict
+from nitric.utils import new_default_channel, _struct_from_dict, _dict_from_struct
 from nitric.proto.nitric.queue.v1 import QueueStub, NitricTask, FailedTask as WireFailedTask
 from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True, order=True)
 class Task(object):
-    """Represents a NitricTask."""
+    """A reference to a task received from or to be sent to a Queue."""
 
     id: str = field(default=None)
     payload_type: str = field(default=None)
     payload: dict = field(default_factory=dict)
     lease_id: str = field(default=None)
-    _queue_stub: QueueStub = field(default=None)
-    _queue: str = field(default=None)
+    _queueing: Queueing = field(default=None)
+    _queue: Queue = field(default=None)
 
     async def complete(self):
-        """Mark this task as complete and remove it from the queue."""
-        if self._queue_stub is None or self._queue is None or self._queue == "":
-            raise Exception("Task was not created via Queue.")
+        """
+        Mark this task as complete and remove it from the queue.
+
+        Only callable for tasks that have been received from a Queue.
+        """
+        if self._queueing is None or self._queue is None:
+            raise Exception("Task is missing internal client, was it returned from queue.receive?")
         if self.lease_id is None:
             raise Exception(
-                "No lease_id available for task. Tasks must be received using Queue.receive to have a "
-                "valid lease_id."
+                "Tasks must be received using Queue.receive to have a lease_id and be valid for completion."
             )
-        await self._queue_stub.complete(queue=self._queue, lease_id=self.lease_id)
+        await self._queueing._queue_stub.complete(queue=self._queue.name, lease_id=self.lease_id)
 
 
 @dataclass(frozen=True, order=True)
@@ -67,7 +72,7 @@ def _task_to_wire(task: Task) -> NitricTask:
     )
 
 
-def _wire_to_task(task: NitricTask, queue_stub: QueueStub = None, queue: str = None) -> Task:
+def _wire_to_task(task: NitricTask, queueing: Queueing = None, queue: Queue = None) -> Task:
     """
     Convert a Nitric Queue Task (protobuf) to a Nitric Task (python SDK).
 
@@ -77,9 +82,9 @@ def _wire_to_task(task: NitricTask, queue_stub: QueueStub = None, queue: str = N
     return Task(
         id=task.id,
         payload_type=task.payload_type,
-        payload=task.payload.to_dict(),
+        payload=_dict_from_struct(task.payload),
         lease_id=task.lease_id,
-        _queue_stub=queue_stub,
+        _queueing=queueing,
         _queue=queue,
     )
 
@@ -106,7 +111,7 @@ def _wire_to_failed_task(failed_task: WireFailedTask) -> FailedTask:
 class Queue(object):
     """A reference to a queue from a queue service, used to perform operations on that queue."""
 
-    _queue_stub: QueueStub
+    _queueing: Queueing
     name: str
 
     async def send(
@@ -131,7 +136,7 @@ class Queue(object):
             # TODO: handle tasks that are just a payload
             task = Task(**task)
 
-        await self._queue_stub.send(queue=self.name, task=_task_to_wire(task))
+        await self._queueing._queue_stub.send(queue=self.name, task=_task_to_wire(task))
 
     async def _send_batch(
         self, tasks: List[Union[Task, dict]] = None, raise_on_failure: bool = True
@@ -148,7 +153,7 @@ class Queue(object):
 
         wire_tasks = [_task_to_wire(Task(**task) if isinstance(task, dict) else task) for task in tasks]
 
-        response = await self._queue_stub.send_batch(queue=self.name, tasks=wire_tasks)
+        response = await self._queueing._queue_stub.send_batch(queue=self.name, tasks=wire_tasks)
 
         return [_wire_to_failed_task(failed_task) for failed_task in response.failed_tasks]
 
@@ -169,17 +174,15 @@ class Queue(object):
         if limit is None or limit < 1:
             limit = 1
 
-        response = await self._queue_stub.receive(queue=self.name, depth=limit)
+        response = await self._queueing._queue_stub.receive(queue=self.name, depth=limit)
 
         # Map the response protobuf response items to Python SDK Nitric Tasks
-        return [_wire_to_task(task=task, queue_stub=self._queue_stub, queue=self.name) for task in response.tasks]
+        return [_wire_to_task(task=task, queueing=self._queueing, queue=self) for task in response.tasks]
 
 
-class QueueClient(object):
+class Queueing(object):
     """
-    Nitric generic publish/subscribe tasking client.
-
-    This client insulates application code from stack specific task/topic operations or SDKs.
+    Queueing client, providing access to Queue and Task references and operations on those entities.
     """
 
     def __init__(self):
@@ -188,4 +191,4 @@ class QueueClient(object):
 
     def queue(self, name: str):
         """Return a reference to a queue from the connected queue service."""
-        return Queue(_queue_stub=self._queue_stub, name=name)
+        return Queue(_queueing=self, name=name)
