@@ -138,9 +138,7 @@ class Queue(object):
 
         await self._queueing._queue_stub.send(queue=self.name, task=_task_to_wire(task))
 
-    async def _send_batch(
-        self, tasks: List[Union[Task, dict]] = None, raise_on_failure: bool = True
-    ) -> List[FailedTask]:
+    async def _send_batch(self, tasks: List[Union[Task, dict]], raise_on_failure: bool = True) -> List[FailedTask]:
         """
         Push a collection of tasks to a queue, which can be retrieved by other services.
 
@@ -148,8 +146,8 @@ class Queue(object):
         :param raise_on_failure: Whether to raise an exception when one or more tasks fails to send
         :return: PushResponse containing a list containing details of any messages that failed to publish.
         """
-        if tasks is None:
-            tasks = []
+        if tasks is None or len(tasks) < 1:
+            raise Exception("No tasks provided, nothing to send.")
 
         wire_tasks = [_task_to_wire(Task(**task) if isinstance(task, dict) else task) for task in tasks]
 
