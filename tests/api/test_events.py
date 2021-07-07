@@ -22,6 +22,7 @@ from unittest.mock import patch, AsyncMock
 from betterproto.lib.google.protobuf import Struct
 
 from nitric.api import Eventing, Event
+from nitric.proto.nitric.event.v1 import TopicListResponse, NitricTopic
 from nitric.utils import _struct_from_dict
 
 
@@ -108,3 +109,24 @@ class EventClientTest(IsolatedAsyncioTestCase):
         assert mock_publish.call_args.kwargs["event"].id is None
         assert mock_publish.call_args.kwargs["event"].payload_type is None
         assert mock_publish.call_args.kwargs["event"].payload == Struct()
+
+    async def test_get_topics(self):
+        mock_list_topics = AsyncMock()
+        mock_response = TopicListResponse(
+            topics=[
+                NitricTopic(name="test-topic1"),
+                NitricTopic(name="test-topic2"),
+            ]
+        )
+        mock_list_topics.return_value = mock_response
+
+        payload = {"content": "of event"}
+
+        with patch("nitric.proto.nitric.event.v1.TopicStub.list", mock_list_topics):
+            topics = await Eventing().topics()
+
+        # Check expected values were passed to Stub
+        mock_list_topics.assert_called_once()
+        self.assertEqual(2, len(topics))
+        self.assertEqual(topics[0].name, "test-topic1")
+        self.assertEqual(topics[1].name, "test-topic2")

@@ -23,7 +23,13 @@ import pytest
 from betterproto.lib.google.protobuf import Struct
 
 from nitric.api import Queueing, Task
-from nitric.proto.nitric.queue.v1 import QueueReceiveResponse, NitricTask, QueueCompleteResponse
+from nitric.proto.nitric.queue.v1 import (
+    QueueReceiveResponse,
+    NitricTask,
+    QueueCompleteResponse,
+    QueueSendBatchResponse,
+    FailedTask,
+)
 from nitric.utils import _struct_from_dict
 
 
@@ -51,6 +57,35 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         assert len(mock_send.call_args.kwargs["task"].payload.fields) == 1
         assert mock_send.call_args.kwargs["task"].payload == _struct_from_dict(payload)
 
+    async def test_send_with_failed(self):
+        payload = {"content": "of task"}
+
+        mock_send = AsyncMock()
+        mock_send.return_value = QueueSendBatchResponse(
+            failed_tasks=[
+                FailedTask(
+                    task=NitricTask(
+                        id="test-id",
+                        payload=_struct_from_dict(payload),
+                    ),
+                    message="failed to send in this test",
+                )
+            ]
+        )
+
+        with patch("nitric.proto.nitric.queue.v1.QueueStub.send_batch", mock_send):
+            queue = Queueing().queue("test-queue")
+            failed = await queue.send([Task(payload=payload) for i in range(2)])
+
+        # Check expected values were passed to Stub
+        mock_send.assert_called_once()
+        self.assertEqual("test-queue", mock_send.call_args.kwargs["queue"])
+        assert isinstance(mock_send.call_args.kwargs["tasks"], list)
+        # Check that the failed task is returned with its details
+        self.assertEqual(1, len(failed))
+        self.assertEqual("failed to send in this test", failed[0].message)
+        self.assertEqual(payload, failed[0].payload)
+
     async def test_send_dict(self):
         mock_send = AsyncMock()
         mock_response = Object()
@@ -70,7 +105,7 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         assert len(mock_send.call_args.kwargs["task"].payload.fields) == 1
         assert mock_send.call_args.kwargs["task"].payload == _struct_from_dict(payload)
 
-    async def test_publish_invalid_type(self):
+    async def test_send_invalid_type(self):
         mock_send = AsyncMock()
         mock_response = Object()
         mock_send.return_value = mock_response
@@ -79,12 +114,8 @@ class QueueClientTest(IsolatedAsyncioTestCase):
 
         with patch("nitric.proto.nitric.queue.v1.QueueStub.send", mock_send):
             queue = Queueing().queue("test-queue")
-            try:
+            with pytest.raises(AttributeError):
                 await queue.send((1, 2, 3))
-                assert False
-            except AttributeError:
-                # Exception raised if expected duck type attributes are missing
-                assert True
 
     async def test_send_none(self):
         mock_send = AsyncMock()
@@ -103,6 +134,12 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         assert mock_send.call_args.kwargs["task"].id is None
         assert mock_send.call_args.kwargs["task"].payload_type is None
         assert mock_send.call_args.kwargs["task"].payload == Struct()
+
+    async def test_send_empty_list(self):
+        with pytest.raises(Exception) as e_info:
+            await Queueing().queue("test-queue").send([])
+
+        self.assertEqual(str(e_info.value), "No tasks provided, nothing to send.")
 
     async def test_receive(self):
         payload = {"content": "of task"}
@@ -201,14 +238,19 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         self.assertEqual("test-lease", mock_complete.call_args.kwargs["lease_id"])
 
     async def test_complete_unleased_task(self):
-        mock_complete = AsyncMock()
-        mock_complete.return_value = QueueCompleteResponse()
-
         queueing = Queueing()
         # lease_id omitted.
         task = Task(_queueing=queueing, _queue=queueing.queue("test-queue"))
 
-        with patch("nitric.proto.nitric.queue.v1.QueueStub.complete", mock_complete):
-            with pytest.raises(Exception) as e:
-                await task.complete()
-            self.assertIn("Tasks must be received", str(e.value))
+        with pytest.raises(Exception) as e:
+            await task.complete()
+        self.assertIn("Tasks must be received", str(e.value))
+
+    async def test_complete_task_without_client(self):
+        queueing = Queueing()
+        # lease_id omitted.
+        task = Task(lease_id="test-lease")
+
+        with pytest.raises(Exception) as e:
+            await task.complete()
+        self.assertIn("Task is missing internal client", str(e.value))
