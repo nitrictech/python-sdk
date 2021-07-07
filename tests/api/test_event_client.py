@@ -21,7 +21,7 @@ from unittest.mock import patch, AsyncMock
 
 from betterproto.lib.google.protobuf import Struct
 
-from nitric.api import EventClient, Eventing
+from nitric.api import Eventing, Event
 from nitric.utils import _struct_from_dict
 
 
@@ -39,8 +39,8 @@ class EventClientTest(IsolatedAsyncioTestCase):
         payload = {"content": "of event"}
 
         with patch("nitric.proto.nitric.event.v1.EventStub.publish", mock_publish):
-            topic = EventClient().topic("test-topic")
-            event = await topic.publish(Eventing(payload=payload))
+            topic = Eventing().topic("test-topic")
+            event = await topic.publish(Event(payload=payload))
 
         # Check the returned ID was set on the event
         assert event.id == "test-id"
@@ -62,7 +62,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         payload = {"content": "of event"}
 
         with patch("nitric.proto.nitric.event.v1.EventStub.publish", mock_publish):
-            topic = EventClient().topic("test-topic")
+            topic = Eventing().topic("test-topic")
             await topic.publish({"id": "123", "payload": payload})
 
         # Check expected values were passed to Stub
@@ -82,7 +82,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         payload = {"content": "of event"}
 
         with patch("nitric.proto.nitric.event.v1.EventStub.publish", mock_publish):
-            topic = EventClient().topic("test-topic")
+            topic = Eventing().topic("test-topic")
             try:
                 await topic.publish((1, 2, 3))
                 assert False
@@ -99,7 +99,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         payload = {"content": "of event"}
 
         with patch("nitric.proto.nitric.event.v1.EventStub.publish", mock_publish):
-            topic = EventClient().topic("test-topic")
+            topic = Eventing().topic("test-topic")
             await topic.publish()
 
         # Check expected values were passed to Stub

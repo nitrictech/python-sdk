@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True, order=True)
-class Eventing(object):
+class Event(object):
     """
     Eventing client, providing access to Topic and Event references and operations on those entities.
     """
@@ -33,7 +33,7 @@ class Eventing(object):
     payload_type: str = field(default=None)
 
 
-def _event_to_wire(event: Eventing) -> NitricEvent:
+def _event_to_wire(event: Event) -> NitricEvent:
     return NitricEvent(
         id=event.id,
         payload=_struct_from_dict(event.payload),
@@ -50,8 +50,8 @@ class Topic(object):
 
     async def publish(
         self,
-        event: Union[Eventing, dict] = None,
-    ) -> Eventing:
+        event: Union[Event, dict] = None,
+    ) -> Event:
         """
         Publish an event/message to a topic, which can be subscribed to by other services.
 
@@ -59,17 +59,17 @@ class Topic(object):
         :return: the published event, with the id added if one was auto-generated
         """
         if event is None:
-            event = Eventing()
+            event = Event()
 
         if isinstance(event, dict):
             # TODO: handle events that are just a payload
-            event = Eventing(**event)
+            event = Event(**event)
 
         response = await self._stub.publish(topic=self.name, event=_event_to_wire(event))
-        return Eventing(**{**event.__dict__.copy(), **{"id": response.id}})
+        return Event(**{**event.__dict__.copy(), **{"id": response.id}})
 
 
-class EventClient(object):
+class Eventing(object):
     """
     Nitric generic publish/subscribe event client.
 
