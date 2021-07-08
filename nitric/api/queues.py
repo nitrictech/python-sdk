@@ -185,7 +185,13 @@ class Queueing(object):
 
     def __init__(self):
         """Construct a Nitric Queue Client."""
-        self._queue_stub = QueueStub(channel=new_default_channel())
+        self.channel = new_default_channel()
+        self._queue_stub = QueueStub(channel=self.channel)
+
+    def __del__(self):
+        # close the channel when this client is destroyed
+        if self.channel is not None:
+            self.channel.close()
 
     def queue(self, name: str):
         """Return a reference to a queue from the connected queue service."""

@@ -66,6 +66,7 @@ class Topic(object):
             event = Event(**event)
 
         response = await self._stub.publish(topic=self.name, event=_event_to_wire(event))
+        self._stub.channel.close()
         return Event(**{**event.__dict__.copy(), **{"id": response.id}})
 
 
@@ -78,9 +79,14 @@ class Eventing(object):
 
     def __init__(self):
         """Construct a Nitric Event Client."""
-        channel = new_default_channel()
-        self._stub = EventStub(channel=channel)
-        self._topic_stub = TopicStub(channel=channel)
+        self.channel = new_default_channel()
+        self._stub = EventStub(channel=self.channel)
+        self._topic_stub = TopicStub(channel=self.channel)
+
+    def __del__(self):
+        # close the channel when this client is destroyed
+        if self.channel is not None:
+            self.channel.close()
 
     async def topics(self) -> List[Topic]:
         """Get a list of topics available for publishing or subscription."""
