@@ -18,6 +18,9 @@
 #
 import typing
 from dataclasses import dataclass, field
+
+import betterproto
+
 from nitric.proto.nitric.faas.v1 import TriggerRequest
 from nitric.faas.response import Response, TopicResponseContext, HttpResponseContext, ResponseContext
 
@@ -72,7 +75,7 @@ class TriggerContext(object):
 
         This indicates the availability of additional topic/event specific context such as the topic name.
         """
-        return isinstance(self.context, TriggerContext)
+        return isinstance(self.context, TopicTriggerContext)
 
     def as_topic(self) -> typing.Union[TopicTriggerContext, None]:
         """
@@ -89,7 +92,8 @@ class TriggerContext(object):
     @staticmethod
     def from_trigger_request(trigger_request: TriggerRequest):
         """Return a TriggerContext from a TriggerRequest."""
-        if trigger_request.http is not None:
+        context_type, context = betterproto.which_one_of(trigger_request, "context")
+        if context_type == "http":
             return TriggerContext(
                 context=HttpTriggerContext(
                     headers=trigger_request.http.headers,
@@ -98,12 +102,11 @@ class TriggerContext(object):
                     path=trigger_request.http.path,
                 )
             )
-        elif trigger_request.topic is not None:
+        elif context_type == "topic":
             return TriggerContext(context=TopicTriggerContext(topic=trigger_request.topic.topic))
         else:
-            # We have an error
-            # should probably raise an exception
-            return None
+            print("Trigger with unknown context received, context type: {}".format(context_type))
+            raise Exception("Unknown trigger context, type: {}".format(context_type))
 
 
 def _clean_header(header_name: str):
