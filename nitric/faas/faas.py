@@ -93,8 +93,12 @@ async def _register_faas_worker(
                 continue
             if request_channel.done():
                 break
-    except Exception:
+    except ConnectionRefusedError as cre:
         traceback.print_exc()
+        raise ConnectionRefusedError("Failed to register function with Membrane") from cre
+    except Exception as e:
+        traceback.print_exc()
+        raise Exception("An unexpected error occured.") from e
     finally:
         print("stream from Membrane closed, closing client stream")
         # The channel must be closed to complete the gRPC connection
