@@ -19,6 +19,7 @@
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import patch, AsyncMock
 
+import pytest
 from betterproto.lib.google.protobuf import Struct
 
 from nitric.api import Events, Event
@@ -84,12 +85,8 @@ class EventClientTest(IsolatedAsyncioTestCase):
 
         with patch("nitric.proto.nitric.event.v1.EventStub.publish", mock_publish):
             topic = Events().topic("test-topic")
-            try:
+            with pytest.raises(Exception):
                 await topic.publish((1, 2, 3))
-                assert False
-            except AttributeError:
-                # Exception raised if expected duck type attributes are missing
-                assert True
 
     async def test_publish_none(self):
         mock_publish = AsyncMock()

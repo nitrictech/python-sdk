@@ -68,18 +68,24 @@ class CollectionRef:
 
     _documents: Documents
     name: str
-    parent: DocumentRef = field(default_factory=None)
+    parent: Union[DocumentRef, None] = field(default_factory=lambda: None)
 
     def doc(self, key: str) -> DocumentRef:
         """Return a reference to a document in the collection."""
         return DocumentRef(_documents=self._documents, _collection=self, key=key)
+
+    def query(self) -> QueryBuilder:
+        """Return a query builder scoped to this collection."""
+        return QueryBuilder(documents=self._documents, collection=self)
 
     def is_sub_collection(self):
         """Return True if this collection is a sub-collection of a document in another collection."""
         return self.parent is not None
 
     def _to_wire(self) -> CollectionMessage:
-        return CollectionMessage(name=self.name, parent=self.parent._to_wire() if self.is_sub_collection() else None)
+        if self.is_sub_collection():
+            return CollectionMessage(name=self.name, parent=self.parent._to_wire())
+        return CollectionMessage(name=self.name)
 
 
 class Operator(Enum):
@@ -104,18 +110,19 @@ class Expression:
     def __post_init__(self):
         if isinstance(self.operator, str):
             # Convert string operators to their enum values
-            self.operator = Operator[self.operator]
+            self.operator = Operator(self.operator)
 
     def _value_to_expression_value(self):
         """Return an ExpressionValue message representation of the value of this expression."""
         if isinstance(self.value, str):
             return ExpressionValue(string_value=self.value)
+        # Check bool before numbers, because booleans are numbers.
+        if isinstance(self.value, bool):
+            return ExpressionValue(bool_value=self.value)
         if isinstance(self.value, int):
             return ExpressionValue(int_value=self.value)
         if isinstance(self.value, float):
             return ExpressionValue(double_value=self.value)
-        if isinstance(self.value, bool):
-            return ExpressionValue(bool_value=self.value)
 
     def _to_wire(self):
         """Return the Expression protobuf message representation of this expression."""
@@ -147,8 +154,8 @@ class Document:
 class QueryResultsPage:
     """Represents a page of results from a query."""
 
-    paging_token: any = field(default_factory=None)
-    documents: List[Document] = field(default_factory=[])
+    paging_token: any = field(default_factory=lambda: None)
+    documents: List[Document] = field(default_factory=lambda: [])
 
 
 class QueryBuilder:
@@ -220,7 +227,7 @@ class QueryBuilder:
         )
 
         return QueryResultsPage(
-            paging_token=results.paging_token, values=[Document._from_wire(result) for result in results.documents]
+            paging_token=results.paging_token, documents=[Document._from_wire(result) for result in results.documents]
         )
 
     def __eq__(self, other):
@@ -260,13 +267,13 @@ class Documents(object):
 
     def __init__(self):
         """Construct a Nitric Document Client."""
-        self.channel = new_default_channel()
-        self._stub = DocumentServiceStub(channel=self.channel)
+        self._channel = new_default_channel()
+        self._stub = DocumentServiceStub(channel=self._channel)
 
     def __del__(self):
         # close the channel when this client is destroyed
-        if self.channel is not None:
-            self.channel.close()
+        if self._channel is not None:
+            self._channel.close()
 
     def collection(self, name: str) -> CollectionRef:
         """Return a reference to a document collection."""
