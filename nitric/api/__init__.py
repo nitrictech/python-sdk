@@ -18,14 +18,14 @@
 #
 """Nitric API SDK."""
 from nitric.api.events import Events, Event, Topic
-from nitric.api.kv import KeyValueClient
 from nitric.api.queues import Queues, Task, FailedTask
 from nitric.api.storage import Storage
+from nitric.api.documents import Documents
 
 __all__ = [
     "Events",
-    "KeyValueClient",
     "Queues",
+    "Documents",
     "Storage",
     "Event",
     "Task",
