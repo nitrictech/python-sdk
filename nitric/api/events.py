@@ -24,9 +24,7 @@ from dataclasses import dataclass, field
 
 @dataclass(frozen=True, order=True)
 class Event(object):
-    """
-    Eventing client, providing access to Topic and Event references and operations on those entities.
-    """
+    """Eventing client, providing access to Topic and Event references and operations on those entities."""
 
     payload: dict = field(default_factory=dict)
     id: str = field(default=None)
@@ -70,7 +68,7 @@ class Topic(object):
         return Event(**{**event.__dict__.copy(), **{"id": response.id}})
 
 
-class Eventing(object):
+class Events(object):
     """
     Nitric generic publish/subscribe event client.
 

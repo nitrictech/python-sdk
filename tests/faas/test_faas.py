@@ -35,6 +35,13 @@ class Object(object):
     pass
 
 
+class MockAsyncChannel:
+    def __init__(self):
+        self.send = AsyncMock()
+        self.close = Mock()
+        self.done = Mock()
+
+
 class EventClientTest(IsolatedAsyncioTestCase):
     def test_start_handler_is_passed_to_register(self):
         mock_register = AsyncMock()
@@ -61,8 +68,8 @@ class EventClientTest(IsolatedAsyncioTestCase):
         mock_handler = Mock()
         mock_grpc_channel = Mock()
         mock_async_channel_init = Mock()
-        mock_request_send = AsyncMock()
-        mock_async_channel_init.return_value = mock_request_send
+        mock_async_chan = MockAsyncChannel()
+        mock_async_channel_init.return_value = mock_async_chan
 
         stream_calls = 0
 
@@ -83,7 +90,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         # Async request channel created
         mock_async_channel_init.assert_called_once_with(close=True)
         # Send the init request
-        mock_request_send.send.assert_called_once_with(ClientMessage(init_request=InitRequest()))
+        mock_async_chan.send.assert_called_once_with(ClientMessage(init_request=InitRequest()))
         # accept the init response from server
         assert 1 == stream_calls
         # mock handler not called
@@ -93,8 +100,8 @@ class EventClientTest(IsolatedAsyncioTestCase):
         mock_handler = Mock()
         mock_grpc_channel = Mock()
         mock_async_channel_init = Mock()
-        mock_request_send = AsyncMock()
-        mock_async_channel_init.return_value = mock_request_send
+        mock_async_chan = MockAsyncChannel()
+        mock_async_channel_init.return_value = mock_async_chan
 
         stream_calls = 0
 
@@ -126,8 +133,8 @@ class EventClientTest(IsolatedAsyncioTestCase):
         mock_handler = AsyncMock()
         mock_grpc_channel = Mock()
         mock_async_channel_init = Mock()
-        mock_request_send = AsyncMock()
-        mock_async_channel_init.return_value = mock_request_send
+        mock_async_chan = MockAsyncChannel()
+        mock_async_channel_init.return_value = mock_async_chan
 
         stream_calls = 0
 
@@ -160,8 +167,8 @@ class EventClientTest(IsolatedAsyncioTestCase):
         mock_handler.side_effect = Exception("test exception")
         mock_grpc_channel = Mock()
         mock_async_channel_init = Mock()
-        mock_async_channel = AsyncMock()
-        mock_async_channel_init.return_value = mock_async_channel
+        mock_async_chan = MockAsyncChannel()
+        mock_async_channel_init.return_value = mock_async_chan
 
         stream_calls = 0
 
@@ -184,8 +191,8 @@ class EventClientTest(IsolatedAsyncioTestCase):
         # handler called
         mock_handler.assert_called_once()
         # init, trigger response, done, close
-        self.assertEqual(4, len(mock_async_channel.mock_calls))
-        args, kwargs = mock_async_channel.send.call_args_list[1]
+        self.assertEqual(2, len(mock_async_chan.send.mock_calls))
+        args, kwargs = mock_async_chan.send.call_args_list[1]
         (message,) = args
         # Success status in response should be False
         self.assertFalse(message.trigger_response.topic.success)
@@ -195,8 +202,8 @@ class EventClientTest(IsolatedAsyncioTestCase):
         mock_handler.side_effect = Exception("test exception")
         mock_grpc_channel = Mock()
         mock_async_channel_init = Mock()
-        mock_async_channel = AsyncMock()
-        mock_async_channel_init.return_value = mock_async_channel
+        mock_async_chan = MockAsyncChannel()
+        mock_async_channel_init.return_value = mock_async_chan
 
         stream_calls = 0
 
@@ -222,9 +229,9 @@ class EventClientTest(IsolatedAsyncioTestCase):
         assert 1 == stream_calls
         # handler called
         mock_handler.assert_called_once()
-        # init, trigger response, done, close
-        self.assertEqual(4, len(mock_async_channel.mock_calls))
-        args, kwargs = mock_async_channel.send.call_args_list[1]
+        # init, trigger response
+        self.assertEqual(2, len(mock_async_chan.send.mock_calls))
+        args, kwargs = mock_async_chan.send.call_args_list[1]
         (message,) = args
         # Success status in response should be False
         self.assertEqual(500, message.trigger_response.http.status)
@@ -234,9 +241,8 @@ class EventClientTest(IsolatedAsyncioTestCase):
         mock_handler.return_value = b"some bytes"
         mock_grpc_channel = Mock()
         mock_async_channel_init = Mock()
-        mock_async_channel_init = Mock()
-        mock_async_channel = AsyncMock()
-        mock_async_channel_init.return_value = mock_async_channel
+        mock_async_chan = MockAsyncChannel()
+        mock_async_channel_init.return_value = mock_async_chan
 
         stream_calls = 0
 
@@ -263,9 +269,9 @@ class EventClientTest(IsolatedAsyncioTestCase):
             assert 1 == stream_calls
             # handler called
             mock_handler.assert_called_once()
-            # init, trigger response, done, close
-            self.assertEqual(4, len(mock_async_channel.mock_calls))
-            args, kwargs = mock_async_channel.send.call_args_list[1]
+            # init, trigger response
+            self.assertEqual(2, len(mock_async_chan.send.mock_calls))
+            args, kwargs = mock_async_chan.send.call_args_list[1]
             (message,) = args
             # Response bytes should be unmodified.
             self.assertEqual(b"some bytes", message.trigger_response.data)
@@ -275,9 +281,8 @@ class EventClientTest(IsolatedAsyncioTestCase):
         mock_handler.return_value = {"key": "value", "num": 123}
         mock_grpc_channel = Mock()
         mock_async_channel_init = Mock()
-        mock_async_channel_init = Mock()
-        mock_async_channel = AsyncMock()
-        mock_async_channel_init.return_value = mock_async_channel
+        mock_async_chan = MockAsyncChannel()
+        mock_async_channel_init.return_value = mock_async_chan
 
         stream_calls = 0
 
@@ -304,9 +309,9 @@ class EventClientTest(IsolatedAsyncioTestCase):
             assert 1 == stream_calls
             # handler called
             mock_handler.assert_called_once()
-            # init, trigger response, done, close
-            self.assertEqual(4, len(mock_async_channel.mock_calls))
-            args, kwargs = mock_async_channel.send.call_args_list[1]
+            # init, trigger response
+            self.assertEqual(2, len(mock_async_chan.send.mock_calls))
+            args, kwargs = mock_async_chan.send.call_args_list[1]
             (message,) = args
             # Response should be returned as JSON
             self.assertEqual(b'{"key": "value", "num": 123}', message.trigger_response.data)
@@ -317,9 +322,8 @@ class EventClientTest(IsolatedAsyncioTestCase):
         mock_handler.return_value = "a test string"
         mock_grpc_channel = Mock()
         mock_async_channel_init = Mock()
-        mock_async_channel_init = Mock()
-        mock_async_channel = AsyncMock()
-        mock_async_channel_init.return_value = mock_async_channel
+        mock_async_chan = MockAsyncChannel()
+        mock_async_channel_init.return_value = mock_async_chan
 
         stream_calls = 0
 
@@ -346,9 +350,9 @@ class EventClientTest(IsolatedAsyncioTestCase):
             assert 1 == stream_calls
             # handler called
             mock_handler.assert_called_once()
-            # init, trigger response, done, close
-            self.assertEqual(4, len(mock_async_channel.mock_calls))
-            args, kwargs = mock_async_channel.send.call_args_list[1]
+            # init, trigger response
+            self.assertEqual(2, len(mock_async_chan.send.mock_calls))
+            args, kwargs = mock_async_chan.send.call_args_list[1]
             (message,) = args
             # Response string should be converted to bytes
             self.assertEqual(b"a test string", message.trigger_response.data)

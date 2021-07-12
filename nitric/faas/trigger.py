@@ -105,8 +105,8 @@ class TriggerContext(object):
         elif context_type == "topic":
             return TriggerContext(context=TopicTriggerContext(topic=trigger_request.topic.topic))
         else:
-            print("Trigger with unknown context received, context type: {}".format(context_type))
-            raise Exception("Unknown trigger context, type: {}".format(context_type))
+            print("Trigger with unknown context received, context type: {0}".format(context_type))
+            raise Exception("Unknown trigger context, type: {0}".format(context_type))
 
 
 def _clean_header(header_name: str):

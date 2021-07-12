@@ -21,7 +21,7 @@ from unittest.mock import patch, AsyncMock
 
 from betterproto.lib.google.protobuf import Struct
 
-from nitric.api import Eventing, Event
+from nitric.api import Events, Event
 from nitric.proto.nitric.event.v1 import TopicListResponse, NitricTopic
 from nitric.utils import _struct_from_dict
 
@@ -40,7 +40,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         payload = {"content": "of event"}
 
         with patch("nitric.proto.nitric.event.v1.EventStub.publish", mock_publish):
-            topic = Eventing().topic("test-topic")
+            topic = Events().topic("test-topic")
             event = await topic.publish(Event(payload=payload))
 
         # Check the returned ID was set on the event
@@ -63,7 +63,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         payload = {"content": "of event"}
 
         with patch("nitric.proto.nitric.event.v1.EventStub.publish", mock_publish):
-            topic = Eventing().topic("test-topic")
+            topic = Events().topic("test-topic")
             await topic.publish({"id": "123", "payload": payload})
 
         # Check expected values were passed to Stub
@@ -83,7 +83,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         payload = {"content": "of event"}
 
         with patch("nitric.proto.nitric.event.v1.EventStub.publish", mock_publish):
-            topic = Eventing().topic("test-topic")
+            topic = Events().topic("test-topic")
             try:
                 await topic.publish((1, 2, 3))
                 assert False
@@ -100,7 +100,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         payload = {"content": "of event"}
 
         with patch("nitric.proto.nitric.event.v1.EventStub.publish", mock_publish):
-            topic = Eventing().topic("test-topic")
+            topic = Events().topic("test-topic")
             await topic.publish()
 
         # Check expected values were passed to Stub
@@ -123,7 +123,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         payload = {"content": "of event"}
 
         with patch("nitric.proto.nitric.event.v1.TopicStub.list", mock_list_topics):
-            topics = await Eventing().topics()
+            topics = await Events().topics()
 
         # Check expected values were passed to Stub
         mock_list_topics.assert_called_once()

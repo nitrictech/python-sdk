@@ -32,7 +32,7 @@ class Task(object):
     payload_type: str = field(default=None)
     payload: dict = field(default_factory=dict)
     lease_id: str = field(default=None)
-    _queueing: Queueing = field(default=None)
+    _queueing: Queues = field(default=None)
     _queue: Queue = field(default=None)
 
     async def complete(self):
@@ -72,7 +72,7 @@ def _task_to_wire(task: Task) -> NitricTask:
     )
 
 
-def _wire_to_task(task: NitricTask, queueing: Queueing = None, queue: Queue = None) -> Task:
+def _wire_to_task(task: NitricTask, queueing: Queues = None, queue: Queue = None) -> Task:
     """
     Convert a Nitric Queue Task (protobuf) to a Nitric Task (python SDK).
 
@@ -111,7 +111,7 @@ def _wire_to_failed_task(failed_task: WireFailedTask) -> FailedTask:
 class Queue(object):
     """A reference to a queue from a queue service, used to perform operations on that queue."""
 
-    _queueing: Queueing
+    _queueing: Queues
     name: str
 
     async def send(
@@ -178,10 +178,8 @@ class Queue(object):
         return [_wire_to_task(task=task, queueing=self._queueing, queue=self) for task in response.tasks]
 
 
-class Queueing(object):
-    """
-    Queueing client, providing access to Queue and Task references and operations on those entities.
-    """
+class Queues(object):
+    """Queueing client, providing access to Queue and Task references and operations on those entities."""
 
     def __init__(self):
         """Construct a Nitric Queue Client."""

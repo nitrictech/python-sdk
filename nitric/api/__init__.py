@@ -17,15 +17,15 @@
 # limitations under the License.
 #
 """Nitric API SDK."""
-from nitric.api.events import Eventing, Event, Topic
+from nitric.api.events import Events, Event, Topic
 from nitric.api.kv import KeyValueClient
-from nitric.api.queues import Queueing, Task, FailedTask
+from nitric.api.queues import Queues, Task, FailedTask
 from nitric.api.storage import Storage
 
 __all__ = [
-    "Eventing",
+    "Events",
     "KeyValueClient",
-    "Queueing",
+    "Queues",
     "Storage",
     "Event",
     "Task",

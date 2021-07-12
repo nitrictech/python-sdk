@@ -41,5 +41,5 @@ pip3 install nitric
 
 ```python
 # import classes/modules as required
-from nitric.api import Eventing, KeyValueClient
+from nitric.api import Events, KeyValueClient
 ```
