@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, AsyncIterator, Union
+from typing import List, AsyncIterator, Union, Any
 
 from nitric.proto.nitric.document.v1 import (
     DocumentServiceStub,
@@ -74,9 +74,20 @@ class CollectionRef:
         """Return a reference to a document in the collection."""
         return DocumentRef(_documents=self._documents, _collection=self, key=key)
 
-    def query(self) -> QueryBuilder:
+    def query(
+        self,
+        paging_token: Any = None,
+        limit: int = 0,
+        expressions: Union[Expression, List[Expression]] = None,
+    ) -> QueryBuilder:
         """Return a query builder scoped to this collection."""
-        return QueryBuilder(documents=self._documents, collection=self)
+        return QueryBuilder(
+            documents=self._documents,
+            collection=self,
+            paging_token=paging_token,
+            limit=limit,
+            expressions=[expressions] if isinstance(expressions, Expression) else expressions,
+        )
 
     def is_sub_collection(self):
         """Return True if this collection is a sub-collection of a document in another collection."""
@@ -97,6 +108,59 @@ class Operator(Enum):
     greater_than_or_equal = ">="
     equals = "="
     starts_with = "startsWith"
+
+
+class _ExpressionBuilder:
+    """Builder for creating query expressions using magic methods."""
+
+    def __init__(self, operand):
+        self._operand = operand
+
+    def __eq__(self, other) -> Expression:
+        return Expression(self._operand, Operator.equals, other)
+
+    def __lt__(self, other) -> Expression:
+        return Expression(self._operand, Operator.less_than, other)
+
+    def __le__(self, other) -> Expression:
+        return Expression(self._operand, Operator.less_than_or_equal, other)
+
+    def __gt__(self, other) -> Expression:
+        return Expression(self._operand, Operator.greater_than, other)
+
+    def __ge__(self, other) -> Expression:
+        return Expression(self._operand, Operator.greater_than_or_equal, other)
+
+    def eq(self, other) -> Expression:
+        return self == other
+
+    def lt(self, other) -> Expression:
+        return self < other
+
+    def le(self, other) -> Expression:
+        return self <= other
+
+    def gt(self, other) -> Expression:
+        return self > other
+
+    def ge(self, other) -> Expression:
+        return self >= other
+
+    def starts_with(self, match) -> Expression:
+        return Expression(self._operand, Operator.starts_with, match)
+
+
+def condition(name: str) -> _ExpressionBuilder:
+    """
+    Convenience function for constructing query expressions builds.
+
+    Expression builders in turn provides magic methods for constructing expressions.
+
+    e.g. prop('first_name') == 'john' is equivalent to Expression('first_name, '=', 'john')
+
+    Supported operations are ==, <, >, <=, >=, .starts_with()
+    """
+    return _ExpressionBuilder(operand=name)
 
 
 @dataclass(order=True)
@@ -163,21 +227,44 @@ class QueryBuilder:
 
     _documents: Documents
     _collection: CollectionRef
-    _paging_token: object
+    _paging_token: Any
     _limit: int
     _expressions: List[Expression]
 
-    def __init__(self, documents: Documents, collection: CollectionRef):
+    def __init__(
+        self,
+        documents: Documents,
+        collection: CollectionRef,
+        paging_token: Any = None,
+        limit: int = 0,
+        expressions: List[Expression] = None,
+    ):
         """Construct a new QueryBuilder."""
         self._documents = documents
         self._collection = collection
-        self._paging_token = None
-        self._limit = 0  # default to unlimited.
-        self._expressions = []
+        self._paging_token = paging_token
+        self._limit = limit  # default to unlimited.
+        if expressions is None:
+            self._expressions = []
+        else:
+            self._expressions = expressions
 
-    def where(self, operand: str, operator: Union[Operator, str], value) -> QueryBuilder:
+    def _flat_expressions(self, expressions) -> List[Expression]:
+        if isinstance(expressions, tuple) and len(expressions) == 3 and isinstance(expressions[0], str):
+            # handle the special case where an expression was passed in as its component arguments.
+            return [Expression(*expressions)]
+        if isinstance(expressions, Expression):
+            return [expressions]
+        else:
+            exps = []
+            for exp in expressions:
+                exps = exps + self._flat_expressions(exp)
+            return exps
+
+    def where(self, *expressions: Union[Expression, List[Expression], Union[str, Operator]]) -> QueryBuilder:
         """Add a filter expression to the query."""
-        self._expressions.append(Expression(operand, operator, value))
+        for expression in self._flat_expressions(expressions):
+            self._expressions.append(expression)
         return self
 
     def page_from(self, token) -> QueryBuilder:

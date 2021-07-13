@@ -23,7 +23,7 @@ import pytest
 from betterproto.lib.google.protobuf import Struct, Value
 
 from nitric.api import Events, Event
-from nitric.api.documents import QueryBuilder, Operator, Documents
+from nitric.api.documents import QueryBuilder, Operator, Documents, condition, Expression as QExpression
 from nitric.proto.nitric.document.v1 import (
     Key,
     Collection,
@@ -263,3 +263,151 @@ class QueryTest(IsolatedAsyncioTestCase):
             .limit(3)
             .__str__(),
         )
+
+    def test_query_flat_expressions(self):
+        flattened = QueryBuilder(documents=None, collection=None)._flat_expressions(
+            (
+                QExpression(operand="first_name", operator="=", value="john"),
+                [
+                    QExpression(operand="last_name", operator="startsWith", value="s"),
+                    QExpression(operand="age", operator=">=", value=18),
+                ],
+            )
+        )
+
+    def test_where_with_variadic_expressions(self):
+        builder = (
+            Documents()
+            .collection("people")
+            .query()
+            .where(
+                condition("first_name") == "john",
+                condition("last_name").starts_with("s"),
+                condition("age") >= 18,
+                [
+                    condition("last_name").starts_with("s"),
+                    condition("age") >= 18,
+                ],
+            )
+        )
+        expected = [
+            QExpression(operand="first_name", operator="=", value="john"),
+            QExpression(operand="last_name", operator="startsWith", value="s"),
+            QExpression(operand="age", operator=">=", value=18),
+            QExpression(operand="last_name", operator="startsWith", value="s"),
+            QExpression(operand="age", operator=">=", value=18),
+        ]
+        assert expected == builder._expressions
+
+    def test_where_with_list_of_expressions(self):
+        builder = (
+            Documents()
+            .collection("people")
+            .query()
+            .where(
+                [
+                    condition("first_name") == "john",
+                    condition("last_name").starts_with("s"),
+                    condition("age") >= 18,
+                ]
+            )
+        )
+        expected = [
+            QExpression(operand="first_name", operator="=", value="john"),
+            QExpression(operand="last_name", operator="startsWith", value="s"),
+            QExpression(operand="age", operator=">=", value=18),
+        ]
+        assert expected == builder._expressions
+
+    def test_where_with_single_expression(self):
+        builder = Documents().collection("people").query().where(condition("first_name") == "john")
+        expected = [QExpression(operand="first_name", operator="=", value="john")]
+        assert expected == builder._expressions
+
+    def test_where_with_expression_args(self):
+        builder = Documents().collection("people").query().where("first_name", "=", "john")
+        expected = [QExpression(operand="first_name", operator="=", value="john")]
+        assert expected == builder._expressions
+
+    def test_querybuild_with_constructor_expression(self):
+        builder = Documents().collection("people").query(expressions=condition("first_name") == "john")
+        expected = [QExpression(operand="first_name", operator="=", value="john")]
+        assert expected == builder._expressions
+
+    def test_querybuild_with_constructor_expressions_list(self):
+        builder = (
+            Documents()
+            .collection("people")
+            .query(
+                expressions=[
+                    condition("first_name") == "john",
+                    condition("last_name").starts_with("s"),
+                    condition("age") >= 18,
+                ]
+            )
+        )
+        expected = [
+            QExpression(operand="first_name", operator="=", value="john"),
+            QExpression(operand="last_name", operator="startsWith", value="s"),
+            QExpression(operand="age", operator=">=", value=18),
+        ]
+        assert expected == builder._expressions
+
+    def test_querybuild_with_negative_limit(self):
+        with pytest.raises(Exception) as e:
+            Documents().collection("people").query().limit(-1)
+        self.assertIn("limit must be a positive integer", str(e.value))
+
+    async def test_querybuild_stream_with_paging_from(self):
+        with pytest.raises(Exception) as e:
+            async for doc in Documents().collection("people").query().page_from("a").stream():
+                pass
+        self.assertIn("page_from() should not be used with streamed queries", str(e.value))
+
+
+class QueryExpressionShorthandTest(IsolatedAsyncioTestCase):
+    # Starts With
+    def test_starts_with(self):
+        self.assertEqual(
+            QExpression(operand="first_name", operator="startsWith", value="j"),
+            condition("first_name").starts_with("j"),
+        )
+
+    # Equals
+    def test_magic_eq(self):
+        self.assertEqual(
+            QExpression(operand="first_name", operator="=", value="john"), condition("first_name") == "john"
+        )
+
+    def test_eq(self):
+        self.assertEqual(
+            QExpression(operand="first_name", operator="=", value="john"), condition("first_name").eq("john")
+        )
+
+    # Less than
+    def test_magic_lt(self):
+        self.assertEqual(QExpression(operand="age", operator="<", value=20), condition("age") < 20)
+
+    def test_lt(self):
+        self.assertEqual(QExpression(operand="age", operator="<", value=20), condition("age").lt(20))
+
+    # Less than or equal
+    def test_magic_le(self):
+        self.assertEqual(QExpression(operand="age", operator="<=", value=20), condition("age") <= 20)
+
+    def test_le(self):
+        self.assertEqual(QExpression(operand="age", operator="<=", value=20), condition("age").le(20))
+
+    # Greater than
+    def test_magic_gt(self):
+        self.assertEqual(QExpression(operand="age", operator=">", value=20), condition("age") > 20)
+
+    def test_gt(self):
+        self.assertEqual(QExpression(operand="age", operator=">", value=20), condition("age").gt(20))
+
+    # Greater than or equal
+    def test_magic_ge(self):
+        self.assertEqual(QExpression(operand="age", operator=">=", value=20), condition("age") >= 20)
+
+    def test_ge(self):
+        self.assertEqual(QExpression(operand="age", operator=">=", value=20), condition("age").ge(20))
