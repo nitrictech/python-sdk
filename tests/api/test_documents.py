@@ -329,6 +329,22 @@ class QueryTest(IsolatedAsyncioTestCase):
         expected = [QExpression(operand="first_name", operator="=", value="john")]
         assert expected == builder._expressions
 
+    def test_where_with_list_of_expression_args(self):
+        builder = (
+            Documents()
+            .collection("people")
+            .query()
+            .where(
+                ("age", ">", 20),
+                ("age", "<", 50),
+            )
+        )
+        expected = [
+            QExpression(operand="age", operator=">", value=20),
+            QExpression(operand="age", operator="<", value=50),
+        ]
+        assert expected == builder._expressions
+
     def test_querybuild_with_constructor_expression(self):
         builder = Documents().collection("people").query(expressions=condition("first_name") == "john")
         expected = [QExpression(operand="first_name", operator="=", value="john")]

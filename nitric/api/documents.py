@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, AsyncIterator, Union, Any
+from typing import List, AsyncIterator, Union, Any, Tuple
 
 from nitric.proto.nitric.document.v1 import (
     DocumentServiceStub,
@@ -223,7 +223,7 @@ class QueryResultsPage:
 
 
 class QueryBuilder:
-    """Document query builder for retrieving documents from a collection based on filter expressions."""
+    """Document query builder for retrieving documents from a collection based on filters."""
 
     _documents: Documents
     _collection: CollectionRef
@@ -250,19 +250,51 @@ class QueryBuilder:
             self._expressions = expressions
 
     def _flat_expressions(self, expressions) -> List[Expression]:
+        """Process possible inputs for .where() into a flattened list of expressions."""
         if isinstance(expressions, tuple) and len(expressions) == 3 and isinstance(expressions[0], str):
             # handle the special case where an expression was passed in as its component arguments.
+            # e.g. .where('age', '<', 30) instead of .where(condition('age') > 30)
             return [Expression(*expressions)]
         if isinstance(expressions, Expression):
+            # when a single expression is received, wrap in a list and return it
             return [expressions]
         else:
+            # flatten lists of lists into single dimension list of expressions
             exps = []
             for exp in expressions:
                 exps = exps + self._flat_expressions(exp)
             return exps
 
-    def where(self, *expressions: Union[Expression, List[Expression], Union[str, Operator]]) -> QueryBuilder:
-        """Add a filter expression to the query."""
+    def where(
+        self,
+        *expressions: Union[
+            Expression, List[Expression], Union[str, Operator, int, bool, Tuple[str, Union[str, Operator], Any]]
+        ]
+    ) -> QueryBuilder:
+        """
+        Add a filter expression to the query.
+
+        :param expressions: a single expression or a set of expression args or a variadic/tuple/list of expressions.
+
+        Examples:
+            .where('age', '>', 20)
+            .where(condition('age') > 20)
+            .where(condition('age').gt(20))
+            .where(
+                condition('age') > 20,
+                condition('age') < 50,
+            )
+            .where(
+                [
+                    condition('age') > 20,
+                    condition('age') < 50,
+                ]
+            )
+            .where(
+                ('age', '>', 20),
+                ('age', '<', 50),
+            )
+        """
         for expression in self._flat_expressions(expressions):
             self._expressions.append(expression)
         return self
