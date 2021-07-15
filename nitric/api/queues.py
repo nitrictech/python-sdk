@@ -20,7 +20,7 @@ from __future__ import annotations
 
 from typing import List, Union
 from nitric.utils import new_default_channel, _struct_from_dict, _dict_from_struct
-from nitric.proto.nitric.queue.v1 import QueueStub, NitricTask, FailedTask as WireFailedTask
+from nitric.proto.nitric.queue.v1 import QueueServiceStub, NitricTask, FailedTask as WireFailedTask
 from dataclasses import dataclass, field
 
 
@@ -184,7 +184,7 @@ class Queues(object):
     def __init__(self):
         """Construct a Nitric Queue Client."""
         self.channel = new_default_channel()
-        self._queue_stub = QueueStub(channel=self.channel)
+        self._queue_stub = QueueServiceStub(channel=self.channel)
 
     def __del__(self):
         # close the channel when this client is destroyed

@@ -18,7 +18,7 @@
 #
 from typing import List, Union
 from nitric.utils import new_default_channel, _struct_from_dict
-from nitric.proto.nitric.event.v1 import EventStub, NitricEvent, TopicStub
+from nitric.proto.nitric.event.v1 import EventServiceStub, NitricEvent, TopicServiceStub
 from dataclasses import dataclass, field
 
 
@@ -43,7 +43,7 @@ def _event_to_wire(event: Event) -> NitricEvent:
 class Topic(object):
     """A reference to a topic on an event service, used to perform operations on that topic."""
 
-    _stub: EventStub
+    _stub: EventServiceStub
     name: str
 
     async def publish(
@@ -78,8 +78,8 @@ class Events(object):
     def __init__(self):
         """Construct a Nitric Event Client."""
         self.channel = new_default_channel()
-        self._stub = EventStub(channel=self.channel)
-        self._topic_stub = TopicStub(channel=self.channel)
+        self._stub = EventServiceStub(channel=self.channel)
+        self._topic_stub = TopicServiceStub(channel=self.channel)
 
     def __del__(self):
         # close the channel when this client is destroyed

@@ -19,7 +19,7 @@
 from dataclasses import dataclass
 
 from nitric.utils import new_default_channel
-from nitric.proto.nitric.storage.v1 import StorageStub
+from nitric.proto.nitric.storage.v1 import StorageServiceStub
 
 
 class Storage(object):
@@ -32,7 +32,7 @@ class Storage(object):
     def __init__(self):
         """Construct a Nitric Storage Client."""
         self.channel = new_default_channel()
-        self._storage_stub = StorageStub(channel=self.channel)
+        self._storage_stub = StorageServiceStub(channel=self.channel)
 
     def __del__(self):
         # close the channel when this client is destroyed
@@ -48,7 +48,7 @@ class Storage(object):
 class Bucket(object):
     """A reference to a bucket in a storage service, used to the perform operations on that bucket."""
 
-    _storage_stub: StorageStub
+    _storage_stub: StorageServiceStub
     name: str
 
     def file(self, key: str):
@@ -60,7 +60,7 @@ class Bucket(object):
 class File(object):
     """A reference to a file in a bucket, used to perform operations on that file."""
 
-    _storage_stub: StorageStub
+    _storage_stub: StorageServiceStub
     _bucket: str
     key: str
 

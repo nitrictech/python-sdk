@@ -25,7 +25,7 @@ from betterproto.grpc.util.async_channel import AsyncChannel
 
 from nitric.utils import new_default_channel
 from nitric.faas import Trigger, Response
-from nitric.proto.nitric.faas.v1 import FaasStub, InitRequest, ClientMessage
+from nitric.proto.nitric.faas.v1 import FaasServiceStub, InitRequest, ClientMessage
 import asyncio
 
 
@@ -40,7 +40,7 @@ async def _register_faas_worker(
     :param func: handler function for incoming triggers. Can be sync or async, async is preferred.
     """
     channel = new_default_channel()
-    client = FaasStub(channel)
+    client = FaasServiceStub(channel)
     request_channel = AsyncChannel(close=True)
     # We can start be sending all the requests we already have
     try:

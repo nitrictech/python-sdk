@@ -40,7 +40,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
 
         payload = {"content": "of event"}
 
-        with patch("nitric.proto.nitric.event.v1.EventStub.publish", mock_publish):
+        with patch("nitric.proto.nitric.event.v1.EventServiceStub.publish", mock_publish):
             topic = Events().topic("test-topic")
             event = await topic.publish(Event(payload=payload))
 
@@ -63,7 +63,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
 
         payload = {"content": "of event"}
 
-        with patch("nitric.proto.nitric.event.v1.EventStub.publish", mock_publish):
+        with patch("nitric.proto.nitric.event.v1.EventServiceStub.publish", mock_publish):
             topic = Events().topic("test-topic")
             await topic.publish({"id": "123", "payload": payload})
 
@@ -83,7 +83,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
 
         payload = {"content": "of event"}
 
-        with patch("nitric.proto.nitric.event.v1.EventStub.publish", mock_publish):
+        with patch("nitric.proto.nitric.event.v1.EventServiceStub.publish", mock_publish):
             topic = Events().topic("test-topic")
             with pytest.raises(Exception):
                 await topic.publish((1, 2, 3))
@@ -96,7 +96,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
 
         payload = {"content": "of event"}
 
-        with patch("nitric.proto.nitric.event.v1.EventStub.publish", mock_publish):
+        with patch("nitric.proto.nitric.event.v1.EventServiceStub.publish", mock_publish):
             topic = Events().topic("test-topic")
             await topic.publish()
 
@@ -119,7 +119,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
 
         payload = {"content": "of event"}
 
-        with patch("nitric.proto.nitric.event.v1.TopicStub.list", mock_list_topics):
+        with patch("nitric.proto.nitric.event.v1.TopicServiceStub.list", mock_list_topics):
             topics = await Events().topics()
 
         # Check expected values were passed to Stub

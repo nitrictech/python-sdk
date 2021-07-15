@@ -152,7 +152,7 @@ class _ExpressionBuilder:
 
 def condition(name: str) -> _ExpressionBuilder:
     """
-    Convenience function for constructing query expressions builds.
+    Construct a query expressions builder, for convenience.
 
     Expression builders in turn provides magic methods for constructing expressions.
 
@@ -276,7 +276,8 @@ class QueryBuilder:
 
         :param expressions: a single expression or a set of expression args or a variadic/tuple/list of expressions.
 
-        Examples:
+        Examples
+        --------
             .where('age', '>', 20)
             .where(condition('age') > 20)
             .where(condition('age').gt(20))
@@ -294,6 +295,7 @@ class QueryBuilder:
                 ('age', '>', 20),
                 ('age', '<', 50),
             )
+
         """
         for expression in self._flat_expressions(expressions):
             self._expressions.append(expression)
