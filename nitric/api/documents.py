@@ -106,7 +106,7 @@ class Operator(Enum):
     greater_than = ">"
     less_than_or_equal = "<="
     greater_than_or_equal = ">="
-    equals = "="
+    equals = "=="
     starts_with = "startsWith"
 
 

@@ -31,13 +31,13 @@ class Storage(object):
 
     def __init__(self):
         """Construct a Nitric Storage Client."""
-        self.channel = new_default_channel()
-        self._storage_stub = StorageServiceStub(channel=self.channel)
+        self._channel = new_default_channel()
+        self._storage_stub = StorageServiceStub(channel=self._channel)
 
     def __del__(self):
         # close the channel when this client is destroyed
-        if self.channel is not None:
-            self.channel.close()
+        if self._channel is not None:
+            self._channel.close()
 
     def bucket(self, name: str):
         """Return a reference to a bucket from the connected storage service."""
