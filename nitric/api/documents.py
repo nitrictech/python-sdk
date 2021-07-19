@@ -20,8 +20,8 @@ class DocumentRef:
     """A reference to a document in a collection."""
 
     _documents: Documents
-    _collection: CollectionRef
-    key: str
+    parent: CollectionRef
+    id: str
 
     def collection(self, name: str) -> CollectionRef:
         """
@@ -31,15 +31,15 @@ class DocumentRef:
         e.g. Documents().collection('a').doc('b').collection('c').doc('d') is valid,
         Documents().collection('a').doc('b').collection('c').doc('d').collection('e') is invalid (1 level too deep).
         """
-        if self._collection.is_sub_collection():
+        if self.parent.is_sub_collection():
             # Collection nesting is currently unsupported, but may be included in a future enhancement.
             raise Exception("Currently, sub-collections may only be nested 1 deep")
         return CollectionRef(_documents=self._documents, name=name, parent=self)
 
-    async def get(self) -> dict:
+    async def get(self) -> Document:
         """Retrieve the contents of this document, if it exists."""
-        response = await self._documents._stub.get(key=KeyMessage(collection=self._collection._to_wire(), id=self.key))
-        return _dict_from_struct(response.document.content)
+        response = await self._documents._stub.get(key=_doc_ref_to_wire(self))
+        return _document_from_wire(documents=self._documents, message=response.document)
 
     async def set(self, content: dict):
         """
@@ -48,18 +48,50 @@ class DocumentRef:
         If the document exists it will be updated, otherwise a new document will be created.
         """
         await self._documents._stub.set(
-            key=KeyMessage(collection=self._collection._to_wire(), id=self.key),
+            key=_doc_ref_to_wire(self),
             content=_struct_from_dict(content),
         )
 
     async def delete(self):
         """Delete this document, if it exists."""
         await self._documents._stub.delete(
-            key=KeyMessage(collection=self._collection._to_wire(), id=self.key),
+            key=_doc_ref_to_wire(self),
         )
 
-    def _to_wire(self) -> KeyMessage:
-        return KeyMessage(id=self.key, collection=self._collection._to_wire())
+
+def _document_from_wire(documents: Documents, message: DocumentMessage) -> Document:
+    ref = _doc_ref_from_wire(documents=documents, message=message.key)
+
+    return Document(
+        _ref=ref,
+        content=_dict_from_struct(message.content),
+    )
+
+
+def _doc_ref_to_wire(ref: DocumentRef) -> KeyMessage:
+    return KeyMessage(id=ref.id, collection=_collection_to_wire(ref.parent))
+
+
+def _doc_ref_from_wire(documents: Documents, message: KeyMessage) -> DocumentRef:
+    return DocumentRef(
+        _documents=documents,
+        id=message.id,
+        parent=_collection_from_wire(documents=documents, message=message.collection),
+    )
+
+
+def _collection_to_wire(ref: CollectionRef) -> CollectionMessage:
+    if ref.is_sub_collection():
+        return CollectionMessage(name=ref.name, parent=_doc_ref_to_wire(ref.parent) if ref.parent else None)
+    return CollectionMessage(name=ref.name)
+
+
+def _collection_from_wire(documents: Documents, message: CollectionMessage) -> CollectionRef:
+    return CollectionRef(
+        _documents=documents,
+        name=message.name,
+        parent=_doc_ref_from_wire(documents=documents, message=message.parent) if message.parent else None,
+    )
 
 
 @dataclass(frozen=True, order=True)
@@ -70,9 +102,9 @@ class CollectionRef:
     name: str
     parent: Union[DocumentRef, None] = field(default_factory=lambda: None)
 
-    def doc(self, key: str) -> DocumentRef:
+    def doc(self, doc_id: str) -> DocumentRef:
         """Return a reference to a document in the collection."""
-        return DocumentRef(_documents=self._documents, _collection=self, key=key)
+        return DocumentRef(_documents=self._documents, parent=self, id=doc_id)
 
     def query(
         self,
@@ -92,11 +124,6 @@ class CollectionRef:
     def is_sub_collection(self):
         """Return True if this collection is a sub-collection of a document in another collection."""
         return self.parent is not None
-
-    def _to_wire(self) -> CollectionMessage:
-        if self.is_sub_collection():
-            return CollectionMessage(name=self.name, parent=self.parent._to_wire())
-        return CollectionMessage(name=self.name)
 
 
 class Operator(Enum):
@@ -204,14 +231,20 @@ class Expression:
 class Document:
     """Represents a document and any associated metadata."""
 
+    _ref: DocumentRef
     content: dict
 
-    @staticmethod
-    def _from_wire(message: DocumentMessage):
-        """Convert a protobuf document message representation to a document object."""
-        return Document(
-            content=_dict_from_struct(message.content),
-        )
+    @property
+    def id(self):
+        return self._ref.id
+
+    @property
+    def collection(self) -> CollectionRef:
+        return self._ref.parent
+
+    @property
+    def ref(self):
+        return self._ref
 
 
 @dataclass(frozen=True, order=True)
@@ -328,11 +361,11 @@ class QueryBuilder:
             raise ValueError("page_from() should not be used with streamed queries.")
 
         async for result in self._documents._stub.query_stream(
-            collection=self._collection._to_wire(),
+            collection=_collection_to_wire(self._collection),
             expressions=self._expressions_to_wire(),
             limit=self._limit,
         ):
-            yield Document._from_wire(result.document)
+            yield _document_from_wire(documents=self._documents, message=result.document)
 
     async def fetch(self) -> QueryResultsPage:
         """
@@ -341,14 +374,15 @@ class QueryBuilder:
         If a page has been fetched previously, a token can be provided via paging_from(), to fetch the subsequent pages.
         """
         results = await self._documents._stub.query(
-            collection=self._collection._to_wire(),
+            collection=_collection_to_wire(self._collection),
             expressions=self._expressions_to_wire(),
             limit=self._limit,
             paging_token=self._paging_token,
         )
 
         return QueryResultsPage(
-            paging_token=results.paging_token, documents=[Document._from_wire(result) for result in results.documents]
+            paging_token=results.paging_token,
+            documents=[_document_from_wire(documents=self._documents, message=result) for result in results.documents],
         )
 
     def __eq__(self, other):

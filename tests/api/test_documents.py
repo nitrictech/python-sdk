@@ -23,7 +23,14 @@ import pytest
 from betterproto.lib.google.protobuf import Struct, Value
 
 from nitric.api import Events, Event
-from nitric.api.documents import QueryBuilder, Operator, Documents, condition, Expression as QExpression
+from nitric.api.documents import (
+    QueryBuilder,
+    Operator,
+    Documents,
+    condition,
+    Expression as QExpression,
+    Document as SdkDocument,
+)
 from nitric.proto.nitric.document.v1 import (
     Key,
     Collection,
@@ -89,6 +96,7 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
         mock_get = AsyncMock()
         mock_get.return_value = DocumentGetResponse(
             document=Document(
+                key=Key(id="b", collection=Collection(name="a")),
                 content=Struct(
                     fields={
                         "a": Value(number_value=1.0),
@@ -106,12 +114,13 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
                 id="b",
             )
         )
-        self.assertEqual(1.0, response["a"])
+        self.assertEqual(1.0, response.content["a"])
 
     async def test_get_subcollection_document(self):
         mock_get = AsyncMock()
         mock_get.return_value = DocumentGetResponse(
             document=Document(
+                key=Key(id="d", collection=Collection(name="c", parent=Key(id="b", collection=Collection(name="a")))),
                 content=Struct(
                     fields={
                         "a": Value(number_value=1.0),
@@ -121,7 +130,7 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
         )
 
         with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.get", mock_get):
-            response = await Documents().collection("a").doc("b").collection("c").doc("d").get()
+            response: SdkDocument = await Documents().collection("a").doc("b").collection("c").doc("d").get()
 
         mock_get.assert_called_once_with(
             key=Key(
@@ -135,7 +144,11 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
                 id="d",
             )
         )
-        self.assertEqual(1.0, response["a"])
+        self.assertEqual(1.0, response.content["a"])
+        self.assertEqual("d", response.id)
+        self.assertEqual("c", response.collection.name)
+        self.assertEqual("b", response.collection.parent.id)
+        self.assertEqual("a", response.collection.parent.parent.name)
 
     async def test_delete_document(self):
         mock_delete = AsyncMock()
@@ -178,7 +191,13 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
     async def test_collection_query_fetch(self):
         mock_query = AsyncMock()
         mock_query.return_value = DocumentQueryResponse(
-            documents=[Document(content=Struct(fields={"a": Value(number_value=i)})) for i in range(3)],
+            documents=[
+                Document(
+                    content=Struct(fields={"a": Value(number_value=i)}),
+                    key=Key(id="test-doc", collection=Collection(name="a")),
+                )
+                for i in range(3)
+            ],
             paging_token={"b": "c"},
         )
 
@@ -190,7 +209,7 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
                 .where("name", "startsWith", "test")
                 .where("age", ">", 3)
                 .where("dollar", "<", 2.0)
-                .where("true", "=", True)
+                .where("true", "==", True)
                 .limit(3)
                 .fetch()
             )
@@ -201,7 +220,7 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
                 Expression(operand="name", operator="startsWith", value=ExpressionValue(string_value="test")),
                 Expression(operand="age", operator=">", value=ExpressionValue(int_value=3)),
                 Expression(operand="dollar", operator="<", value=ExpressionValue(double_value=2.0)),
-                Expression(operand="true", operator="=", value=ExpressionValue(bool_value=True)),
+                Expression(operand="true", operator="==", value=ExpressionValue(bool_value=True)),
             ],
             limit=3,
             paging_token=None,
@@ -267,7 +286,7 @@ class QueryTest(IsolatedAsyncioTestCase):
     def test_query_flat_expressions(self):
         flattened = QueryBuilder(documents=None, collection=None)._flat_expressions(
             (
-                QExpression(operand="first_name", operator="=", value="john"),
+                QExpression(operand="first_name", operator="==", value="john"),
                 [
                     QExpression(operand="last_name", operator="startsWith", value="s"),
                     QExpression(operand="age", operator=">=", value=18),
@@ -291,7 +310,7 @@ class QueryTest(IsolatedAsyncioTestCase):
             )
         )
         expected = [
-            QExpression(operand="first_name", operator="=", value="john"),
+            QExpression(operand="first_name", operator="==", value="john"),
             QExpression(operand="last_name", operator="startsWith", value="s"),
             QExpression(operand="age", operator=">=", value=18),
             QExpression(operand="last_name", operator="startsWith", value="s"),
@@ -313,20 +332,20 @@ class QueryTest(IsolatedAsyncioTestCase):
             )
         )
         expected = [
-            QExpression(operand="first_name", operator="=", value="john"),
-            QExpression(operand="last_name", operator="startsWith", value="s"),
-            QExpression(operand="age", operator=">=", value=18),
+            QExpression(operand="first_name", operator=Operator.equals, value="john"),
+            QExpression(operand="last_name", operator=Operator.starts_with, value="s"),
+            QExpression(operand="age", operator=Operator.greater_than_or_equal, value=18),
         ]
         assert expected == builder._expressions
 
     def test_where_with_single_expression(self):
         builder = Documents().collection("people").query().where(condition("first_name") == "john")
-        expected = [QExpression(operand="first_name", operator="=", value="john")]
+        expected = [QExpression(operand="first_name", operator=Operator.equals, value="john")]
         assert expected == builder._expressions
 
     def test_where_with_expression_args(self):
-        builder = Documents().collection("people").query().where("first_name", "=", "john")
-        expected = [QExpression(operand="first_name", operator="=", value="john")]
+        builder = Documents().collection("people").query().where("first_name", "==", "john")
+        expected = [QExpression(operand="first_name", operator=Operator.equals, value="john")]
         assert expected == builder._expressions
 
     def test_where_with_list_of_expression_args(self):
@@ -347,7 +366,7 @@ class QueryTest(IsolatedAsyncioTestCase):
 
     def test_querybuild_with_constructor_expression(self):
         builder = Documents().collection("people").query(expressions=condition("first_name") == "john")
-        expected = [QExpression(operand="first_name", operator="=", value="john")]
+        expected = [QExpression(operand="first_name", operator=Operator.equals, value="john")]
         assert expected == builder._expressions
 
     def test_querybuild_with_constructor_expressions_list(self):
@@ -363,7 +382,7 @@ class QueryTest(IsolatedAsyncioTestCase):
             )
         )
         expected = [
-            QExpression(operand="first_name", operator="=", value="john"),
+            QExpression(operand="first_name", operator=Operator.equals, value="john"),
             QExpression(operand="last_name", operator="startsWith", value="s"),
             QExpression(operand="age", operator=">=", value=18),
         ]
@@ -392,38 +411,47 @@ class QueryExpressionShorthandTest(IsolatedAsyncioTestCase):
     # Equals
     def test_magic_eq(self):
         self.assertEqual(
-            QExpression(operand="first_name", operator="=", value="john"), condition("first_name") == "john"
+            QExpression(operand="first_name", operator=Operator.equals, value="john"), condition("first_name") == "john"
         )
 
     def test_eq(self):
         self.assertEqual(
-            QExpression(operand="first_name", operator="=", value="john"), condition("first_name").eq("john")
+            QExpression(operand="first_name", operator=Operator.equals, value="john"),
+            condition("first_name").eq("john"),
         )
 
     # Less than
     def test_magic_lt(self):
-        self.assertEqual(QExpression(operand="age", operator="<", value=20), condition("age") < 20)
+        self.assertEqual(QExpression(operand="age", operator=Operator.less_than, value=20), condition("age") < 20)
 
     def test_lt(self):
-        self.assertEqual(QExpression(operand="age", operator="<", value=20), condition("age").lt(20))
+        self.assertEqual(QExpression(operand="age", operator=Operator.less_than, value=20), condition("age").lt(20))
 
     # Less than or equal
     def test_magic_le(self):
-        self.assertEqual(QExpression(operand="age", operator="<=", value=20), condition("age") <= 20)
+        self.assertEqual(
+            QExpression(operand="age", operator=Operator.less_than_or_equal, value=20), condition("age") <= 20
+        )
 
     def test_le(self):
-        self.assertEqual(QExpression(operand="age", operator="<=", value=20), condition("age").le(20))
+        self.assertEqual(
+            QExpression(operand="age", operator=Operator.less_than_or_equal, value=20), condition("age").le(20)
+        )
 
     # Greater than
     def test_magic_gt(self):
-        self.assertEqual(QExpression(operand="age", operator=">", value=20), condition("age") > 20)
+        self.assertEqual(QExpression(operand="age", operator=Operator.greater_than, value=20), condition("age") > 20)
 
     def test_gt(self):
-        self.assertEqual(QExpression(operand="age", operator=">", value=20), condition("age").gt(20))
+        self.assertEqual(QExpression(operand="age", operator=Operator.greater_than, value=20), condition("age").gt(20))
 
     # Greater than or equal
     def test_magic_ge(self):
-        self.assertEqual(QExpression(operand="age", operator=">=", value=20), condition("age") >= 20)
+        self.assertEqual(
+            QExpression(operand="age", operator=Operator.greater_than_or_equal, value=20), condition("age") >= 20
+        )
 
     def test_ge(self):
-        self.assertEqual(QExpression(operand="age", operator=">=", value=20), condition("age").ge(20))
+        self.assertEqual(
+            QExpression(operand="age", operator=Operator.greater_than_or_equal, value=20), condition("age").ge(20)
+        )
