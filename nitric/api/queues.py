@@ -26,7 +26,16 @@ from dataclasses import dataclass, field
 
 @dataclass(frozen=True, order=True)
 class Task(object):
-    """A reference to a task received from or to be sent to a Queue."""
+    """A task to be sent to a Queue."""
+
+    id: str = field(default=None)
+    payload_type: str = field(default=None)
+    payload: dict = field(default_factory=dict)
+
+
+@dataclass(frozen=True, order=True)
+class ReceivedTask(object):
+    """A reference to a task received from a Queue, with a lease."""
 
     id: str = field(default=None)
     payload_type: str = field(default=None)
@@ -52,9 +61,8 @@ class Task(object):
 
 @dataclass(frozen=True, order=True)
 class FailedTask(Task):
-    """Represents a failed queue publish for an event."""
+    """Represents a failed queue publish."""
 
-    lease_id: str = None  # failed tasks should never have a lease id.
     message: str = field(default="")
 
 
@@ -72,14 +80,14 @@ def _task_to_wire(task: Task) -> NitricTask:
     )
 
 
-def _wire_to_task(task: NitricTask, queueing: Queues = None, queue: Queue = None) -> Task:
+def _wire_to_received_task(task: NitricTask, queueing: Queues = None, queue: Queue = None) -> ReceivedTask:
     """
     Convert a Nitric Queue Task (protobuf) to a Nitric Task (python SDK).
 
     :param task: to convert
     :return: converted task
     """
-    return Task(
+    return ReceivedTask(
         id=task.id,
         payload_type=task.payload_type,
         payload=_dict_from_struct(task.payload),
@@ -96,13 +104,12 @@ def _wire_to_failed_task(failed_task: WireFailedTask) -> FailedTask:
     :param failed_task: the failed task
     :return: the Failed Task with failure message
     """
-    task = _wire_to_task(failed_task.task)
+    task = _wire_to_received_task(failed_task.task)
 
     return FailedTask(
         id=task.id,
         payload_type=task.payload_type,
         payload=task.payload,
-        lease_id=task.lease_id,
         message=failed_task.message,
     )
 
@@ -175,7 +182,7 @@ class Queue(object):
         response = await self._queueing._queue_stub.receive(queue=self.name, depth=limit)
 
         # Map the response protobuf response items to Python SDK Nitric Tasks
-        return [_wire_to_task(task=task, queueing=self._queueing, queue=self) for task in response.tasks]
+        return [_wire_to_received_task(task=task, queueing=self._queueing, queue=self) for task in response.tasks]
 
 
 class Queues(object):

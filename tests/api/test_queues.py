@@ -23,6 +23,7 @@ import pytest
 from betterproto.lib.google.protobuf import Struct
 
 from nitric.api import Queues, Task
+from nitric.api.queues import ReceivedTask
 from nitric.proto.nitric.queue.v1 import (
     QueueReceiveResponse,
     NitricTask,
@@ -227,7 +228,7 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         mock_complete.return_value = QueueCompleteResponse()
 
         queueing = Queues()
-        task = Task(lease_id="test-lease", _queueing=queueing, _queue=queueing.queue("test-queue"))
+        task = ReceivedTask(lease_id="test-lease", _queueing=queueing, _queue=queueing.queue("test-queue"))
 
         with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.complete", mock_complete):
             await task.complete()
@@ -237,19 +238,10 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         self.assertEqual("test-queue", mock_complete.call_args.kwargs["queue"])
         self.assertEqual("test-lease", mock_complete.call_args.kwargs["lease_id"])
 
-    async def test_complete_unleased_task(self):
-        queueing = Queues()
-        # lease_id omitted.
-        task = Task(_queueing=queueing, _queue=queueing.queue("test-queue"))
-
-        with pytest.raises(Exception) as e:
-            await task.complete()
-        self.assertIn("Tasks must be received", str(e.value))
-
     async def test_complete_task_without_client(self):
         queueing = Queues()
         # lease_id omitted.
-        task = Task(lease_id="test-lease")
+        task = ReceivedTask(lease_id="test-lease")
 
         with pytest.raises(Exception) as e:
             await task.complete()
