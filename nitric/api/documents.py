@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import List, AsyncIterator, Union, Any, Tuple
 
+from nitric.api.const import MAX_SUB_COLLECTION_DEPTH
 from nitric.proto.nitric.document.v1 import (
     DocumentServiceStub,
     Collection as CollectionMessage,
@@ -13,6 +14,12 @@ from nitric.proto.nitric.document.v1 import (
     Document as DocumentMessage,
 )
 from nitric.utils import new_default_channel, _dict_from_struct, _struct_from_dict
+
+
+class CollectionDepthException(Exception):
+    """Exception when the max depth of document sub-collections is exceeded."""
+
+    pass
 
 
 @dataclass(frozen=True, order=True)
@@ -31,9 +38,13 @@ class DocumentRef:
         e.g. Documents().collection('a').doc('b').collection('c').doc('d') is valid,
         Documents().collection('a').doc('b').collection('c').doc('d').collection('e') is invalid (1 level too deep).
         """
-        if self.parent.is_sub_collection():
-            # Collection nesting is currently unsupported, but may be included in a future enhancement.
-            raise Exception("Currently, sub-collections may only be nested 1 deep")
+        current_depth = self.parent.sub_collection_depth()
+        if current_depth >= MAX_SUB_COLLECTION_DEPTH:
+            # Collection nesting is only supported to a maximum depth.
+            raise CollectionDepthException(
+                f"sub-collections supported to a depth of {MAX_SUB_COLLECTION_DEPTH}, "
+                f"attempted to create new collection with depth {current_depth + 1}"
+            )
         return CollectionRef(_documents=self._documents, name=name, parent=self)
 
     async def get(self) -> Document:
@@ -120,6 +131,12 @@ class CollectionRef:
             limit=limit,
             expressions=[expressions] if isinstance(expressions, Expression) else expressions,
         )
+
+    def sub_collection_depth(self) -> int:
+        if not self.is_sub_collection():
+            return 0
+        else:
+            return self.parent.parent.sub_collection_depth() + 1
 
     def is_sub_collection(self):
         """Return True if this collection is a sub-collection of a document in another collection."""
@@ -302,7 +319,7 @@ class QueryBuilder:
         self,
         *expressions: Union[
             Expression, List[Expression], Union[str, Operator, int, bool, Tuple[str, Union[str, Operator], Any]]
-        ]
+        ],
     ) -> QueryBuilder:
         """
         Add a filter expression to the query.

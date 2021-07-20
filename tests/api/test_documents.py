@@ -186,7 +186,9 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
         with pytest.raises(Exception) as e:
             Documents().collection("a").doc("b").collection("c").doc("d").collection("should-fail")
 
-        self.assertIn("sub-collections may only be nested 1 deep", str(e.value))
+        self.assertIn(
+            "sub-collections supported to a depth of 1, attempted to create new collection with depth 2", str(e.value)
+        )
 
     async def test_collection_query_fetch(self):
         mock_query = AsyncMock()
