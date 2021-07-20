@@ -46,15 +46,13 @@
 # limitations under the License.
 #
 &#34;&#34;&#34;Nitric API SDK.&#34;&#34;&#34;
-from nitric.api.event import EventClient, TopicClient
+from nitric.api.events import EventClient, Event, Topic
 from nitric.api.kv import KeyValueClient
-from nitric.api.queue import QueueClient
+from nitric.api.queues import QueueClient, Task, FailedTask
 from nitric.api.storage import StorageClient
-from nitric.api.models import Event, Task, FailedTask, Topic
 
 __all__ = [
     &#34;EventClient&#34;,
-    &#34;TopicClient&#34;,
     &#34;KeyValueClient&#34;,
     &#34;QueueClient&#34;,
     &#34;StorageClient&#34;,
@@ -68,7 +66,7 @@ __all__ = [
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="nitric.api.event" href="event.html">nitric.api.event</a></code></dt>
+<dt><code class="name"><a title="nitric.api.events" href="events.html">nitric.api.events</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -80,11 +78,7 @@ __all__ = [
 <dd>
 <div class="desc"></div>
 </dd>
-<dt><code class="name"><a title="nitric.api.models" href="models.html">nitric.api.models</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="nitric.api.queue" href="queue.html">nitric.api.queue</a></code></dt>
+<dt><code class="name"><a title="nitric.api.queues" href="queues.html">nitric.api.queues</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -103,7 +97,7 @@ __all__ = [
 <dl>
 <dt id="nitric.api.Event"><code class="flex name class">
 <span>class <span class="ident">Event</span></span>
-<span>(</span><span>event_id: str, payload_type: str, payload: dict)</span>
+<span>(</span><span>payload: dict = &lt;factory&gt;, id: str = None, payload_type: str = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Represents a NitricEvent.</p></div>
@@ -114,13 +108,13 @@ __all__ = [
 <pre><code class="python">class Event(object):
     &#34;&#34;&#34;Represents a NitricEvent.&#34;&#34;&#34;
 
-    event_id: str
-    payload_type: str
-    payload: dict</code></pre>
+    payload: dict = field(default_factory=dict)
+    id: str = field(default=None)
+    payload_type: str = field(default=None)</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
-<dt id="nitric.api.Event.event_id"><code class="name">var <span class="ident">event_id</span> : str</code></dt>
+<dt id="nitric.api.Event.id"><code class="name">var <span class="ident">id</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -145,7 +139,7 @@ __all__ = [
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class EventClient(BaseClient):
+<pre><code class="python">class EventClient(object):
     &#34;&#34;&#34;
     Nitric generic publish/subscribe event client.
 
@@ -154,86 +148,55 @@ __all__ = [
 
     def __init__(self):
         &#34;&#34;&#34;Construct a Nitric Event Client.&#34;&#34;&#34;
-        super(self.__class__, self).__init__()
-        self._stub = event_service.EventStub(self._channel)
+        channel = new_default_channel()
+        self._stub = EventStub(channel=channel)
+        self._topic_stub = TopicStub(channel=channel)
 
-    def publish(
-        self,
-        topic_name: str,
-        payload: dict = None,
-        payload_type: str = &#34;&#34;,
-        event_id: str = None,
-    ) -&gt; str:
-        &#34;&#34;&#34;
-        Publish an event/message to a topic, which can be subscribed to by other services.
+    async def topics(self) -&gt; List[Topic]:
+        &#34;&#34;&#34;Get a list of topics available for publishing or subscription.&#34;&#34;&#34;
+        response = await self._topic_stub.list()
+        return [self.topic(topic.name) for topic in response.topics]
 
-        :param topic_name: the name of the topic to publish to
-        :param payload: content of the message to send
-        :param payload_type: fully qualified name of the event payload type, e.g. io.nitric.example.customer.created
-        :param event_id: a unique id, used to ensure idempotent processing of events. Defaults to a version 4 UUID.
-        :return: the request id on successful publish
-        &#34;&#34;&#34;
-        if payload is None:
-            payload = {}
-        payload_struct = Struct()
-        payload_struct.update(payload)
-        nitric_event = NitricEvent(id=event_id, payload_type=payload_type, payload=payload_struct)
-        request = event_model.EventPublishRequest(topic=topic_name, event=nitric_event)
-        self._exec(&#34;Publish&#34;, request)
-        return event_id</code></pre>
+    def topic(self, name: str) -&gt; Topic:
+        &#34;&#34;&#34;Return a reference a topic from the connected event service.&#34;&#34;&#34;
+        return Topic(_stub=self._stub, name=name)</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>nitric.api._base_client.BaseClient</li>
-<li>abc.ABC</li>
-</ul>
 <h3>Methods</h3>
 <dl>
-<dt id="nitric.api.EventClient.publish"><code class="name flex">
-<span>def <span class="ident">publish</span></span>(<span>self, topic_name: str, payload: dict = None, payload_type: str = '', event_id: str = None) ‑> str</span>
+<dt id="nitric.api.EventClient.topic"><code class="name flex">
+<span>def <span class="ident">topic</span></span>(<span>self, name: str) ‑> <a title="nitric.api.events.Topic" href="events.html#nitric.api.events.Topic">Topic</a></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Publish an event/message to a topic, which can be subscribed to by other services.</p>
-<p>:param topic_name: the name of the topic to publish to
-:param payload: content of the message to send
-:param payload_type: fully qualified name of the event payload type, e.g. io.nitric.example.customer.created
-:param event_id: a unique id, used to ensure idempotent processing of events. Defaults to a version 4 UUID.
-:return: the request id on successful publish</p></div>
+<div class="desc"><p>Return a reference a topic from the connected event service.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def publish(
-    self,
-    topic_name: str,
-    payload: dict = None,
-    payload_type: str = &#34;&#34;,
-    event_id: str = None,
-) -&gt; str:
-    &#34;&#34;&#34;
-    Publish an event/message to a topic, which can be subscribed to by other services.
-
-    :param topic_name: the name of the topic to publish to
-    :param payload: content of the message to send
-    :param payload_type: fully qualified name of the event payload type, e.g. io.nitric.example.customer.created
-    :param event_id: a unique id, used to ensure idempotent processing of events. Defaults to a version 4 UUID.
-    :return: the request id on successful publish
-    &#34;&#34;&#34;
-    if payload is None:
-        payload = {}
-    payload_struct = Struct()
-    payload_struct.update(payload)
-    nitric_event = NitricEvent(id=event_id, payload_type=payload_type, payload=payload_struct)
-    request = event_model.EventPublishRequest(topic=topic_name, event=nitric_event)
-    self._exec(&#34;Publish&#34;, request)
-    return event_id</code></pre>
+<pre><code class="python">def topic(self, name: str) -&gt; Topic:
+    &#34;&#34;&#34;Return a reference a topic from the connected event service.&#34;&#34;&#34;
+    return Topic(_stub=self._stub, name=name)</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.EventClient.topics"><code class="name flex">
+<span>async def <span class="ident">topics</span></span>(<span>self) ‑> List[<a title="nitric.api.events.Topic" href="events.html#nitric.api.events.Topic">Topic</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get a list of topics available for publishing or subscription.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def topics(self) -&gt; List[Topic]:
+    &#34;&#34;&#34;Get a list of topics available for publishing or subscription.&#34;&#34;&#34;
+    response = await self._topic_stub.list()
+    return [self.topic(topic.name) for topic in response.topics]</code></pre>
 </details>
 </dd>
 </dl>
 </dd>
 <dt id="nitric.api.FailedTask"><code class="flex name class">
 <span>class <span class="ident">FailedTask</span></span>
-<span>(</span><span>task_id: str, payload_type: str, payload: dict, lease_id: str = None, message: str = '')</span>
+<span>(</span><span>id: str = None, payload_type: str = None, payload: dict = &lt;factory&gt;, lease_id: str = None, message: str = '')</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Represents a failed queue publish for an event.</p></div>
@@ -244,71 +207,79 @@ __all__ = [
 <pre><code class="python">class FailedTask(Task):
     &#34;&#34;&#34;Represents a failed queue publish for an event.&#34;&#34;&#34;
 
+    lease_id: str = None  # failed tasks should never have a lease id.
     message: str = field(default=&#34;&#34;)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="nitric.api.models.Task" href="models.html#nitric.api.models.Task">Task</a></li>
+<li><a title="nitric.api.queues.Task" href="queues.html#nitric.api.queues.Task">Task</a></li>
 </ul>
 <h3>Class variables</h3>
 <dl>
+<dt id="nitric.api.FailedTask.lease_id"><code class="name">var <span class="ident">lease_id</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="nitric.api.FailedTask.message"><code class="name">var <span class="ident">message</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 </dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="nitric.api.queues.Task" href="queues.html#nitric.api.queues.Task">Task</a></b></code>:
+<ul class="hlist">
+<li><code><a title="nitric.api.queues.Task.complete" href="queues.html#nitric.api.queues.Task.complete">complete</a></code></li>
+</ul>
+</li>
+</ul>
 </dd>
 <dt id="nitric.api.KeyValueClient"><code class="flex name class">
 <span>class <span class="ident">KeyValueClient</span></span>
+<span>(</span><span>collection: str)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Nitric generic document store/db client.</p>
 <p>This client insulates application code from stack specific document CRUD operations or SDKs.</p>
-<p>Construct a new DocumentClient.</p></div>
+<p>Construct a new DocumentClient.</p>
+<p>:param collection: name of the key/value collection</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class KeyValueClient(BaseClient):
+<pre><code class="python">class KeyValueClient(object):
     &#34;&#34;&#34;
     Nitric generic document store/db client.
 
     This client insulates application code from stack specific document CRUD operations or SDKs.
     &#34;&#34;&#34;
 
-    def __init__(self):
-        &#34;&#34;&#34;Construct a new DocumentClient.&#34;&#34;&#34;
-        super(self.__class__, self).__init__()
-        self._stub = key_value_service.KeyValueStub(self._channel)
+    def __init__(self, collection: str):
+        &#34;&#34;&#34;
+        Construct a new DocumentClient.
 
-    def put(self, collection: str, key: str, value: dict):
-        &#34;&#34;&#34;Create a new document with the specified key in the specified collection.&#34;&#34;&#34;
-        value_struct = Struct()
-        value_struct.update(value)
-        request = key_value.KeyValuePutRequest(collection=collection, key=key, value=value_struct)
-        return self._exec(&#34;Put&#34;, request)
+        :param collection: name of the key/value collection
+        &#34;&#34;&#34;
+        self.collection = collection
+        self._stub = KeyValueStub(channel=new_default_channel())
 
-    def get(self, collection: str, key: str) -&gt; dict:
-        &#34;&#34;&#34;Retrieve a document from the specified collection by its key.&#34;&#34;&#34;
-        request = key_value.KeyValueGetRequest(collection=collection, key=key)
-        reply: KeyValueGetResponse = self._exec(&#34;Get&#34;, request)
-        document = MessageToDict(reply)[&#34;value&#34;]
-        return document
+    async def put(self, key: str, value: dict):
+        &#34;&#34;&#34;Create a new document with the specified key.&#34;&#34;&#34;
+        await self._stub.put(collection=self.collection, key=key, value=_struct_from_dict(value))
 
-    def delete(self, collection: str, key: str):
+    async def get(self, key: str) -&gt; dict:
+        &#34;&#34;&#34;Retrieve a document from the specified key.&#34;&#34;&#34;
+        response = await self._stub.get(collection=self.collection, key=key)
+        return response.value.to_dict()
+
+    async def delete(self, key: str):
         &#34;&#34;&#34;Delete the specified document from the collection.&#34;&#34;&#34;
-        request = key_value.KeyValueDeleteRequest(collection=collection, key=key)
-        return self._exec(&#34;Delete&#34;, request)</code></pre>
+        await self._stub.delete(collection=self.collection, key=key)</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>nitric.api._base_client.BaseClient</li>
-<li>abc.ABC</li>
-</ul>
 <h3>Methods</h3>
 <dl>
 <dt id="nitric.api.KeyValueClient.delete"><code class="name flex">
-<span>def <span class="ident">delete</span></span>(<span>self, collection: str, key: str)</span>
+<span>async def <span class="ident">delete</span></span>(<span>self, key: str)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Delete the specified document from the collection.</p></div>
@@ -316,44 +287,38 @@ __all__ = [
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def delete(self, collection: str, key: str):
+<pre><code class="python">async def delete(self, key: str):
     &#34;&#34;&#34;Delete the specified document from the collection.&#34;&#34;&#34;
-    request = key_value.KeyValueDeleteRequest(collection=collection, key=key)
-    return self._exec(&#34;Delete&#34;, request)</code></pre>
+    await self._stub.delete(collection=self.collection, key=key)</code></pre>
 </details>
 </dd>
 <dt id="nitric.api.KeyValueClient.get"><code class="name flex">
-<span>def <span class="ident">get</span></span>(<span>self, collection: str, key: str) ‑> dict</span>
+<span>async def <span class="ident">get</span></span>(<span>self, key: str) ‑> dict</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Retrieve a document from the specified collection by its key.</p></div>
+<div class="desc"><p>Retrieve a document from the specified key.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get(self, collection: str, key: str) -&gt; dict:
-    &#34;&#34;&#34;Retrieve a document from the specified collection by its key.&#34;&#34;&#34;
-    request = key_value.KeyValueGetRequest(collection=collection, key=key)
-    reply: KeyValueGetResponse = self._exec(&#34;Get&#34;, request)
-    document = MessageToDict(reply)[&#34;value&#34;]
-    return document</code></pre>
+<pre><code class="python">async def get(self, key: str) -&gt; dict:
+    &#34;&#34;&#34;Retrieve a document from the specified key.&#34;&#34;&#34;
+    response = await self._stub.get(collection=self.collection, key=key)
+    return response.value.to_dict()</code></pre>
 </details>
 </dd>
 <dt id="nitric.api.KeyValueClient.put"><code class="name flex">
-<span>def <span class="ident">put</span></span>(<span>self, collection: str, key: str, value: dict)</span>
+<span>async def <span class="ident">put</span></span>(<span>self, key: str, value: dict)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Create a new document with the specified key in the specified collection.</p></div>
+<div class="desc"><p>Create a new document with the specified key.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def put(self, collection: str, key: str, value: dict):
-    &#34;&#34;&#34;Create a new document with the specified key in the specified collection.&#34;&#34;&#34;
-    value_struct = Struct()
-    value_struct.update(value)
-    request = key_value.KeyValuePutRequest(collection=collection, key=key, value=value_struct)
-    return self._exec(&#34;Put&#34;, request)</code></pre>
+<pre><code class="python">async def put(self, key: str, value: dict):
+    &#34;&#34;&#34;Create a new document with the specified key.&#34;&#34;&#34;
+    await self._stub.put(collection=self.collection, key=key, value=_struct_from_dict(value))</code></pre>
 </details>
 </dd>
 </dl>
@@ -369,7 +334,7 @@ __all__ = [
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class QueueClient(BaseClient):
+<pre><code class="python">class QueueClient(object):
     &#34;&#34;&#34;
     Nitric generic publish/subscribe tasking client.
 
@@ -378,184 +343,26 @@ __all__ = [
 
     def __init__(self):
         &#34;&#34;&#34;Construct a Nitric Queue Client.&#34;&#34;&#34;
-        super(self.__class__, self).__init__()
-        self._stub = queue_service.QueueStub(self._channel)
+        self._queue_stub = QueueStub(channel=new_default_channel())
 
-    def _task_to_wire(self, task: Task) -&gt; queue.NitricTask:
-        &#34;&#34;&#34;
-        Convert a Nitric Task to a Nitric Queue Task.
-
-        :param task: to convert
-        :return: converted task
-        &#34;&#34;&#34;
-        payload_struct = Struct()
-        payload_struct.update(task.payload)
-
-        return queue.NitricTask(
-            id=task.task_id,
-            payload_type=task.payload_type,
-            payload=payload_struct,
-        )
-
-    def _wire_to_task(self, task: queue.NitricTask) -&gt; Task:
-        &#34;&#34;&#34;
-        Convert a Nitric Queue Task (protobuf) to a Nitric Task (python SDK).
-
-        :param task: to convert
-        :return: converted task
-        &#34;&#34;&#34;
-        return Task(
-            task_id=task.id,
-            payload_type=task.payload_type,
-            payload=MessageToDict(task.payload),
-            lease_id=task.lease_id,
-        )
-
-    def _wire_to_failed_task(self, failed_task: queue.FailedTask) -&gt; FailedTask:
-        &#34;&#34;&#34;
-        Convert a queue task that failed to push into a Failed Task object.
-
-        :param failed_task: the failed task
-        :return: the Failed Task with failure message
-        &#34;&#34;&#34;
-        task = self._wire_to_task(failed_task.task)
-
-        return FailedTask(
-            task_id=task.task_id,
-            payload_type=task.payload_type,
-            payload=task.payload,
-            lease_id=task.lease_id,
-            message=failed_task.message,
-        )
-
-    def send_batch(self, queue_name: str, tasks: List[Task] = None) -&gt; PushResponse:
-        &#34;&#34;&#34;
-        Push a collection of tasks to a queue, which can be retrieved by other services.
-
-        :param queue_name: the name of the queue to publish to
-        :param tasks: The tasks to push to the queue
-        :return: PushResponse containing a list containing details of any messages that failed to publish.
-        &#34;&#34;&#34;
-        if tasks is None:
-            tasks = []
-        wire_tasks = map(self._task_to_wire, tasks)
-
-        request = queue.QueueSendBatchRequest(queue=queue_name, tasks=wire_tasks)
-
-        response: queue.QueueSendBatchResponse = self._exec(&#34;SendBatch&#34;, request)
-
-        failed_tasks = map(self._wire_to_failed_task, response.failedMessages)
-
-        return PushResponse(failed_tasks=list(failed_tasks))
-
-    def receive(self, queue_name: str, depth: int = None) -&gt; List[Task]:
-        &#34;&#34;&#34;
-        Pop 1 or more items from the specified queue up to the depth limit.
-
-        Queue items are Nitric Tasks that are leased for a limited period of time, where they may be worked on.
-        Once complete or failed they must be acknowledged using the request specific leaseId.
-
-        If the lease on a queue item expires before it is acknowledged or the lease is extended the task will be
-        returned to the queue for reprocessing.
-
-        :param queue_name: Nitric name for the queue. This will be automatically resolved to the provider specific
-        identifier.
-        :param depth: The maximum number of queue items to return. Default: 1, Min: 1.
-        :return: Queue items popped from the specified queue.
-        &#34;&#34;&#34;
-        # Set the default and minimum depth to 1.
-        if depth is None or depth &lt; 1:
-            depth = 1
-
-        request = queue.QueueReceiveRequest(queue=queue_name, depth=depth)
-
-        response: queue.QueueReceiveResponse = self._exec(&#34;Receive&#34;, request)
-
-        # Map the response protobuf response items to Python SDK Nitric Queue Items
-        return [self._wire_to_task(item) for item in response.items]</code></pre>
+    def queue(self, name: str):
+        &#34;&#34;&#34;Return a reference to a queue from the connected queue service.&#34;&#34;&#34;
+        return Queue(_queue_stub=self._queue_stub, name=name)</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>nitric.api._base_client.BaseClient</li>
-<li>abc.ABC</li>
-</ul>
 <h3>Methods</h3>
 <dl>
-<dt id="nitric.api.QueueClient.receive"><code class="name flex">
-<span>def <span class="ident">receive</span></span>(<span>self, queue_name: str, depth: int = None) ‑> List[<a title="nitric.api.models.Task" href="models.html#nitric.api.models.Task">Task</a>]</span>
+<dt id="nitric.api.QueueClient.queue"><code class="name flex">
+<span>def <span class="ident">queue</span></span>(<span>self, name: str)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Pop 1 or more items from the specified queue up to the depth limit.</p>
-<p>Queue items are Nitric Tasks that are leased for a limited period of time, where they may be worked on.
-Once complete or failed they must be acknowledged using the request specific leaseId.</p>
-<p>If the lease on a queue item expires before it is acknowledged or the lease is extended the task will be
-returned to the queue for reprocessing.</p>
-<p>:param queue_name: Nitric name for the queue. This will be automatically resolved to the provider specific
-identifier.
-:param depth: The maximum number of queue items to return. Default: 1, Min: 1.
-:return: Queue items popped from the specified queue.</p></div>
+<div class="desc"><p>Return a reference to a queue from the connected queue service.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def receive(self, queue_name: str, depth: int = None) -&gt; List[Task]:
-    &#34;&#34;&#34;
-    Pop 1 or more items from the specified queue up to the depth limit.
-
-    Queue items are Nitric Tasks that are leased for a limited period of time, where they may be worked on.
-    Once complete or failed they must be acknowledged using the request specific leaseId.
-
-    If the lease on a queue item expires before it is acknowledged or the lease is extended the task will be
-    returned to the queue for reprocessing.
-
-    :param queue_name: Nitric name for the queue. This will be automatically resolved to the provider specific
-    identifier.
-    :param depth: The maximum number of queue items to return. Default: 1, Min: 1.
-    :return: Queue items popped from the specified queue.
-    &#34;&#34;&#34;
-    # Set the default and minimum depth to 1.
-    if depth is None or depth &lt; 1:
-        depth = 1
-
-    request = queue.QueueReceiveRequest(queue=queue_name, depth=depth)
-
-    response: queue.QueueReceiveResponse = self._exec(&#34;Receive&#34;, request)
-
-    # Map the response protobuf response items to Python SDK Nitric Queue Items
-    return [self._wire_to_task(item) for item in response.items]</code></pre>
-</details>
-</dd>
-<dt id="nitric.api.QueueClient.send_batch"><code class="name flex">
-<span>def <span class="ident">send_batch</span></span>(<span>self, queue_name: str, tasks: List[<a title="nitric.api.models.Task" href="models.html#nitric.api.models.Task">Task</a>] = None) ‑> <a title="nitric.api.queue.PushResponse" href="queue.html#nitric.api.queue.PushResponse">PushResponse</a></span>
-</code></dt>
-<dd>
-<div class="desc"><p>Push a collection of tasks to a queue, which can be retrieved by other services.</p>
-<p>:param queue_name: the name of the queue to publish to
-:param tasks: The tasks to push to the queue
-:return: PushResponse containing a list containing details of any messages that failed to publish.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def send_batch(self, queue_name: str, tasks: List[Task] = None) -&gt; PushResponse:
-    &#34;&#34;&#34;
-    Push a collection of tasks to a queue, which can be retrieved by other services.
-
-    :param queue_name: the name of the queue to publish to
-    :param tasks: The tasks to push to the queue
-    :return: PushResponse containing a list containing details of any messages that failed to publish.
-    &#34;&#34;&#34;
-    if tasks is None:
-        tasks = []
-    wire_tasks = map(self._task_to_wire, tasks)
-
-    request = queue.QueueSendBatchRequest(queue=queue_name, tasks=wire_tasks)
-
-    response: queue.QueueSendBatchResponse = self._exec(&#34;SendBatch&#34;, request)
-
-    failed_tasks = map(self._wire_to_failed_task, response.failedMessages)
-
-    return PushResponse(failed_tasks=list(failed_tasks))</code></pre>
+<pre><code class="python">def queue(self, name: str):
+    &#34;&#34;&#34;Return a reference to a queue from the connected queue service.&#34;&#34;&#34;
+    return Queue(_queue_stub=self._queue_stub, name=name)</code></pre>
 </details>
 </dd>
 </dl>
@@ -566,12 +373,12 @@ identifier.
 <dd>
 <div class="desc"><p>Nitric generic blob storage client.</p>
 <p>This client insulates application code from stack specific blob store operations or SDKs.</p>
-<p>Construct a new StorageClient.</p></div>
+<p>Construct a Nitric Storage Client.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class StorageClient(BaseClient):
+<pre><code class="python">class StorageClient(object):
     &#34;&#34;&#34;
     Nitric generic blob storage client.
 
@@ -579,99 +386,34 @@ identifier.
     &#34;&#34;&#34;
 
     def __init__(self):
-        &#34;&#34;&#34;Construct a new StorageClient.&#34;&#34;&#34;
-        super(self.__class__, self).__init__()
-        self._stub = storage_service.StorageStub(self._channel)
+        &#34;&#34;&#34;Construct a Nitric Storage Client.&#34;&#34;&#34;
+        self._storage_stub = StorageStub(channel=new_default_channel())
 
-    def write(self, bucket_name: str, key: str, body: bytes):
-        &#34;&#34;&#34;
-        Store a file.
-
-        :param bucket_name: name of the bucket to store the data in.
-        :param key: key within the bucket, where the file should be stored.
-        :param body: data to be stored.
-        :return: storage result.
-        &#34;&#34;&#34;
-        request = storage.StorageWriteRequest(bucket_name=bucket_name, key=key, body=body)
-        response = self._exec(&#34;Write&#34;, request)
-        return response
-
-    def read(self, bucket_name: str, key: str) -&gt; bytes:
-        &#34;&#34;&#34;
-        Retrieve an existing file.
-
-        :param bucket_name: name of the bucket where the file was stored.
-        :param key: key for the file to retrieve.
-        :return: the file as bytes.
-        &#34;&#34;&#34;
-        request = storage.StorageReadRequest(bucket_name=bucket_name, key=key)
-        response = self._exec(&#34;Read&#34;, request)
-        return response.body</code></pre>
+    def bucket(self, name: str):
+        &#34;&#34;&#34;Return a reference to a bucket from the connected storage service.&#34;&#34;&#34;
+        return Bucket(_storage_stub=self._storage_stub, name=name)</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>nitric.api._base_client.BaseClient</li>
-<li>abc.ABC</li>
-</ul>
 <h3>Methods</h3>
 <dl>
-<dt id="nitric.api.StorageClient.read"><code class="name flex">
-<span>def <span class="ident">read</span></span>(<span>self, bucket_name: str, key: str) ‑> bytes</span>
+<dt id="nitric.api.StorageClient.bucket"><code class="name flex">
+<span>def <span class="ident">bucket</span></span>(<span>self, name: str)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Retrieve an existing file.</p>
-<p>:param bucket_name: name of the bucket where the file was stored.
-:param key: key for the file to retrieve.
-:return: the file as bytes.</p></div>
+<div class="desc"><p>Return a reference to a bucket from the connected storage service.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def read(self, bucket_name: str, key: str) -&gt; bytes:
-    &#34;&#34;&#34;
-    Retrieve an existing file.
-
-    :param bucket_name: name of the bucket where the file was stored.
-    :param key: key for the file to retrieve.
-    :return: the file as bytes.
-    &#34;&#34;&#34;
-    request = storage.StorageReadRequest(bucket_name=bucket_name, key=key)
-    response = self._exec(&#34;Read&#34;, request)
-    return response.body</code></pre>
-</details>
-</dd>
-<dt id="nitric.api.StorageClient.write"><code class="name flex">
-<span>def <span class="ident">write</span></span>(<span>self, bucket_name: str, key: str, body: bytes)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Store a file.</p>
-<p>:param bucket_name: name of the bucket to store the data in.
-:param key: key within the bucket, where the file should be stored.
-:param body: data to be stored.
-:return: storage result.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def write(self, bucket_name: str, key: str, body: bytes):
-    &#34;&#34;&#34;
-    Store a file.
-
-    :param bucket_name: name of the bucket to store the data in.
-    :param key: key within the bucket, where the file should be stored.
-    :param body: data to be stored.
-    :return: storage result.
-    &#34;&#34;&#34;
-    request = storage.StorageWriteRequest(bucket_name=bucket_name, key=key, body=body)
-    response = self._exec(&#34;Write&#34;, request)
-    return response</code></pre>
+<pre><code class="python">def bucket(self, name: str):
+    &#34;&#34;&#34;Return a reference to a bucket from the connected storage service.&#34;&#34;&#34;
+    return Bucket(_storage_stub=self._storage_stub, name=name)</code></pre>
 </details>
 </dd>
 </dl>
 </dd>
 <dt id="nitric.api.Task"><code class="flex name class">
 <span>class <span class="ident">Task</span></span>
-<span>(</span><span>task_id: str, payload_type: str, payload: dict, lease_id: str = None)</span>
+<span>(</span><span>id: str = None, payload_type: str = None, payload: dict = &lt;factory&gt;, lease_id: str = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Represents a NitricTask.</p></div>
@@ -682,17 +424,34 @@ identifier.
 <pre><code class="python">class Task(object):
     &#34;&#34;&#34;Represents a NitricTask.&#34;&#34;&#34;
 
-    task_id: str
-    payload_type: str
-    payload: dict
-    lease_id: str = field(default=None)</code></pre>
+    id: str = field(default=None)
+    payload_type: str = field(default=None)
+    payload: dict = field(default_factory=dict)
+    lease_id: str = field(default=None)
+    _queue_stub: QueueStub = field(default=None)
+    _queue: str = field(default=None)
+
+    async def complete(self):
+        &#34;&#34;&#34;Mark this task as complete and remove it from the queue.&#34;&#34;&#34;
+        if self._queue_stub is None or self._queue is None or self._queue == &#34;&#34;:
+            raise Exception(&#34;Task was not created via Queue.&#34;)
+        if self.lease_id is None:
+            raise Exception(
+                &#34;No lease_id available for task. Tasks must be received using Queue.receive to have a &#34;
+                &#34;valid lease_id.&#34;
+            )
+        await self._queue_stub.complete(queue=self._queue, lease_id=self.lease_id)</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="nitric.api.models.FailedTask" href="models.html#nitric.api.models.FailedTask">FailedTask</a></li>
+<li><a title="nitric.api.queues.FailedTask" href="queues.html#nitric.api.queues.FailedTask">FailedTask</a></li>
 </ul>
 <h3>Class variables</h3>
 <dl>
+<dt id="nitric.api.Task.id"><code class="name">var <span class="ident">id</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="nitric.api.Task.lease_id"><code class="name">var <span class="ident">lease_id</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
@@ -705,26 +464,71 @@ identifier.
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="nitric.api.Task.task_id"><code class="name">var <span class="ident">task_id</span> : str</code></dt>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.api.Task.complete"><code class="name flex">
+<span>async def <span class="ident">complete</span></span>(<span>self)</span>
+</code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Mark this task as complete and remove it from the queue.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def complete(self):
+    &#34;&#34;&#34;Mark this task as complete and remove it from the queue.&#34;&#34;&#34;
+    if self._queue_stub is None or self._queue is None or self._queue == &#34;&#34;:
+        raise Exception(&#34;Task was not created via Queue.&#34;)
+    if self.lease_id is None:
+        raise Exception(
+            &#34;No lease_id available for task. Tasks must be received using Queue.receive to have a &#34;
+            &#34;valid lease_id.&#34;
+        )
+    await self._queue_stub.complete(queue=self._queue, lease_id=self.lease_id)</code></pre>
+</details>
 </dd>
 </dl>
 </dd>
 <dt id="nitric.api.Topic"><code class="flex name class">
 <span>class <span class="ident">Topic</span></span>
-<span>(</span><span>name: str)</span>
+<span>(</span><span>_stub: <a title="nitric.proto.nitric.event.v1.EventStub" href="../proto/nitric/event/v1/index.html#nitric.proto.nitric.event.v1.EventStub">EventStub</a>, name: str)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Represents event topic metadata.</p></div>
+<div class="desc"><p>A reference to a topic on an event service, used to perform operations on that topic.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Topic(object):
+<<<<<<< refs/remotes/origin/main
     &#34;&#34;&#34;Represents event topic metadata.&#34;&#34;&#34;
+=======
+    &#34;&#34;&#34;A reference to a topic on an event service, used to perform operations on that topic.&#34;&#34;&#34;
 
-    name: str</code></pre>
+    _stub: EventStub
+    name: str
+
+    async def publish(
+        self,
+        event: Union[Event, dict] = None,
+    ) -&gt; Event:
+        &#34;&#34;&#34;
+        Publish an event/message to a topic, which can be subscribed to by other services.
+
+        :param event: the event to publish
+        :return: the published event, with the id added if one was auto-generated
+        &#34;&#34;&#34;
+        if event is None:
+            event = Event()
+
+        if isinstance(event, dict):
+            # TODO: handle events that are just a payload
+            event = Event(**event)
+>>>>>>> feat: port faas.start to bi-di streaming with membrane
+
+        response = await self._stub.publish(topic=self.name, event=_event_to_wire(event))
+        return Event(**{**event.__dict__.copy(), **{&#34;id&#34;: response.id}})</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
@@ -733,57 +537,38 @@ identifier.
 <div class="desc"></div>
 </dd>
 </dl>
-</dd>
-<dt id="nitric.api.TopicClient"><code class="flex name class">
-<span>class <span class="ident">TopicClient</span></span>
-</code></dt>
-<dd>
-<div class="desc"><p>Nitric generic event topic client.</p>
-<p>This client insulates application code from stack specific topic operations or SDKs.</p>
-<p>Construct a Nitric Topic Client.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class TopicClient(BaseClient):
-    &#34;&#34;&#34;
-    Nitric generic event topic client.
-
-    This client insulates application code from stack specific topic operations or SDKs.
-    &#34;&#34;&#34;
-
-    def __init__(self):
-        &#34;&#34;&#34;Construct a Nitric Topic Client.&#34;&#34;&#34;
-        super(self.__class__, self).__init__()
-        self._stub = event_service.TopicStub(self._channel)
-
-    def get_topics(self) -&gt; List[Topic]:
-        &#34;&#34;&#34;Get a list of topics available for publishing or subscription.&#34;&#34;&#34;
-        response: event.TopicListResponse = self._exec(&#34;List&#34;)
-        topics = [Topic(name=topic.name) for topic in response.topics]
-        return topics</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>nitric.api._base_client.BaseClient</li>
-<li>abc.ABC</li>
-</ul>
 <h3>Methods</h3>
 <dl>
-<dt id="nitric.api.TopicClient.get_topics"><code class="name flex">
-<span>def <span class="ident">get_topics</span></span>(<span>self) ‑> List[<a title="nitric.api.models.Topic" href="models.html#nitric.api.models.Topic">Topic</a>]</span>
+<dt id="nitric.api.Topic.publish"><code class="name flex">
+<span>async def <span class="ident">publish</span></span>(<span>self, event: Union[<a title="nitric.api.events.Event" href="events.html#nitric.api.events.Event">Event</a>, dict] = None) ‑> <a title="nitric.api.events.Event" href="events.html#nitric.api.events.Event">Event</a></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Get a list of topics available for publishing or subscription.</p></div>
+<div class="desc"><p>Publish an event/message to a topic, which can be subscribed to by other services.</p>
+<p>:param event: the event to publish
+:return: the published event, with the id added if one was auto-generated</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_topics(self) -&gt; List[Topic]:
-    &#34;&#34;&#34;Get a list of topics available for publishing or subscription.&#34;&#34;&#34;
-    response: event.TopicListResponse = self._exec(&#34;List&#34;)
-    topics = [Topic(name=topic.name) for topic in response.topics]
-    return topics</code></pre>
+<pre><code class="python">async def publish(
+    self,
+    event: Union[Event, dict] = None,
+) -&gt; Event:
+    &#34;&#34;&#34;
+    Publish an event/message to a topic, which can be subscribed to by other services.
+
+    :param event: the event to publish
+    :return: the published event, with the id added if one was auto-generated
+    &#34;&#34;&#34;
+    if event is None:
+        event = Event()
+
+    if isinstance(event, dict):
+        # TODO: handle events that are just a payload
+        event = Event(**event)
+
+    response = await self._stub.publish(topic=self.name, event=_event_to_wire(event))
+    return Event(**{**event.__dict__.copy(), **{&#34;id&#34;: response.id}})</code></pre>
 </details>
 </dd>
 </dl>
@@ -804,11 +589,10 @@ identifier.
 </li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="nitric.api.event" href="event.html">nitric.api.event</a></code></li>
+<li><code><a title="nitric.api.events" href="events.html">nitric.api.events</a></code></li>
 <li><code><a title="nitric.api.exception" href="exception.html">nitric.api.exception</a></code></li>
 <li><code><a title="nitric.api.kv" href="kv.html">nitric.api.kv</a></code></li>
-<li><code><a title="nitric.api.models" href="models.html">nitric.api.models</a></code></li>
-<li><code><a title="nitric.api.queue" href="queue.html">nitric.api.queue</a></code></li>
+<li><code><a title="nitric.api.queues" href="queues.html">nitric.api.queues</a></code></li>
 <li><code><a title="nitric.api.storage" href="storage.html">nitric.api.storage</a></code></li>
 </ul>
 </li>
@@ -817,7 +601,7 @@ identifier.
 <li>
 <h4><code><a title="nitric.api.Event" href="#nitric.api.Event">Event</a></code></h4>
 <ul class="">
-<li><code><a title="nitric.api.Event.event_id" href="#nitric.api.Event.event_id">event_id</a></code></li>
+<li><code><a title="nitric.api.Event.id" href="#nitric.api.Event.id">id</a></code></li>
 <li><code><a title="nitric.api.Event.payload" href="#nitric.api.Event.payload">payload</a></code></li>
 <li><code><a title="nitric.api.Event.payload_type" href="#nitric.api.Event.payload_type">payload_type</a></code></li>
 </ul>
@@ -825,12 +609,14 @@ identifier.
 <li>
 <h4><code><a title="nitric.api.EventClient" href="#nitric.api.EventClient">EventClient</a></code></h4>
 <ul class="">
-<li><code><a title="nitric.api.EventClient.publish" href="#nitric.api.EventClient.publish">publish</a></code></li>
+<li><code><a title="nitric.api.EventClient.topic" href="#nitric.api.EventClient.topic">topic</a></code></li>
+<li><code><a title="nitric.api.EventClient.topics" href="#nitric.api.EventClient.topics">topics</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="nitric.api.FailedTask" href="#nitric.api.FailedTask">FailedTask</a></code></h4>
 <ul class="">
+<li><code><a title="nitric.api.FailedTask.lease_id" href="#nitric.api.FailedTask.lease_id">lease_id</a></code></li>
 <li><code><a title="nitric.api.FailedTask.message" href="#nitric.api.FailedTask.message">message</a></code></li>
 </ul>
 </li>
@@ -845,36 +631,30 @@ identifier.
 <li>
 <h4><code><a title="nitric.api.QueueClient" href="#nitric.api.QueueClient">QueueClient</a></code></h4>
 <ul class="">
-<li><code><a title="nitric.api.QueueClient.receive" href="#nitric.api.QueueClient.receive">receive</a></code></li>
-<li><code><a title="nitric.api.QueueClient.send_batch" href="#nitric.api.QueueClient.send_batch">send_batch</a></code></li>
+<li><code><a title="nitric.api.QueueClient.queue" href="#nitric.api.QueueClient.queue">queue</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="nitric.api.StorageClient" href="#nitric.api.StorageClient">StorageClient</a></code></h4>
 <ul class="">
-<li><code><a title="nitric.api.StorageClient.read" href="#nitric.api.StorageClient.read">read</a></code></li>
-<li><code><a title="nitric.api.StorageClient.write" href="#nitric.api.StorageClient.write">write</a></code></li>
+<li><code><a title="nitric.api.StorageClient.bucket" href="#nitric.api.StorageClient.bucket">bucket</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="nitric.api.Task" href="#nitric.api.Task">Task</a></code></h4>
 <ul class="">
+<li><code><a title="nitric.api.Task.complete" href="#nitric.api.Task.complete">complete</a></code></li>
+<li><code><a title="nitric.api.Task.id" href="#nitric.api.Task.id">id</a></code></li>
 <li><code><a title="nitric.api.Task.lease_id" href="#nitric.api.Task.lease_id">lease_id</a></code></li>
 <li><code><a title="nitric.api.Task.payload" href="#nitric.api.Task.payload">payload</a></code></li>
 <li><code><a title="nitric.api.Task.payload_type" href="#nitric.api.Task.payload_type">payload_type</a></code></li>
-<li><code><a title="nitric.api.Task.task_id" href="#nitric.api.Task.task_id">task_id</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="nitric.api.Topic" href="#nitric.api.Topic">Topic</a></code></h4>
 <ul class="">
 <li><code><a title="nitric.api.Topic.name" href="#nitric.api.Topic.name">name</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="nitric.api.TopicClient" href="#nitric.api.TopicClient">TopicClient</a></code></h4>
-<ul class="">
-<li><code><a title="nitric.api.TopicClient.get_topics" href="#nitric.api.TopicClient.get_topics">get_topics</a></code></li>
+<li><code><a title="nitric.api.Topic.publish" href="#nitric.api.Topic.publish">publish</a></code></li>
 </ul>
 </li>
 </ul>

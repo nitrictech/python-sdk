@@ -16,19 +16,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Nitric API SDK."""
-from nitric.api.events import Events, Event, Topic
-from nitric.api.queues import Queues, Task, FailedTask
-from nitric.api.storage import Storage
-from nitric.api.documents import Documents
+from unittest import IsolatedAsyncioTestCase
+from unittest.mock import patch, AsyncMock, Mock, call
 
-__all__ = [
-    "Events",
-    "Queues",
-    "Documents",
-    "Storage",
-    "Event",
-    "Task",
-    "FailedTask",
-    "Topic",
-]
+from nitric.faas import ResponseContext, HttpResponseContext, TopicResponseContext
+
+
+class ResponseContextTest(IsolatedAsyncioTestCase):
+    def test_is_http(self):
+        context = ResponseContext(context=HttpResponseContext())
+        self.assertTrue(context.is_http())
+        self.assertFalse(context.is_topic())
+
+    def test_is_topic(self):
+        context = ResponseContext(context=TopicResponseContext())
+        self.assertTrue(context.is_topic())
+        self.assertFalse(context.is_http())

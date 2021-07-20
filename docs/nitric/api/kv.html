@@ -44,44 +44,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from nitric.proto import key_value
-from nitric.proto import key_value_service
-from nitric.api._base_client import BaseClient
-from google.protobuf.struct_pb2 import Struct
-from google.protobuf.json_format import MessageToDict
-from nitric.proto.kv.v1.kv_pb2 import KeyValueGetResponse
+from nitric.utils import new_default_channel, _struct_from_dict
+from nitric.proto.nitric.kv.v1 import KeyValueStub
 
 
-class KeyValueClient(BaseClient):
+class KeyValueClient(object):
     &#34;&#34;&#34;
     Nitric generic document store/db client.
 
     This client insulates application code from stack specific document CRUD operations or SDKs.
     &#34;&#34;&#34;
 
-    def __init__(self):
-        &#34;&#34;&#34;Construct a new DocumentClient.&#34;&#34;&#34;
-        super(self.__class__, self).__init__()
-        self._stub = key_value_service.KeyValueStub(self._channel)
+    def __init__(self, collection: str):
+        &#34;&#34;&#34;
+        Construct a new DocumentClient.
 
-    def put(self, collection: str, key: str, value: dict):
-        &#34;&#34;&#34;Create a new document with the specified key in the specified collection.&#34;&#34;&#34;
-        value_struct = Struct()
-        value_struct.update(value)
-        request = key_value.KeyValuePutRequest(collection=collection, key=key, value=value_struct)
-        return self._exec(&#34;Put&#34;, request)
+        :param collection: name of the key/value collection
+        &#34;&#34;&#34;
+        self.collection = collection
+        self._stub = KeyValueStub(channel=new_default_channel())
 
-    def get(self, collection: str, key: str) -&gt; dict:
-        &#34;&#34;&#34;Retrieve a document from the specified collection by its key.&#34;&#34;&#34;
-        request = key_value.KeyValueGetRequest(collection=collection, key=key)
-        reply: KeyValueGetResponse = self._exec(&#34;Get&#34;, request)
-        document = MessageToDict(reply)[&#34;value&#34;]
-        return document
+    async def put(self, key: str, value: dict):
+        &#34;&#34;&#34;Create a new document with the specified key.&#34;&#34;&#34;
+        await self._stub.put(collection=self.collection, key=key, value=_struct_from_dict(value))
 
-    def delete(self, collection: str, key: str):
+    async def get(self, key: str) -&gt; dict:
+        &#34;&#34;&#34;Retrieve a document from the specified key.&#34;&#34;&#34;
+        response = await self._stub.get(collection=self.collection, key=key)
+        return response.value.to_dict()
+
+    async def delete(self, key: str):
         &#34;&#34;&#34;Delete the specified document from the collection.&#34;&#34;&#34;
-        request = key_value.KeyValueDeleteRequest(collection=collection, key=key)
-        return self._exec(&#34;Delete&#34;, request)</code></pre>
+        await self._stub.delete(collection=self.collection, key=key)</code></pre>
 </details>
 </section>
 <section>
@@ -95,55 +89,50 @@ class KeyValueClient(BaseClient):
 <dl>
 <dt id="nitric.api.kv.KeyValueClient"><code class="flex name class">
 <span>class <span class="ident">KeyValueClient</span></span>
+<span>(</span><span>collection: str)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Nitric generic document store/db client.</p>
 <p>This client insulates application code from stack specific document CRUD operations or SDKs.</p>
-<p>Construct a new DocumentClient.</p></div>
+<p>Construct a new DocumentClient.</p>
+<p>:param collection: name of the key/value collection</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class KeyValueClient(BaseClient):
+<pre><code class="python">class KeyValueClient(object):
     &#34;&#34;&#34;
     Nitric generic document store/db client.
 
     This client insulates application code from stack specific document CRUD operations or SDKs.
     &#34;&#34;&#34;
 
-    def __init__(self):
-        &#34;&#34;&#34;Construct a new DocumentClient.&#34;&#34;&#34;
-        super(self.__class__, self).__init__()
-        self._stub = key_value_service.KeyValueStub(self._channel)
+    def __init__(self, collection: str):
+        &#34;&#34;&#34;
+        Construct a new DocumentClient.
 
-    def put(self, collection: str, key: str, value: dict):
-        &#34;&#34;&#34;Create a new document with the specified key in the specified collection.&#34;&#34;&#34;
-        value_struct = Struct()
-        value_struct.update(value)
-        request = key_value.KeyValuePutRequest(collection=collection, key=key, value=value_struct)
-        return self._exec(&#34;Put&#34;, request)
+        :param collection: name of the key/value collection
+        &#34;&#34;&#34;
+        self.collection = collection
+        self._stub = KeyValueStub(channel=new_default_channel())
 
-    def get(self, collection: str, key: str) -&gt; dict:
-        &#34;&#34;&#34;Retrieve a document from the specified collection by its key.&#34;&#34;&#34;
-        request = key_value.KeyValueGetRequest(collection=collection, key=key)
-        reply: KeyValueGetResponse = self._exec(&#34;Get&#34;, request)
-        document = MessageToDict(reply)[&#34;value&#34;]
-        return document
+    async def put(self, key: str, value: dict):
+        &#34;&#34;&#34;Create a new document with the specified key.&#34;&#34;&#34;
+        await self._stub.put(collection=self.collection, key=key, value=_struct_from_dict(value))
 
-    def delete(self, collection: str, key: str):
+    async def get(self, key: str) -&gt; dict:
+        &#34;&#34;&#34;Retrieve a document from the specified key.&#34;&#34;&#34;
+        response = await self._stub.get(collection=self.collection, key=key)
+        return response.value.to_dict()
+
+    async def delete(self, key: str):
         &#34;&#34;&#34;Delete the specified document from the collection.&#34;&#34;&#34;
-        request = key_value.KeyValueDeleteRequest(collection=collection, key=key)
-        return self._exec(&#34;Delete&#34;, request)</code></pre>
+        await self._stub.delete(collection=self.collection, key=key)</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>nitric.api._base_client.BaseClient</li>
-<li>abc.ABC</li>
-</ul>
 <h3>Methods</h3>
 <dl>
 <dt id="nitric.api.kv.KeyValueClient.delete"><code class="name flex">
-<span>def <span class="ident">delete</span></span>(<span>self, collection: str, key: str)</span>
+<span>async def <span class="ident">delete</span></span>(<span>self, key: str)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Delete the specified document from the collection.</p></div>
@@ -151,38 +140,43 @@ class KeyValueClient(BaseClient):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def delete(self, collection: str, key: str):
+<pre><code class="python">async def delete(self, key: str):
     &#34;&#34;&#34;Delete the specified document from the collection.&#34;&#34;&#34;
-    request = key_value.KeyValueDeleteRequest(collection=collection, key=key)
-    return self._exec(&#34;Delete&#34;, request)</code></pre>
+    await self._stub.delete(collection=self.collection, key=key)</code></pre>
 </details>
 </dd>
 <dt id="nitric.api.kv.KeyValueClient.get"><code class="name flex">
-<span>def <span class="ident">get</span></span>(<span>self, collection: str, key: str) ‑> dict</span>
+<span>async def <span class="ident">get</span></span>(<span>self, key: str) ‑> dict</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Retrieve a document from the specified collection by its key.</p></div>
+<div class="desc"><p>Retrieve a document from the specified key.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get(self, collection: str, key: str) -&gt; dict:
-    &#34;&#34;&#34;Retrieve a document from the specified collection by its key.&#34;&#34;&#34;
-    request = key_value.KeyValueGetRequest(collection=collection, key=key)
-    reply: KeyValueGetResponse = self._exec(&#34;Get&#34;, request)
-    document = MessageToDict(reply)[&#34;value&#34;]
-    return document</code></pre>
+<pre><code class="python">async def get(self, key: str) -&gt; dict:
+    &#34;&#34;&#34;Retrieve a document from the specified key.&#34;&#34;&#34;
+    response = await self._stub.get(collection=self.collection, key=key)
+    return response.value.to_dict()</code></pre>
 </details>
 </dd>
 <dt id="nitric.api.kv.KeyValueClient.put"><code class="name flex">
+<<<<<<< refs/remotes/origin/main
 <span>def <span class="ident">put</span></span>(<span>self, collection: str, key: str, value: dict)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create a new document with the specified key in the specified collection.</p></div>
+=======
+<span>async def <span class="ident">put</span></span>(<span>self, key: str, value: dict)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a new document with the specified key.</p></div>
+>>>>>>> feat: port faas.start to bi-di streaming with membrane
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
+<<<<<<< refs/remotes/origin/main
 <pre><code class="python">def put(self, collection: str, key: str, value: dict):
     &#34;&#34;&#34;Create a new document with the specified key in the specified collection.&#34;&#34;&#34;
     value_struct = Struct()
@@ -216,6 +210,12 @@ class KeyValueClient(BaseClient):
 <dt id="nitric.api.kv.KeyValueGetResponse.value"><code class="name">var <span class="ident">value</span></code></dt>
 <dd>
 <div class="desc"><p>Field nitric.kv.v1.KeyValueGetResponse.value</p></div>
+=======
+<pre><code class="python">async def put(self, key: str, value: dict):
+    &#34;&#34;&#34;Create a new document with the specified key.&#34;&#34;&#34;
+    await self._stub.put(collection=self.collection, key=key, value=_struct_from_dict(value))</code></pre>
+</details>
+>>>>>>> feat: port faas.start to bi-di streaming with membrane
 </dd>
 </dl>
 </dd>
@@ -243,6 +243,7 @@ class KeyValueClient(BaseClient):
 <li><code><a title="nitric.api.kv.KeyValueClient.put" href="#nitric.api.kv.KeyValueClient.put">put</a></code></li>
 </ul>
 </li>
+<<<<<<< refs/remotes/origin/main
 <li>
 <h4><code><a title="nitric.api.kv.KeyValueGetResponse" href="#nitric.api.kv.KeyValueGetResponse">KeyValueGetResponse</a></code></h4>
 <ul class="">
@@ -250,6 +251,8 @@ class KeyValueClient(BaseClient):
 <li><code><a title="nitric.api.kv.KeyValueGetResponse.value" href="#nitric.api.kv.KeyValueGetResponse.value">value</a></code></li>
 </ul>
 </li>
+=======
+>>>>>>> feat: port faas.start to bi-di streaming with membrane
 </ul>
 </li>
 </ul>

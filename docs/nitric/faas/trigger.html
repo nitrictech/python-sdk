@@ -45,57 +45,52 @@
 # limitations under the License.
 #
 import typing
+from dataclasses import dataclass, field
 
-from nitric.proto.faas.v1.faas_pb2 import TriggerRequest
+import nitric.faas
+from nitric.proto.nitric.faas.v1 import TriggerRequest
 
 from nitric.faas.response import Response, TopicResponseContext, HttpResponseContext, ResponseContext
 
 
+@dataclass(order=True)
 class HttpTriggerContext(object):
     &#34;&#34;&#34;Represents Trigger metadata from a HTTP subscription.&#34;&#34;&#34;
 
-    def __init__(
-        self,
-        method: str,
-        path: str,
-        headers: typing.Dict[str, str],
-        query_params: typing.Dict[str, str],
-    ):
-        &#34;&#34;&#34;Create a Http trigger context.&#34;&#34;&#34;
-        self.method = method
-        self.path = path
-        self.headers = headers
-        self.query_params = query_params
+    method: str
+    path: str
+    headers: typing.Dict[str, str]
+    query_params: typing.Dict[str, str]
 
 
 class TopicTriggerContext(object):
     &#34;&#34;&#34;Represents Trigger metadata from a topic subscription.&#34;&#34;&#34;
 
     def __init__(self, topic: str):
-        &#34;&#34;&#34;Create a Topic trigger context.&#34;&#34;&#34;
+        &#34;&#34;&#34;Construct a new TopicTriggerContext, including the name of the source topic for this trigger.&#34;&#34;&#34;
         self.topic = topic
 
 
+@dataclass(order=True)
 class TriggerContext(object):
     &#34;&#34;&#34;Represents the contextual metadata for a Nitric function request.&#34;&#34;&#34;
 
-    def __init__(self, context: typing.Union[TopicTriggerContext, HttpTriggerContext]):
-        &#34;&#34;&#34;Construct a Nitric Trigger Context.&#34;&#34;&#34;
-        self.context = context
+    context: typing.Union[TopicTriggerContext, HttpTriggerContext]
 
     def is_http(self) -&gt; bool:
         &#34;&#34;&#34;
-        Determine if trigger was raised by a http request.
+        Indicate whether the trigger was from an HTTP request.
 
-        :return true if trigger was raised by a HTTP request
+        This indicates the availability of additional HTTP specific context such as path, query parameters and headers.
         &#34;&#34;&#34;
         return isinstance(self.context, HttpTriggerContext)
 
     def as_http(self) -&gt; typing.Union[HttpTriggerContext, None]:
         &#34;&#34;&#34;
-        Unwrap HttpTriggerContext.
+        Return this context as an HTTP context type.
 
-        :return HttpTriggerContext if is_http is true otherwise None
+        If the trigger wasn&#39;t an HTTP request, this function returns None.
+        is_http() should be used first to determine if this was an HTTP request trigger.
         &#34;&#34;&#34;
         if not self.is_http():
             return None
@@ -104,17 +99,18 @@ class TriggerContext(object):
 
     def is_topic(self) -&gt; bool:
         &#34;&#34;&#34;
-        Determine if trigger was raised by a topic event.
+        Indicate whether the trigger was from a topic (event).
 
-        :return true if trigger is for a topic event
+        This indicates the availability of additional topic/event specific context such as the topic name.
         &#34;&#34;&#34;
         return isinstance(self.context, TriggerContext)
 
     def as_topic(self) -&gt; typing.Union[TopicTriggerContext, None]:
         &#34;&#34;&#34;
-        Unwrap TopicTriggerContext.
+        Return this context as a topic context type.
 
-        :return TopicTriggerContext if is_topic is true otherwise None
+        If the trigger wasn&#39;t an event from a topic, this function returns None.
+        is_topic() should be used first to determine if this was a topic trigger.
         &#34;&#34;&#34;
         if not self.is_topic():
             return None
@@ -123,18 +119,21 @@ class TriggerContext(object):
 
     @staticmethod
     def from_trigger_request(trigger_request: TriggerRequest):
-        &#34;&#34;&#34;
-        Create a TriggerContext from a gRPC TriggerRequest.
-
-        :return Created TriggerContext
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Return a TriggerContext from a TriggerRequest.&#34;&#34;&#34;
         if trigger_request.http is not None:
             return TriggerContext(
                 context=HttpTriggerContext(
+<<<<<<< refs/remotes/origin/main
                     headers=dict(trigger_request.http.headers),
                     path=trigger_request.http.path,
                     method=trigger_request.http.method,
                     query_params=dict(trigger_request.http.query_params),
+=======
+                    headers=trigger_request.http.headers,
+                    method=trigger_request.http.method,
+                    query_params=trigger_request.http.query_params,
+                    path=trigger_request.http.path,
+>>>>>>> feat: port faas.start to bi-di streaming with membrane
                 )
             )
         elif trigger_request.topic is not None:
@@ -145,6 +144,12 @@ class TriggerContext(object):
             return None
 
 
+def _clean_header(header_name: str):
+    &#34;&#34;&#34;Convert a Nitric HTTP request header name into the equivalent Context property name.&#34;&#34;&#34;
+    return header_name.lower().replace(&#34;x-nitric-&#34;, &#34;&#34;).replace(&#34;-&#34;, &#34;_&#34;)
+
+
+@dataclass(order=True)
 class Trigger(object):
     &#34;&#34;&#34;
     Represents a standard Nitric function request.
@@ -152,10 +157,8 @@ class Trigger(object):
     These requests are normalized from their original stack-specific structures.
     &#34;&#34;&#34;
 
-    def __init__(self, context: TriggerContext, data: bytes):
-        &#34;&#34;&#34;Construct a Nitric Function Request.&#34;&#34;&#34;
-        self.context = context
-        self.data = data
+    context: TriggerContext
+    data: bytes = field(default_factory=bytes)
 
     def get_body(self) -&gt; bytes:
         &#34;&#34;&#34;Return the bytes of the body of the request.&#34;&#34;&#34;
@@ -175,12 +178,10 @@ class Trigger(object):
 
     def default_response(self) -&gt; Response:
         &#34;&#34;&#34;
-        Create a relevant default response.
+        Return the trigger response, based on the trigger context type.
 
         The returned response can be interrogated with its context to determine the appropriate
         response context e.g. response.context.is_http() or response.context.is_topic().
-
-        :returns Default response for this Trigger
         &#34;&#34;&#34;
         response_ctx = None
 
@@ -189,15 +190,11 @@ class Trigger(object):
         elif self.context.is_topic():
             response_ctx = ResponseContext(context=TopicResponseContext())
 
-        return Response(data=None, context=response_ctx)
+        return Response(context=response_ctx)
 
     @staticmethod
     def from_trigger_request(trigger_request: TriggerRequest):
-        &#34;&#34;&#34;
-        Create a Trigger from a gRPC TriggerRequest.
-
-        :returns Created Trigger
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Return the python SDK implementation of a Trigger from a protobuf representation.&#34;&#34;&#34;
         context = TriggerContext.from_trigger_request(trigger_request)
 
         return Trigger(context=context, data=trigger_request.data)</code></pre>
@@ -217,8 +214,7 @@ class Trigger(object):
 <span>(</span><span>method: str, path: str, headers: Dict[str, str], query_params: Dict[str, str])</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Represents Trigger metadata from a HTTP subscription.</p>
-<p>Create a Http trigger context.</p></div>
+<div class="desc"><p>Represents Trigger metadata from a HTTP subscription.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -226,19 +222,30 @@ class Trigger(object):
 <pre><code class="python">class HttpTriggerContext(object):
     &#34;&#34;&#34;Represents Trigger metadata from a HTTP subscription.&#34;&#34;&#34;
 
-    def __init__(
-        self,
-        method: str,
-        path: str,
-        headers: typing.Dict[str, str],
-        query_params: typing.Dict[str, str],
-    ):
-        &#34;&#34;&#34;Create a Http trigger context.&#34;&#34;&#34;
-        self.method = method
-        self.path = path
-        self.headers = headers
-        self.query_params = query_params</code></pre>
+    method: str
+    path: str
+    headers: typing.Dict[str, str]
+    query_params: typing.Dict[str, str]</code></pre>
 </details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.faas.trigger.HttpTriggerContext.headers"><code class="name">var <span class="ident">headers</span> : Dict[str, str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.faas.trigger.HttpTriggerContext.method"><code class="name">var <span class="ident">method</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.faas.trigger.HttpTriggerContext.path"><code class="name">var <span class="ident">path</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.faas.trigger.HttpTriggerContext.query_params"><code class="name">var <span class="ident">query_params</span> : Dict[str, str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
 </dd>
 <dt id="nitric.faas.trigger.TopicTriggerContext"><code class="flex name class">
 <span>class <span class="ident">TopicTriggerContext</span></span>
@@ -246,7 +253,7 @@ class Trigger(object):
 </code></dt>
 <dd>
 <div class="desc"><p>Represents Trigger metadata from a topic subscription.</p>
-<p>Create a Topic trigger context.</p></div>
+<p>Construct a new TopicTriggerContext, including the name of the source topic for this trigger.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -255,18 +262,17 @@ class Trigger(object):
     &#34;&#34;&#34;Represents Trigger metadata from a topic subscription.&#34;&#34;&#34;
 
     def __init__(self, topic: str):
-        &#34;&#34;&#34;Create a Topic trigger context.&#34;&#34;&#34;
+        &#34;&#34;&#34;Construct a new TopicTriggerContext, including the name of the source topic for this trigger.&#34;&#34;&#34;
         self.topic = topic</code></pre>
 </details>
 </dd>
 <dt id="nitric.faas.trigger.Trigger"><code class="flex name class">
 <span>class <span class="ident">Trigger</span></span>
-<span>(</span><span>context: <a title="nitric.faas.trigger.TriggerContext" href="#nitric.faas.trigger.TriggerContext">TriggerContext</a>, data: bytes)</span>
+<span>(</span><span>context: <a title="nitric.faas.trigger.TriggerContext" href="#nitric.faas.trigger.TriggerContext">TriggerContext</a>, data: bytes = &lt;factory&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Represents a standard Nitric function request.</p>
-<p>These requests are normalized from their original stack-specific structures.</p>
-<p>Construct a Nitric Function Request.</p></div>
+<p>These requests are normalized from their original stack-specific structures.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -278,10 +284,8 @@ class Trigger(object):
     These requests are normalized from their original stack-specific structures.
     &#34;&#34;&#34;
 
-    def __init__(self, context: TriggerContext, data: bytes):
-        &#34;&#34;&#34;Construct a Nitric Function Request.&#34;&#34;&#34;
-        self.context = context
-        self.data = data
+    context: TriggerContext
+    data: bytes = field(default_factory=bytes)
 
     def get_body(self) -&gt; bytes:
         &#34;&#34;&#34;Return the bytes of the body of the request.&#34;&#34;&#34;
@@ -301,12 +305,10 @@ class Trigger(object):
 
     def default_response(self) -&gt; Response:
         &#34;&#34;&#34;
-        Create a relevant default response.
+        Return the trigger response, based on the trigger context type.
 
         The returned response can be interrogated with its context to determine the appropriate
         response context e.g. response.context.is_http() or response.context.is_topic().
-
-        :returns Default response for this Trigger
         &#34;&#34;&#34;
         response_ctx = None
 
@@ -315,38 +317,40 @@ class Trigger(object):
         elif self.context.is_topic():
             response_ctx = ResponseContext(context=TopicResponseContext())
 
-        return Response(data=None, context=response_ctx)
+        return Response(context=response_ctx)
 
     @staticmethod
     def from_trigger_request(trigger_request: TriggerRequest):
-        &#34;&#34;&#34;
-        Create a Trigger from a gRPC TriggerRequest.
-
-        :returns Created Trigger
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Return the python SDK implementation of a Trigger from a protobuf representation.&#34;&#34;&#34;
         context = TriggerContext.from_trigger_request(trigger_request)
 
         return Trigger(context=context, data=trigger_request.data)</code></pre>
 </details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.faas.trigger.Trigger.context"><code class="name">var <span class="ident">context</span> : <a title="nitric.faas.trigger.TriggerContext" href="#nitric.faas.trigger.TriggerContext">TriggerContext</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.faas.trigger.Trigger.data"><code class="name">var <span class="ident">data</span> : bytes</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
 <h3>Static methods</h3>
 <dl>
 <dt id="nitric.faas.trigger.Trigger.from_trigger_request"><code class="name flex">
-<span>def <span class="ident">from_trigger_request</span></span>(<span>trigger_request: faas.v1.faas_pb2.TriggerRequest)</span>
+<span>def <span class="ident">from_trigger_request</span></span>(<span>trigger_request: <a title="nitric.proto.nitric.faas.v1.TriggerRequest" href="../proto/nitric/faas/v1/index.html#nitric.proto.nitric.faas.v1.TriggerRequest">TriggerRequest</a>)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Create a Trigger from a gRPC TriggerRequest.</p>
-<p>:returns Created Trigger</p></div>
+<div class="desc"><p>Return the python SDK implementation of a Trigger from a protobuf representation.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def from_trigger_request(trigger_request: TriggerRequest):
-    &#34;&#34;&#34;
-    Create a Trigger from a gRPC TriggerRequest.
-
-    :returns Created Trigger
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Return the python SDK implementation of a Trigger from a protobuf representation.&#34;&#34;&#34;
     context = TriggerContext.from_trigger_request(trigger_request)
 
     return Trigger(context=context, data=trigger_request.data)</code></pre>
@@ -359,22 +363,19 @@ def from_trigger_request(trigger_request: TriggerRequest):
 <span>def <span class="ident">default_response</span></span>(<span>self) ‑> <a title="nitric.faas.response.Response" href="response.html#nitric.faas.response.Response">Response</a></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Create a relevant default response.</p>
+<div class="desc"><p>Return the trigger response, based on the trigger context type.</p>
 <p>The returned response can be interrogated with its context to determine the appropriate
-response context e.g. response.context.is_http() or response.context.is_topic().</p>
-<p>:returns Default response for this Trigger</p></div>
+response context e.g. response.context.is_http() or response.context.is_topic().</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def default_response(self) -&gt; Response:
     &#34;&#34;&#34;
-    Create a relevant default response.
+    Return the trigger response, based on the trigger context type.
 
     The returned response can be interrogated with its context to determine the appropriate
     response context e.g. response.context.is_http() or response.context.is_topic().
-
-    :returns Default response for this Trigger
     &#34;&#34;&#34;
     response_ctx = None
 
@@ -383,7 +384,7 @@ response context e.g. response.context.is_http() or response.context.is_topic().
     elif self.context.is_topic():
         response_ctx = ResponseContext(context=TopicResponseContext())
 
-    return Response(data=None, context=response_ctx)</code></pre>
+    return Response(context=response_ctx)</code></pre>
 </details>
 </dd>
 <dt id="nitric.faas.trigger.Trigger.get_body"><code class="name flex">
@@ -431,8 +432,7 @@ response context e.g. response.context.is_http() or response.context.is_topic().
 <span>(</span><span>context: Union[<a title="nitric.faas.trigger.TopicTriggerContext" href="#nitric.faas.trigger.TopicTriggerContext">TopicTriggerContext</a>, <a title="nitric.faas.trigger.HttpTriggerContext" href="#nitric.faas.trigger.HttpTriggerContext">HttpTriggerContext</a>])</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Represents the contextual metadata for a Nitric function request.</p>
-<p>Construct a Nitric Trigger Context.</p></div>
+<div class="desc"><p>Represents the contextual metadata for a Nitric function request.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -440,23 +440,22 @@ response context e.g. response.context.is_http() or response.context.is_topic().
 <pre><code class="python">class TriggerContext(object):
     &#34;&#34;&#34;Represents the contextual metadata for a Nitric function request.&#34;&#34;&#34;
 
-    def __init__(self, context: typing.Union[TopicTriggerContext, HttpTriggerContext]):
-        &#34;&#34;&#34;Construct a Nitric Trigger Context.&#34;&#34;&#34;
-        self.context = context
+    context: typing.Union[TopicTriggerContext, HttpTriggerContext]
 
     def is_http(self) -&gt; bool:
         &#34;&#34;&#34;
-        Determine if trigger was raised by a http request.
+        Indicate whether the trigger was from an HTTP request.
 
-        :return true if trigger was raised by a HTTP request
+        This indicates the availability of additional HTTP specific context such as path, query parameters and headers.
         &#34;&#34;&#34;
         return isinstance(self.context, HttpTriggerContext)
 
     def as_http(self) -&gt; typing.Union[HttpTriggerContext, None]:
         &#34;&#34;&#34;
-        Unwrap HttpTriggerContext.
+        Return this context as an HTTP context type.
 
-        :return HttpTriggerContext if is_http is true otherwise None
+        If the trigger wasn&#39;t an HTTP request, this function returns None.
+        is_http() should be used first to determine if this was an HTTP request trigger.
         &#34;&#34;&#34;
         if not self.is_http():
             return None
@@ -465,17 +464,18 @@ response context e.g. response.context.is_http() or response.context.is_topic().
 
     def is_topic(self) -&gt; bool:
         &#34;&#34;&#34;
-        Determine if trigger was raised by a topic event.
+        Indicate whether the trigger was from a topic (event).
 
-        :return true if trigger is for a topic event
+        This indicates the availability of additional topic/event specific context such as the topic name.
         &#34;&#34;&#34;
         return isinstance(self.context, TriggerContext)
 
     def as_topic(self) -&gt; typing.Union[TopicTriggerContext, None]:
         &#34;&#34;&#34;
-        Unwrap TopicTriggerContext.
+        Return this context as a topic context type.
 
-        :return TopicTriggerContext if is_topic is true otherwise None
+        If the trigger wasn&#39;t an event from a topic, this function returns None.
+        is_topic() should be used first to determine if this was a topic trigger.
         &#34;&#34;&#34;
         if not self.is_topic():
             return None
@@ -484,18 +484,21 @@ response context e.g. response.context.is_http() or response.context.is_topic().
 
     @staticmethod
     def from_trigger_request(trigger_request: TriggerRequest):
-        &#34;&#34;&#34;
-        Create a TriggerContext from a gRPC TriggerRequest.
-
-        :return Created TriggerContext
-        &#34;&#34;&#34;
+        &#34;&#34;&#34;Return a TriggerContext from a TriggerRequest.&#34;&#34;&#34;
         if trigger_request.http is not None:
             return TriggerContext(
                 context=HttpTriggerContext(
+<<<<<<< refs/remotes/origin/main
                     headers=dict(trigger_request.http.headers),
                     path=trigger_request.http.path,
                     method=trigger_request.http.method,
                     query_params=dict(trigger_request.http.query_params),
+=======
+                    headers=trigger_request.http.headers,
+                    method=trigger_request.http.method,
+                    query_params=trigger_request.http.query_params,
+                    path=trigger_request.http.path,
+>>>>>>> feat: port faas.start to bi-di streaming with membrane
                 )
             )
         elif trigger_request.topic is not None:
@@ -505,32 +508,41 @@ response context e.g. response.context.is_http() or response.context.is_topic().
             # should probably raise an exception
             return None</code></pre>
 </details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.faas.trigger.TriggerContext.context"><code class="name">var <span class="ident">context</span> : Union[<a title="nitric.faas.trigger.TopicTriggerContext" href="#nitric.faas.trigger.TopicTriggerContext">TopicTriggerContext</a>, <a title="nitric.faas.trigger.HttpTriggerContext" href="#nitric.faas.trigger.HttpTriggerContext">HttpTriggerContext</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
 <h3>Static methods</h3>
 <dl>
 <dt id="nitric.faas.trigger.TriggerContext.from_trigger_request"><code class="name flex">
-<span>def <span class="ident">from_trigger_request</span></span>(<span>trigger_request: faas.v1.faas_pb2.TriggerRequest)</span>
+<span>def <span class="ident">from_trigger_request</span></span>(<span>trigger_request: <a title="nitric.proto.nitric.faas.v1.TriggerRequest" href="../proto/nitric/faas/v1/index.html#nitric.proto.nitric.faas.v1.TriggerRequest">TriggerRequest</a>)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Create a TriggerContext from a gRPC TriggerRequest.</p>
-<p>:return Created TriggerContext</p></div>
+<div class="desc"><p>Return a TriggerContext from a TriggerRequest.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
 def from_trigger_request(trigger_request: TriggerRequest):
-    &#34;&#34;&#34;
-    Create a TriggerContext from a gRPC TriggerRequest.
-
-    :return Created TriggerContext
-    &#34;&#34;&#34;
+    &#34;&#34;&#34;Return a TriggerContext from a TriggerRequest.&#34;&#34;&#34;
     if trigger_request.http is not None:
         return TriggerContext(
             context=HttpTriggerContext(
+<<<<<<< refs/remotes/origin/main
                 headers=dict(trigger_request.http.headers),
                 path=trigger_request.http.path,
                 method=trigger_request.http.method,
                 query_params=dict(trigger_request.http.query_params),
+=======
+                headers=trigger_request.http.headers,
+                method=trigger_request.http.method,
+                query_params=trigger_request.http.query_params,
+                path=trigger_request.http.path,
+>>>>>>> feat: port faas.start to bi-di streaming with membrane
             )
         )
     elif trigger_request.topic is not None:
@@ -548,17 +560,19 @@ def from_trigger_request(trigger_request: TriggerRequest):
 <span>def <span class="ident">as_http</span></span>(<span>self) ‑> Union[<a title="nitric.faas.trigger.HttpTriggerContext" href="#nitric.faas.trigger.HttpTriggerContext">HttpTriggerContext</a>, NoneType]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Unwrap HttpTriggerContext.</p>
-<p>:return HttpTriggerContext if is_http is true otherwise None</p></div>
+<div class="desc"><p>Return this context as an HTTP context type.</p>
+<p>If the trigger wasn't an HTTP request, this function returns None.
+is_http() should be used first to determine if this was an HTTP request trigger.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def as_http(self) -&gt; typing.Union[HttpTriggerContext, None]:
     &#34;&#34;&#34;
-    Unwrap HttpTriggerContext.
+    Return this context as an HTTP context type.
 
-    :return HttpTriggerContext if is_http is true otherwise None
+    If the trigger wasn&#39;t an HTTP request, this function returns None.
+    is_http() should be used first to determine if this was an HTTP request trigger.
     &#34;&#34;&#34;
     if not self.is_http():
         return None
@@ -570,17 +584,19 @@ def from_trigger_request(trigger_request: TriggerRequest):
 <span>def <span class="ident">as_topic</span></span>(<span>self) ‑> Union[<a title="nitric.faas.trigger.TopicTriggerContext" href="#nitric.faas.trigger.TopicTriggerContext">TopicTriggerContext</a>, NoneType]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Unwrap TopicTriggerContext.</p>
-<p>:return TopicTriggerContext if is_topic is true otherwise None</p></div>
+<div class="desc"><p>Return this context as a topic context type.</p>
+<p>If the trigger wasn't an event from a topic, this function returns None.
+is_topic() should be used first to determine if this was a topic trigger.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def as_topic(self) -&gt; typing.Union[TopicTriggerContext, None]:
     &#34;&#34;&#34;
-    Unwrap TopicTriggerContext.
+    Return this context as a topic context type.
 
-    :return TopicTriggerContext if is_topic is true otherwise None
+    If the trigger wasn&#39;t an event from a topic, this function returns None.
+    is_topic() should be used first to determine if this was a topic trigger.
     &#34;&#34;&#34;
     if not self.is_topic():
         return None
@@ -592,17 +608,17 @@ def from_trigger_request(trigger_request: TriggerRequest):
 <span>def <span class="ident">is_http</span></span>(<span>self) ‑> bool</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Determine if trigger was raised by a http request.</p>
-<p>:return true if trigger was raised by a HTTP request</p></div>
+<div class="desc"><p>Indicate whether the trigger was from an HTTP request.</p>
+<p>This indicates the availability of additional HTTP specific context such as path, query parameters and headers.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def is_http(self) -&gt; bool:
     &#34;&#34;&#34;
-    Determine if trigger was raised by a http request.
+    Indicate whether the trigger was from an HTTP request.
 
-    :return true if trigger was raised by a HTTP request
+    This indicates the availability of additional HTTP specific context such as path, query parameters and headers.
     &#34;&#34;&#34;
     return isinstance(self.context, HttpTriggerContext)</code></pre>
 </details>
@@ -611,23 +627,24 @@ def from_trigger_request(trigger_request: TriggerRequest):
 <span>def <span class="ident">is_topic</span></span>(<span>self) ‑> bool</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Determine if trigger was raised by a topic event.</p>
-<p>:return true if trigger is for a topic event</p></div>
+<div class="desc"><p>Indicate whether the trigger was from a topic (event).</p>
+<p>This indicates the availability of additional topic/event specific context such as the topic name.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def is_topic(self) -&gt; bool:
     &#34;&#34;&#34;
-    Determine if trigger was raised by a topic event.
+    Indicate whether the trigger was from a topic (event).
 
-    :return true if trigger is for a topic event
+    This indicates the availability of additional topic/event specific context such as the topic name.
     &#34;&#34;&#34;
     return isinstance(self.context, TriggerContext)</code></pre>
 </details>
 </dd>
 </dl>
 </dd>
+<<<<<<< refs/remotes/origin/main
 <dt id="nitric.faas.trigger.TriggerRequest"><code class="flex name class">
 <span>class <span class="ident">TriggerRequest</span></span>
 <span>(</span><span>*args, **kwargs)</span>
@@ -666,6 +683,8 @@ def from_trigger_request(trigger_request: TriggerRequest):
 </dd>
 </dl>
 </dd>
+=======
+>>>>>>> feat: port faas.start to bi-di streaming with membrane
 </dl>
 </section>
 </article>
@@ -684,6 +703,12 @@ def from_trigger_request(trigger_request: TriggerRequest):
 <ul>
 <li>
 <h4><code><a title="nitric.faas.trigger.HttpTriggerContext" href="#nitric.faas.trigger.HttpTriggerContext">HttpTriggerContext</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.faas.trigger.HttpTriggerContext.headers" href="#nitric.faas.trigger.HttpTriggerContext.headers">headers</a></code></li>
+<li><code><a title="nitric.faas.trigger.HttpTriggerContext.method" href="#nitric.faas.trigger.HttpTriggerContext.method">method</a></code></li>
+<li><code><a title="nitric.faas.trigger.HttpTriggerContext.path" href="#nitric.faas.trigger.HttpTriggerContext.path">path</a></code></li>
+<li><code><a title="nitric.faas.trigger.HttpTriggerContext.query_params" href="#nitric.faas.trigger.HttpTriggerContext.query_params">query_params</a></code></li>
+</ul>
 </li>
 <li>
 <h4><code><a title="nitric.faas.trigger.TopicTriggerContext" href="#nitric.faas.trigger.TopicTriggerContext">TopicTriggerContext</a></code></h4>
@@ -691,6 +716,8 @@ def from_trigger_request(trigger_request: TriggerRequest):
 <li>
 <h4><code><a title="nitric.faas.trigger.Trigger" href="#nitric.faas.trigger.Trigger">Trigger</a></code></h4>
 <ul class="">
+<li><code><a title="nitric.faas.trigger.Trigger.context" href="#nitric.faas.trigger.Trigger.context">context</a></code></li>
+<li><code><a title="nitric.faas.trigger.Trigger.data" href="#nitric.faas.trigger.Trigger.data">data</a></code></li>
 <li><code><a title="nitric.faas.trigger.Trigger.default_response" href="#nitric.faas.trigger.Trigger.default_response">default_response</a></code></li>
 <li><code><a title="nitric.faas.trigger.Trigger.from_trigger_request" href="#nitric.faas.trigger.Trigger.from_trigger_request">from_trigger_request</a></code></li>
 <li><code><a title="nitric.faas.trigger.Trigger.get_body" href="#nitric.faas.trigger.Trigger.get_body">get_body</a></code></li>
@@ -702,11 +729,13 @@ def from_trigger_request(trigger_request: TriggerRequest):
 <ul class="">
 <li><code><a title="nitric.faas.trigger.TriggerContext.as_http" href="#nitric.faas.trigger.TriggerContext.as_http">as_http</a></code></li>
 <li><code><a title="nitric.faas.trigger.TriggerContext.as_topic" href="#nitric.faas.trigger.TriggerContext.as_topic">as_topic</a></code></li>
+<li><code><a title="nitric.faas.trigger.TriggerContext.context" href="#nitric.faas.trigger.TriggerContext.context">context</a></code></li>
 <li><code><a title="nitric.faas.trigger.TriggerContext.from_trigger_request" href="#nitric.faas.trigger.TriggerContext.from_trigger_request">from_trigger_request</a></code></li>
 <li><code><a title="nitric.faas.trigger.TriggerContext.is_http" href="#nitric.faas.trigger.TriggerContext.is_http">is_http</a></code></li>
 <li><code><a title="nitric.faas.trigger.TriggerContext.is_topic" href="#nitric.faas.trigger.TriggerContext.is_topic">is_topic</a></code></li>
 </ul>
 </li>
+<<<<<<< refs/remotes/origin/main
 <li>
 <h4><code><a title="nitric.faas.trigger.TriggerRequest" href="#nitric.faas.trigger.TriggerRequest">TriggerRequest</a></code></h4>
 <ul class="">
@@ -717,6 +746,8 @@ def from_trigger_request(trigger_request: TriggerRequest):
 <li><code><a title="nitric.faas.trigger.TriggerRequest.topic" href="#nitric.faas.trigger.TriggerRequest.topic">topic</a></code></li>
 </ul>
 </li>
+=======
+>>>>>>> feat: port faas.start to bi-di streaming with membrane
 </ul>
 </li>
 </ul>

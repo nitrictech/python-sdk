@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>nitric.api.events API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>nitric.api.events</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#
+# Copyright (c) 2021 Nitric Technologies Pty Ltd.
+#
+# This file is part of Nitric Python 3 SDK.
+# See https://github.com/nitrictech/python-sdk for further info.
+#
+# Licensed under the Apache License, Version 2.0 (the &#34;License&#34;);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an &#34;AS IS&#34; BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+from typing import List, Union
+from nitric.utils import new_default_channel, _struct_from_dict
+from nitric.proto.nitric.event.v1 import EventStub, NitricEvent, TopicStub
+from dataclasses import dataclass, field
+
+
+@dataclass(frozen=True, order=True)
+class Event(object):
+    &#34;&#34;&#34;Represents a NitricEvent.&#34;&#34;&#34;
+
+    payload: dict = field(default_factory=dict)
+    id: str = field(default=None)
+    payload_type: str = field(default=None)
+
+
+def _event_to_wire(event: Event) -&gt; NitricEvent:
+    return NitricEvent(
+        id=event.id,
+        payload=_struct_from_dict(event.payload),
+        payload_type=event.payload_type,
+    )
+
+
+@dataclass(frozen=True, order=True)
+class Topic(object):
+    &#34;&#34;&#34;A reference to a topic on an event service, used to perform operations on that topic.&#34;&#34;&#34;
+
+    _stub: EventStub
+    name: str
+
+    async def publish(
+        self,
+        event: Union[Event, dict] = None,
+    ) -&gt; Event:
+        &#34;&#34;&#34;
+        Publish an event/message to a topic, which can be subscribed to by other services.
+
+        :param event: the event to publish
+        :return: the published event, with the id added if one was auto-generated
+        &#34;&#34;&#34;
+        if event is None:
+            event = Event()
+
+        if isinstance(event, dict):
+            # TODO: handle events that are just a payload
+            event = Event(**event)
+
+        response = await self._stub.publish(topic=self.name, event=_event_to_wire(event))
+        return Event(**{**event.__dict__.copy(), **{&#34;id&#34;: response.id}})
+
+
+class EventClient(object):
+    &#34;&#34;&#34;
+    Nitric generic publish/subscribe event client.
+
+    This client insulates application code from stack specific event operations or SDKs.
+    &#34;&#34;&#34;
+
+    def __init__(self):
+        &#34;&#34;&#34;Construct a Nitric Event Client.&#34;&#34;&#34;
+        channel = new_default_channel()
+        self._stub = EventStub(channel=channel)
+        self._topic_stub = TopicStub(channel=channel)
+
+    async def topics(self) -&gt; List[Topic]:
+        &#34;&#34;&#34;Get a list of topics available for publishing or subscription.&#34;&#34;&#34;
+        response = await self._topic_stub.list()
+        return [self.topic(topic.name) for topic in response.topics]
+
+    def topic(self, name: str) -&gt; Topic:
+        &#34;&#34;&#34;Return a reference a topic from the connected event service.&#34;&#34;&#34;
+        return Topic(_stub=self._stub, name=name)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="nitric.api.events.Event"><code class="flex name class">
+<span>class <span class="ident">Event</span></span>
+<span>(</span><span>payload: dict = &lt;factory&gt;, id: str = None, payload_type: str = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents a NitricEvent.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Event(object):
+    &#34;&#34;&#34;Represents a NitricEvent.&#34;&#34;&#34;
+
+    payload: dict = field(default_factory=dict)
+    id: str = field(default=None)
+    payload_type: str = field(default=None)</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.api.events.Event.id"><code class="name">var <span class="ident">id</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.events.Event.payload"><code class="name">var <span class="ident">payload</span> : dict</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.events.Event.payload_type"><code class="name">var <span class="ident">payload_type</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.api.events.EventClient"><code class="flex name class">
+<span>class <span class="ident">EventClient</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Nitric generic publish/subscribe event client.</p>
+<p>This client insulates application code from stack specific event operations or SDKs.</p>
+<p>Construct a Nitric Event Client.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<<<<<<< refs/remotes/origin/main:docs/nitric/api/models.html
+<pre><code class="python">class FailedTask(Task):
+    &#34;&#34;&#34;Represents a failed queue publish for an event.&#34;&#34;&#34;
+=======
+<pre><code class="python">class EventClient(object):
+    &#34;&#34;&#34;
+    Nitric generic publish/subscribe event client.
+
+    This client insulates application code from stack specific event operations or SDKs.
+    &#34;&#34;&#34;
+
+    def __init__(self):
+        &#34;&#34;&#34;Construct a Nitric Event Client.&#34;&#34;&#34;
+        channel = new_default_channel()
+        self._stub = EventStub(channel=channel)
+        self._topic_stub = TopicStub(channel=channel)
+>>>>>>> feat: port faas.start to bi-di streaming with membrane:docs/nitric/api/events.html
+
+    async def topics(self) -&gt; List[Topic]:
+        &#34;&#34;&#34;Get a list of topics available for publishing or subscription.&#34;&#34;&#34;
+        response = await self._topic_stub.list()
+        return [self.topic(topic.name) for topic in response.topics]
+
+    def topic(self, name: str) -&gt; Topic:
+        &#34;&#34;&#34;Return a reference a topic from the connected event service.&#34;&#34;&#34;
+        return Topic(_stub=self._stub, name=name)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.api.events.EventClient.topic"><code class="name flex">
+<span>def <span class="ident">topic</span></span>(<span>self, name: str) ‑> <a title="nitric.api.events.Topic" href="#nitric.api.events.Topic">Topic</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a reference a topic from the connected event service.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def topic(self, name: str) -&gt; Topic:
+    &#34;&#34;&#34;Return a reference a topic from the connected event service.&#34;&#34;&#34;
+    return Topic(_stub=self._stub, name=name)</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.events.EventClient.topics"><code class="name flex">
+<span>async def <span class="ident">topics</span></span>(<span>self) ‑> List[<a title="nitric.api.events.Topic" href="#nitric.api.events.Topic">Topic</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get a list of topics available for publishing or subscription.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def topics(self) -&gt; List[Topic]:
+    &#34;&#34;&#34;Get a list of topics available for publishing or subscription.&#34;&#34;&#34;
+    response = await self._topic_stub.list()
+    return [self.topic(topic.name) for topic in response.topics]</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.api.events.Topic"><code class="flex name class">
+<span>class <span class="ident">Topic</span></span>
+<span>(</span><span>_stub: <a title="nitric.proto.nitric.event.v1.EventStub" href="../proto/nitric/event/v1/index.html#nitric.proto.nitric.event.v1.EventStub">EventStub</a>, name: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A reference to a topic on an event service, used to perform operations on that topic.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<<<<<<< refs/remotes/origin/main:docs/nitric/api/models.html
+<pre><code class="python">class Task(object):
+    &#34;&#34;&#34;Represents a NitricTask.&#34;&#34;&#34;
+=======
+<pre><code class="python">class Topic(object):
+    &#34;&#34;&#34;A reference to a topic on an event service, used to perform operations on that topic.&#34;&#34;&#34;
+
+    _stub: EventStub
+    name: str
+
+    async def publish(
+        self,
+        event: Union[Event, dict] = None,
+    ) -&gt; Event:
+        &#34;&#34;&#34;
+        Publish an event/message to a topic, which can be subscribed to by other services.
+
+        :param event: the event to publish
+        :return: the published event, with the id added if one was auto-generated
+        &#34;&#34;&#34;
+        if event is None:
+            event = Event()
+
+        if isinstance(event, dict):
+            # TODO: handle events that are just a payload
+            event = Event(**event)
+>>>>>>> feat: port faas.start to bi-di streaming with membrane:docs/nitric/api/events.html
+
+        response = await self._stub.publish(topic=self.name, event=_event_to_wire(event))
+        return Event(**{**event.__dict__.copy(), **{&#34;id&#34;: response.id}})</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.api.events.Topic.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.api.events.Topic.publish"><code class="name flex">
+<span>async def <span class="ident">publish</span></span>(<span>self, event: Union[<a title="nitric.api.events.Event" href="#nitric.api.events.Event">Event</a>, dict] = None) ‑> <a title="nitric.api.events.Event" href="#nitric.api.events.Event">Event</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Publish an event/message to a topic, which can be subscribed to by other services.</p>
+<p>:param event: the event to publish
+:return: the published event, with the id added if one was auto-generated</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<<<<<<< refs/remotes/origin/main:docs/nitric/api/models.html
+<pre><code class="python">class Topic(object):
+    &#34;&#34;&#34;Represents event topic metadata.&#34;&#34;&#34;
+=======
+<pre><code class="python">async def publish(
+    self,
+    event: Union[Event, dict] = None,
+) -&gt; Event:
+    &#34;&#34;&#34;
+    Publish an event/message to a topic, which can be subscribed to by other services.
+
+    :param event: the event to publish
+    :return: the published event, with the id added if one was auto-generated
+    &#34;&#34;&#34;
+    if event is None:
+        event = Event()
+
+    if isinstance(event, dict):
+        # TODO: handle events that are just a payload
+        event = Event(**event)
+>>>>>>> feat: port faas.start to bi-di streaming with membrane:docs/nitric/api/events.html
+
+    response = await self._stub.publish(topic=self.name, event=_event_to_wire(event))
+    return Event(**{**event.__dict__.copy(), **{&#34;id&#34;: response.id}})</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="nitric.api" href="index.html">nitric.api</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="nitric.api.events.Event" href="#nitric.api.events.Event">Event</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.events.Event.id" href="#nitric.api.events.Event.id">id</a></code></li>
+<li><code><a title="nitric.api.events.Event.payload" href="#nitric.api.events.Event.payload">payload</a></code></li>
+<li><code><a title="nitric.api.events.Event.payload_type" href="#nitric.api.events.Event.payload_type">payload_type</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.api.events.EventClient" href="#nitric.api.events.EventClient">EventClient</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.events.EventClient.topic" href="#nitric.api.events.EventClient.topic">topic</a></code></li>
+<li><code><a title="nitric.api.events.EventClient.topics" href="#nitric.api.events.EventClient.topics">topics</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.api.events.Topic" href="#nitric.api.events.Topic">Topic</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.events.Topic.name" href="#nitric.api.events.Topic.name">name</a></code></li>
+<li><code><a title="nitric.api.events.Topic.publish" href="#nitric.api.events.Topic.publish">publish</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>

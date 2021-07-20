@@ -16,12 +16,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from nitric.proto import storage
-from nitric.proto import storage_service
-from nitric.api._base_client import BaseClient
+from dataclasses import dataclass
+
+from nitric.utils import new_default_channel
+from nitric.proto.nitric.storage.v1 import StorageServiceStub
 
 
-class StorageClient(BaseClient):
+class Storage(object):
     """
     Nitric generic blob storage client.
 
@@ -29,31 +30,53 @@ class StorageClient(BaseClient):
     """
 
     def __init__(self):
-        """Construct a new StorageClient."""
-        super(self.__class__, self).__init__()
-        self._stub = storage_service.StorageStub(self._channel)
+        """Construct a Nitric Storage Client."""
+        self._channel = new_default_channel()
+        self._storage_stub = StorageServiceStub(channel=self._channel)
 
-    def write(self, bucket_name: str, key: str, body: bytes):
-        """
-        Store a file.
+    def __del__(self):
+        # close the channel when this client is destroyed
+        if self._channel is not None:
+            self._channel.close()
 
-        :param bucket_name: name of the bucket to store the data in.
-        :param key: key within the bucket, where the file should be stored.
-        :param body: data to be stored.
-        :return: storage result.
-        """
-        request = storage.StorageWriteRequest(bucket_name=bucket_name, key=key, body=body)
-        response = self._exec("Write", request)
-        return response
+    def bucket(self, name: str):
+        """Return a reference to a bucket from the connected storage service."""
+        return Bucket(_storage_stub=self._storage_stub, name=name)
 
-    def read(self, bucket_name: str, key: str) -> bytes:
-        """
-        Retrieve an existing file.
 
-        :param bucket_name: name of the bucket where the file was stored.
-        :param key: key for the file to retrieve.
-        :return: the file as bytes.
+@dataclass(frozen=True, order=True)
+class Bucket(object):
+    """A reference to a bucket in a storage service, used to the perform operations on that bucket."""
+
+    _storage_stub: StorageServiceStub
+    name: str
+
+    def file(self, key: str):
+        """Return a reference to a file in this bucket."""
+        return File(_storage_stub=self._storage_stub, _bucket=self.name, key=key)
+
+
+@dataclass(frozen=True, order=True)
+class File(object):
+    """A reference to a file in a bucket, used to perform operations on that file."""
+
+    _storage_stub: StorageServiceStub
+    _bucket: str
+    key: str
+
+    async def write(self, body: bytes):
         """
-        request = storage.StorageReadRequest(bucket_name=bucket_name, key=key)
-        response = self._exec("Read", request)
+        Write the bytes as the content of this file.
+
+        Will create the file if it doesn't already exist.
+        """
+        await self._storage_stub.write(bucket_name=self._bucket, key=self.key, body=body)
+
+    async def read(self) -> bytes:
+        """Read this files contents from the bucket."""
+        response = await self._storage_stub.read(bucket_name=self._bucket, key=self.key)
         return response.body
+
+    async def delete(self):
+        """Delete this file from the bucket."""
+        await self._storage_stub.delete(bucket_name=self._bucket, key=self.key)

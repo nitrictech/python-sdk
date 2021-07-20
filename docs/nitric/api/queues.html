@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>nitric.api.queues API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>nitric.api.queues</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#
+# Copyright (c) 2021 Nitric Technologies Pty Ltd.
+#
+# This file is part of Nitric Python 3 SDK.
+# See https://github.com/nitrictech/python-sdk for further info.
+#
+# Licensed under the Apache License, Version 2.0 (the &#34;License&#34;);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an &#34;AS IS&#34; BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+from typing import List, Union
+from nitric.utils import new_default_channel, _struct_from_dict
+from nitric.proto.nitric.queue.v1 import QueueStub, NitricTask, FailedTask as WireFailedTask
+from dataclasses import dataclass, field
+
+
+@dataclass(frozen=True, order=True)
+class Task(object):
+    &#34;&#34;&#34;Represents a NitricTask.&#34;&#34;&#34;
+
+    id: str = field(default=None)
+    payload_type: str = field(default=None)
+    payload: dict = field(default_factory=dict)
+    lease_id: str = field(default=None)
+    _queue_stub: QueueStub = field(default=None)
+    _queue: str = field(default=None)
+
+    async def complete(self):
+        &#34;&#34;&#34;Mark this task as complete and remove it from the queue.&#34;&#34;&#34;
+        if self._queue_stub is None or self._queue is None or self._queue == &#34;&#34;:
+            raise Exception(&#34;Task was not created via Queue.&#34;)
+        if self.lease_id is None:
+            raise Exception(
+                &#34;No lease_id available for task. Tasks must be received using Queue.receive to have a &#34;
+                &#34;valid lease_id.&#34;
+            )
+        await self._queue_stub.complete(queue=self._queue, lease_id=self.lease_id)
+
+
+@dataclass(frozen=True, order=True)
+class FailedTask(Task):
+    &#34;&#34;&#34;Represents a failed queue publish for an event.&#34;&#34;&#34;
+
+    lease_id: str = None  # failed tasks should never have a lease id.
+    message: str = field(default=&#34;&#34;)
+
+
+def _task_to_wire(task: Task) -&gt; NitricTask:
+    &#34;&#34;&#34;
+    Convert a Nitric Task to a Nitric Queue Task.
+
+    :param task: to convert
+    :return: converted task
+    &#34;&#34;&#34;
+    return NitricTask(
+        id=task.id,
+        payload_type=task.payload_type,
+        payload=_struct_from_dict(task.payload),
+    )
+
+
+def _wire_to_task(task: NitricTask) -&gt; Task:
+    &#34;&#34;&#34;
+    Convert a Nitric Queue Task (protobuf) to a Nitric Task (python SDK).
+
+    :param task: to convert
+    :return: converted task
+    &#34;&#34;&#34;
+    return Task(
+        id=task.id,
+        payload_type=task.payload_type,
+        payload=task.payload.to_dict(),
+        lease_id=task.lease_id,
+    )
+
+
+def _wire_to_failed_task(failed_task: WireFailedTask) -&gt; FailedTask:
+    &#34;&#34;&#34;
+    Convert a queue task that failed to push into a Failed Task object.
+
+    :param failed_task: the failed task
+    :return: the Failed Task with failure message
+    &#34;&#34;&#34;
+    task = _wire_to_task(failed_task.task)
+
+    return FailedTask(
+        id=task.id,
+        payload_type=task.payload_type,
+        payload=task.payload,
+        lease_id=task.lease_id,
+        message=failed_task.message,
+    )
+
+
+@dataclass(frozen=True, order=True)
+class Queue(object):
+    &#34;&#34;&#34;A reference to a queue from a queue service, used to perform operations on that queue.&#34;&#34;&#34;
+
+    _queue_stub: QueueStub
+    name: str
+
+    async def send(
+        self, tasks: Union[Task, dict, List[Union[Task, dict]]] = None
+    ) -&gt; Union[Task, List[Union[Task, FailedTask]]]:
+        &#34;&#34;&#34;
+        Send one or more tasks to this queue.
+
+        If a list of tasks is provided this function will return a list containing any tasks that failed to be sent to
+        the queue.
+
+        :param tasks: A task or list of tasks to send to the queue.
+        &#34;&#34;&#34;
+        if isinstance(tasks, list):
+            return await self._send_batch(tasks)
+
+        task = tasks
+        if task is None:
+            task = Task()
+
+        if isinstance(task, dict):
+            # TODO: handle tasks that are just a payload
+            task = Task(**task)
+
+        await self._queue_stub.send(queue=self.name, task=_task_to_wire(task))
+
+    async def _send_batch(
+        self, tasks: List[Union[Task, dict]] = None, raise_on_failure: bool = True
+    ) -&gt; List[FailedTask]:
+        &#34;&#34;&#34;
+        Push a collection of tasks to a queue, which can be retrieved by other services.
+
+        :param tasks: The tasks to push to the queue
+        :param raise_on_failure: Whether to raise an exception when one or more tasks fails to send
+        :return: PushResponse containing a list containing details of any messages that failed to publish.
+        &#34;&#34;&#34;
+        if tasks is None:
+            tasks = []
+
+        wire_tasks = [_task_to_wire(Task(**task) if isinstance(task, dict) else task) for task in tasks]
+
+        response = await self._queue_stub.send_batch(queue=self.name, tasks=wire_tasks)
+
+        return [_wire_to_failed_task(failed_task) for failed_task in response.failed_tasks]
+
+    async def receive(self, limit: int = None) -&gt; List[Task]:
+        &#34;&#34;&#34;
+        Pop 1 or more items from the specified queue up to the depth limit.
+
+        Queue items are Nitric Tasks that are leased for a limited period of time, where they may be worked on.
+        Once complete or failed they must be acknowledged using the request specific leaseId.
+
+        If the lease on a queue item expires before it is acknowledged or the lease is extended the task will be
+        returned to the queue for reprocessing.
+
+        :param limit: The maximum number of queue items to return. Default: 1, Min: 1.
+        :return: Queue items popped from the specified queue.
+        &#34;&#34;&#34;
+        # Set the default and minimum depth to 1.
+        if limit is None or limit &lt; 1:
+            limit = 1
+
+        response = await self._queue_stub.receive(queue=self.name, depth=limit)
+
+        # Map the response protobuf response items to Python SDK Nitric Tasks
+        return [_wire_to_task(task) for task in response.tasks]
+
+
+class QueueClient(object):
+    &#34;&#34;&#34;
+    Nitric generic publish/subscribe tasking client.
+
+    This client insulates application code from stack specific task/topic operations or SDKs.
+    &#34;&#34;&#34;
+
+    def __init__(self):
+        &#34;&#34;&#34;Construct a Nitric Queue Client.&#34;&#34;&#34;
+        self._queue_stub = QueueStub(channel=new_default_channel())
+
+    def queue(self, name: str):
+        &#34;&#34;&#34;Return a reference to a queue from the connected queue service.&#34;&#34;&#34;
+        return Queue(_queue_stub=self._queue_stub, name=name)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="nitric.api.queues.FailedTask"><code class="flex name class">
+<span>class <span class="ident">FailedTask</span></span>
+<span>(</span><span>id: str = None, payload_type: str = None, payload: dict = &lt;factory&gt;, lease_id: str = None, message: str = '')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents a failed queue publish for an event.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FailedTask(Task):
+    &#34;&#34;&#34;Represents a failed queue publish for an event.&#34;&#34;&#34;
+
+    lease_id: str = None  # failed tasks should never have a lease id.
+    message: str = field(default=&#34;&#34;)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.api.queues.Task" href="#nitric.api.queues.Task">Task</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.api.queues.FailedTask.lease_id"><code class="name">var <span class="ident">lease_id</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.queues.FailedTask.message"><code class="name">var <span class="ident">message</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="nitric.api.queues.Task" href="#nitric.api.queues.Task">Task</a></b></code>:
+<ul class="hlist">
+<li><code><a title="nitric.api.queues.Task.complete" href="#nitric.api.queues.Task.complete">complete</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="nitric.api.queues.Queue"><code class="flex name class">
+<span>class <span class="ident">Queue</span></span>
+<span>(</span><span>_queue_stub: <a title="nitric.proto.nitric.queue.v1.QueueStub" href="../proto/nitric/queue/v1/index.html#nitric.proto.nitric.queue.v1.QueueStub">QueueStub</a>, name: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A reference to a queue from a queue service, used to perform operations on that queue.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Queue(object):
+    &#34;&#34;&#34;A reference to a queue from a queue service, used to perform operations on that queue.&#34;&#34;&#34;
+
+    _queue_stub: QueueStub
+    name: str
+
+    async def send(
+        self, tasks: Union[Task, dict, List[Union[Task, dict]]] = None
+    ) -&gt; Union[Task, List[Union[Task, FailedTask]]]:
+        &#34;&#34;&#34;
+        Send one or more tasks to this queue.
+
+        If a list of tasks is provided this function will return a list containing any tasks that failed to be sent to
+        the queue.
+
+        :param tasks: A task or list of tasks to send to the queue.
+        &#34;&#34;&#34;
+        if isinstance(tasks, list):
+            return await self._send_batch(tasks)
+
+        task = tasks
+        if task is None:
+            task = Task()
+
+        if isinstance(task, dict):
+            # TODO: handle tasks that are just a payload
+            task = Task(**task)
+
+        await self._queue_stub.send(queue=self.name, task=_task_to_wire(task))
+
+    async def _send_batch(
+        self, tasks: List[Union[Task, dict]] = None, raise_on_failure: bool = True
+    ) -&gt; List[FailedTask]:
+        &#34;&#34;&#34;
+        Push a collection of tasks to a queue, which can be retrieved by other services.
+
+        :param tasks: The tasks to push to the queue
+        :param raise_on_failure: Whether to raise an exception when one or more tasks fails to send
+        :return: PushResponse containing a list containing details of any messages that failed to publish.
+        &#34;&#34;&#34;
+        if tasks is None:
+            tasks = []
+
+        wire_tasks = [_task_to_wire(Task(**task) if isinstance(task, dict) else task) for task in tasks]
+
+        response = await self._queue_stub.send_batch(queue=self.name, tasks=wire_tasks)
+
+        return [_wire_to_failed_task(failed_task) for failed_task in response.failed_tasks]
+
+    async def receive(self, limit: int = None) -&gt; List[Task]:
+        &#34;&#34;&#34;
+        Pop 1 or more items from the specified queue up to the depth limit.
+
+        Queue items are Nitric Tasks that are leased for a limited period of time, where they may be worked on.
+        Once complete or failed they must be acknowledged using the request specific leaseId.
+
+        If the lease on a queue item expires before it is acknowledged or the lease is extended the task will be
+        returned to the queue for reprocessing.
+
+        :param limit: The maximum number of queue items to return. Default: 1, Min: 1.
+        :return: Queue items popped from the specified queue.
+        &#34;&#34;&#34;
+        # Set the default and minimum depth to 1.
+        if limit is None or limit &lt; 1:
+            limit = 1
+
+        response = await self._queue_stub.receive(queue=self.name, depth=limit)
+
+        # Map the response protobuf response items to Python SDK Nitric Tasks
+        return [_wire_to_task(task) for task in response.tasks]</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.api.queues.Queue.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.api.queues.Queue.receive"><code class="name flex">
+<span>async def <span class="ident">receive</span></span>(<span>self, limit: int = None) ‑> List[<a title="nitric.api.queues.Task" href="#nitric.api.queues.Task">Task</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Pop 1 or more items from the specified queue up to the depth limit.</p>
+<p>Queue items are Nitric Tasks that are leased for a limited period of time, where they may be worked on.
+Once complete or failed they must be acknowledged using the request specific leaseId.</p>
+<p>If the lease on a queue item expires before it is acknowledged or the lease is extended the task will be
+returned to the queue for reprocessing.</p>
+<p>:param limit: The maximum number of queue items to return. Default: 1, Min: 1.
+:return: Queue items popped from the specified queue.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def receive(self, limit: int = None) -&gt; List[Task]:
+    &#34;&#34;&#34;
+    Pop 1 or more items from the specified queue up to the depth limit.
+
+    Queue items are Nitric Tasks that are leased for a limited period of time, where they may be worked on.
+    Once complete or failed they must be acknowledged using the request specific leaseId.
+
+    If the lease on a queue item expires before it is acknowledged or the lease is extended the task will be
+    returned to the queue for reprocessing.
+
+    :param limit: The maximum number of queue items to return. Default: 1, Min: 1.
+    :return: Queue items popped from the specified queue.
+    &#34;&#34;&#34;
+    # Set the default and minimum depth to 1.
+    if limit is None or limit &lt; 1:
+        limit = 1
+
+    response = await self._queue_stub.receive(queue=self.name, depth=limit)
+
+    # Map the response protobuf response items to Python SDK Nitric Tasks
+    return [_wire_to_task(task) for task in response.tasks]</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.queues.Queue.send"><code class="name flex">
+<span>async def <span class="ident">send</span></span>(<span>self, tasks: Union[<a title="nitric.api.queues.Task" href="#nitric.api.queues.Task">Task</a>, dict, List[Union[<a title="nitric.api.queues.Task" href="#nitric.api.queues.Task">Task</a>, dict]]] = None) ‑> Union[<a title="nitric.api.queues.Task" href="#nitric.api.queues.Task">Task</a>, List[Union[<a title="nitric.api.queues.Task" href="#nitric.api.queues.Task">Task</a>, <a title="nitric.api.queues.FailedTask" href="#nitric.api.queues.FailedTask">FailedTask</a>]]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Send one or more tasks to this queue.</p>
+<p>If a list of tasks is provided this function will return a list containing any tasks that failed to be sent to
+the queue.</p>
+<p>:param tasks: A task or list of tasks to send to the queue.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def send(
+    self, tasks: Union[Task, dict, List[Union[Task, dict]]] = None
+) -&gt; Union[Task, List[Union[Task, FailedTask]]]:
+    &#34;&#34;&#34;
+    Send one or more tasks to this queue.
+
+    If a list of tasks is provided this function will return a list containing any tasks that failed to be sent to
+    the queue.
+
+    :param tasks: A task or list of tasks to send to the queue.
+    &#34;&#34;&#34;
+    if isinstance(tasks, list):
+        return await self._send_batch(tasks)
+
+    task = tasks
+    if task is None:
+        task = Task()
+
+    if isinstance(task, dict):
+        # TODO: handle tasks that are just a payload
+        task = Task(**task)
+
+    await self._queue_stub.send(queue=self.name, task=_task_to_wire(task))</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.api.queues.QueueClient"><code class="flex name class">
+<span>class <span class="ident">QueueClient</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Nitric generic publish/subscribe tasking client.</p>
+<p>This client insulates application code from stack specific task/topic operations or SDKs.</p>
+<p>Construct a Nitric Queue Client.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class QueueClient(object):
+    &#34;&#34;&#34;
+    Nitric generic publish/subscribe tasking client.
+
+    This client insulates application code from stack specific task/topic operations or SDKs.
+    &#34;&#34;&#34;
+
+    def __init__(self):
+        &#34;&#34;&#34;Construct a Nitric Queue Client.&#34;&#34;&#34;
+        self._queue_stub = QueueStub(channel=new_default_channel())
+
+    def queue(self, name: str):
+        &#34;&#34;&#34;Return a reference to a queue from the connected queue service.&#34;&#34;&#34;
+        return Queue(_queue_stub=self._queue_stub, name=name)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.api.queues.QueueClient.queue"><code class="name flex">
+<span>def <span class="ident">queue</span></span>(<span>self, name: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a reference to a queue from the connected queue service.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def queue(self, name: str):
+    &#34;&#34;&#34;Return a reference to a queue from the connected queue service.&#34;&#34;&#34;
+    return Queue(_queue_stub=self._queue_stub, name=name)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.api.queues.Task"><code class="flex name class">
+<span>class <span class="ident">Task</span></span>
+<span>(</span><span>id: str = None, payload_type: str = None, payload: dict = &lt;factory&gt;, lease_id: str = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents a NitricTask.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Task(object):
+    &#34;&#34;&#34;Represents a NitricTask.&#34;&#34;&#34;
+
+    id: str = field(default=None)
+    payload_type: str = field(default=None)
+    payload: dict = field(default_factory=dict)
+    lease_id: str = field(default=None)
+    _queue_stub: QueueStub = field(default=None)
+    _queue: str = field(default=None)
+
+    async def complete(self):
+        &#34;&#34;&#34;Mark this task as complete and remove it from the queue.&#34;&#34;&#34;
+        if self._queue_stub is None or self._queue is None or self._queue == &#34;&#34;:
+            raise Exception(&#34;Task was not created via Queue.&#34;)
+        if self.lease_id is None:
+            raise Exception(
+                &#34;No lease_id available for task. Tasks must be received using Queue.receive to have a &#34;
+                &#34;valid lease_id.&#34;
+            )
+        await self._queue_stub.complete(queue=self._queue, lease_id=self.lease_id)</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="nitric.api.queues.FailedTask" href="#nitric.api.queues.FailedTask">FailedTask</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.api.queues.Task.id"><code class="name">var <span class="ident">id</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.queues.Task.lease_id"><code class="name">var <span class="ident">lease_id</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.queues.Task.payload"><code class="name">var <span class="ident">payload</span> : dict</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.queues.Task.payload_type"><code class="name">var <span class="ident">payload_type</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.api.queues.Task.complete"><code class="name flex">
+<span>async def <span class="ident">complete</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Mark this task as complete and remove it from the queue.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def complete(self):
+    &#34;&#34;&#34;Mark this task as complete and remove it from the queue.&#34;&#34;&#34;
+    if self._queue_stub is None or self._queue is None or self._queue == &#34;&#34;:
+        raise Exception(&#34;Task was not created via Queue.&#34;)
+    if self.lease_id is None:
+        raise Exception(
+            &#34;No lease_id available for task. Tasks must be received using Queue.receive to have a &#34;
+            &#34;valid lease_id.&#34;
+        )
+    await self._queue_stub.complete(queue=self._queue, lease_id=self.lease_id)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="nitric.api" href="index.html">nitric.api</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="nitric.api.queues.FailedTask" href="#nitric.api.queues.FailedTask">FailedTask</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.queues.FailedTask.lease_id" href="#nitric.api.queues.FailedTask.lease_id">lease_id</a></code></li>
+<li><code><a title="nitric.api.queues.FailedTask.message" href="#nitric.api.queues.FailedTask.message">message</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.api.queues.Queue" href="#nitric.api.queues.Queue">Queue</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.queues.Queue.name" href="#nitric.api.queues.Queue.name">name</a></code></li>
+<li><code><a title="nitric.api.queues.Queue.receive" href="#nitric.api.queues.Queue.receive">receive</a></code></li>
+<li><code><a title="nitric.api.queues.Queue.send" href="#nitric.api.queues.Queue.send">send</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.api.queues.QueueClient" href="#nitric.api.queues.QueueClient">QueueClient</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.queues.QueueClient.queue" href="#nitric.api.queues.QueueClient.queue">queue</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.api.queues.Task" href="#nitric.api.queues.Task">Task</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.queues.Task.complete" href="#nitric.api.queues.Task.complete">complete</a></code></li>
+<li><code><a title="nitric.api.queues.Task.id" href="#nitric.api.queues.Task.id">id</a></code></li>
+<li><code><a title="nitric.api.queues.Task.lease_id" href="#nitric.api.queues.Task.lease_id">lease_id</a></code></li>
+<li><code><a title="nitric.api.queues.Task.payload" href="#nitric.api.queues.Task.payload">payload</a></code></li>
+<li><code><a title="nitric.api.queues.Task.payload_type" href="#nitric.api.queues.Task.payload_type">payload_type</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>
