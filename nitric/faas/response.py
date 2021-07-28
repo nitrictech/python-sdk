@@ -16,8 +16,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import json
 from dataclasses import dataclass, field
-from typing import Union
+from typing import Union, Any
 from nitric.proto.nitric.faas import v1
 from nitric.proto.nitric.faas.v1 import TriggerResponse
 
@@ -89,11 +90,21 @@ class Response(object):
     """Nitric Function as a Service (FaaS) response class."""
 
     context: ResponseContext
-    data: bytes = field(default_factory=bytes)
+    data: Union[bytes, str, None, Any] = field(default=None)
+
+    def data_to_bytes(self) -> bytes:
+        if self.data is None:
+            return bytes()
+        elif isinstance(self.data, bytes):
+            return self.data
+        elif isinstance(self.data, str):
+            return bytes(self.data, "utf-8")
+
+        return bytes(json.dumps(self.data), "utf-8")
 
     def to_grpc_trigger_response_context(self) -> TriggerResponse:
         """Translate a response object ready for on the wire transport."""
-        response = TriggerResponse(data=self.data)
+        response = TriggerResponse(data=self.data_to_bytes())
 
         if self.context.is_http():
             ctx = self.context.as_http()
