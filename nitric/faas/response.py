@@ -93,6 +93,13 @@ class Response(object):
     data: Union[bytes, str, None, Any] = field(default=None)
 
     def data_to_bytes(self) -> bytes:
+        """
+        Return the data from this response. If not already bytes, the data will be converted.
+
+        None returns an empty byte array.
+        str will be converted directly to bytes
+        All other types are converted to JSON using json.dumps, then to bytes from the JSON string.
+        """
         if self.data is None:
             return bytes()
         elif isinstance(self.data, bytes):

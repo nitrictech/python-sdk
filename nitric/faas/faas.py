@@ -31,7 +31,11 @@ import asyncio
 
 async def _register_faas_worker(
     func: Callable[
-        [Trigger], Union[Coroutine[Any, Any, Union[Response, None, dict, bytes]], Union[Response, None, dict, bytes]]
+        [Trigger],
+        Union[
+            Coroutine[Any, Any, Union[Response, None, dict, list, set, bytes]],
+            Union[Response, None, dict, list, set, bytes],
+        ],
     ]
 ):
     """
@@ -74,7 +78,7 @@ async def _register_faas_worker(
                     if isinstance(response, bytes):
                         full_response.data = response
                     # convert dict responses to JSON
-                    elif isinstance(response, dict):
+                    elif isinstance(response, (dict, list, set)):
                         full_response.data = bytes(json.dumps(response), "utf-8")
                         if full_response.context.is_http():
                             full_response.context.as_http().headers["Content-Type"] = "application/json"
@@ -106,7 +110,7 @@ async def _register_faas_worker(
         channel.close()
 
 
-def start(handler: Callable[[Trigger], Coroutine[Any, Any, Union[Response, None, dict, bytes]]]):
+def start(handler: Callable[[Trigger], Coroutine[Any, Any, Union[Response, None, dict, list, set, bytes]]]):
     """
     Register the provided function as the trigger handler and starts handling new trigger requests.
 
