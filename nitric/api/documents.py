@@ -151,6 +151,7 @@ class CollectionRef:
         )
 
     def sub_collection_depth(self) -> int:
+        """Return the depth of this collection, which is a count of the parents above this collection."""
         if not self.is_sub_collection():
             return 0
         else:
@@ -271,14 +272,17 @@ class Document:
 
     @property
     def id(self):
+        """Return the document's unique id."""
         return self._ref.id
 
     @property
     def collection(self) -> CollectionRef:
+        """Return the CollectionRef for the collection that contains this document."""
         return self._ref.parent
 
     @property
     def ref(self):
+        """Return the DocumentRef for this document."""
         return self._ref
 
 
@@ -288,6 +292,10 @@ class QueryResultsPage:
 
     paging_token: any = field(default_factory=lambda: None)
     documents: List[Document] = field(default_factory=lambda: [])
+
+    def has_more_pages(self) -> bool:
+        """Return false if the page token is None or empty (both represent no more pages)."""
+        return bool(self.paging_token)
 
 
 class QueryBuilder:
@@ -416,7 +424,7 @@ class QueryBuilder:
         )
 
         return QueryResultsPage(
-            paging_token=results.paging_token,
+            paging_token=results.paging_token if results.paging_token else None,
             documents=[_document_from_wire(documents=self._documents, message=result) for result in results.documents],
         )
 
