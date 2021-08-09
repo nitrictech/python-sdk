@@ -21,6 +21,7 @@ from nitric.api.events import Events, Event, Topic
 from nitric.api.queues import Queues, Task, FailedTask
 from nitric.api.storage import Storage
 from nitric.api.documents import Documents
+from nitric.api.secrets import Secrets
 
 __all__ = [
     "Events",
@@ -31,4 +32,5 @@ __all__ = [
     "Task",
     "FailedTask",
     "Topic",
+    "Secrets",
 ]
