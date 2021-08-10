@@ -3,8 +3,9 @@ repos:
     rev: stable
     hooks:
     - id: black
+      exclude: ^(examples)/
 -   repo: https://github.com/pycqa/flake8
     rev: 3.7.9
     hooks:
     - id: flake8
-      exclude: ^(venv|tests|build|dist|nitric/proto)/
+      exclude: ^(venv|tests|build|dist|nitric/proto|examples)/
