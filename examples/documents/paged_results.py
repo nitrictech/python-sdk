@@ -8,8 +8,9 @@ async def documents_paged_results():
     query = docs.collection("Customers").query().where("active", "==", True).limit(100)
 
     # Fetch first page
-    results = query.fetch()
+    results = await query.fetch()
 
     # Fetch next page
-    results = query.page_from(results.paging_token).fetch()
+    if results.paging_token:
+        results = await query.page_from(results.paging_token).fetch()
 # [END snippet]

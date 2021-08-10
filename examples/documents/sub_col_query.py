@@ -9,5 +9,5 @@
 #           .collection("Orders")
 #           .query())
 
-#   results = query.fetch()
+#   results = await query.fetch()
 # # [END snippet]

@@ -7,5 +7,5 @@ async def documents_sub_doc_query():
 
     query = docs.collection("Customers").doc("apple").collection("Orders").query()
 
-    results = query.fetch()
+    results = await query.fetch()
 # [END snippet]

@@ -7,5 +7,5 @@ async def documents_query_limits():
 
     query = docs.collection("Customers").collection("Orders").query().limit(1000)
 
-    results = query.fetch()
+    results = await query.fetch()
 # [END snippet]

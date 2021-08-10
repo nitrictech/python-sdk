@@ -7,5 +7,5 @@ async def documents_query_filter():
 
     query = docs.collection("Customers").query().where("country", "==", "US").where("age", ">=", 21)
 
-    results = query.fetch()
+    results = await query.fetch()
 # [END snippet]

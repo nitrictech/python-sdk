@@ -8,5 +8,5 @@ async def documents_query():
     query = docs.collection("Customers").query()
 
     # Execute query
-    results = query.fetch()
+    results = await query.fetch()
 # [END snippet]

@@ -12,5 +12,5 @@ async def queues_receive():
         # Work on a task...
 
         # Complete the task if it was processed successfully
-        task.complete()
+        await task.complete()
 # [END snippet]

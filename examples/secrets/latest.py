@@ -7,5 +7,8 @@ async def secret_latest():
     secrets = Secrets()
 
     # Get latest secret version
-    value = secrets.secret("my-secret").latest()
+    latest_version = secrets.secret("database.password").latest()
+
+    # Access the latest secret version
+    value = await latest_version.access()
 # [END snippet]

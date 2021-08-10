@@ -9,5 +9,5 @@ async def documents_streamed():
 
     async for doc in query.stream():
         # Process doc stream...
+        print(doc.content)
 # [END snippet]
-      remove_indentation_error = "yes please"

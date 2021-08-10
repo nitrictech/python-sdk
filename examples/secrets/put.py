@@ -8,8 +8,8 @@ async def secret_put():
 
     # Store the new password value, making it the latest version
     new_password = "qxGJp9rWMbYvPEsNFXzukQa!"
-    new_secret = await secrets.secret("my-secret").put(new_password)
+    new_version = await secrets.secret("database.password").put(new_password)
 
     # Access the exact version of the put secret, for future reference
-    new_version = new_secret.secret.version
+    password = await new_version.access()
 # [END snippet]
