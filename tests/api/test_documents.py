@@ -21,6 +21,7 @@ from unittest.mock import patch, AsyncMock
 
 import pytest
 from betterproto.lib.google.protobuf import Struct, Value
+from grpclib import GRPCError, Status
 
 from nitric.api import Events, Event
 from nitric.api.documents import (
@@ -30,7 +31,9 @@ from nitric.api.documents import (
     condition,
     Expression as QExpression,
     Document as SdkDocument,
+    QueryResultsPage,
 )
+from nitric.api.exception import UnknownException
 from nitric.proto.nitric.document.v1 import (
     Key,
     Collection,
@@ -115,6 +118,13 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
             )
         )
         self.assertEqual(1.0, response.content["a"])
+
+    async def test_ref_from_document(self):
+        doc_ref = Documents().collection("test-collection").doc("test-doc")
+
+        doc = SdkDocument(_ref=doc_ref, content={})
+
+        assert doc.ref == doc_ref
 
     async def test_get_subcollection_document(self):
         mock_get = AsyncMock()
@@ -231,6 +241,14 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
         self.assertEqual({"b": "c"}, results.paging_token)
         self.assertEqual([{"a": i} for i in range(3)], [doc.content for doc in results.documents])
 
+    async def test_has_more_pages(self):
+        page = QueryResultsPage(paging_token="anything", documents=[])
+        assert page.has_more_pages()
+
+    async def test_no_more_pages(self):
+        page = QueryResultsPage(paging_token=None, documents=[])
+        assert not page.has_more_pages()
+
     async def test_collection_query_stream(self):
         stream_calls = 0
         call_args = {}
@@ -262,6 +280,60 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
             call_args,
         )
         self.assertEqual([{"a": i} for i in range(3)], [doc.content for doc in results])
+
+    # Test GRPC Errors are returned from all methods
+
+    async def test_set_document_error(self):
+        mock_set = AsyncMock()
+        mock_set.side_effect = GRPCError(Status.UNKNOWN, "test error")
+
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.set", mock_set):
+            with pytest.raises(UnknownException) as e:
+                await Documents().collection("a").doc("b").set({"a": 1})
+
+    async def test_get_document_error(self):
+        mock_get = AsyncMock()
+        mock_get.side_effect = GRPCError(Status.UNKNOWN, "test error")
+
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.get", mock_get):
+            with pytest.raises(UnknownException) as e:
+                await Documents().collection("a").doc("b").get()
+
+    async def test_delete_document_error(self):
+        mock_delete = AsyncMock()
+        mock_delete.side_effect = GRPCError(Status.UNKNOWN, "test error")
+
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.delete", mock_delete):
+            with pytest.raises(UnknownException) as e:
+                await Documents().collection("a").doc("b").delete()
+
+    async def test_query_fetch_error(self):
+        mock_fetch = AsyncMock()
+        mock_fetch.side_effect = GRPCError(Status.UNKNOWN, "test error")
+
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.query", mock_fetch):
+            with pytest.raises(UnknownException) as e:
+                await Documents().collection("a").query().fetch()
+
+    async def test_query_stream_error(self):
+        stream_calls = 0
+        call_args = {}
+
+        async def mock_stream(self, **kwargs):
+            nonlocal call_args
+            nonlocal stream_calls
+            call_args = kwargs
+            for i in range(3):
+                raise GRPCError(Status.UNKNOWN, "test error")
+                stream_calls += 1
+                yield DocumentQueryStreamResponse(
+                    document=Document(content=Struct(fields={"a": Value(number_value=i)}))
+                )
+
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.query_stream", mock_stream):
+            with pytest.raises(UnknownException) as e:
+                async for result in Documents().collection("a").query().stream():
+                    assert False
 
 
 class QueryTest(IsolatedAsyncioTestCase):

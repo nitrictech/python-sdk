@@ -161,7 +161,7 @@ def exception_from_grpc_code(code: int, message: str = None):
 
 # Map of gRPC status codes to the appropriate exception class.
 _exception_code_map = {
-    0: None,
+    0: lambda message: Exception("Error returned with status 0, which is a success status"),
     1: CancelledException,
     2: UnknownException,
     3: InvalidArgumentException,

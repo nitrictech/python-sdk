@@ -54,11 +54,9 @@ class ReceivedTask(object):
 
         Only callable for tasks that have been received from a Queue.
         """
-        if self._queueing is None or self._queue is None:
-            raise FailedPreconditionException("Task is missing internal client, was it returned from queue.receive?")
-        if self.lease_id is None:
+        if self._queueing is None or self._queue is None or self.lease_id is None:
             raise FailedPreconditionException(
-                "Tasks must be received using Queue.receive to have a lease_id and be valid for completion."
+                "Task is missing internal client or lease id, was it returned from " "queue.receive?"
             )
         try:
             await self._queueing._queue_stub.complete(queue=self._queue.name, lease_id=self.lease_id)

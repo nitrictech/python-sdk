@@ -19,7 +19,11 @@
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import patch, AsyncMock
 
+import pytest
+from grpclib import GRPCError, Status
+
 from nitric.api import Secrets
+from nitric.api.exception import UnknownException
 from nitric.api.secrets import SecretValue
 from nitric.proto.nitric.secret.v1 import SecretPutResponse, SecretVersion, Secret, SecretAccessResponse
 
@@ -104,3 +108,20 @@ class SecretsClientTest(IsolatedAsyncioTestCase):
 
         assert value.as_bytes() == b"secret value"
         assert bytes(value) == b"secret value"
+
+    async def test_put_error(self):
+        mock_put = AsyncMock()
+        mock_put.side_effect = GRPCError(Status.UNKNOWN, "test error")
+
+        with patch("nitric.proto.nitric.secret.v1.SecretServiceStub.put", mock_put):
+            with pytest.raises(UnknownException) as e:
+                secret = Secrets().secret("test-secret")
+                await secret.put(b"a test secret value")
+
+    async def test_access_error(self):
+        mock_access = AsyncMock()
+        mock_access.side_effect = GRPCError(Status.UNKNOWN, "test error")
+
+        with patch("nitric.proto.nitric.secret.v1.SecretServiceStub.access", mock_access):
+            with pytest.raises(UnknownException) as e:
+                await Secrets().secret("test-secret").latest().access()
