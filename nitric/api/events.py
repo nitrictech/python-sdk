@@ -16,7 +16,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from __future__ import annotations
+
 from typing import List, Union
+
+from grpclib import GRPCError
+
+from nitric.api.exception import exception_from_grpc_error
 from nitric.utils import new_default_channel, _struct_from_dict
 from nitric.proto.nitric.event.v1 import EventServiceStub, NitricEvent, TopicServiceStub
 from dataclasses import dataclass, field
@@ -43,7 +49,7 @@ def _event_to_wire(event: Event) -> NitricEvent:
 class Topic(object):
     """A reference to a topic on an event service, used to perform operations on that topic."""
 
-    _stub: EventServiceStub
+    _events: Events
     name: str
 
     async def publish(
@@ -63,9 +69,11 @@ class Topic(object):
             # TODO: handle events that are just a payload
             event = Event(**event)
 
-        response = await self._stub.publish(topic=self.name, event=_event_to_wire(event))
-        self._stub.channel.close()
-        return Event(**{**event.__dict__.copy(), **{"id": response.id}})
+        try:
+            response = await self._events._stub.publish(topic=self.name, event=_event_to_wire(event))
+            return Event(**{**event.__dict__.copy(), **{"id": response.id}})
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
 
 class Events(object):
@@ -88,9 +96,12 @@ class Events(object):
 
     async def topics(self) -> List[Topic]:
         """Get a list of topics available for publishing or subscription."""
-        response = await self._topic_stub.list()
-        return [self.topic(topic.name) for topic in response.topics]
+        try:
+            response = await self._topic_stub.list()
+            return [self.topic(topic.name) for topic in response.topics]
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
     def topic(self, name: str) -> Topic:
         """Return a reference to a topic."""
-        return Topic(_stub=self._stub, name=name)
+        return Topic(_events=self, name=name)

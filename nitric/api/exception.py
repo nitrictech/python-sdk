@@ -16,21 +16,166 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from grpclib import GRPCError
 
 
-class UnimplementedException(Exception):
-    """Exception raised when the requested operation isn't supported by the server."""
-
-    pass
-
-
-class AlreadyExistsException(Exception):
-    """Exception raised when an entity already exist during a request to create a new entity."""
+class NitricServiceException(Exception):
+    """Base exception for all errors returned by Nitric API methods."""
 
     pass
 
 
-class UnavailableException(Exception):
-    """Exception raised when a gRPC service is unavailable."""
+class AbortedException(NitricServiceException):
+    """The operation was aborted, typically due to a concurrency issue such as a sequencer check failure or
+    transaction abort."""
 
     pass
+
+
+class AlreadyExistsException(NitricServiceException):
+    """The entity that a client attempted to create (e.g., file or directory) already exists."""
+
+    pass
+
+
+class CancelledException(NitricServiceException):
+    """The operation was cancelled, typically by the caller."""
+
+    pass
+
+
+class DataLossException(NitricServiceException):
+    """Unrecoverable data loss or corruption."""
+
+    pass
+
+
+class DeadlineExceededException(NitricServiceException):
+    """The deadline expired before the operation could complete."""
+
+    pass
+
+
+class FailedPreconditionException(NitricServiceException):
+    """
+    The operation was rejected because the system is not in a state required for the operation's execution.
+
+    For example, the document collection to be deleted is not empty.
+    """
+
+    pass
+
+
+class InternalException(NitricServiceException):
+    """Internal errors."""
+
+    pass
+
+
+class InvalidArgumentException(NitricServiceException):
+    """
+    The client specified an invalid argument.
+
+    Note that this differs from FAILED_PRECONDITION. INVALID_ARGUMENT indicates arguments that are problematic
+    regardless of the state of the system (e.g., a malformed file name).
+    """
+
+    pass
+
+
+class OutOfRangeException(NitricServiceException):
+    """
+    The operation was attempted past the valid range.
+
+    E.g. reading past the end of a file.
+    """
+
+    pass
+
+
+class NotFoundException(NitricServiceException):
+    """Some requested entity was not found."""
+
+    pass
+
+
+class PermissionDeniedException(NitricServiceException):
+    """The caller does not have permission to execute the specified operation."""
+
+    pass
+
+
+class ResourceExhaustedException(NitricServiceException):
+    """Some resource has been exhausted, perhaps a per-user quota, or perhaps the entire file system is out of space."""
+
+    pass
+
+
+class UnauthenticatedException(NitricServiceException):
+    """The request does not have valid authentication credentials for the operation."""
+
+    pass
+
+
+class UnavailableException(NitricServiceException):
+    """
+    The service is currently unavailable.
+
+    This is most likely a transient condition, which can be corrected by retrying with a backoff.
+    """
+
+    pass
+
+
+class UnimplementedException(NitricServiceException):
+    """
+    The operation is not implemented or is not supported/enabled in this service.
+
+    May appear when using an older version of the Membrane with a newer SDK.
+    """
+
+    pass
+
+
+class UnknownException(NitricServiceException):
+    """Unknown error."""
+
+    pass
+
+
+def exception_from_grpc_error(error: GRPCError):
+    return exception_from_grpc_code(error.status.value, error.message)
+
+
+def exception_from_grpc_code(code: int, message: str = None):
+    """
+    Return a new instance of the appropriate exception for the given status code.
+
+    If an unknown or unexpected status code value is provided an UnknownException will be returned.
+    """
+    if code not in _exception_code_map:
+        return UnknownException()
+
+    return _exception_code_map[code](message)
+
+
+# Map of gRPC status codes to the appropriate exception class.
+_exception_code_map = {
+    0: None,
+    1: CancelledException,
+    2: UnknownException,
+    3: InvalidArgumentException,
+    4: DeadlineExceededException,
+    5: NotFoundException,
+    6: AlreadyExistsException,
+    7: PermissionDeniedException,
+    8: ResourceExhaustedException,
+    9: FailedPreconditionException,
+    10: AbortedException,
+    11: OutOfRangeException,
+    12: UnimplementedException,
+    13: InternalException,
+    14: UnavailableException,
+    15: DataLossException,
+    16: UnauthenticatedException,
+}

@@ -18,6 +18,9 @@
 #
 from dataclasses import dataclass
 
+from grpclib import GRPCError
+
+from nitric.api.exception import exception_from_grpc_error
 from nitric.utils import new_default_channel
 from nitric.proto.nitric.storage.v1 import StorageServiceStub
 
@@ -41,26 +44,26 @@ class Storage(object):
 
     def bucket(self, name: str):
         """Return a reference to a bucket from the connected storage service."""
-        return Bucket(_storage_stub=self._storage_stub, name=name)
+        return Bucket(_storage=self, name=name)
 
 
 @dataclass(frozen=True, order=True)
 class Bucket(object):
     """A reference to a bucket in a storage service, used to the perform operations on that bucket."""
 
-    _storage_stub: StorageServiceStub
+    _storage: Storage
     name: str
 
     def file(self, key: str):
         """Return a reference to a file in this bucket."""
-        return File(_storage_stub=self._storage_stub, _bucket=self.name, key=key)
+        return File(_storage=self._storage, _bucket=self.name, key=key)
 
 
 @dataclass(frozen=True, order=True)
 class File(object):
     """A reference to a file in a bucket, used to perform operations on that file."""
 
-    _storage_stub: StorageServiceStub
+    _storage: Storage
     _bucket: str
     key: str
 
@@ -70,13 +73,22 @@ class File(object):
 
         Will create the file if it doesn't already exist.
         """
-        await self._storage_stub.write(bucket_name=self._bucket, key=self.key, body=body)
+        try:
+            await self._storage._storage_stub.write(bucket_name=self._bucket, key=self.key, body=body)
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
     async def read(self) -> bytes:
         """Read this files contents from the bucket."""
-        response = await self._storage_stub.read(bucket_name=self._bucket, key=self.key)
-        return response.body
+        try:
+            response = await self._storage._storage_stub.read(bucket_name=self._bucket, key=self.key)
+            return response.body
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
     async def delete(self):
         """Delete this file from the bucket."""
-        await self._storage_stub.delete(bucket_name=self._bucket, key=self.key)
+        try:
+            await self._storage._storage_stub.delete(bucket_name=self._bucket, key=self.key)
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)

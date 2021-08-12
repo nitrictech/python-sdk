@@ -19,6 +19,10 @@
 from __future__ import annotations
 
 from typing import List, Union
+
+from grpclib import GRPCError
+
+from nitric.api.exception import FailedPreconditionException, exception_from_grpc_error, InvalidArgumentException
 from nitric.utils import new_default_channel, _struct_from_dict, _dict_from_struct
 from nitric.proto.nitric.queue.v1 import QueueServiceStub, NitricTask, FailedTask as WireFailedTask
 from dataclasses import dataclass, field
@@ -51,12 +55,15 @@ class ReceivedTask(object):
         Only callable for tasks that have been received from a Queue.
         """
         if self._queueing is None or self._queue is None:
-            raise Exception("Task is missing internal client, was it returned from queue.receive?")
+            raise FailedPreconditionException("Task is missing internal client, was it returned from queue.receive?")
         if self.lease_id is None:
-            raise Exception(
+            raise FailedPreconditionException(
                 "Tasks must be received using Queue.receive to have a lease_id and be valid for completion."
             )
-        await self._queueing._queue_stub.complete(queue=self._queue.name, lease_id=self.lease_id)
+        try:
+            await self._queueing._queue_stub.complete(queue=self._queue.name, lease_id=self.lease_id)
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
 
 @dataclass(frozen=True, order=True)
@@ -143,7 +150,10 @@ class Queue(object):
             # TODO: handle tasks that are just a payload
             task = Task(**task)
 
-        await self._queueing._queue_stub.send(queue=self.name, task=_task_to_wire(task))
+        try:
+            await self._queueing._queue_stub.send(queue=self.name, task=_task_to_wire(task))
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
     async def _send_batch(self, tasks: List[Union[Task, dict]], raise_on_failure: bool = True) -> List[FailedTask]:
         """
@@ -154,13 +164,15 @@ class Queue(object):
         :return: PushResponse containing a list containing details of any messages that failed to publish.
         """
         if tasks is None or len(tasks) < 1:
-            raise Exception("No tasks provided, nothing to send.")
+            raise InvalidArgumentException("No tasks provided, nothing to send.")
 
         wire_tasks = [_task_to_wire(Task(**task) if isinstance(task, dict) else task) for task in tasks]
 
-        response = await self._queueing._queue_stub.send_batch(queue=self.name, tasks=wire_tasks)
-
-        return [_wire_to_failed_task(failed_task) for failed_task in response.failed_tasks]
+        try:
+            response = await self._queueing._queue_stub.send_batch(queue=self.name, tasks=wire_tasks)
+            return [_wire_to_failed_task(failed_task) for failed_task in response.failed_tasks]
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
     async def receive(self, limit: int = None) -> List[Task]:
         """
@@ -179,10 +191,12 @@ class Queue(object):
         if limit is None or limit < 1:
             limit = 1
 
-        response = await self._queueing._queue_stub.receive(queue=self.name, depth=limit)
-
-        # Map the response protobuf response items to Python SDK Nitric Tasks
-        return [_wire_to_received_task(task=task, queueing=self._queueing, queue=self) for task in response.tasks]
+        try:
+            response = await self._queueing._queue_stub.receive(queue=self.name, depth=limit)
+            # Map the response protobuf response items to Python SDK Nitric Tasks
+            return [_wire_to_received_task(task=task, queueing=self._queueing, queue=self) for task in response.tasks]
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
 
 class Queues(object):

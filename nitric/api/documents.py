@@ -22,7 +22,10 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import List, AsyncIterator, Union, Any, Tuple
 
+from grpclib import GRPCError
+
 from nitric.api.const import MAX_SUB_COLLECTION_DEPTH
+from nitric.api.exception import exception_from_grpc_error
 from nitric.proto.nitric.document.v1 import (
     DocumentServiceStub,
     Collection as CollectionMessage,
@@ -35,7 +38,7 @@ from nitric.utils import new_default_channel, _dict_from_struct, _struct_from_di
 
 
 class CollectionDepthException(Exception):
-    """Exception when the max depth of document sub-collections is exceeded."""
+    """The max depth of document sub-collections has been exceeded."""
 
     pass
 
@@ -67,8 +70,11 @@ class DocumentRef:
 
     async def get(self) -> Document:
         """Retrieve the contents of this document, if it exists."""
-        response = await self._documents._stub.get(key=_doc_ref_to_wire(self))
-        return _document_from_wire(documents=self._documents, message=response.document)
+        try:
+            response = await self._documents._stub.get(key=_doc_ref_to_wire(self))
+            return _document_from_wire(documents=self._documents, message=response.document)
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
     async def set(self, content: dict):
         """
@@ -76,16 +82,22 @@ class DocumentRef:
 
         If the document exists it will be updated, otherwise a new document will be created.
         """
-        await self._documents._stub.set(
-            key=_doc_ref_to_wire(self),
-            content=_struct_from_dict(content),
-        )
+        try:
+            await self._documents._stub.set(
+                key=_doc_ref_to_wire(self),
+                content=_struct_from_dict(content),
+            )
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
     async def delete(self):
         """Delete this document, if it exists."""
-        await self._documents._stub.delete(
-            key=_doc_ref_to_wire(self),
-        )
+        try:
+            await self._documents._stub.delete(
+                key=_doc_ref_to_wire(self),
+            )
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
 
 def _document_from_wire(documents: Documents, message: DocumentMessage) -> Document:
@@ -403,12 +415,15 @@ class QueryBuilder:
         if self._paging_token is not None:
             raise ValueError("page_from() should not be used with streamed queries.")
 
-        async for result in self._documents._stub.query_stream(
-            collection=_collection_to_wire(self._collection),
-            expressions=self._expressions_to_wire(),
-            limit=self._limit,
-        ):
-            yield _document_from_wire(documents=self._documents, message=result.document)
+        try:
+            async for result in self._documents._stub.query_stream(
+                collection=_collection_to_wire(self._collection),
+                expressions=self._expressions_to_wire(),
+                limit=self._limit,
+            ):
+                yield _document_from_wire(documents=self._documents, message=result.document)
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
     async def fetch(self) -> QueryResultsPage:
         """
@@ -416,17 +431,22 @@ class QueryBuilder:
 
         If a page has been fetched previously, a token can be provided via paging_from(), to fetch the subsequent pages.
         """
-        results = await self._documents._stub.query(
-            collection=_collection_to_wire(self._collection),
-            expressions=self._expressions_to_wire(),
-            limit=self._limit,
-            paging_token=self._paging_token,
-        )
+        try:
+            results = await self._documents._stub.query(
+                collection=_collection_to_wire(self._collection),
+                expressions=self._expressions_to_wire(),
+                limit=self._limit,
+                paging_token=self._paging_token,
+            )
 
-        return QueryResultsPage(
-            paging_token=results.paging_token if results.paging_token else None,
-            documents=[_document_from_wire(documents=self._documents, message=result) for result in results.documents],
-        )
+            return QueryResultsPage(
+                paging_token=results.paging_token if results.paging_token else None,
+                documents=[
+                    _document_from_wire(documents=self._documents, message=result) for result in results.documents
+                ],
+            )
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
     def __eq__(self, other):
         return self.__repr__() == other.__repr__()
