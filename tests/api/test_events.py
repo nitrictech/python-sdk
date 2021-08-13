@@ -21,8 +21,10 @@ from unittest.mock import patch, AsyncMock
 
 import pytest
 from betterproto.lib.google.protobuf import Struct
+from grpclib import GRPCError, Status
 
 from nitric.api import Events, Event
+from nitric.api.exception import UnknownException
 from nitric.proto.nitric.event.v1 import TopicListResponse, NitricTopic
 from nitric.utils import _struct_from_dict
 
@@ -127,3 +129,19 @@ class EventClientTest(IsolatedAsyncioTestCase):
         self.assertEqual(2, len(topics))
         self.assertEqual(topics[0].name, "test-topic1")
         self.assertEqual(topics[1].name, "test-topic2")
+
+    async def test_publish_error(self):
+        mock_publish = AsyncMock()
+        mock_publish.side_effect = GRPCError(Status.UNKNOWN, "test error")
+
+        with patch("nitric.proto.nitric.event.v1.EventServiceStub.publish", mock_publish):
+            with pytest.raises(UnknownException) as e:
+                await Events().topic("test-topic").publish(Event(payload={}))
+
+    async def test_get_topics_error(self):
+        mock_get_topics = AsyncMock()
+        mock_get_topics.side_effect = GRPCError(Status.UNKNOWN, "test error")
+
+        with patch("nitric.proto.nitric.event.v1.TopicServiceStub.list", mock_get_topics):
+            with pytest.raises(UnknownException) as e:
+                await Events().topics()

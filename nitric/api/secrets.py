@@ -20,6 +20,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Union
 
+from grpclib import GRPCError
+
+from nitric.api.exception import exception_from_grpc_error
 from nitric.utils import new_default_channel
 from nitric.proto.nitric.secret.v1 import SecretServiceStub, Secret as SecretMessage, SecretVersion as VersionMessage
 
@@ -68,8 +71,11 @@ class SecretContainer(object):
 
         secret_message = _secret_to_wire(self)
 
-        response = await self._secrets._secrets_stub.put(secret=secret_message, value=value)
-        return self.version(version=response.secret_version.version)
+        try:
+            response = await self._secrets._secrets_stub.put(secret=secret_message, value=value)
+            return self.version(version=response.secret_version.version)
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
     def version(self, version: str):
         """
@@ -104,7 +110,10 @@ class SecretVersion(object):
     async def access(self) -> SecretValue:
         """Return the value stored against this version of the secret."""
         version_message = _secret_version_to_wire(self)
-        response = await self._secrets._secrets_stub.access(secret_version=version_message)
+        try:
+            response = await self._secrets._secrets_stub.access(secret_version=version_message)
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
         # Construct a new SecretVersion if the response version id doesn't match this reference.
         # This ensures calls to access from the 'latest' version return new version objects

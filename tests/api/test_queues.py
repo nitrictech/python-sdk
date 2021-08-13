@@ -21,8 +21,10 @@ from unittest.mock import patch, AsyncMock
 
 import pytest
 from betterproto.lib.google.protobuf import Struct
+from grpclib import GRPCError, Status
 
 from nitric.api import Queues, Task
+from nitric.api.exception import UnknownException
 from nitric.api.queues import ReceivedTask
 from nitric.proto.nitric.queue.v1 import (
     QueueReceiveResponse,
@@ -246,3 +248,38 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         with pytest.raises(Exception) as e:
             await task.complete()
         self.assertIn("Task is missing internal client", str(e.value))
+
+    async def test_send_error(self):
+        mock_send = AsyncMock()
+        mock_send.side_effect = GRPCError(Status.UNKNOWN, "test error")
+
+        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.send", mock_send):
+            with pytest.raises(UnknownException) as e:
+                await Queues().queue("test-queue").send(Task(payload={"content": "of task"}))
+
+    async def test_send_batch_error(self):
+        mock_send = AsyncMock()
+        mock_send.side_effect = GRPCError(Status.UNKNOWN, "test error")
+
+        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.send_batch", mock_send):
+            with pytest.raises(UnknownException) as e:
+                await Queues().queue("test-queue").send([Task(payload={"content": "of task"}) for i in range(2)])
+
+    async def test_receive_error(self):
+        mock_receive = AsyncMock()
+        mock_receive.side_effect = GRPCError(Status.UNKNOWN, "test error")
+
+        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.receive", mock_receive):
+            with pytest.raises(UnknownException) as e:
+                await Queues().queue("test-queue").receive()
+
+    async def test_complete_error(self):
+        mock_complete = AsyncMock()
+        mock_complete.side_effect = GRPCError(Status.UNKNOWN, "test error")
+
+        queueing = Queues()
+        task = ReceivedTask(lease_id="test-lease", _queueing=queueing, _queue=queueing.queue("test-queue"))
+
+        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.complete", mock_complete):
+            with pytest.raises(UnknownException) as e:
+                await task.complete()
