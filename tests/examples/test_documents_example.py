@@ -1,3 +1,4 @@
+from examples.documents.sub_col_query import documents_sub_col_query
 from nitric.proto.nitric.document.v1 import Collection, DocumentGetResponse, DocumentQueryStreamResponse, Document, Key
 from examples.documents.set import documents_set
 from examples.documents.get import documents_get
@@ -93,6 +94,14 @@ class DocumentsExamplesTest(IsolatedAsyncioTestCase):
 
         with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.query", mock_query):
             await documents_sub_doc_query()
+
+        mock_query.assert_called_once()
+
+    async def test_sub_col_query_document(self):
+        mock_query = AsyncMock()
+
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.query", mock_query):
+            await documents_sub_col_query()
 
         mock_query.assert_called_once()
 
