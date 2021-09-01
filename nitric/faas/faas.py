@@ -33,8 +33,8 @@ async def _register_faas_worker(
     func: Callable[
         [Trigger],
         Union[
-            Coroutine[Any, Any, Union[Response, None, dict, list, set, bytes]],
-            Union[Response, None, dict, list, set, bytes],
+            Coroutine[Any, Any, Union[Response, None, str, dict, list, set, bytes]],
+            Union[Response, None, str, dict, list, set, bytes],
         ],
     ]
 ):
@@ -110,7 +110,7 @@ async def _register_faas_worker(
         channel.close()
 
 
-def start(handler: Callable[[Trigger], Coroutine[Any, Any, Union[Response, None, dict, list, set, bytes]]]):
+def start(handler: Callable[[Trigger], Coroutine[Any, Any, Union[Response, None, str, dict, list, set, bytes]]]):
     """
     Register the provided function as the trigger handler and starts handling new trigger requests.
 
