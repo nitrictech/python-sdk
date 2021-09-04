@@ -29,7 +29,7 @@ from nitric.proto.nitric.faas.v1 import FaasServiceStub, InitRequest, ClientMess
 import asyncio
 
 
-async def _register_faas_worker(
+async def _register_function_handler(
     func: Callable[
         [Trigger],
         Union[
@@ -61,37 +61,53 @@ async def _register_faas_worker(
             if msg_type == "trigger_request":
                 trigger = Trigger.from_trigger_request(srv_msg.trigger_request)
                 try:
-                    response = (await func(trigger)) if asyncio.iscoroutinefunction(func) else func(trigger)
+                    try:
+                        response = (await func(trigger)) if asyncio.iscoroutinefunction(func) else func(trigger)
+                    except Exception:
+                        print("Error calling handler function")
+                        traceback.print_exc()
+                        response = trigger.default_response()
+                        if response.context.is_http():
+                            response.context.as_http().status = 500
+                        else:
+                            response.context.as_topic().success = False
+
+                    # Handle lite responses with just data, assume a success in these cases
+                    if not isinstance(response, Response):
+                        full_response = trigger.default_response()
+                        # don't modify bytes responses
+                        if isinstance(response, bytes):
+                            full_response.data = response
+                        # convert dict responses to JSON
+                        elif isinstance(response, (dict, list, set)):
+                            full_response.data = bytes(json.dumps(response), "utf-8")
+                            if full_response.context.is_http():
+                                full_response.context.as_http().headers["Content-Type"] = "application/json"
+                        # convert anything else to a string
+                        # TODO: this might not always be safe. investigate alternatives
+                        else:
+                            full_response.data = bytes(str(response), "utf-8")
+                        response = full_response
+
+                    # Send function response back to server
+                    await request_channel.send(
+                        ClientMessage(id=srv_msg.id, trigger_response=response.to_grpc_trigger_response_context())
+                    )
                 except Exception:
-                    print("Error calling handler function")
+                    # Any unhandled exceptions in the above code will end the loop and stop processing future triggers
+                    # we catch them here as a last resort.
+                    print("An unexpected error occurred processing trigger or response")
                     traceback.print_exc()
                     response = trigger.default_response()
+                    response.data = bytes()
                     if response.context.is_http():
                         response.context.as_http().status = 500
                     else:
                         response.context.as_topic().success = False
 
-                # Handle lite responses with just data, assume a success in these cases
-                if not isinstance(response, Response):
-                    full_response = trigger.default_response()
-                    # don't modify bytes responses
-                    if isinstance(response, bytes):
-                        full_response.data = response
-                    # convert dict responses to JSON
-                    elif isinstance(response, (dict, list, set)):
-                        full_response.data = bytes(json.dumps(response), "utf-8")
-                        if full_response.context.is_http():
-                            full_response.context.as_http().headers["Content-Type"] = "application/json"
-                    # convert anything else to a string
-                    # TODO: this might not always be safe. investigate alternatives
-                    else:
-                        full_response.data = bytes(str(response), "utf-8")
-                    response = full_response
-
-                # Send function response back to server
-                await request_channel.send(
-                    ClientMessage(id=srv_msg.id, trigger_response=response.to_grpc_trigger_response_context())
-                )
+                    await request_channel.send(
+                        ClientMessage(id=srv_msg.id, trigger_response=response.to_grpc_trigger_response_context())
+                    )
             else:
                 print("unhandled message type {0}, skipping".format(msg_type))
                 continue
@@ -116,4 +132,4 @@ def start(handler: Callable[[Trigger], Coroutine[Any, Any, Union[Response, None,
 
     :param handler: handler function for incoming triggers. Can be sync or async, async is preferred.
     """
-    asyncio.run(_register_faas_worker(handler))
+    asyncio.run(_register_function_handler(handler))
