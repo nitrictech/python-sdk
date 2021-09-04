@@ -28,16 +28,54 @@ from nitric.faas import Trigger, Response
 from nitric.proto.nitric.faas.v1 import FaasServiceStub, InitRequest, ClientMessage
 import asyncio
 
+Handler = Callable[
+    [Trigger],
+    Union[
+        Coroutine[Any, Any, Union[Response, None, str, dict, list, set, bytes]],
+        Union[Response, None, str, dict, list, set, bytes],
+    ],
+]
 
-async def _register_function_handler(
-    func: Callable[
-        [Trigger],
-        Union[
-            Coroutine[Any, Any, Union[Response, None, str, dict, list, set, bytes]],
-            Union[Response, None, str, dict, list, set, bytes],
-        ],
-    ]
-):
+
+def _create_internal_error_response(trigger: Trigger):
+    response = trigger.default_response()
+    response.data = bytes()
+    if response.context.is_http():
+        response.context.as_http().status = 500
+    else:
+        response.context.as_topic().success = False
+    return response
+
+
+async def _handle_trigger(trigger: Trigger, func: Handler):
+    try:
+        response = (await func(trigger)) if asyncio.iscoroutinefunction(func) else func(trigger)
+    except Exception:
+        print("Error calling handler function")
+        traceback.print_exc()
+        return _create_internal_error_response(trigger)
+
+    # Handle lite responses with just data, assume a success in these cases
+    if not isinstance(response, Response):
+        full_response = trigger.default_response()
+        # don't modify bytes responses
+        if isinstance(response, bytes):
+            full_response.data = response
+        # convert dict responses to JSON
+        elif isinstance(response, (dict, list, set)):
+            full_response.data = bytes(json.dumps(response), "utf-8")
+            if full_response.context.is_http():
+                full_response.context.as_http().headers["Content-Type"] = "application/json"
+        # convert anything else to a string
+        # TODO: this might not always be safe. investigate alternatives
+        else:
+            full_response.data = bytes(str(response), "utf-8")
+        response = full_response
+
+    return response
+
+
+async def _register_function_handler(func: Handler):
     """
     Register a new FaaS worker with the Membrane, using the provided function as the handler.
 
@@ -61,34 +99,7 @@ async def _register_function_handler(
             if msg_type == "trigger_request":
                 trigger = Trigger.from_trigger_request(srv_msg.trigger_request)
                 try:
-                    try:
-                        response = (await func(trigger)) if asyncio.iscoroutinefunction(func) else func(trigger)
-                    except Exception:
-                        print("Error calling handler function")
-                        traceback.print_exc()
-                        response = trigger.default_response()
-                        if response.context.is_http():
-                            response.context.as_http().status = 500
-                        else:
-                            response.context.as_topic().success = False
-
-                    # Handle lite responses with just data, assume a success in these cases
-                    if not isinstance(response, Response):
-                        full_response = trigger.default_response()
-                        # don't modify bytes responses
-                        if isinstance(response, bytes):
-                            full_response.data = response
-                        # convert dict responses to JSON
-                        elif isinstance(response, (dict, list, set)):
-                            full_response.data = bytes(json.dumps(response), "utf-8")
-                            if full_response.context.is_http():
-                                full_response.context.as_http().headers["Content-Type"] = "application/json"
-                        # convert anything else to a string
-                        # TODO: this might not always be safe. investigate alternatives
-                        else:
-                            full_response.data = bytes(str(response), "utf-8")
-                        response = full_response
-
+                    response = await _handle_trigger(trigger, func)
                     # Send function response back to server
                     await request_channel.send(
                         ClientMessage(id=srv_msg.id, trigger_response=response.to_grpc_trigger_response_context())
@@ -98,12 +109,7 @@ async def _register_function_handler(
                     # we catch them here as a last resort.
                     print("An unexpected error occurred processing trigger or response")
                     traceback.print_exc()
-                    response = trigger.default_response()
-                    response.data = bytes()
-                    if response.context.is_http():
-                        response.context.as_http().status = 500
-                    else:
-                        response.context.as_topic().success = False
+                    response = _create_internal_error_response(trigger)
 
                     await request_channel.send(
                         ClientMessage(id=srv_msg.id, trigger_response=response.to_grpc_trigger_response_context())
@@ -126,7 +132,7 @@ async def _register_function_handler(
         channel.close()
 
 
-def start(handler: Callable[[Trigger], Coroutine[Any, Any, Union[Response, None, str, dict, list, set, bytes]]]):
+def start(handler: Handler):
     """
     Register the provided function as the trigger handler and starts handling new trigger requests.
 
