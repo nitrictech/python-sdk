@@ -19,7 +19,7 @@
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import patch, AsyncMock, Mock, call
 
-from nitric.faas import faas
+from nitric.faas import faas, Response, ResponseContext, TopicResponseContext
 from nitric.proto.nitric.faas.v1 import (
     ServerMessage,
     InitResponse,
@@ -47,7 +47,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         mock_register = AsyncMock()
         mock_handler = Mock()
 
-        with patch("nitric.faas.faas._register_faas_worker", mock_register):
+        with patch("nitric.faas.faas._register_function_handler", mock_register):
             faas.start(mock_handler)
 
         mock_register.assert_called_once_with(mock_handler)
@@ -57,7 +57,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         mock_register.return_value = mock_registered
         mock_handler = Mock()
 
-        with patch("nitric.faas.faas._register_faas_worker", mock_register):
+        with patch("nitric.faas.faas._register_function_handler", mock_register):
             with patch("asyncio.run", mock_asyncio_run):
                 faas.start(mock_handler)
 
@@ -83,7 +83,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         with patch("nitric.faas.faas.AsyncChannel", mock_async_channel_init), patch(
             "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.faas.new_default_channel", mock_grpc_channel):
-            await faas._register_faas_worker(mock_handler)
+            await faas._register_function_handler(mock_handler)
 
         # gRPC channel created
         mock_grpc_channel.assert_called_once()
@@ -122,7 +122,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         with patch("nitric.faas.faas.AsyncChannel", mock_async_channel_init), patch(
             "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.faas.new_default_channel", mock_grpc_channel):
-            await faas._register_faas_worker(mock_handler)
+            await faas._register_function_handler(mock_handler)
 
         # accept the init response from server
         assert 1 == stream_calls
@@ -155,7 +155,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         with patch("nitric.faas.faas.AsyncChannel", mock_async_channel_init), patch(
             "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.faas.new_default_channel", mock_grpc_channel):
-            await faas._register_faas_worker(mock_handler)
+            await faas._register_function_handler(mock_handler)
 
         # accept the init response from server
         assert 1 == stream_calls
@@ -184,7 +184,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         with patch("nitric.faas.faas.AsyncChannel", mock_async_channel_init), patch(
             "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.faas.new_default_channel", mock_grpc_channel):
-            await faas._register_faas_worker(mock_handler)
+            await faas._register_function_handler(mock_handler)
 
         # accept the trigger response from server
         assert 1 == stream_calls
@@ -223,7 +223,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         with patch("nitric.faas.faas.AsyncChannel", mock_async_channel_init), patch(
             "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.faas.new_default_channel", mock_grpc_channel):
-            await faas._register_faas_worker(mock_handler)
+            await faas._register_function_handler(mock_handler)
 
         # accept the trigger response from server
         assert 1 == stream_calls
@@ -263,7 +263,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         with patch("nitric.faas.faas.AsyncChannel", mock_async_channel_init), patch(
             "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.faas.new_default_channel", mock_grpc_channel):
-            await faas._register_faas_worker(mock_handler)
+            await faas._register_function_handler(mock_handler)
 
             # accept the trigger response from server
             assert 1 == stream_calls
@@ -303,7 +303,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         with patch("nitric.faas.faas.AsyncChannel", mock_async_channel_init), patch(
             "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.faas.new_default_channel", mock_grpc_channel):
-            await faas._register_faas_worker(mock_handler)
+            await faas._register_function_handler(mock_handler)
 
             # accept the trigger response from server
             assert 1 == stream_calls
@@ -344,7 +344,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         with patch("nitric.faas.faas.AsyncChannel", mock_async_channel_init), patch(
             "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.faas.new_default_channel", mock_grpc_channel):
-            await faas._register_faas_worker(mock_handler)
+            await faas._register_function_handler(mock_handler)
 
             # accept the trigger response from server
             assert 1 == stream_calls
@@ -356,3 +356,54 @@ class EventClientTest(IsolatedAsyncioTestCase):
             (message,) = args
             # Response string should be converted to bytes
             self.assertEqual(b"a test string", message.trigger_response.data)
+
+    async def test_unserializable_response(self):
+        class NoJsonForYou:
+            name: str
+
+            def __init__(self):
+                self.name = "Can't be serialized"
+
+        mock_handler = Mock()
+        mock_handler.return_value = Response(
+            data=NoJsonForYou(),
+            context=ResponseContext(context=TopicResponseContext(success=True)),
+        )
+        mock_grpc_channel = Mock()
+        mock_async_channel_init = Mock()
+        mock_async_chan = MockAsyncChannel()
+        mock_async_channel_init.return_value = mock_async_chan
+
+        stream_calls = 0
+
+        async def mock_stream(self, request_iterator):
+            nonlocal stream_calls
+            mock_stream = [
+                ServerMessage(
+                    trigger_request=TriggerRequest(
+                        data=b"",
+                        topic=TopicTriggerContext(),
+                    )
+                )
+            ]
+            for message in mock_stream:
+                stream_calls += 1
+                yield message
+
+        with patch("nitric.faas.faas.AsyncChannel", mock_async_channel_init), patch(
+            "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
+        ), patch("nitric.faas.faas.new_default_channel", mock_grpc_channel):
+            # An exception shouldn't be thrown, even though the serialization fails
+            await faas._register_function_handler(mock_handler)
+
+            # accept the trigger response from server
+            assert 1 == stream_calls
+            # handler called
+            mock_handler.assert_called_once()
+            # init, trigger response
+            self.assertEqual(2, len(mock_async_chan.send.mock_calls))
+            args, kwargs = mock_async_chan.send.call_args_list[1]
+            (message,) = args
+            # Response return a success status of false and no data.
+            self.assertEqual(bytes(), message.trigger_response.data)
+            self.assertFalse(message.trigger_response.topic.success)
