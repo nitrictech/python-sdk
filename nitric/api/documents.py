@@ -36,6 +36,8 @@ from nitric.proto.nitric.document.v1 import (
 )
 from nitric.utils import new_default_channel, _dict_from_struct, _struct_from_dict
 
+NIL_DOC_ID = ""
+
 
 class CollectionDepthException(Exception):
     """The max depth of document sub-collections has been exceeded."""
@@ -147,6 +149,23 @@ class CollectionRef:
         """Return a reference to a document in the collection."""
         return DocumentRef(_documents=self._documents, parent=self, id=doc_id)
 
+    def collection(self, name: str) -> CollectionGroupRef:
+        """
+        Return a reference to a sub-collection of this document.
+
+        This is currently only supported to one level of depth.
+        e.g. Documents().collection('a').collection('b').doc('c') is valid,
+        Documents().collection('a').doc('b').collection('c').collection('d') is invalid (1 level too deep).
+        """
+        current_depth = self.sub_collection_depth()
+        if current_depth >= MAX_SUB_COLLECTION_DEPTH:
+            # Collection nesting is only supported to a maximum depth.
+            raise CollectionDepthException(
+                f"sub-collections supported to a depth of {MAX_SUB_COLLECTION_DEPTH}, "
+                f"attempted to create new collection with depth {current_depth + 1}"
+            )
+        return CollectionGroupRef(_documents=self._documents, name=name, parent=self)
+
     def query(
         self,
         paging_token: Any = None,
@@ -172,6 +191,66 @@ class CollectionRef:
     def is_sub_collection(self):
         """Return True if this collection is a sub-collection of a document in another collection."""
         return self.parent is not None
+
+
+@dataclass(frozen=True, order=True)
+class CollectionGroupRef:
+    """A reference to a collection group."""
+
+    _documents: Documents
+    name: str
+    parent: Union[CollectionRef, None] = field(default_factory=lambda: None)
+
+    def query(
+        self,
+        paging_token: Any = None,
+        limit: int = 0,
+        expressions: Union[Expression, List[Expression]] = None,
+    ) -> QueryBuilder:
+        """Return a query builder scoped to this collection."""
+        return QueryBuilder(
+            documents=self._documents,
+            collection=self.to_collection_ref(),
+            paging_token=paging_token,
+            limit=limit,
+            expressions=[expressions] if isinstance(expressions, Expression) else expressions,
+        )
+
+    def sub_collection_depth(self) -> int:
+        """Return the depth of this collection group, which is a count of the parents above this collection."""
+        if not self.is_sub_collection():
+            return 0
+        else:
+            return self.parent.sub_collection_depth() + 1
+
+    def is_sub_collection(self):
+        """Return True if this collection is a sub-collection of a document in another collection."""
+        return self.parent is not None
+
+    def to_collection_ref(self):
+        """Return this collection group as a collection ref"""
+        return CollectionRef(
+            self._documents,
+            self.name,
+            DocumentRef(
+                self._documents,
+                self.parent,
+                NIL_DOC_ID,
+            ),
+        )
+
+    @staticmethod
+    def from_collection_ref(collectionRef: CollectionRef, documents: Documents) -> CollectionGroupRef:
+        """Return a collection ref as a collection group"""
+        if collectionRef.parent is not None:
+            return CollectionGroupRef(
+                documents,
+                collectionRef.name,
+                CollectionGroupRef.from_collection_ref(
+                    collectionRef.parent,
+                    documents,
+                ),
+            )
 
 
 class Operator(Enum):

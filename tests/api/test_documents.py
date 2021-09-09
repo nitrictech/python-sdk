@@ -200,6 +200,24 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
             "sub-collections supported to a depth of 1, attempted to create new collection with depth 2", str(e.value)
         )
 
+    def test_build_collection_subcollection(self):
+        col_ref = Documents().collection("test-collection").collection("test-subcollection")
+
+        assert col_ref == col_ref
+
+    def test_nested_subcollections_depth(self):
+        col_ref = Documents().collection("test-collection").collection("test-subcollection")
+
+        assert col_ref.sub_collection_depth() == 1
+
+    async def test_nested_subcollectiongroup_fail(self):
+        with pytest.raises(Exception) as e:
+            Documents().collection("a").doc("b").collection("c").collection("should-fail")
+
+        self.assertIn(
+            "sub-collections supported to a depth of 1, attempted to create new collection with depth 2", str(e.value)
+        )
+
     async def test_collection_query_fetch(self):
         mock_query = AsyncMock()
         mock_query.return_value = DocumentQueryResponse(
@@ -228,6 +246,48 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
 
         mock_query.assert_called_once_with(
             collection=Collection(name="a"),
+            expressions=[
+                Expression(operand="name", operator="startsWith", value=ExpressionValue(string_value="test")),
+                Expression(operand="age", operator=">", value=ExpressionValue(int_value=3)),
+                Expression(operand="dollar", operator="<", value=ExpressionValue(double_value=2.0)),
+                Expression(operand="true", operator="==", value=ExpressionValue(bool_value=True)),
+            ],
+            limit=3,
+            paging_token=None,
+        )
+
+        self.assertEqual({"b": "c"}, results.paging_token)
+        self.assertEqual([{"a": i} for i in range(3)], [doc.content for doc in results.documents])
+
+    async def test_subcollection_query_fetch(self):
+        mock_query = AsyncMock()
+        mock_query.return_value = DocumentQueryResponse(
+            documents=[
+                Document(
+                    content=Struct(fields={"a": Value(number_value=i)}),
+                    key=Key(id="test-doc", collection=Collection(name="a")),
+                )
+                for i in range(3)
+            ],
+            paging_token={"b": "c"},
+        )
+
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.query", mock_query):
+            results = (
+                await Documents()
+                .collection("a")
+                .collection("b")
+                .query()
+                .where("name", "startsWith", "test")
+                .where("age", ">", 3)
+                .where("dollar", "<", 2.0)
+                .where("true", "==", True)
+                .limit(3)
+                .fetch()
+            )
+
+        mock_query.assert_called_once_with(
+            collection=Collection(name="b", parent=Key(Collection(name="a"), id="")),
             expressions=[
                 Expression(operand="name", operator="startsWith", value=ExpressionValue(string_value="test")),
                 Expression(operand="age", operator=">", value=ExpressionValue(int_value=3)),
