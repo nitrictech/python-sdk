@@ -25,7 +25,7 @@ from betterproto.grpc.util.async_channel import AsyncChannel
 
 from nitric.utils import new_default_channel
 from nitric.faas import Trigger, Response
-from nitric.proto.nitric.faas.v1 import FaasServiceStub, InitRequest, ClientMessage
+from nitricapi.nitric.faas.v1 import FaasServiceStub, InitRequest, ClientMessage
 import asyncio
 
 Handler = Callable[

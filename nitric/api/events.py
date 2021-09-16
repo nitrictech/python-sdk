@@ -24,7 +24,7 @@ from grpclib import GRPCError
 
 from nitric.api.exception import exception_from_grpc_error
 from nitric.utils import new_default_channel, _struct_from_dict
-from nitric.proto.nitric.event.v1 import EventServiceStub, NitricEvent, TopicServiceStub
+from nitricapi.nitric.event.v1 import EventServiceStub, NitricEvent, TopicServiceStub
 from dataclasses import dataclass, field
 
 

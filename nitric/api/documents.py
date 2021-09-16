@@ -26,7 +26,7 @@ from grpclib import GRPCError
 
 from nitric.api.const import MAX_SUB_COLLECTION_DEPTH
 from nitric.api.exception import exception_from_grpc_error
-from nitric.proto.nitric.document.v1 import (
+from nitricapi.nitric.document.v1 import (
     DocumentServiceStub,
     Collection as CollectionMessage,
     Key as KeyMessage,
@@ -34,6 +34,7 @@ from nitric.proto.nitric.document.v1 import (
     ExpressionValue,
     Document as DocumentMessage,
 )
+
 from nitric.utils import new_default_channel, _dict_from_struct, _struct_from_dict
 
 NIL_DOC_ID = ""
@@ -228,7 +229,7 @@ class CollectionGroupRef:
         return self.parent is not None
 
     def to_collection_ref(self):
-        """Return this collection group as a collection ref"""
+        """Return this collection group as a collection ref."""
         return CollectionRef(
             self._documents,
             self.name,
@@ -241,7 +242,7 @@ class CollectionGroupRef:
 
     @staticmethod
     def from_collection_ref(collectionRef: CollectionRef, documents: Documents) -> CollectionGroupRef:
-        """Return a collection ref as a collection group"""
+        """Return a collection ref as a collection group."""
         if collectionRef.parent is not None:
             return CollectionGroupRef(
                 documents,

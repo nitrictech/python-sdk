@@ -24,7 +24,7 @@ from grpclib import GRPCError
 
 from nitric.api.exception import exception_from_grpc_error
 from nitric.utils import new_default_channel
-from nitric.proto.nitric.secret.v1 import SecretServiceStub, Secret as SecretMessage, SecretVersion as VersionMessage
+from nitricapi.nitric.secret.v1 import SecretServiceStub, Secret as SecretMessage, SecretVersion as VersionMessage
 
 
 class Secrets(object):

@@ -20,7 +20,7 @@ from unittest import IsolatedAsyncioTestCase
 from unittest.mock import patch, AsyncMock, Mock, call
 
 from nitric.faas import ResponseContext, HttpResponseContext, TopicResponseContext, Trigger, TriggerContext
-from nitric.proto.nitric.faas.v1 import TriggerRequest, TopicTriggerContext, HttpTriggerContext
+from nitricapi.nitric.faas.v1 import TriggerRequest, TopicTriggerContext, HttpTriggerContext
 
 
 class ResponseContextTest(IsolatedAsyncioTestCase):
