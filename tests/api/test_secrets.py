@@ -25,7 +25,7 @@ from grpclib import GRPCError, Status
 from nitric.api import Secrets
 from nitric.api.exception import UnknownException
 from nitric.api.secrets import SecretValue
-from nitric.proto.nitric.secret.v1 import SecretPutResponse, SecretVersion, Secret, SecretAccessResponse
+from nitricapi.nitric.secret.v1 import SecretPutResponse, SecretVersion, Secret, SecretAccessResponse
 
 
 class Object(object):
@@ -40,7 +40,7 @@ class SecretsClientTest(IsolatedAsyncioTestCase):
         )
         mock_put.return_value = mock_response
 
-        with patch("nitric.proto.nitric.secret.v1.SecretServiceStub.put", mock_put):
+        with patch("nitricapi.nitric.secret.v1.SecretServiceStub.put", mock_put):
             secret = Secrets().secret("test-secret")
             result = await secret.put(b"a test secret value")
 
@@ -60,7 +60,7 @@ class SecretsClientTest(IsolatedAsyncioTestCase):
         )
         mock_put.return_value = mock_response
 
-        with patch("nitric.proto.nitric.secret.v1.SecretServiceStub.put", mock_put):
+        with patch("nitricapi.nitric.secret.v1.SecretServiceStub.put", mock_put):
             secret = Secrets().secret("test-secret")
             await secret.put("a test secret value")  # string, not bytes
 
@@ -82,7 +82,7 @@ class SecretsClientTest(IsolatedAsyncioTestCase):
         )
         mock_access.return_value = mock_response
 
-        with patch("nitric.proto.nitric.secret.v1.SecretServiceStub.access", mock_access):
+        with patch("nitricapi.nitric.secret.v1.SecretServiceStub.access", mock_access):
             version = Secrets().secret("test-secret").latest()
             result = await version.access()
 
@@ -113,7 +113,7 @@ class SecretsClientTest(IsolatedAsyncioTestCase):
         mock_put = AsyncMock()
         mock_put.side_effect = GRPCError(Status.UNKNOWN, "test error")
 
-        with patch("nitric.proto.nitric.secret.v1.SecretServiceStub.put", mock_put):
+        with patch("nitricapi.nitric.secret.v1.SecretServiceStub.put", mock_put):
             with pytest.raises(UnknownException) as e:
                 secret = Secrets().secret("test-secret")
                 await secret.put(b"a test secret value")
@@ -122,6 +122,6 @@ class SecretsClientTest(IsolatedAsyncioTestCase):
         mock_access = AsyncMock()
         mock_access.side_effect = GRPCError(Status.UNKNOWN, "test error")
 
-        with patch("nitric.proto.nitric.secret.v1.SecretServiceStub.access", mock_access):
+        with patch("nitricapi.nitric.secret.v1.SecretServiceStub.access", mock_access):
             with pytest.raises(UnknownException) as e:
                 await Secrets().secret("test-secret").latest().access()

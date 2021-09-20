@@ -19,8 +19,8 @@
 import json
 from dataclasses import dataclass, field
 from typing import Union, Any
-from nitric.proto.nitric.faas import v1
-from nitric.proto.nitric.faas.v1 import TriggerResponse
+from nitricapi.nitric.faas import v1
+from nitricapi.nitric.faas.v1 import TriggerResponse
 
 
 @dataclass(order=True)

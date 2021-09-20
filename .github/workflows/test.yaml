@@ -26,8 +26,6 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install
       run: make install
-    - name: Generate gRPC Client
-      run: make grpc-client
     - name: Run Tox
       # Run tox using the version of Python in `PATH`
       run: tox -e py

@@ -9,7 +9,7 @@ class QueuesExamplesTest(IsolatedAsyncioTestCase):
     async def test_receive_queue(self):
         mock_receive = AsyncMock()
 
-        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.receive", mock_receive):
+        with patch("nitricapi.nitric.queue.v1.QueueServiceStub.receive", mock_receive):
             await queues_receive()
 
         mock_receive.assert_called_once()
@@ -17,7 +17,7 @@ class QueuesExamplesTest(IsolatedAsyncioTestCase):
     async def test_send_queue(self):
         mock_send = AsyncMock()
 
-        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.send", mock_send):
+        with patch("nitricapi.nitric.queue.v1.QueueServiceStub.send", mock_send):
             await queues_send()
 
         mock_send.assert_called_once()

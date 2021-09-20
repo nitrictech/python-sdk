@@ -11,8 +11,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2.3.1
       with:
-        token: ${{secrets.SUBMOD_PAT}}
-        submodules: recursive
         fetch-depth: 0 # needed to retrieve most recent tag
     - name: Set up Python 3.8
       uses: actions/setup-python@v2

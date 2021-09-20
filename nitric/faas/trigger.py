@@ -21,7 +21,7 @@ from dataclasses import dataclass, field
 
 import betterproto
 
-from nitric.proto.nitric.faas.v1 import TriggerRequest
+from nitricapi.nitric.faas.v1 import TriggerRequest
 from nitric.faas.response import Response, TopicResponseContext, HttpResponseContext, ResponseContext
 
 
@@ -94,9 +94,14 @@ class TriggerContext(object):
         """Return a TriggerContext from a TriggerRequest."""
         context_type, context = betterproto.which_one_of(trigger_request, "context")
         if context_type == "http":
+            if len(trigger_request.http.headers.keys()) > 0:
+                new_headers = {k: v[0].value for (k, v) in trigger_request.http.headers.items()}
+            else:
+                new_headers = trigger_request.http.headers_old
+
             return TriggerContext(
                 context=HttpTriggerContext(
-                    headers=trigger_request.http.headers,
+                    headers=new_headers,
                     method=trigger_request.http.method,
                     query_params=trigger_request.http.query_params,
                     path=trigger_request.http.path,
