@@ -1,8 +1,9 @@
 # [START import]
 from nitric.api import Events, Event
+
 # [END import]
 async def events_event_ids():
-# [START snippet]
+    # [START snippet]
     # Create a new Event Client with default settings
     topic = Events().topic("my-topic")
 
@@ -10,4 +11,6 @@ async def events_event_ids():
 
     # Publish an event to the topic 'my-topic'
     event = await topic.publish(Event(payload=payload))
+
+
 # [END snippet]

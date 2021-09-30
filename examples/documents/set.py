@@ -1,8 +1,9 @@
 # [START import]
 from nitric.api import Documents
+
 # [END import]
 async def documents_set():
-# [START snippet]
+    # [START snippet]
     docs = Documents()
 
     document = docs.collection("products").doc("nitric")
@@ -16,4 +17,6 @@ async def documents_set():
             }
         )
     )
+
+
 # [END snippet]

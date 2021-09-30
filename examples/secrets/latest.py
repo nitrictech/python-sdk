@@ -1,8 +1,9 @@
 # [START import]
 from nitric.api import Secrets
+
 # [END import]
 async def secret_latest():
-# [START snippet]
+    # [START snippet]
     # Construct a new secret client
     secrets = Secrets()
 
@@ -11,4 +12,6 @@ async def secret_latest():
 
     # Access the latest secret version
     value = await latest_version.access()
+
+
 # [END snippet]
