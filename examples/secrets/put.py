@@ -1,8 +1,9 @@
 # [START import]
 from nitric.api import Secrets
+
 # [END import]
 async def secret_put():
-# [START snippet]
+    # [START snippet]
     # Construct a new secret client
     secrets = Secrets()
 
@@ -12,4 +13,6 @@ async def secret_put():
 
     # Access the exact version of the put secret, for future reference
     password = await new_version.access()
+
+
 # [END snippet]

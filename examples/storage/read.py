@@ -1,8 +1,9 @@
 # [START import]
 from nitric.api import Storage
+
 # [END import]
 async def storage_read():
-# [START snippet]
+    # [START snippet]
     # Construct a new storage client with default settings
     storage = Storage()
 
@@ -10,4 +11,6 @@ async def storage_read():
 
     # Read bytes from the file
     file = await file_ref.read()
+
+
 # [END snippet]

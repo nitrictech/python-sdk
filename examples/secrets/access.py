@@ -1,8 +1,9 @@
 # [START import]
 from nitric.api import Secrets
+
 # [END import]
 async def secret_access():
-# [START snippet]
+    # [START snippet]
     # Construct a new secret client
     secrets = Secrets()
 
@@ -11,4 +12,6 @@ async def secret_access():
     value = await secrets.secret("database.password").version(version).access()
 
     password = value.as_string()
+
+
 # [END snippet]
