@@ -44,24 +44,169 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from grpclib import GRPCError
 
 
-class UnimplementedException(Exception):
-    &#34;&#34;&#34;Exception raised when the requested operation isn&#39;t supported by the server.&#34;&#34;&#34;
-
-    pass
-
-
-class AlreadyExistsException(Exception):
-    &#34;&#34;&#34;Exception raised when an entity already exist during a request to create a new entity.&#34;&#34;&#34;
+class NitricServiceException(Exception):
+    &#34;&#34;&#34;Base exception for all errors returned by Nitric API methods.&#34;&#34;&#34;
 
     pass
 
 
-class UnavailableException(Exception):
-    &#34;&#34;&#34;Exception raised when a gRPC service is unavailable.&#34;&#34;&#34;
+class AbortedException(NitricServiceException):
+    &#34;&#34;&#34;The operation was aborted, typically due to a concurrency issue such as a transaction abort.&#34;&#34;&#34;
 
-    pass</code></pre>
+    pass
+
+
+class AlreadyExistsException(NitricServiceException):
+    &#34;&#34;&#34;The entity that a client attempted to create (e.g., file or directory) already exists.&#34;&#34;&#34;
+
+    pass
+
+
+class CancelledException(NitricServiceException):
+    &#34;&#34;&#34;The operation was cancelled, typically by the caller.&#34;&#34;&#34;
+
+    pass
+
+
+class DataLossException(NitricServiceException):
+    &#34;&#34;&#34;Unrecoverable data loss or corruption.&#34;&#34;&#34;
+
+    pass
+
+
+class DeadlineExceededException(NitricServiceException):
+    &#34;&#34;&#34;The deadline expired before the operation could complete.&#34;&#34;&#34;
+
+    pass
+
+
+class FailedPreconditionException(NitricServiceException):
+    &#34;&#34;&#34;
+    The operation was rejected because the system is not in a state required for the operation&#39;s execution.
+
+    For example, the document collection to be deleted is not empty.
+    &#34;&#34;&#34;
+
+    pass
+
+
+class InternalException(NitricServiceException):
+    &#34;&#34;&#34;Internal errors.&#34;&#34;&#34;
+
+    pass
+
+
+class InvalidArgumentException(NitricServiceException):
+    &#34;&#34;&#34;
+    The client specified an invalid argument.
+
+    Note that this differs from FAILED_PRECONDITION. INVALID_ARGUMENT indicates arguments that are problematic
+    regardless of the state of the system (e.g., a malformed file name).
+    &#34;&#34;&#34;
+
+    pass
+
+
+class OutOfRangeException(NitricServiceException):
+    &#34;&#34;&#34;
+    The operation was attempted past the valid range.
+
+    E.g. reading past the end of a file.
+    &#34;&#34;&#34;
+
+    pass
+
+
+class NotFoundException(NitricServiceException):
+    &#34;&#34;&#34;Some requested entity was not found.&#34;&#34;&#34;
+
+    pass
+
+
+class PermissionDeniedException(NitricServiceException):
+    &#34;&#34;&#34;The caller does not have permission to execute the specified operation.&#34;&#34;&#34;
+
+    pass
+
+
+class ResourceExhaustedException(NitricServiceException):
+    &#34;&#34;&#34;Some resource has been exhausted, perhaps a per-user quota, or perhaps the entire file system is out of space.&#34;&#34;&#34;
+
+    pass
+
+
+class UnauthenticatedException(NitricServiceException):
+    &#34;&#34;&#34;The request does not have valid authentication credentials for the operation.&#34;&#34;&#34;
+
+    pass
+
+
+class UnavailableException(NitricServiceException):
+    &#34;&#34;&#34;
+    The service is currently unavailable.
+
+    This is most likely a transient condition, which can be corrected by retrying with a backoff.
+    &#34;&#34;&#34;
+
+    pass
+
+
+class UnimplementedException(NitricServiceException):
+    &#34;&#34;&#34;
+    The operation is not implemented or is not supported/enabled in this service.
+
+    May appear when using an older version of the Membrane with a newer SDK.
+    &#34;&#34;&#34;
+
+    pass
+
+
+class UnknownException(NitricServiceException):
+    &#34;&#34;&#34;Unknown error.&#34;&#34;&#34;
+
+    pass
+
+
+def exception_from_grpc_error(error: GRPCError):
+    &#34;&#34;&#34;Translate a gRPC error to a nitric api exception.&#34;&#34;&#34;
+    return exception_from_grpc_code(error.status.value, error.message)
+
+
+def exception_from_grpc_code(code: int, message: str = None):
+    &#34;&#34;&#34;
+    Return a new instance of the appropriate exception for the given status code.
+
+    If an unknown or unexpected status code value is provided an UnknownException will be returned.
+    &#34;&#34;&#34;
+    if code not in _exception_code_map:
+        return UnknownException()
+
+    return _exception_code_map[code](message)
+
+
+# Map of gRPC status codes to the appropriate exception class.
+_exception_code_map = {
+    0: lambda message: Exception(&#34;Error returned with status 0, which is a success status&#34;),
+    1: CancelledException,
+    2: UnknownException,
+    3: InvalidArgumentException,
+    4: DeadlineExceededException,
+    5: NotFoundException,
+    6: AlreadyExistsException,
+    7: PermissionDeniedException,
+    8: ResourceExhaustedException,
+    9: FailedPreconditionException,
+    10: AbortedException,
+    11: OutOfRangeException,
+    12: UnimplementedException,
+    13: InternalException,
+    14: UnavailableException,
+    15: DataLossException,
+    16: UnauthenticatedException,
+}</code></pre>
 </details>
 </section>
 <section>
@@ -69,27 +214,388 @@ class UnavailableException(Exception):
 <section>
 </section>
 <section>
-</section>
-<section>
-<h2 class="section-title" id="header-classes">Classes</h2>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="nitric.api.exception.AlreadyExistsException"><code class="flex name class">
-<span>class <span class="ident">AlreadyExistsException</span></span>
-<span>(</span><span>*args, **kwargs)</span>
+<dt id="nitric.api.exception.exception_from_grpc_code"><code class="name flex">
+<span>def <span class="ident">exception_from_grpc_code</span></span>(<span>code: int, message: str = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Exception raised when an entity already exist during a request to create a new entity.</p></div>
+<div class="desc"><p>Return a new instance of the appropriate exception for the given status code.</p>
+<p>If an unknown or unexpected status code value is provided an UnknownException will be returned.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class AlreadyExistsException(Exception):
-    &#34;&#34;&#34;Exception raised when an entity already exist during a request to create a new entity.&#34;&#34;&#34;
+<pre><code class="python">def exception_from_grpc_code(code: int, message: str = None):
+    &#34;&#34;&#34;
+    Return a new instance of the appropriate exception for the given status code.
+
+    If an unknown or unexpected status code value is provided an UnknownException will be returned.
+    &#34;&#34;&#34;
+    if code not in _exception_code_map:
+        return UnknownException()
+
+    return _exception_code_map[code](message)</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.exception.exception_from_grpc_error"><code class="name flex">
+<span>def <span class="ident">exception_from_grpc_error</span></span>(<span>error: grpclib.exceptions.GRPCError)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Translate a gRPC error to a nitric api exception.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def exception_from_grpc_error(error: GRPCError):
+    &#34;&#34;&#34;Translate a gRPC error to a nitric api exception.&#34;&#34;&#34;
+    return exception_from_grpc_code(error.status.value, error.message)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="nitric.api.exception.AbortedException"><code class="flex name class">
+<span>class <span class="ident">AbortedException</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The operation was aborted, typically due to a concurrency issue such as a transaction abort.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AbortedException(NitricServiceException):
+    &#34;&#34;&#34;The operation was aborted, typically due to a concurrency issue such as a transaction abort.&#34;&#34;&#34;
 
     pass</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
+<li><a title="nitric.api.exception.NitricServiceException" href="#nitric.api.exception.NitricServiceException">NitricServiceException</a></li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="nitric.api.exception.AlreadyExistsException"><code class="flex name class">
+<span>class <span class="ident">AlreadyExistsException</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The entity that a client attempted to create (e.g., file or directory) already exists.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AlreadyExistsException(NitricServiceException):
+    &#34;&#34;&#34;The entity that a client attempted to create (e.g., file or directory) already exists.&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.api.exception.NitricServiceException" href="#nitric.api.exception.NitricServiceException">NitricServiceException</a></li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="nitric.api.exception.CancelledException"><code class="flex name class">
+<span>class <span class="ident">CancelledException</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The operation was cancelled, typically by the caller.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CancelledException(NitricServiceException):
+    &#34;&#34;&#34;The operation was cancelled, typically by the caller.&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.api.exception.NitricServiceException" href="#nitric.api.exception.NitricServiceException">NitricServiceException</a></li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="nitric.api.exception.DataLossException"><code class="flex name class">
+<span>class <span class="ident">DataLossException</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Unrecoverable data loss or corruption.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DataLossException(NitricServiceException):
+    &#34;&#34;&#34;Unrecoverable data loss or corruption.&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.api.exception.NitricServiceException" href="#nitric.api.exception.NitricServiceException">NitricServiceException</a></li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="nitric.api.exception.DeadlineExceededException"><code class="flex name class">
+<span>class <span class="ident">DeadlineExceededException</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The deadline expired before the operation could complete.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DeadlineExceededException(NitricServiceException):
+    &#34;&#34;&#34;The deadline expired before the operation could complete.&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.api.exception.NitricServiceException" href="#nitric.api.exception.NitricServiceException">NitricServiceException</a></li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="nitric.api.exception.FailedPreconditionException"><code class="flex name class">
+<span>class <span class="ident">FailedPreconditionException</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The operation was rejected because the system is not in a state required for the operation's execution.</p>
+<p>For example, the document collection to be deleted is not empty.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FailedPreconditionException(NitricServiceException):
+    &#34;&#34;&#34;
+    The operation was rejected because the system is not in a state required for the operation&#39;s execution.
+
+    For example, the document collection to be deleted is not empty.
+    &#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.api.exception.NitricServiceException" href="#nitric.api.exception.NitricServiceException">NitricServiceException</a></li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="nitric.api.exception.InternalException"><code class="flex name class">
+<span>class <span class="ident">InternalException</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Internal errors.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class InternalException(NitricServiceException):
+    &#34;&#34;&#34;Internal errors.&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.api.exception.NitricServiceException" href="#nitric.api.exception.NitricServiceException">NitricServiceException</a></li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="nitric.api.exception.InvalidArgumentException"><code class="flex name class">
+<span>class <span class="ident">InvalidArgumentException</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The client specified an invalid argument.</p>
+<p>Note that this differs from FAILED_PRECONDITION. INVALID_ARGUMENT indicates arguments that are problematic
+regardless of the state of the system (e.g., a malformed file name).</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class InvalidArgumentException(NitricServiceException):
+    &#34;&#34;&#34;
+    The client specified an invalid argument.
+
+    Note that this differs from FAILED_PRECONDITION. INVALID_ARGUMENT indicates arguments that are problematic
+    regardless of the state of the system (e.g., a malformed file name).
+    &#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.api.exception.NitricServiceException" href="#nitric.api.exception.NitricServiceException">NitricServiceException</a></li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="nitric.api.exception.NitricServiceException"><code class="flex name class">
+<span>class <span class="ident">NitricServiceException</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base exception for all errors returned by Nitric API methods.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class NitricServiceException(Exception):
+    &#34;&#34;&#34;Base exception for all errors returned by Nitric API methods.&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="nitric.api.exception.AbortedException" href="#nitric.api.exception.AbortedException">AbortedException</a></li>
+<li><a title="nitric.api.exception.AlreadyExistsException" href="#nitric.api.exception.AlreadyExistsException">AlreadyExistsException</a></li>
+<li><a title="nitric.api.exception.CancelledException" href="#nitric.api.exception.CancelledException">CancelledException</a></li>
+<li><a title="nitric.api.exception.DataLossException" href="#nitric.api.exception.DataLossException">DataLossException</a></li>
+<li><a title="nitric.api.exception.DeadlineExceededException" href="#nitric.api.exception.DeadlineExceededException">DeadlineExceededException</a></li>
+<li><a title="nitric.api.exception.FailedPreconditionException" href="#nitric.api.exception.FailedPreconditionException">FailedPreconditionException</a></li>
+<li><a title="nitric.api.exception.InternalException" href="#nitric.api.exception.InternalException">InternalException</a></li>
+<li><a title="nitric.api.exception.InvalidArgumentException" href="#nitric.api.exception.InvalidArgumentException">InvalidArgumentException</a></li>
+<li><a title="nitric.api.exception.NotFoundException" href="#nitric.api.exception.NotFoundException">NotFoundException</a></li>
+<li><a title="nitric.api.exception.OutOfRangeException" href="#nitric.api.exception.OutOfRangeException">OutOfRangeException</a></li>
+<li><a title="nitric.api.exception.PermissionDeniedException" href="#nitric.api.exception.PermissionDeniedException">PermissionDeniedException</a></li>
+<li><a title="nitric.api.exception.ResourceExhaustedException" href="#nitric.api.exception.ResourceExhaustedException">ResourceExhaustedException</a></li>
+<li><a title="nitric.api.exception.UnauthenticatedException" href="#nitric.api.exception.UnauthenticatedException">UnauthenticatedException</a></li>
+<li><a title="nitric.api.exception.UnavailableException" href="#nitric.api.exception.UnavailableException">UnavailableException</a></li>
+<li><a title="nitric.api.exception.UnimplementedException" href="#nitric.api.exception.UnimplementedException">UnimplementedException</a></li>
+<li><a title="nitric.api.exception.UnknownException" href="#nitric.api.exception.UnknownException">UnknownException</a></li>
+</ul>
+</dd>
+<dt id="nitric.api.exception.NotFoundException"><code class="flex name class">
+<span>class <span class="ident">NotFoundException</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Some requested entity was not found.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class NotFoundException(NitricServiceException):
+    &#34;&#34;&#34;Some requested entity was not found.&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.api.exception.NitricServiceException" href="#nitric.api.exception.NitricServiceException">NitricServiceException</a></li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="nitric.api.exception.OutOfRangeException"><code class="flex name class">
+<span>class <span class="ident">OutOfRangeException</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The operation was attempted past the valid range.</p>
+<p>E.g. reading past the end of a file.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class OutOfRangeException(NitricServiceException):
+    &#34;&#34;&#34;
+    The operation was attempted past the valid range.
+
+    E.g. reading past the end of a file.
+    &#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.api.exception.NitricServiceException" href="#nitric.api.exception.NitricServiceException">NitricServiceException</a></li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="nitric.api.exception.PermissionDeniedException"><code class="flex name class">
+<span>class <span class="ident">PermissionDeniedException</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The caller does not have permission to execute the specified operation.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PermissionDeniedException(NitricServiceException):
+    &#34;&#34;&#34;The caller does not have permission to execute the specified operation.&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.api.exception.NitricServiceException" href="#nitric.api.exception.NitricServiceException">NitricServiceException</a></li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="nitric.api.exception.ResourceExhaustedException"><code class="flex name class">
+<span>class <span class="ident">ResourceExhaustedException</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Some resource has been exhausted, perhaps a per-user quota, or perhaps the entire file system is out of space.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ResourceExhaustedException(NitricServiceException):
+    &#34;&#34;&#34;Some resource has been exhausted, perhaps a per-user quota, or perhaps the entire file system is out of space.&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.api.exception.NitricServiceException" href="#nitric.api.exception.NitricServiceException">NitricServiceException</a></li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="nitric.api.exception.UnauthenticatedException"><code class="flex name class">
+<span>class <span class="ident">UnauthenticatedException</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The request does not have valid authentication credentials for the operation.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class UnauthenticatedException(NitricServiceException):
+    &#34;&#34;&#34;The request does not have valid authentication credentials for the operation.&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.api.exception.NitricServiceException" href="#nitric.api.exception.NitricServiceException">NitricServiceException</a></li>
 <li>builtins.Exception</li>
 <li>builtins.BaseException</li>
 </ul>
@@ -99,18 +605,24 @@ class UnavailableException(Exception):
 <span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Exception raised when a gRPC service is unavailable.</p></div>
+<div class="desc"><p>The service is currently unavailable.</p>
+<p>This is most likely a transient condition, which can be corrected by retrying with a backoff.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class UnavailableException(Exception):
-    &#34;&#34;&#34;Exception raised when a gRPC service is unavailable.&#34;&#34;&#34;
+<pre><code class="python">class UnavailableException(NitricServiceException):
+    &#34;&#34;&#34;
+    The service is currently unavailable.
+
+    This is most likely a transient condition, which can be corrected by retrying with a backoff.
+    &#34;&#34;&#34;
 
     pass</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
+<li><a title="nitric.api.exception.NitricServiceException" href="#nitric.api.exception.NitricServiceException">NitricServiceException</a></li>
 <li>builtins.Exception</li>
 <li>builtins.BaseException</li>
 </ul>
@@ -120,18 +632,46 @@ class UnavailableException(Exception):
 <span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Exception raised when the requested operation isn't supported by the server.</p></div>
+<div class="desc"><p>The operation is not implemented or is not supported/enabled in this service.</p>
+<p>May appear when using an older version of the Membrane with a newer SDK.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class UnimplementedException(Exception):
-    &#34;&#34;&#34;Exception raised when the requested operation isn&#39;t supported by the server.&#34;&#34;&#34;
+<pre><code class="python">class UnimplementedException(NitricServiceException):
+    &#34;&#34;&#34;
+    The operation is not implemented or is not supported/enabled in this service.
+
+    May appear when using an older version of the Membrane with a newer SDK.
+    &#34;&#34;&#34;
 
     pass</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
+<li><a title="nitric.api.exception.NitricServiceException" href="#nitric.api.exception.NitricServiceException">NitricServiceException</a></li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="nitric.api.exception.UnknownException"><code class="flex name class">
+<span>class <span class="ident">UnknownException</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Unknown error.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class UnknownException(NitricServiceException):
+    &#34;&#34;&#34;Unknown error.&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.api.exception.NitricServiceException" href="#nitric.api.exception.NitricServiceException">NitricServiceException</a></li>
 <li>builtins.Exception</li>
 <li>builtins.BaseException</li>
 </ul>
@@ -150,16 +690,64 @@ class UnavailableException(Exception):
 <li><code><a title="nitric.api" href="index.html">nitric.api</a></code></li>
 </ul>
 </li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="nitric.api.exception.exception_from_grpc_code" href="#nitric.api.exception.exception_from_grpc_code">exception_from_grpc_code</a></code></li>
+<li><code><a title="nitric.api.exception.exception_from_grpc_error" href="#nitric.api.exception.exception_from_grpc_error">exception_from_grpc_error</a></code></li>
+</ul>
+</li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
+<h4><code><a title="nitric.api.exception.AbortedException" href="#nitric.api.exception.AbortedException">AbortedException</a></code></h4>
+</li>
+<li>
 <h4><code><a title="nitric.api.exception.AlreadyExistsException" href="#nitric.api.exception.AlreadyExistsException">AlreadyExistsException</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.api.exception.CancelledException" href="#nitric.api.exception.CancelledException">CancelledException</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.api.exception.DataLossException" href="#nitric.api.exception.DataLossException">DataLossException</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.api.exception.DeadlineExceededException" href="#nitric.api.exception.DeadlineExceededException">DeadlineExceededException</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.api.exception.FailedPreconditionException" href="#nitric.api.exception.FailedPreconditionException">FailedPreconditionException</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.api.exception.InternalException" href="#nitric.api.exception.InternalException">InternalException</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.api.exception.InvalidArgumentException" href="#nitric.api.exception.InvalidArgumentException">InvalidArgumentException</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.api.exception.NitricServiceException" href="#nitric.api.exception.NitricServiceException">NitricServiceException</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.api.exception.NotFoundException" href="#nitric.api.exception.NotFoundException">NotFoundException</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.api.exception.OutOfRangeException" href="#nitric.api.exception.OutOfRangeException">OutOfRangeException</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.api.exception.PermissionDeniedException" href="#nitric.api.exception.PermissionDeniedException">PermissionDeniedException</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.api.exception.ResourceExhaustedException" href="#nitric.api.exception.ResourceExhaustedException">ResourceExhaustedException</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.api.exception.UnauthenticatedException" href="#nitric.api.exception.UnauthenticatedException">UnauthenticatedException</a></code></h4>
 </li>
 <li>
 <h4><code><a title="nitric.api.exception.UnavailableException" href="#nitric.api.exception.UnavailableException">UnavailableException</a></code></h4>
 </li>
 <li>
 <h4><code><a title="nitric.api.exception.UnimplementedException" href="#nitric.api.exception.UnimplementedException">UnimplementedException</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.api.exception.UnknownException" href="#nitric.api.exception.UnknownException">UnknownException</a></code></h4>
 </li>
 </ul>
 </li>

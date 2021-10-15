@@ -46,26 +46,36 @@
 # limitations under the License.
 #
 &#34;&#34;&#34;Nitric API SDK.&#34;&#34;&#34;
-from nitric.api.events import EventClient, Event, Topic
-from nitric.api.kv import KeyValueClient
-from nitric.api.queues import QueueClient, Task, FailedTask
-from nitric.api.storage import StorageClient
+from nitric.api.events import Events, Event, Topic
+from nitric.api.queues import Queues, Task, FailedTask
+from nitric.api.storage import Storage
+from nitric.api.documents import Documents
+from nitric.api.secrets import Secrets
 
 __all__ = [
-    &#34;EventClient&#34;,
-    &#34;KeyValueClient&#34;,
-    &#34;QueueClient&#34;,
-    &#34;StorageClient&#34;,
+    &#34;Events&#34;,
+    &#34;Queues&#34;,
+    &#34;Documents&#34;,
+    &#34;Storage&#34;,
     &#34;Event&#34;,
     &#34;Task&#34;,
     &#34;FailedTask&#34;,
     &#34;Topic&#34;,
+    &#34;Secrets&#34;,
 ]</code></pre>
 </details>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
+<dt><code class="name"><a title="nitric.api.const" href="const.html">nitric.api.const</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="nitric.api.documents" href="documents.html">nitric.api.documents</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt><code class="name"><a title="nitric.api.events" href="events.html">nitric.api.events</a></code></dt>
 <dd>
 <div class="desc"></div>
@@ -74,11 +84,11 @@ __all__ = [
 <dd>
 <div class="desc"></div>
 </dd>
-<dt><code class="name"><a title="nitric.api.kv" href="kv.html">nitric.api.kv</a></code></dt>
+<dt><code class="name"><a title="nitric.api.queues" href="queues.html">nitric.api.queues</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt><code class="name"><a title="nitric.api.queues" href="queues.html">nitric.api.queues</a></code></dt>
+<dt><code class="name"><a title="nitric.api.secrets" href="secrets.html">nitric.api.secrets</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -95,18 +105,70 @@ __all__ = [
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="nitric.api.Documents"><code class="flex name class">
+<span>class <span class="ident">Documents</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Nitric client for interacting with document collections.</p>
+<p>This client insulates application code from stack specific event operations or SDKs.</p>
+<p>Construct a Nitric Document Client.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Documents(object):
+    &#34;&#34;&#34;
+    Nitric client for interacting with document collections.
+
+    This client insulates application code from stack specific event operations or SDKs.
+    &#34;&#34;&#34;
+
+    _stub: DocumentServiceStub
+
+    def __init__(self):
+        &#34;&#34;&#34;Construct a Nitric Document Client.&#34;&#34;&#34;
+        self._channel = new_default_channel()
+        self._stub = DocumentServiceStub(channel=self._channel)
+
+    def __del__(self):
+        # close the channel when this client is destroyed
+        if self._channel is not None:
+            self._channel.close()
+
+    def collection(self, name: str) -&gt; CollectionRef:
+        &#34;&#34;&#34;Return a reference to a document collection.&#34;&#34;&#34;
+        return CollectionRef(_documents=self, name=name)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.api.Documents.collection"><code class="name flex">
+<span>def <span class="ident">collection</span></span>(<span>self, name: str) ‑> <a title="nitric.api.documents.CollectionRef" href="documents.html#nitric.api.documents.CollectionRef">CollectionRef</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a reference to a document collection.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def collection(self, name: str) -&gt; CollectionRef:
+    &#34;&#34;&#34;Return a reference to a document collection.&#34;&#34;&#34;
+    return CollectionRef(_documents=self, name=name)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
 <dt id="nitric.api.Event"><code class="flex name class">
 <span>class <span class="ident">Event</span></span>
 <span>(</span><span>payload: dict = &lt;factory&gt;, id: str = None, payload_type: str = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Represents a NitricEvent.</p></div>
+<div class="desc"><p>Eventing client, providing access to Topic and Event references and operations on those entities.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Event(object):
-    &#34;&#34;&#34;Represents a NitricEvent.&#34;&#34;&#34;
+    &#34;&#34;&#34;Eventing client, providing access to Topic and Event references and operations on those entities.&#34;&#34;&#34;
 
     payload: dict = field(default_factory=dict)
     id: str = field(default=None)
@@ -128,8 +190,8 @@ __all__ = [
 </dd>
 </dl>
 </dd>
-<dt id="nitric.api.EventClient"><code class="flex name class">
-<span>class <span class="ident">EventClient</span></span>
+<dt id="nitric.api.Events"><code class="flex name class">
+<span>class <span class="ident">Events</span></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Nitric generic publish/subscribe event client.</p>
@@ -139,7 +201,7 @@ __all__ = [
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class EventClient(object):
+<pre><code class="python">class Events(object):
     &#34;&#34;&#34;
     Nitric generic publish/subscribe event client.
 
@@ -148,36 +210,44 @@ __all__ = [
 
     def __init__(self):
         &#34;&#34;&#34;Construct a Nitric Event Client.&#34;&#34;&#34;
-        channel = new_default_channel()
-        self._stub = EventStub(channel=channel)
-        self._topic_stub = TopicStub(channel=channel)
+        self.channel = new_default_channel()
+        self._stub = EventServiceStub(channel=self.channel)
+        self._topic_stub = TopicServiceStub(channel=self.channel)
+
+    def __del__(self):
+        # close the channel when this client is destroyed
+        if self.channel is not None:
+            self.channel.close()
 
     async def topics(self) -&gt; List[Topic]:
         &#34;&#34;&#34;Get a list of topics available for publishing or subscription.&#34;&#34;&#34;
-        response = await self._topic_stub.list()
-        return [self.topic(topic.name) for topic in response.topics]
+        try:
+            response = await self._topic_stub.list()
+            return [self.topic(topic.name) for topic in response.topics]
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
     def topic(self, name: str) -&gt; Topic:
-        &#34;&#34;&#34;Return a reference a topic from the connected event service.&#34;&#34;&#34;
-        return Topic(_stub=self._stub, name=name)</code></pre>
+        &#34;&#34;&#34;Return a reference to a topic.&#34;&#34;&#34;
+        return Topic(_events=self, name=name)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="nitric.api.EventClient.topic"><code class="name flex">
+<dt id="nitric.api.Events.topic"><code class="name flex">
 <span>def <span class="ident">topic</span></span>(<span>self, name: str) ‑> <a title="nitric.api.events.Topic" href="events.html#nitric.api.events.Topic">Topic</a></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Return a reference a topic from the connected event service.</p></div>
+<div class="desc"><p>Return a reference to a topic.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def topic(self, name: str) -&gt; Topic:
-    &#34;&#34;&#34;Return a reference a topic from the connected event service.&#34;&#34;&#34;
-    return Topic(_stub=self._stub, name=name)</code></pre>
+    &#34;&#34;&#34;Return a reference to a topic.&#34;&#34;&#34;
+    return Topic(_events=self, name=name)</code></pre>
 </details>
 </dd>
-<dt id="nitric.api.EventClient.topics"><code class="name flex">
+<dt id="nitric.api.Events.topics"><code class="name flex">
 <span>async def <span class="ident">topics</span></span>(<span>self) ‑> List[<a title="nitric.api.events.Topic" href="events.html#nitric.api.events.Topic">Topic</a>]</span>
 </code></dt>
 <dd>
@@ -188,26 +258,28 @@ __all__ = [
 </summary>
 <pre><code class="python">async def topics(self) -&gt; List[Topic]:
     &#34;&#34;&#34;Get a list of topics available for publishing or subscription.&#34;&#34;&#34;
-    response = await self._topic_stub.list()
-    return [self.topic(topic.name) for topic in response.topics]</code></pre>
+    try:
+        response = await self._topic_stub.list()
+        return [self.topic(topic.name) for topic in response.topics]
+    except GRPCError as grpc_err:
+        raise exception_from_grpc_error(grpc_err)</code></pre>
 </details>
 </dd>
 </dl>
 </dd>
 <dt id="nitric.api.FailedTask"><code class="flex name class">
 <span>class <span class="ident">FailedTask</span></span>
-<span>(</span><span>id: str = None, payload_type: str = None, payload: dict = &lt;factory&gt;, lease_id: str = None, message: str = '')</span>
+<span>(</span><span>id: str = None, payload_type: str = None, payload: dict = &lt;factory&gt;, message: str = '')</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Represents a failed queue publish for an event.</p></div>
+<div class="desc"><p>Represents a failed queue publish.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class FailedTask(Task):
-    &#34;&#34;&#34;Represents a failed queue publish for an event.&#34;&#34;&#34;
+    &#34;&#34;&#34;Represents a failed queue publish.&#34;&#34;&#34;
 
-    lease_id: str = None  # failed tasks should never have a lease id.
     message: str = field(default=&#34;&#34;)</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -216,142 +288,42 @@ __all__ = [
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="nitric.api.FailedTask.lease_id"><code class="name">var <span class="ident">lease_id</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="nitric.api.FailedTask.message"><code class="name">var <span class="ident">message</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 </dl>
-<h3>Inherited members</h3>
-<ul class="hlist">
-<li><code><b><a title="nitric.api.queues.Task" href="queues.html#nitric.api.queues.Task">Task</a></b></code>:
-<ul class="hlist">
-<li><code><a title="nitric.api.queues.Task.complete" href="queues.html#nitric.api.queues.Task.complete">complete</a></code></li>
-</ul>
-</li>
-</ul>
 </dd>
-<dt id="nitric.api.KeyValueClient"><code class="flex name class">
-<span>class <span class="ident">KeyValueClient</span></span>
-<span>(</span><span>collection: str)</span>
+<dt id="nitric.api.Queues"><code class="flex name class">
+<span>class <span class="ident">Queues</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Nitric generic document store/db client.</p>
-<p>This client insulates application code from stack specific document CRUD operations or SDKs.</p>
-<p>Construct a new DocumentClient.</p>
-<p>:param collection: name of the key/value collection</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class KeyValueClient(object):
-    &#34;&#34;&#34;
-    Nitric generic document store/db client.
-
-    This client insulates application code from stack specific document CRUD operations or SDKs.
-    &#34;&#34;&#34;
-
-    def __init__(self, collection: str):
-        &#34;&#34;&#34;
-        Construct a new DocumentClient.
-
-        :param collection: name of the key/value collection
-        &#34;&#34;&#34;
-        self.collection = collection
-        self._stub = KeyValueStub(channel=new_default_channel())
-
-    async def put(self, key: str, value: dict):
-        &#34;&#34;&#34;Create a new document with the specified key.&#34;&#34;&#34;
-        await self._stub.put(collection=self.collection, key=key, value=_struct_from_dict(value))
-
-    async def get(self, key: str) -&gt; dict:
-        &#34;&#34;&#34;Retrieve a document from the specified key.&#34;&#34;&#34;
-        response = await self._stub.get(collection=self.collection, key=key)
-        return response.value.to_dict()
-
-    async def delete(self, key: str):
-        &#34;&#34;&#34;Delete the specified document from the collection.&#34;&#34;&#34;
-        await self._stub.delete(collection=self.collection, key=key)</code></pre>
-</details>
-<h3>Methods</h3>
-<dl>
-<dt id="nitric.api.KeyValueClient.delete"><code class="name flex">
-<span>async def <span class="ident">delete</span></span>(<span>self, key: str)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Delete the specified document from the collection.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">async def delete(self, key: str):
-    &#34;&#34;&#34;Delete the specified document from the collection.&#34;&#34;&#34;
-    await self._stub.delete(collection=self.collection, key=key)</code></pre>
-</details>
-</dd>
-<dt id="nitric.api.KeyValueClient.get"><code class="name flex">
-<span>async def <span class="ident">get</span></span>(<span>self, key: str) ‑> dict</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Retrieve a document from the specified key.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">async def get(self, key: str) -&gt; dict:
-    &#34;&#34;&#34;Retrieve a document from the specified key.&#34;&#34;&#34;
-    response = await self._stub.get(collection=self.collection, key=key)
-    return response.value.to_dict()</code></pre>
-</details>
-</dd>
-<dt id="nitric.api.KeyValueClient.put"><code class="name flex">
-<span>async def <span class="ident">put</span></span>(<span>self, key: str, value: dict)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Create a new document with the specified key.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">async def put(self, key: str, value: dict):
-    &#34;&#34;&#34;Create a new document with the specified key.&#34;&#34;&#34;
-    await self._stub.put(collection=self.collection, key=key, value=_struct_from_dict(value))</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
-<dt id="nitric.api.QueueClient"><code class="flex name class">
-<span>class <span class="ident">QueueClient</span></span>
-</code></dt>
-<dd>
-<div class="desc"><p>Nitric generic publish/subscribe tasking client.</p>
-<p>This client insulates application code from stack specific task/topic operations or SDKs.</p>
+<div class="desc"><p>Queueing client, providing access to Queue and Task references and operations on those entities.</p>
 <p>Construct a Nitric Queue Client.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class QueueClient(object):
-    &#34;&#34;&#34;
-    Nitric generic publish/subscribe tasking client.
-
-    This client insulates application code from stack specific task/topic operations or SDKs.
-    &#34;&#34;&#34;
+<pre><code class="python">class Queues(object):
+    &#34;&#34;&#34;Queueing client, providing access to Queue and Task references and operations on those entities.&#34;&#34;&#34;
 
     def __init__(self):
         &#34;&#34;&#34;Construct a Nitric Queue Client.&#34;&#34;&#34;
-        self._queue_stub = QueueStub(channel=new_default_channel())
+        self.channel = new_default_channel()
+        self._queue_stub = QueueServiceStub(channel=self.channel)
+
+    def __del__(self):
+        # close the channel when this client is destroyed
+        if self.channel is not None:
+            self.channel.close()
 
     def queue(self, name: str):
         &#34;&#34;&#34;Return a reference to a queue from the connected queue service.&#34;&#34;&#34;
-        return Queue(_queue_stub=self._queue_stub, name=name)</code></pre>
+        return Queue(_queueing=self, name=name)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="nitric.api.QueueClient.queue"><code class="name flex">
+<dt id="nitric.api.Queues.queue"><code class="name flex">
 <span>def <span class="ident">queue</span></span>(<span>self, name: str)</span>
 </code></dt>
 <dd>
@@ -362,13 +334,63 @@ __all__ = [
 </summary>
 <pre><code class="python">def queue(self, name: str):
     &#34;&#34;&#34;Return a reference to a queue from the connected queue service.&#34;&#34;&#34;
-    return Queue(_queue_stub=self._queue_stub, name=name)</code></pre>
+    return Queue(_queueing=self, name=name)</code></pre>
 </details>
 </dd>
 </dl>
 </dd>
-<dt id="nitric.api.StorageClient"><code class="flex name class">
-<span>class <span class="ident">StorageClient</span></span>
+<dt id="nitric.api.Secrets"><code class="flex name class">
+<span>class <span class="ident">Secrets</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Nitric secrets management client.</p>
+<p>This client insulates application code from stack specific secrets managements services.</p>
+<p>Construct a Nitric Storage Client.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Secrets(object):
+    &#34;&#34;&#34;
+    Nitric secrets management client.
+
+    This client insulates application code from stack specific secrets managements services.
+    &#34;&#34;&#34;
+
+    def __init__(self):
+        &#34;&#34;&#34;Construct a Nitric Storage Client.&#34;&#34;&#34;
+        self._channel = new_default_channel()
+        self._secrets_stub = SecretServiceStub(channel=self._channel)
+
+    def __del__(self):
+        # close the channel when this client is destroyed
+        if self._channel is not None:
+            self._channel.close()
+
+    def secret(self, name: str):
+        &#34;&#34;&#34;Return a reference to a secret container from the connected secrets management service.&#34;&#34;&#34;
+        return SecretContainer(_secrets=self, name=name)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.api.Secrets.secret"><code class="name flex">
+<span>def <span class="ident">secret</span></span>(<span>self, name: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a reference to a secret container from the connected secrets management service.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def secret(self, name: str):
+    &#34;&#34;&#34;Return a reference to a secret container from the connected secrets management service.&#34;&#34;&#34;
+    return SecretContainer(_secrets=self, name=name)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.api.Storage"><code class="flex name class">
+<span>class <span class="ident">Storage</span></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Nitric generic blob storage client.</p>
@@ -378,7 +400,7 @@ __all__ = [
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class StorageClient(object):
+<pre><code class="python">class Storage(object):
     &#34;&#34;&#34;
     Nitric generic blob storage client.
 
@@ -387,15 +409,21 @@ __all__ = [
 
     def __init__(self):
         &#34;&#34;&#34;Construct a Nitric Storage Client.&#34;&#34;&#34;
-        self._storage_stub = StorageStub(channel=new_default_channel())
+        self._channel = new_default_channel()
+        self._storage_stub = StorageServiceStub(channel=self._channel)
+
+    def __del__(self):
+        # close the channel when this client is destroyed
+        if self._channel is not None:
+            self._channel.close()
 
     def bucket(self, name: str):
         &#34;&#34;&#34;Return a reference to a bucket from the connected storage service.&#34;&#34;&#34;
-        return Bucket(_storage_stub=self._storage_stub, name=name)</code></pre>
+        return Bucket(_storage=self, name=name)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="nitric.api.StorageClient.bucket"><code class="name flex">
+<dt id="nitric.api.Storage.bucket"><code class="name flex">
 <span>def <span class="ident">bucket</span></span>(<span>self, name: str)</span>
 </code></dt>
 <dd>
@@ -406,41 +434,27 @@ __all__ = [
 </summary>
 <pre><code class="python">def bucket(self, name: str):
     &#34;&#34;&#34;Return a reference to a bucket from the connected storage service.&#34;&#34;&#34;
-    return Bucket(_storage_stub=self._storage_stub, name=name)</code></pre>
+    return Bucket(_storage=self, name=name)</code></pre>
 </details>
 </dd>
 </dl>
 </dd>
 <dt id="nitric.api.Task"><code class="flex name class">
 <span>class <span class="ident">Task</span></span>
-<span>(</span><span>id: str = None, payload_type: str = None, payload: dict = &lt;factory&gt;, lease_id: str = None)</span>
+<span>(</span><span>id: str = None, payload_type: str = None, payload: dict = &lt;factory&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Represents a NitricTask.</p></div>
+<div class="desc"><p>A task to be sent to a Queue.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Task(object):
-    &#34;&#34;&#34;Represents a NitricTask.&#34;&#34;&#34;
+    &#34;&#34;&#34;A task to be sent to a Queue.&#34;&#34;&#34;
 
     id: str = field(default=None)
     payload_type: str = field(default=None)
-    payload: dict = field(default_factory=dict)
-    lease_id: str = field(default=None)
-    _queue_stub: QueueStub = field(default=None)
-    _queue: str = field(default=None)
-
-    async def complete(self):
-        &#34;&#34;&#34;Mark this task as complete and remove it from the queue.&#34;&#34;&#34;
-        if self._queue_stub is None or self._queue is None or self._queue == &#34;&#34;:
-            raise Exception(&#34;Task was not created via Queue.&#34;)
-        if self.lease_id is None:
-            raise Exception(
-                &#34;No lease_id available for task. Tasks must be received using Queue.receive to have a &#34;
-                &#34;valid lease_id.&#34;
-            )
-        await self._queue_stub.complete(queue=self._queue, lease_id=self.lease_id)</code></pre>
+    payload: dict = field(default_factory=dict)</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -449,10 +463,6 @@ __all__ = [
 <h3>Class variables</h3>
 <dl>
 <dt id="nitric.api.Task.id"><code class="name">var <span class="ident">id</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="nitric.api.Task.lease_id"><code class="name">var <span class="ident">lease_id</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -465,34 +475,10 @@ __all__ = [
 <div class="desc"></div>
 </dd>
 </dl>
-<h3>Methods</h3>
-<dl>
-<dt id="nitric.api.Task.complete"><code class="name flex">
-<span>async def <span class="ident">complete</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Mark this task as complete and remove it from the queue.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">async def complete(self):
-    &#34;&#34;&#34;Mark this task as complete and remove it from the queue.&#34;&#34;&#34;
-    if self._queue_stub is None or self._queue is None or self._queue == &#34;&#34;:
-        raise Exception(&#34;Task was not created via Queue.&#34;)
-    if self.lease_id is None:
-        raise Exception(
-            &#34;No lease_id available for task. Tasks must be received using Queue.receive to have a &#34;
-            &#34;valid lease_id.&#34;
-        )
-    await self._queue_stub.complete(queue=self._queue, lease_id=self.lease_id)</code></pre>
-</details>
-</dd>
-</dl>
 </dd>
 <dt id="nitric.api.Topic"><code class="flex name class">
 <span>class <span class="ident">Topic</span></span>
-<span>(</span><span>_stub: <a title="nitric.proto.nitric.event.v1.EventStub" href="../proto/nitric/event/v1/index.html#nitric.proto.nitric.event.v1.EventStub">EventStub</a>, name: str)</span>
+<span>(</span><span>_events: <a title="nitric.api.Events" href="#nitric.api.Events">Events</a>, name: str)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A reference to a topic on an event service, used to perform operations on that topic.</p></div>
@@ -501,12 +487,9 @@ __all__ = [
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Topic(object):
-<<<<<<< refs/remotes/origin/main
-    &#34;&#34;&#34;Represents event topic metadata.&#34;&#34;&#34;
-=======
     &#34;&#34;&#34;A reference to a topic on an event service, used to perform operations on that topic.&#34;&#34;&#34;
 
-    _stub: EventStub
+    _events: Events
     name: str
 
     async def publish(
@@ -525,10 +508,12 @@ __all__ = [
         if isinstance(event, dict):
             # TODO: handle events that are just a payload
             event = Event(**event)
->>>>>>> feat: port faas.start to bi-di streaming with membrane
 
-        response = await self._stub.publish(topic=self.name, event=_event_to_wire(event))
-        return Event(**{**event.__dict__.copy(), **{&#34;id&#34;: response.id}})</code></pre>
+        try:
+            response = await self._events._stub.publish(topic=self.name, event=_event_to_wire(event))
+            return Event(**{**event.__dict__.copy(), **{&#34;id&#34;: response.id}})
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
@@ -540,7 +525,7 @@ __all__ = [
 <h3>Methods</h3>
 <dl>
 <dt id="nitric.api.Topic.publish"><code class="name flex">
-<span>async def <span class="ident">publish</span></span>(<span>self, event: Union[<a title="nitric.api.events.Event" href="events.html#nitric.api.events.Event">Event</a>, dict] = None) ‑> <a title="nitric.api.events.Event" href="events.html#nitric.api.events.Event">Event</a></span>
+<span>async def <span class="ident">publish</span></span>(<span>self, event: Union[<a title="nitric.api.Event" href="#nitric.api.Event">Event</a>, dict] = None) ‑> <a title="nitric.api.events.Event" href="events.html#nitric.api.events.Event">Event</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Publish an event/message to a topic, which can be subscribed to by other services.</p>
@@ -567,8 +552,11 @@ __all__ = [
         # TODO: handle events that are just a payload
         event = Event(**event)
 
-    response = await self._stub.publish(topic=self.name, event=_event_to_wire(event))
-    return Event(**{**event.__dict__.copy(), **{&#34;id&#34;: response.id}})</code></pre>
+    try:
+        response = await self._events._stub.publish(topic=self.name, event=_event_to_wire(event))
+        return Event(**{**event.__dict__.copy(), **{&#34;id&#34;: response.id}})
+    except GRPCError as grpc_err:
+        raise exception_from_grpc_error(grpc_err)</code></pre>
 </details>
 </dd>
 </dl>
@@ -589,15 +577,23 @@ __all__ = [
 </li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
+<li><code><a title="nitric.api.const" href="const.html">nitric.api.const</a></code></li>
+<li><code><a title="nitric.api.documents" href="documents.html">nitric.api.documents</a></code></li>
 <li><code><a title="nitric.api.events" href="events.html">nitric.api.events</a></code></li>
 <li><code><a title="nitric.api.exception" href="exception.html">nitric.api.exception</a></code></li>
-<li><code><a title="nitric.api.kv" href="kv.html">nitric.api.kv</a></code></li>
 <li><code><a title="nitric.api.queues" href="queues.html">nitric.api.queues</a></code></li>
+<li><code><a title="nitric.api.secrets" href="secrets.html">nitric.api.secrets</a></code></li>
 <li><code><a title="nitric.api.storage" href="storage.html">nitric.api.storage</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
+<li>
+<h4><code><a title="nitric.api.Documents" href="#nitric.api.Documents">Documents</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.Documents.collection" href="#nitric.api.Documents.collection">collection</a></code></li>
+</ul>
+</li>
 <li>
 <h4><code><a title="nitric.api.Event" href="#nitric.api.Event">Event</a></code></h4>
 <ul class="">
@@ -607,45 +603,40 @@ __all__ = [
 </ul>
 </li>
 <li>
-<h4><code><a title="nitric.api.EventClient" href="#nitric.api.EventClient">EventClient</a></code></h4>
+<h4><code><a title="nitric.api.Events" href="#nitric.api.Events">Events</a></code></h4>
 <ul class="">
-<li><code><a title="nitric.api.EventClient.topic" href="#nitric.api.EventClient.topic">topic</a></code></li>
-<li><code><a title="nitric.api.EventClient.topics" href="#nitric.api.EventClient.topics">topics</a></code></li>
+<li><code><a title="nitric.api.Events.topic" href="#nitric.api.Events.topic">topic</a></code></li>
+<li><code><a title="nitric.api.Events.topics" href="#nitric.api.Events.topics">topics</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="nitric.api.FailedTask" href="#nitric.api.FailedTask">FailedTask</a></code></h4>
 <ul class="">
-<li><code><a title="nitric.api.FailedTask.lease_id" href="#nitric.api.FailedTask.lease_id">lease_id</a></code></li>
 <li><code><a title="nitric.api.FailedTask.message" href="#nitric.api.FailedTask.message">message</a></code></li>
 </ul>
 </li>
 <li>
-<h4><code><a title="nitric.api.KeyValueClient" href="#nitric.api.KeyValueClient">KeyValueClient</a></code></h4>
+<h4><code><a title="nitric.api.Queues" href="#nitric.api.Queues">Queues</a></code></h4>
 <ul class="">
-<li><code><a title="nitric.api.KeyValueClient.delete" href="#nitric.api.KeyValueClient.delete">delete</a></code></li>
-<li><code><a title="nitric.api.KeyValueClient.get" href="#nitric.api.KeyValueClient.get">get</a></code></li>
-<li><code><a title="nitric.api.KeyValueClient.put" href="#nitric.api.KeyValueClient.put">put</a></code></li>
+<li><code><a title="nitric.api.Queues.queue" href="#nitric.api.Queues.queue">queue</a></code></li>
 </ul>
 </li>
 <li>
-<h4><code><a title="nitric.api.QueueClient" href="#nitric.api.QueueClient">QueueClient</a></code></h4>
+<h4><code><a title="nitric.api.Secrets" href="#nitric.api.Secrets">Secrets</a></code></h4>
 <ul class="">
-<li><code><a title="nitric.api.QueueClient.queue" href="#nitric.api.QueueClient.queue">queue</a></code></li>
+<li><code><a title="nitric.api.Secrets.secret" href="#nitric.api.Secrets.secret">secret</a></code></li>
 </ul>
 </li>
 <li>
-<h4><code><a title="nitric.api.StorageClient" href="#nitric.api.StorageClient">StorageClient</a></code></h4>
+<h4><code><a title="nitric.api.Storage" href="#nitric.api.Storage">Storage</a></code></h4>
 <ul class="">
-<li><code><a title="nitric.api.StorageClient.bucket" href="#nitric.api.StorageClient.bucket">bucket</a></code></li>
+<li><code><a title="nitric.api.Storage.bucket" href="#nitric.api.Storage.bucket">bucket</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="nitric.api.Task" href="#nitric.api.Task">Task</a></code></h4>
 <ul class="">
-<li><code><a title="nitric.api.Task.complete" href="#nitric.api.Task.complete">complete</a></code></li>
 <li><code><a title="nitric.api.Task.id" href="#nitric.api.Task.id">id</a></code></li>
-<li><code><a title="nitric.api.Task.lease_id" href="#nitric.api.Task.lease_id">lease_id</a></code></li>
 <li><code><a title="nitric.api.Task.payload" href="#nitric.api.Task.payload">payload</a></code></li>
 <li><code><a title="nitric.api.Task.payload_type" href="#nitric.api.Task.payload_type">payload_type</a></code></li>
 </ul>

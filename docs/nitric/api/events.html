@@ -44,15 +44,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from __future__ import annotations
+
 from typing import List, Union
+
+from grpclib import GRPCError
+
+from nitric.api.exception import exception_from_grpc_error
 from nitric.utils import new_default_channel, _struct_from_dict
-from nitric.proto.nitric.event.v1 import EventStub, NitricEvent, TopicStub
+from nitricapi.nitric.event.v1 import EventServiceStub, NitricEvent, TopicServiceStub
 from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True, order=True)
 class Event(object):
-    &#34;&#34;&#34;Represents a NitricEvent.&#34;&#34;&#34;
+    &#34;&#34;&#34;Eventing client, providing access to Topic and Event references and operations on those entities.&#34;&#34;&#34;
 
     payload: dict = field(default_factory=dict)
     id: str = field(default=None)
@@ -71,7 +77,7 @@ def _event_to_wire(event: Event) -&gt; NitricEvent:
 class Topic(object):
     &#34;&#34;&#34;A reference to a topic on an event service, used to perform operations on that topic.&#34;&#34;&#34;
 
-    _stub: EventStub
+    _events: Events
     name: str
 
     async def publish(
@@ -91,11 +97,14 @@ class Topic(object):
             # TODO: handle events that are just a payload
             event = Event(**event)
 
-        response = await self._stub.publish(topic=self.name, event=_event_to_wire(event))
-        return Event(**{**event.__dict__.copy(), **{&#34;id&#34;: response.id}})
+        try:
+            response = await self._events._stub.publish(topic=self.name, event=_event_to_wire(event))
+            return Event(**{**event.__dict__.copy(), **{&#34;id&#34;: response.id}})
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
 
-class EventClient(object):
+class Events(object):
     &#34;&#34;&#34;
     Nitric generic publish/subscribe event client.
 
@@ -104,18 +113,26 @@ class EventClient(object):
 
     def __init__(self):
         &#34;&#34;&#34;Construct a Nitric Event Client.&#34;&#34;&#34;
-        channel = new_default_channel()
-        self._stub = EventStub(channel=channel)
-        self._topic_stub = TopicStub(channel=channel)
+        self.channel = new_default_channel()
+        self._stub = EventServiceStub(channel=self.channel)
+        self._topic_stub = TopicServiceStub(channel=self.channel)
+
+    def __del__(self):
+        # close the channel when this client is destroyed
+        if self.channel is not None:
+            self.channel.close()
 
     async def topics(self) -&gt; List[Topic]:
         &#34;&#34;&#34;Get a list of topics available for publishing or subscription.&#34;&#34;&#34;
-        response = await self._topic_stub.list()
-        return [self.topic(topic.name) for topic in response.topics]
+        try:
+            response = await self._topic_stub.list()
+            return [self.topic(topic.name) for topic in response.topics]
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
     def topic(self, name: str) -&gt; Topic:
-        &#34;&#34;&#34;Return a reference a topic from the connected event service.&#34;&#34;&#34;
-        return Topic(_stub=self._stub, name=name)</code></pre>
+        &#34;&#34;&#34;Return a reference to a topic.&#34;&#34;&#34;
+        return Topic(_events=self, name=name)</code></pre>
 </details>
 </section>
 <section>
@@ -132,13 +149,13 @@ class EventClient(object):
 <span>(</span><span>payload: dict = &lt;factory&gt;, id: str = None, payload_type: str = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Represents a NitricEvent.</p></div>
+<div class="desc"><p>Eventing client, providing access to Topic and Event references and operations on those entities.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Event(object):
-    &#34;&#34;&#34;Represents a NitricEvent.&#34;&#34;&#34;
+    &#34;&#34;&#34;Eventing client, providing access to Topic and Event references and operations on those entities.&#34;&#34;&#34;
 
     payload: dict = field(default_factory=dict)
     id: str = field(default=None)
@@ -160,8 +177,8 @@ class EventClient(object):
 </dd>
 </dl>
 </dd>
-<dt id="nitric.api.events.EventClient"><code class="flex name class">
-<span>class <span class="ident">EventClient</span></span>
+<dt id="nitric.api.events.Events"><code class="flex name class">
+<span>class <span class="ident">Events</span></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Nitric generic publish/subscribe event client.</p>
@@ -171,11 +188,7 @@ class EventClient(object):
 <summary>
 <span>Expand source code</span>
 </summary>
-<<<<<<< refs/remotes/origin/main:docs/nitric/api/models.html
-<pre><code class="python">class FailedTask(Task):
-    &#34;&#34;&#34;Represents a failed queue publish for an event.&#34;&#34;&#34;
-=======
-<pre><code class="python">class EventClient(object):
+<pre><code class="python">class Events(object):
     &#34;&#34;&#34;
     Nitric generic publish/subscribe event client.
 
@@ -184,37 +197,44 @@ class EventClient(object):
 
     def __init__(self):
         &#34;&#34;&#34;Construct a Nitric Event Client.&#34;&#34;&#34;
-        channel = new_default_channel()
-        self._stub = EventStub(channel=channel)
-        self._topic_stub = TopicStub(channel=channel)
->>>>>>> feat: port faas.start to bi-di streaming with membrane:docs/nitric/api/events.html
+        self.channel = new_default_channel()
+        self._stub = EventServiceStub(channel=self.channel)
+        self._topic_stub = TopicServiceStub(channel=self.channel)
+
+    def __del__(self):
+        # close the channel when this client is destroyed
+        if self.channel is not None:
+            self.channel.close()
 
     async def topics(self) -&gt; List[Topic]:
         &#34;&#34;&#34;Get a list of topics available for publishing or subscription.&#34;&#34;&#34;
-        response = await self._topic_stub.list()
-        return [self.topic(topic.name) for topic in response.topics]
+        try:
+            response = await self._topic_stub.list()
+            return [self.topic(topic.name) for topic in response.topics]
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
     def topic(self, name: str) -&gt; Topic:
-        &#34;&#34;&#34;Return a reference a topic from the connected event service.&#34;&#34;&#34;
-        return Topic(_stub=self._stub, name=name)</code></pre>
+        &#34;&#34;&#34;Return a reference to a topic.&#34;&#34;&#34;
+        return Topic(_events=self, name=name)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="nitric.api.events.EventClient.topic"><code class="name flex">
+<dt id="nitric.api.events.Events.topic"><code class="name flex">
 <span>def <span class="ident">topic</span></span>(<span>self, name: str) ‑> <a title="nitric.api.events.Topic" href="#nitric.api.events.Topic">Topic</a></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Return a reference a topic from the connected event service.</p></div>
+<div class="desc"><p>Return a reference to a topic.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def topic(self, name: str) -&gt; Topic:
-    &#34;&#34;&#34;Return a reference a topic from the connected event service.&#34;&#34;&#34;
-    return Topic(_stub=self._stub, name=name)</code></pre>
+    &#34;&#34;&#34;Return a reference to a topic.&#34;&#34;&#34;
+    return Topic(_events=self, name=name)</code></pre>
 </details>
 </dd>
-<dt id="nitric.api.events.EventClient.topics"><code class="name flex">
+<dt id="nitric.api.events.Events.topics"><code class="name flex">
 <span>async def <span class="ident">topics</span></span>(<span>self) ‑> List[<a title="nitric.api.events.Topic" href="#nitric.api.events.Topic">Topic</a>]</span>
 </code></dt>
 <dd>
@@ -225,15 +245,18 @@ class EventClient(object):
 </summary>
 <pre><code class="python">async def topics(self) -&gt; List[Topic]:
     &#34;&#34;&#34;Get a list of topics available for publishing or subscription.&#34;&#34;&#34;
-    response = await self._topic_stub.list()
-    return [self.topic(topic.name) for topic in response.topics]</code></pre>
+    try:
+        response = await self._topic_stub.list()
+        return [self.topic(topic.name) for topic in response.topics]
+    except GRPCError as grpc_err:
+        raise exception_from_grpc_error(grpc_err)</code></pre>
 </details>
 </dd>
 </dl>
 </dd>
 <dt id="nitric.api.events.Topic"><code class="flex name class">
 <span>class <span class="ident">Topic</span></span>
-<span>(</span><span>_stub: <a title="nitric.proto.nitric.event.v1.EventStub" href="../proto/nitric/event/v1/index.html#nitric.proto.nitric.event.v1.EventStub">EventStub</a>, name: str)</span>
+<span>(</span><span>_events: <a title="nitric.api.events.Events" href="#nitric.api.events.Events">Events</a>, name: str)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A reference to a topic on an event service, used to perform operations on that topic.</p></div>
@@ -241,14 +264,10 @@ class EventClient(object):
 <summary>
 <span>Expand source code</span>
 </summary>
-<<<<<<< refs/remotes/origin/main:docs/nitric/api/models.html
-<pre><code class="python">class Task(object):
-    &#34;&#34;&#34;Represents a NitricTask.&#34;&#34;&#34;
-=======
 <pre><code class="python">class Topic(object):
     &#34;&#34;&#34;A reference to a topic on an event service, used to perform operations on that topic.&#34;&#34;&#34;
 
-    _stub: EventStub
+    _events: Events
     name: str
 
     async def publish(
@@ -267,10 +286,12 @@ class EventClient(object):
         if isinstance(event, dict):
             # TODO: handle events that are just a payload
             event = Event(**event)
->>>>>>> feat: port faas.start to bi-di streaming with membrane:docs/nitric/api/events.html
 
-        response = await self._stub.publish(topic=self.name, event=_event_to_wire(event))
-        return Event(**{**event.__dict__.copy(), **{&#34;id&#34;: response.id}})</code></pre>
+        try:
+            response = await self._events._stub.publish(topic=self.name, event=_event_to_wire(event))
+            return Event(**{**event.__dict__.copy(), **{&#34;id&#34;: response.id}})
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
@@ -292,10 +313,6 @@ class EventClient(object):
 <summary>
 <span>Expand source code</span>
 </summary>
-<<<<<<< refs/remotes/origin/main:docs/nitric/api/models.html
-<pre><code class="python">class Topic(object):
-    &#34;&#34;&#34;Represents event topic metadata.&#34;&#34;&#34;
-=======
 <pre><code class="python">async def publish(
     self,
     event: Union[Event, dict] = None,
@@ -312,10 +329,12 @@ class EventClient(object):
     if isinstance(event, dict):
         # TODO: handle events that are just a payload
         event = Event(**event)
->>>>>>> feat: port faas.start to bi-di streaming with membrane:docs/nitric/api/events.html
 
-    response = await self._stub.publish(topic=self.name, event=_event_to_wire(event))
-    return Event(**{**event.__dict__.copy(), **{&#34;id&#34;: response.id}})</code></pre>
+    try:
+        response = await self._events._stub.publish(topic=self.name, event=_event_to_wire(event))
+        return Event(**{**event.__dict__.copy(), **{&#34;id&#34;: response.id}})
+    except GRPCError as grpc_err:
+        raise exception_from_grpc_error(grpc_err)</code></pre>
 </details>
 </dd>
 </dl>
@@ -345,10 +364,10 @@ class EventClient(object):
 </ul>
 </li>
 <li>
-<h4><code><a title="nitric.api.events.EventClient" href="#nitric.api.events.EventClient">EventClient</a></code></h4>
+<h4><code><a title="nitric.api.events.Events" href="#nitric.api.events.Events">Events</a></code></h4>
 <ul class="">
-<li><code><a title="nitric.api.events.EventClient.topic" href="#nitric.api.events.EventClient.topic">topic</a></code></li>
-<li><code><a title="nitric.api.events.EventClient.topics" href="#nitric.api.events.EventClient.topics">topics</a></code></li>
+<li><code><a title="nitric.api.events.Events.topic" href="#nitric.api.events.Events.topic">topic</a></code></li>
+<li><code><a title="nitric.api.events.Events.topics" href="#nitric.api.events.Events.topics">topics</a></code></li>
 </ul>
 </li>
 <li>

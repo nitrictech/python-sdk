@@ -1,0 +1,1961 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>nitric.api.documents API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>nitric.api.documents</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#
+# Copyright (c) 2021 Nitric Technologies Pty Ltd.
+#
+# This file is part of Nitric Python 3 SDK.
+# See https://github.com/nitrictech/python-sdk for further info.
+#
+# Licensed under the Apache License, Version 2.0 (the &#34;License&#34;);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an &#34;AS IS&#34; BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import List, AsyncIterator, Union, Any, Tuple
+
+from grpclib import GRPCError
+
+from nitric.api.const import MAX_SUB_COLLECTION_DEPTH
+from nitric.api.exception import exception_from_grpc_error
+from nitricapi.nitric.document.v1 import (
+    DocumentServiceStub,
+    Collection as CollectionMessage,
+    Key as KeyMessage,
+    Expression as ExpressionMessage,
+    ExpressionValue,
+    Document as DocumentMessage,
+)
+
+from nitric.utils import new_default_channel, _dict_from_struct, _struct_from_dict
+
+NIL_DOC_ID = &#34;&#34;
+
+
+class CollectionDepthException(Exception):
+    &#34;&#34;&#34;The max depth of document sub-collections has been exceeded.&#34;&#34;&#34;
+
+    pass
+
+
+@dataclass(frozen=True, order=True)
+class DocumentRef:
+    &#34;&#34;&#34;A reference to a document in a collection.&#34;&#34;&#34;
+
+    _documents: Documents
+    parent: CollectionRef
+    id: str
+
+    def collection(self, name: str) -&gt; CollectionRef:
+        &#34;&#34;&#34;
+        Return a reference to a sub-collection of this document.
+
+        This is currently only supported to one level of depth.
+        e.g. Documents().collection(&#39;a&#39;).doc(&#39;b&#39;).collection(&#39;c&#39;).doc(&#39;d&#39;) is valid,
+        Documents().collection(&#39;a&#39;).doc(&#39;b&#39;).collection(&#39;c&#39;).doc(&#39;d&#39;).collection(&#39;e&#39;) is invalid (1 level too deep).
+        &#34;&#34;&#34;
+        current_depth = self.parent.sub_collection_depth()
+        if current_depth &gt;= MAX_SUB_COLLECTION_DEPTH:
+            # Collection nesting is only supported to a maximum depth.
+            raise CollectionDepthException(
+                f&#34;sub-collections supported to a depth of {MAX_SUB_COLLECTION_DEPTH}, &#34;
+                f&#34;attempted to create new collection with depth {current_depth + 1}&#34;
+            )
+        return CollectionRef(_documents=self._documents, name=name, parent=self)
+
+    async def get(self) -&gt; Document:
+        &#34;&#34;&#34;Retrieve the contents of this document, if it exists.&#34;&#34;&#34;
+        try:
+            response = await self._documents._stub.get(key=_doc_ref_to_wire(self))
+            return _document_from_wire(documents=self._documents, message=response.document)
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
+
+    async def set(self, content: dict):
+        &#34;&#34;&#34;
+        Set the contents of this document.
+
+        If the document exists it will be updated, otherwise a new document will be created.
+        &#34;&#34;&#34;
+        try:
+            await self._documents._stub.set(
+                key=_doc_ref_to_wire(self),
+                content=_struct_from_dict(content),
+            )
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
+
+    async def delete(self):
+        &#34;&#34;&#34;Delete this document, if it exists.&#34;&#34;&#34;
+        try:
+            await self._documents._stub.delete(
+                key=_doc_ref_to_wire(self),
+            )
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
+
+
+def _document_from_wire(documents: Documents, message: DocumentMessage) -&gt; Document:
+    ref = _doc_ref_from_wire(documents=documents, message=message.key)
+
+    return Document(
+        _ref=ref,
+        content=_dict_from_struct(message.content),
+    )
+
+
+def _doc_ref_to_wire(ref: DocumentRef) -&gt; KeyMessage:
+    return KeyMessage(id=ref.id, collection=_collection_to_wire(ref.parent))
+
+
+def _doc_ref_from_wire(documents: Documents, message: KeyMessage) -&gt; DocumentRef:
+    return DocumentRef(
+        _documents=documents,
+        id=message.id,
+        parent=_collection_from_wire(documents=documents, message=message.collection),
+    )
+
+
+def _collection_to_wire(ref: CollectionRef) -&gt; CollectionMessage:
+    if ref.is_sub_collection():
+        return CollectionMessage(name=ref.name, parent=_doc_ref_to_wire(ref.parent) if ref.parent else None)
+    return CollectionMessage(name=ref.name)
+
+
+def _collection_from_wire(documents: Documents, message: CollectionMessage) -&gt; CollectionRef:
+    return CollectionRef(
+        _documents=documents,
+        name=message.name,
+        parent=_doc_ref_from_wire(documents=documents, message=message.parent) if message.parent else None,
+    )
+
+
+@dataclass(frozen=True, order=True)
+class CollectionRef:
+    &#34;&#34;&#34;A reference to a collection of documents.&#34;&#34;&#34;
+
+    _documents: Documents
+    name: str
+    parent: Union[DocumentRef, None] = field(default_factory=lambda: None)
+
+    def doc(self, doc_id: str) -&gt; DocumentRef:
+        &#34;&#34;&#34;Return a reference to a document in the collection.&#34;&#34;&#34;
+        return DocumentRef(_documents=self._documents, parent=self, id=doc_id)
+
+    def collection(self, name: str) -&gt; CollectionGroupRef:
+        &#34;&#34;&#34;
+        Return a reference to a sub-collection of this document.
+
+        This is currently only supported to one level of depth.
+        e.g. Documents().collection(&#39;a&#39;).collection(&#39;b&#39;).doc(&#39;c&#39;) is valid,
+        Documents().collection(&#39;a&#39;).doc(&#39;b&#39;).collection(&#39;c&#39;).collection(&#39;d&#39;) is invalid (1 level too deep).
+        &#34;&#34;&#34;
+        current_depth = self.sub_collection_depth()
+        if current_depth &gt;= MAX_SUB_COLLECTION_DEPTH:
+            # Collection nesting is only supported to a maximum depth.
+            raise CollectionDepthException(
+                f&#34;sub-collections supported to a depth of {MAX_SUB_COLLECTION_DEPTH}, &#34;
+                f&#34;attempted to create new collection with depth {current_depth + 1}&#34;
+            )
+        return CollectionGroupRef(_documents=self._documents, name=name, parent=self)
+
+    def query(
+        self,
+        paging_token: Any = None,
+        limit: int = 0,
+        expressions: Union[Expression, List[Expression]] = None,
+    ) -&gt; QueryBuilder:
+        &#34;&#34;&#34;Return a query builder scoped to this collection.&#34;&#34;&#34;
+        return QueryBuilder(
+            documents=self._documents,
+            collection=self,
+            paging_token=paging_token,
+            limit=limit,
+            expressions=[expressions] if isinstance(expressions, Expression) else expressions,
+        )
+
+    def sub_collection_depth(self) -&gt; int:
+        &#34;&#34;&#34;Return the depth of this collection, which is a count of the parents above this collection.&#34;&#34;&#34;
+        if not self.is_sub_collection():
+            return 0
+        else:
+            return self.parent.parent.sub_collection_depth() + 1
+
+    def is_sub_collection(self):
+        &#34;&#34;&#34;Return True if this collection is a sub-collection of a document in another collection.&#34;&#34;&#34;
+        return self.parent is not None
+
+
+@dataclass(frozen=True, order=True)
+class CollectionGroupRef:
+    &#34;&#34;&#34;A reference to a collection group.&#34;&#34;&#34;
+
+    _documents: Documents
+    name: str
+    parent: Union[CollectionRef, None] = field(default_factory=lambda: None)
+
+    def query(
+        self,
+        paging_token: Any = None,
+        limit: int = 0,
+        expressions: Union[Expression, List[Expression]] = None,
+    ) -&gt; QueryBuilder:
+        &#34;&#34;&#34;Return a query builder scoped to this collection.&#34;&#34;&#34;
+        return QueryBuilder(
+            documents=self._documents,
+            collection=self.to_collection_ref(),
+            paging_token=paging_token,
+            limit=limit,
+            expressions=[expressions] if isinstance(expressions, Expression) else expressions,
+        )
+
+    def sub_collection_depth(self) -&gt; int:
+        &#34;&#34;&#34;Return the depth of this collection group, which is a count of the parents above this collection.&#34;&#34;&#34;
+        if not self.is_sub_collection():
+            return 0
+        else:
+            return self.parent.sub_collection_depth() + 1
+
+    def is_sub_collection(self):
+        &#34;&#34;&#34;Return True if this collection is a sub-collection of a document in another collection.&#34;&#34;&#34;
+        return self.parent is not None
+
+    def to_collection_ref(self):
+        &#34;&#34;&#34;Return this collection group as a collection ref.&#34;&#34;&#34;
+        return CollectionRef(
+            self._documents,
+            self.name,
+            DocumentRef(
+                self._documents,
+                self.parent,
+                NIL_DOC_ID,
+            ),
+        )
+
+    @staticmethod
+    def from_collection_ref(collectionRef: CollectionRef, documents: Documents) -&gt; CollectionGroupRef:
+        &#34;&#34;&#34;Return a collection ref as a collection group.&#34;&#34;&#34;
+        if collectionRef.parent is not None:
+            return CollectionGroupRef(
+                documents,
+                collectionRef.name,
+                CollectionGroupRef.from_collection_ref(
+                    collectionRef.parent,
+                    documents,
+                ),
+            )
+
+
+class Operator(Enum):
+    &#34;&#34;&#34;Valid query expression operators.&#34;&#34;&#34;
+
+    less_than = &#34;&lt;&#34;
+    greater_than = &#34;&gt;&#34;
+    less_than_or_equal = &#34;&lt;=&#34;
+    greater_than_or_equal = &#34;&gt;=&#34;
+    equals = &#34;==&#34;
+    starts_with = &#34;startsWith&#34;
+
+
+class _ExpressionBuilder:
+    &#34;&#34;&#34;Builder for creating query expressions using magic methods.&#34;&#34;&#34;
+
+    def __init__(self, operand):
+        self._operand = operand
+
+    def __eq__(self, other) -&gt; Expression:
+        return Expression(self._operand, Operator.equals, other)
+
+    def __lt__(self, other) -&gt; Expression:
+        return Expression(self._operand, Operator.less_than, other)
+
+    def __le__(self, other) -&gt; Expression:
+        return Expression(self._operand, Operator.less_than_or_equal, other)
+
+    def __gt__(self, other) -&gt; Expression:
+        return Expression(self._operand, Operator.greater_than, other)
+
+    def __ge__(self, other) -&gt; Expression:
+        return Expression(self._operand, Operator.greater_than_or_equal, other)
+
+    def eq(self, other) -&gt; Expression:
+        return self == other
+
+    def lt(self, other) -&gt; Expression:
+        return self &lt; other
+
+    def le(self, other) -&gt; Expression:
+        return self &lt;= other
+
+    def gt(self, other) -&gt; Expression:
+        return self &gt; other
+
+    def ge(self, other) -&gt; Expression:
+        return self &gt;= other
+
+    def starts_with(self, match) -&gt; Expression:
+        return Expression(self._operand, Operator.starts_with, match)
+
+
+def condition(name: str) -&gt; _ExpressionBuilder:
+    &#34;&#34;&#34;
+    Construct a query expressions builder, for convenience.
+
+    Expression builders in turn provides magic methods for constructing expressions.
+
+    e.g. prop(&#39;first_name&#39;) == &#39;john&#39; is equivalent to Expression(&#39;first_name, &#39;=&#39;, &#39;john&#39;)
+
+    Supported operations are ==, &lt;, &gt;, &lt;=, &gt;=, .starts_with()
+    &#34;&#34;&#34;
+    return _ExpressionBuilder(operand=name)
+
+
+@dataclass(order=True)
+class Expression:
+    &#34;&#34;&#34;Query expressions, representing a boolean operation used for query filters.&#34;&#34;&#34;
+
+    operand: str
+    operator: Union[Operator, str]
+    value: Union[str, int, float, bool]
+
+    def __post_init__(self):
+        if isinstance(self.operator, str):
+            # Convert string operators to their enum values
+            self.operator = Operator(self.operator)
+
+    def _value_to_expression_value(self):
+        &#34;&#34;&#34;Return an ExpressionValue message representation of the value of this expression.&#34;&#34;&#34;
+        if isinstance(self.value, str):
+            return ExpressionValue(string_value=self.value)
+        # Check bool before numbers, because booleans are numbers.
+        if isinstance(self.value, bool):
+            return ExpressionValue(bool_value=self.value)
+        if isinstance(self.value, int):
+            return ExpressionValue(int_value=self.value)
+        if isinstance(self.value, float):
+            return ExpressionValue(double_value=self.value)
+
+    def _to_wire(self):
+        &#34;&#34;&#34;Return the Expression protobuf message representation of this expression.&#34;&#34;&#34;
+        return ExpressionMessage(
+            operand=self.operand,
+            operator=self.operator.value,
+            value=self._value_to_expression_value(),
+        )
+
+    def __str__(self):
+        return &#34;{0} {1} {2}&#34;.format(self.operand, self.operator.name, self.value)
+
+
+@dataclass(frozen=True, order=True)
+class Document:
+    &#34;&#34;&#34;Represents a document and any associated metadata.&#34;&#34;&#34;
+
+    _ref: DocumentRef
+    content: dict
+
+    @property
+    def id(self):
+        &#34;&#34;&#34;Return the document&#39;s unique id.&#34;&#34;&#34;
+        return self._ref.id
+
+    @property
+    def collection(self) -&gt; CollectionRef:
+        &#34;&#34;&#34;Return the CollectionRef for the collection that contains this document.&#34;&#34;&#34;
+        return self._ref.parent
+
+    @property
+    def ref(self):
+        &#34;&#34;&#34;Return the DocumentRef for this document.&#34;&#34;&#34;
+        return self._ref
+
+
+@dataclass(frozen=True, order=True)
+class QueryResultsPage:
+    &#34;&#34;&#34;Represents a page of results from a query.&#34;&#34;&#34;
+
+    paging_token: any = field(default_factory=lambda: None)
+    documents: List[Document] = field(default_factory=lambda: [])
+
+    def has_more_pages(self) -&gt; bool:
+        &#34;&#34;&#34;Return false if the page token is None or empty (both represent no more pages).&#34;&#34;&#34;
+        return bool(self.paging_token)
+
+
+class QueryBuilder:
+    &#34;&#34;&#34;Document query builder for retrieving documents from a collection based on filters.&#34;&#34;&#34;
+
+    _documents: Documents
+    _collection: CollectionRef
+    _paging_token: Any
+    _limit: int
+    _expressions: List[Expression]
+
+    def __init__(
+        self,
+        documents: Documents,
+        collection: CollectionRef,
+        paging_token: Any = None,
+        limit: int = 0,
+        expressions: List[Expression] = None,
+    ):
+        &#34;&#34;&#34;Construct a new QueryBuilder.&#34;&#34;&#34;
+        self._documents = documents
+        self._collection = collection
+        self._paging_token = paging_token
+        self._limit = limit  # default to unlimited.
+        if expressions is None:
+            self._expressions = []
+        else:
+            self._expressions = expressions
+
+    def _flat_expressions(self, expressions) -&gt; List[Expression]:
+        &#34;&#34;&#34;Process possible inputs for .where() into a flattened list of expressions.&#34;&#34;&#34;
+        if isinstance(expressions, tuple) and len(expressions) == 3 and isinstance(expressions[0], str):
+            # handle the special case where an expression was passed in as its component arguments.
+            # e.g. .where(&#39;age&#39;, &#39;&lt;&#39;, 30) instead of .where(condition(&#39;age&#39;) &gt; 30)
+            return [Expression(*expressions)]
+        if isinstance(expressions, Expression):
+            # when a single expression is received, wrap in a list and return it
+            return [expressions]
+        else:
+            # flatten lists of lists into single dimension list of expressions
+            exps = []
+            for exp in expressions:
+                exps = exps + self._flat_expressions(exp)
+            return exps
+
+    def where(
+        self,
+        *expressions: Union[
+            Expression, List[Expression], Union[str, Operator, int, bool, Tuple[str, Union[str, Operator], Any]]
+        ],
+    ) -&gt; QueryBuilder:
+        &#34;&#34;&#34;
+        Add a filter expression to the query.
+
+        :param expressions: a single expression or a set of expression args or a variadic/tuple/list of expressions.
+
+        Examples
+        --------
+            .where(&#39;age&#39;, &#39;&gt;&#39;, 20)
+            .where(condition(&#39;age&#39;) &gt; 20)
+            .where(condition(&#39;age&#39;).gt(20))
+            .where(
+                condition(&#39;age&#39;) &gt; 20,
+                condition(&#39;age&#39;) &lt; 50,
+            )
+            .where(
+                [
+                    condition(&#39;age&#39;) &gt; 20,
+                    condition(&#39;age&#39;) &lt; 50,
+                ]
+            )
+            .where(
+                (&#39;age&#39;, &#39;&gt;&#39;, 20),
+                (&#39;age&#39;, &#39;&lt;&#39;, 50),
+            )
+
+        &#34;&#34;&#34;
+        for expression in self._flat_expressions(expressions):
+            self._expressions.append(expression)
+        return self
+
+    def page_from(self, token) -&gt; QueryBuilder:
+        &#34;&#34;&#34;
+        Set the paging token for the query.
+
+        Used when requesting subsequent pages from a query.
+        &#34;&#34;&#34;
+        self._paging_token = token
+        return self
+
+    def limit(self, limit: int) -&gt; QueryBuilder:
+        &#34;&#34;&#34;Set the maximum number of results returned by this query.&#34;&#34;&#34;
+        if limit is None or not isinstance(limit, int) or limit &lt; 0:
+            raise ValueError(&#34;limit must be a positive integer or 0 for unlimited.&#34;)
+        self._limit = limit
+        return self
+
+    def _expressions_to_wire(self) -&gt; List[ExpressionMessage]:
+        &#34;&#34;&#34;Return this queries&#39; expressions as a list of their protobuf message representation.&#34;&#34;&#34;
+        return [expressions._to_wire() for expressions in self._expressions]
+
+    async def stream(self) -&gt; AsyncIterator[Document]:
+        &#34;&#34;&#34;Return all query results as a stream.&#34;&#34;&#34;
+        # TODO: add limit, expressions and paging token to query.
+        if self._paging_token is not None:
+            raise ValueError(&#34;page_from() should not be used with streamed queries.&#34;)
+
+        try:
+            async for result in self._documents._stub.query_stream(
+                collection=_collection_to_wire(self._collection),
+                expressions=self._expressions_to_wire(),
+                limit=self._limit,
+            ):
+                yield _document_from_wire(documents=self._documents, message=result.document)
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
+
+    async def fetch(self) -&gt; QueryResultsPage:
+        &#34;&#34;&#34;
+        Fetch a single page of results.
+
+        If a page has been fetched previously, a token can be provided via paging_from(), to fetch the subsequent pages.
+        &#34;&#34;&#34;
+        try:
+            results = await self._documents._stub.query(
+                collection=_collection_to_wire(self._collection),
+                expressions=self._expressions_to_wire(),
+                limit=self._limit,
+                paging_token=self._paging_token,
+            )
+
+            return QueryResultsPage(
+                paging_token=results.paging_token if results.paging_token else None,
+                documents=[
+                    _document_from_wire(documents=self._documents, message=result) for result in results.documents
+                ],
+            )
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
+
+    def __eq__(self, other):
+        return self.__repr__() == other.__repr__()
+
+    def __str__(self):
+        repr_str = &#34;from {0}&#34;.format(str(self._collection))
+        if self._paging_token:
+            repr_str += &#34;, paging token {0}&#34;.format(str(self._paging_token))
+        if len(self._expressions):
+            repr_str += &#34;, where &#34; + &#34; and &#34;.join([str(exp) for exp in self._expressions])
+        if self._limit != 1:
+            repr_str += &#34;, limit to {0} results&#34;.format(self._limit)
+
+        return &#34;Query({0})&#34;.format(repr_str)
+
+    def __repr__(self):
+        repr_str = &#34;Documents.collection({0}).query()&#34;.format(self._collection)
+        if self._paging_token:
+            repr_str += &#34;.page_from({0})&#34;.format(self._paging_token)
+        if len(self._expressions):
+            repr_str += &#34;&#34;.join([&#34;.where({0})&#34;.format(str(exp)) for exp in self._expressions])
+        if self._limit != 1:
+            repr_str += &#34;.limit({0})&#34;.format(self._limit)
+
+        return repr_str
+
+
+class Documents(object):
+    &#34;&#34;&#34;
+    Nitric client for interacting with document collections.
+
+    This client insulates application code from stack specific event operations or SDKs.
+    &#34;&#34;&#34;
+
+    _stub: DocumentServiceStub
+
+    def __init__(self):
+        &#34;&#34;&#34;Construct a Nitric Document Client.&#34;&#34;&#34;
+        self._channel = new_default_channel()
+        self._stub = DocumentServiceStub(channel=self._channel)
+
+    def __del__(self):
+        # close the channel when this client is destroyed
+        if self._channel is not None:
+            self._channel.close()
+
+    def collection(self, name: str) -&gt; CollectionRef:
+        &#34;&#34;&#34;Return a reference to a document collection.&#34;&#34;&#34;
+        return CollectionRef(_documents=self, name=name)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="nitric.api.documents.condition"><code class="name flex">
+<span>def <span class="ident">condition</span></span>(<span>name: str) ‑> nitric.api.documents._ExpressionBuilder</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Construct a query expressions builder, for convenience.</p>
+<p>Expression builders in turn provides magic methods for constructing expressions.</p>
+<p>e.g. prop('first_name') == 'john' is equivalent to Expression('first_name, '=', 'john')</p>
+<p>Supported operations are ==, &lt;, &gt;, &lt;=, &gt;=, .starts_with()</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def condition(name: str) -&gt; _ExpressionBuilder:
+    &#34;&#34;&#34;
+    Construct a query expressions builder, for convenience.
+
+    Expression builders in turn provides magic methods for constructing expressions.
+
+    e.g. prop(&#39;first_name&#39;) == &#39;john&#39; is equivalent to Expression(&#39;first_name, &#39;=&#39;, &#39;john&#39;)
+
+    Supported operations are ==, &lt;, &gt;, &lt;=, &gt;=, .starts_with()
+    &#34;&#34;&#34;
+    return _ExpressionBuilder(operand=name)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="nitric.api.documents.CollectionDepthException"><code class="flex name class">
+<span>class <span class="ident">CollectionDepthException</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The max depth of document sub-collections has been exceeded.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CollectionDepthException(Exception):
+    &#34;&#34;&#34;The max depth of document sub-collections has been exceeded.&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="nitric.api.documents.CollectionGroupRef"><code class="flex name class">
+<span>class <span class="ident">CollectionGroupRef</span></span>
+<span>(</span><span>_documents: <a title="nitric.api.documents.Documents" href="#nitric.api.documents.Documents">Documents</a>, name: str, parent: Union[<a title="nitric.api.documents.CollectionRef" href="#nitric.api.documents.CollectionRef">CollectionRef</a>, None] = &lt;factory&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A reference to a collection group.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CollectionGroupRef:
+    &#34;&#34;&#34;A reference to a collection group.&#34;&#34;&#34;
+
+    _documents: Documents
+    name: str
+    parent: Union[CollectionRef, None] = field(default_factory=lambda: None)
+
+    def query(
+        self,
+        paging_token: Any = None,
+        limit: int = 0,
+        expressions: Union[Expression, List[Expression]] = None,
+    ) -&gt; QueryBuilder:
+        &#34;&#34;&#34;Return a query builder scoped to this collection.&#34;&#34;&#34;
+        return QueryBuilder(
+            documents=self._documents,
+            collection=self.to_collection_ref(),
+            paging_token=paging_token,
+            limit=limit,
+            expressions=[expressions] if isinstance(expressions, Expression) else expressions,
+        )
+
+    def sub_collection_depth(self) -&gt; int:
+        &#34;&#34;&#34;Return the depth of this collection group, which is a count of the parents above this collection.&#34;&#34;&#34;
+        if not self.is_sub_collection():
+            return 0
+        else:
+            return self.parent.sub_collection_depth() + 1
+
+    def is_sub_collection(self):
+        &#34;&#34;&#34;Return True if this collection is a sub-collection of a document in another collection.&#34;&#34;&#34;
+        return self.parent is not None
+
+    def to_collection_ref(self):
+        &#34;&#34;&#34;Return this collection group as a collection ref.&#34;&#34;&#34;
+        return CollectionRef(
+            self._documents,
+            self.name,
+            DocumentRef(
+                self._documents,
+                self.parent,
+                NIL_DOC_ID,
+            ),
+        )
+
+    @staticmethod
+    def from_collection_ref(collectionRef: CollectionRef, documents: Documents) -&gt; CollectionGroupRef:
+        &#34;&#34;&#34;Return a collection ref as a collection group.&#34;&#34;&#34;
+        if collectionRef.parent is not None:
+            return CollectionGroupRef(
+                documents,
+                collectionRef.name,
+                CollectionGroupRef.from_collection_ref(
+                    collectionRef.parent,
+                    documents,
+                ),
+            )</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.api.documents.CollectionGroupRef.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.documents.CollectionGroupRef.parent"><code class="name">var <span class="ident">parent</span> : Union[<a title="nitric.api.documents.CollectionRef" href="#nitric.api.documents.CollectionRef">CollectionRef</a>, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="nitric.api.documents.CollectionGroupRef.from_collection_ref"><code class="name flex">
+<span>def <span class="ident">from_collection_ref</span></span>(<span>collectionRef: <a title="nitric.api.documents.CollectionRef" href="#nitric.api.documents.CollectionRef">CollectionRef</a>, documents: <a title="nitric.api.documents.Documents" href="#nitric.api.documents.Documents">Documents</a>) ‑> <a title="nitric.api.documents.CollectionGroupRef" href="#nitric.api.documents.CollectionGroupRef">CollectionGroupRef</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a collection ref as a collection group.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def from_collection_ref(collectionRef: CollectionRef, documents: Documents) -&gt; CollectionGroupRef:
+    &#34;&#34;&#34;Return a collection ref as a collection group.&#34;&#34;&#34;
+    if collectionRef.parent is not None:
+        return CollectionGroupRef(
+            documents,
+            collectionRef.name,
+            CollectionGroupRef.from_collection_ref(
+                collectionRef.parent,
+                documents,
+            ),
+        )</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.api.documents.CollectionGroupRef.is_sub_collection"><code class="name flex">
+<span>def <span class="ident">is_sub_collection</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return True if this collection is a sub-collection of a document in another collection.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_sub_collection(self):
+    &#34;&#34;&#34;Return True if this collection is a sub-collection of a document in another collection.&#34;&#34;&#34;
+    return self.parent is not None</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.documents.CollectionGroupRef.query"><code class="name flex">
+<span>def <span class="ident">query</span></span>(<span>self, paging_token: Any = None, limit: int = 0, expressions: Union[<a title="nitric.api.documents.Expression" href="#nitric.api.documents.Expression">Expression</a>, List[<a title="nitric.api.documents.Expression" href="#nitric.api.documents.Expression">Expression</a>]] = None) ‑> <a title="nitric.api.documents.QueryBuilder" href="#nitric.api.documents.QueryBuilder">QueryBuilder</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a query builder scoped to this collection.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def query(
+    self,
+    paging_token: Any = None,
+    limit: int = 0,
+    expressions: Union[Expression, List[Expression]] = None,
+) -&gt; QueryBuilder:
+    &#34;&#34;&#34;Return a query builder scoped to this collection.&#34;&#34;&#34;
+    return QueryBuilder(
+        documents=self._documents,
+        collection=self.to_collection_ref(),
+        paging_token=paging_token,
+        limit=limit,
+        expressions=[expressions] if isinstance(expressions, Expression) else expressions,
+    )</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.documents.CollectionGroupRef.sub_collection_depth"><code class="name flex">
+<span>def <span class="ident">sub_collection_depth</span></span>(<span>self) ‑> int</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the depth of this collection group, which is a count of the parents above this collection.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sub_collection_depth(self) -&gt; int:
+    &#34;&#34;&#34;Return the depth of this collection group, which is a count of the parents above this collection.&#34;&#34;&#34;
+    if not self.is_sub_collection():
+        return 0
+    else:
+        return self.parent.sub_collection_depth() + 1</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.documents.CollectionGroupRef.to_collection_ref"><code class="name flex">
+<span>def <span class="ident">to_collection_ref</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return this collection group as a collection ref.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_collection_ref(self):
+    &#34;&#34;&#34;Return this collection group as a collection ref.&#34;&#34;&#34;
+    return CollectionRef(
+        self._documents,
+        self.name,
+        DocumentRef(
+            self._documents,
+            self.parent,
+            NIL_DOC_ID,
+        ),
+    )</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.api.documents.CollectionRef"><code class="flex name class">
+<span>class <span class="ident">CollectionRef</span></span>
+<span>(</span><span>_documents: <a title="nitric.api.documents.Documents" href="#nitric.api.documents.Documents">Documents</a>, name: str, parent: Union[<a title="nitric.api.documents.DocumentRef" href="#nitric.api.documents.DocumentRef">DocumentRef</a>, None] = &lt;factory&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A reference to a collection of documents.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CollectionRef:
+    &#34;&#34;&#34;A reference to a collection of documents.&#34;&#34;&#34;
+
+    _documents: Documents
+    name: str
+    parent: Union[DocumentRef, None] = field(default_factory=lambda: None)
+
+    def doc(self, doc_id: str) -&gt; DocumentRef:
+        &#34;&#34;&#34;Return a reference to a document in the collection.&#34;&#34;&#34;
+        return DocumentRef(_documents=self._documents, parent=self, id=doc_id)
+
+    def collection(self, name: str) -&gt; CollectionGroupRef:
+        &#34;&#34;&#34;
+        Return a reference to a sub-collection of this document.
+
+        This is currently only supported to one level of depth.
+        e.g. Documents().collection(&#39;a&#39;).collection(&#39;b&#39;).doc(&#39;c&#39;) is valid,
+        Documents().collection(&#39;a&#39;).doc(&#39;b&#39;).collection(&#39;c&#39;).collection(&#39;d&#39;) is invalid (1 level too deep).
+        &#34;&#34;&#34;
+        current_depth = self.sub_collection_depth()
+        if current_depth &gt;= MAX_SUB_COLLECTION_DEPTH:
+            # Collection nesting is only supported to a maximum depth.
+            raise CollectionDepthException(
+                f&#34;sub-collections supported to a depth of {MAX_SUB_COLLECTION_DEPTH}, &#34;
+                f&#34;attempted to create new collection with depth {current_depth + 1}&#34;
+            )
+        return CollectionGroupRef(_documents=self._documents, name=name, parent=self)
+
+    def query(
+        self,
+        paging_token: Any = None,
+        limit: int = 0,
+        expressions: Union[Expression, List[Expression]] = None,
+    ) -&gt; QueryBuilder:
+        &#34;&#34;&#34;Return a query builder scoped to this collection.&#34;&#34;&#34;
+        return QueryBuilder(
+            documents=self._documents,
+            collection=self,
+            paging_token=paging_token,
+            limit=limit,
+            expressions=[expressions] if isinstance(expressions, Expression) else expressions,
+        )
+
+    def sub_collection_depth(self) -&gt; int:
+        &#34;&#34;&#34;Return the depth of this collection, which is a count of the parents above this collection.&#34;&#34;&#34;
+        if not self.is_sub_collection():
+            return 0
+        else:
+            return self.parent.parent.sub_collection_depth() + 1
+
+    def is_sub_collection(self):
+        &#34;&#34;&#34;Return True if this collection is a sub-collection of a document in another collection.&#34;&#34;&#34;
+        return self.parent is not None</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.api.documents.CollectionRef.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.documents.CollectionRef.parent"><code class="name">var <span class="ident">parent</span> : Union[<a title="nitric.api.documents.DocumentRef" href="#nitric.api.documents.DocumentRef">DocumentRef</a>, NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.api.documents.CollectionRef.collection"><code class="name flex">
+<span>def <span class="ident">collection</span></span>(<span>self, name: str) ‑> <a title="nitric.api.documents.CollectionGroupRef" href="#nitric.api.documents.CollectionGroupRef">CollectionGroupRef</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a reference to a sub-collection of this document.</p>
+<p>This is currently only supported to one level of depth.
+e.g. Documents().collection('a').collection('b').doc('c') is valid,
+Documents().collection('a').doc('b').collection('c').collection('d') is invalid (1 level too deep).</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def collection(self, name: str) -&gt; CollectionGroupRef:
+    &#34;&#34;&#34;
+    Return a reference to a sub-collection of this document.
+
+    This is currently only supported to one level of depth.
+    e.g. Documents().collection(&#39;a&#39;).collection(&#39;b&#39;).doc(&#39;c&#39;) is valid,
+    Documents().collection(&#39;a&#39;).doc(&#39;b&#39;).collection(&#39;c&#39;).collection(&#39;d&#39;) is invalid (1 level too deep).
+    &#34;&#34;&#34;
+    current_depth = self.sub_collection_depth()
+    if current_depth &gt;= MAX_SUB_COLLECTION_DEPTH:
+        # Collection nesting is only supported to a maximum depth.
+        raise CollectionDepthException(
+            f&#34;sub-collections supported to a depth of {MAX_SUB_COLLECTION_DEPTH}, &#34;
+            f&#34;attempted to create new collection with depth {current_depth + 1}&#34;
+        )
+    return CollectionGroupRef(_documents=self._documents, name=name, parent=self)</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.documents.CollectionRef.doc"><code class="name flex">
+<span>def <span class="ident">doc</span></span>(<span>self, doc_id: str) ‑> <a title="nitric.api.documents.DocumentRef" href="#nitric.api.documents.DocumentRef">DocumentRef</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a reference to a document in the collection.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def doc(self, doc_id: str) -&gt; DocumentRef:
+    &#34;&#34;&#34;Return a reference to a document in the collection.&#34;&#34;&#34;
+    return DocumentRef(_documents=self._documents, parent=self, id=doc_id)</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.documents.CollectionRef.is_sub_collection"><code class="name flex">
+<span>def <span class="ident">is_sub_collection</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return True if this collection is a sub-collection of a document in another collection.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_sub_collection(self):
+    &#34;&#34;&#34;Return True if this collection is a sub-collection of a document in another collection.&#34;&#34;&#34;
+    return self.parent is not None</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.documents.CollectionRef.query"><code class="name flex">
+<span>def <span class="ident">query</span></span>(<span>self, paging_token: Any = None, limit: int = 0, expressions: Union[<a title="nitric.api.documents.Expression" href="#nitric.api.documents.Expression">Expression</a>, List[<a title="nitric.api.documents.Expression" href="#nitric.api.documents.Expression">Expression</a>]] = None) ‑> <a title="nitric.api.documents.QueryBuilder" href="#nitric.api.documents.QueryBuilder">QueryBuilder</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a query builder scoped to this collection.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def query(
+    self,
+    paging_token: Any = None,
+    limit: int = 0,
+    expressions: Union[Expression, List[Expression]] = None,
+) -&gt; QueryBuilder:
+    &#34;&#34;&#34;Return a query builder scoped to this collection.&#34;&#34;&#34;
+    return QueryBuilder(
+        documents=self._documents,
+        collection=self,
+        paging_token=paging_token,
+        limit=limit,
+        expressions=[expressions] if isinstance(expressions, Expression) else expressions,
+    )</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.documents.CollectionRef.sub_collection_depth"><code class="name flex">
+<span>def <span class="ident">sub_collection_depth</span></span>(<span>self) ‑> int</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the depth of this collection, which is a count of the parents above this collection.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sub_collection_depth(self) -&gt; int:
+    &#34;&#34;&#34;Return the depth of this collection, which is a count of the parents above this collection.&#34;&#34;&#34;
+    if not self.is_sub_collection():
+        return 0
+    else:
+        return self.parent.parent.sub_collection_depth() + 1</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.api.documents.Document"><code class="flex name class">
+<span>class <span class="ident">Document</span></span>
+<span>(</span><span>_ref: <a title="nitric.api.documents.DocumentRef" href="#nitric.api.documents.DocumentRef">DocumentRef</a>, content: dict)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents a document and any associated metadata.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Document:
+    &#34;&#34;&#34;Represents a document and any associated metadata.&#34;&#34;&#34;
+
+    _ref: DocumentRef
+    content: dict
+
+    @property
+    def id(self):
+        &#34;&#34;&#34;Return the document&#39;s unique id.&#34;&#34;&#34;
+        return self._ref.id
+
+    @property
+    def collection(self) -&gt; CollectionRef:
+        &#34;&#34;&#34;Return the CollectionRef for the collection that contains this document.&#34;&#34;&#34;
+        return self._ref.parent
+
+    @property
+    def ref(self):
+        &#34;&#34;&#34;Return the DocumentRef for this document.&#34;&#34;&#34;
+        return self._ref</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.api.documents.Document.content"><code class="name">var <span class="ident">content</span> : dict</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="nitric.api.documents.Document.collection"><code class="name">var <span class="ident">collection</span> : <a title="nitric.api.documents.CollectionRef" href="#nitric.api.documents.CollectionRef">CollectionRef</a></code></dt>
+<dd>
+<div class="desc"><p>Return the CollectionRef for the collection that contains this document.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def collection(self) -&gt; CollectionRef:
+    &#34;&#34;&#34;Return the CollectionRef for the collection that contains this document.&#34;&#34;&#34;
+    return self._ref.parent</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.documents.Document.id"><code class="name">var <span class="ident">id</span></code></dt>
+<dd>
+<div class="desc"><p>Return the document's unique id.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def id(self):
+    &#34;&#34;&#34;Return the document&#39;s unique id.&#34;&#34;&#34;
+    return self._ref.id</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.documents.Document.ref"><code class="name">var <span class="ident">ref</span></code></dt>
+<dd>
+<div class="desc"><p>Return the DocumentRef for this document.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def ref(self):
+    &#34;&#34;&#34;Return the DocumentRef for this document.&#34;&#34;&#34;
+    return self._ref</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.api.documents.DocumentRef"><code class="flex name class">
+<span>class <span class="ident">DocumentRef</span></span>
+<span>(</span><span>_documents: <a title="nitric.api.documents.Documents" href="#nitric.api.documents.Documents">Documents</a>, parent: <a title="nitric.api.documents.CollectionRef" href="#nitric.api.documents.CollectionRef">CollectionRef</a>, id: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A reference to a document in a collection.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DocumentRef:
+    &#34;&#34;&#34;A reference to a document in a collection.&#34;&#34;&#34;
+
+    _documents: Documents
+    parent: CollectionRef
+    id: str
+
+    def collection(self, name: str) -&gt; CollectionRef:
+        &#34;&#34;&#34;
+        Return a reference to a sub-collection of this document.
+
+        This is currently only supported to one level of depth.
+        e.g. Documents().collection(&#39;a&#39;).doc(&#39;b&#39;).collection(&#39;c&#39;).doc(&#39;d&#39;) is valid,
+        Documents().collection(&#39;a&#39;).doc(&#39;b&#39;).collection(&#39;c&#39;).doc(&#39;d&#39;).collection(&#39;e&#39;) is invalid (1 level too deep).
+        &#34;&#34;&#34;
+        current_depth = self.parent.sub_collection_depth()
+        if current_depth &gt;= MAX_SUB_COLLECTION_DEPTH:
+            # Collection nesting is only supported to a maximum depth.
+            raise CollectionDepthException(
+                f&#34;sub-collections supported to a depth of {MAX_SUB_COLLECTION_DEPTH}, &#34;
+                f&#34;attempted to create new collection with depth {current_depth + 1}&#34;
+            )
+        return CollectionRef(_documents=self._documents, name=name, parent=self)
+
+    async def get(self) -&gt; Document:
+        &#34;&#34;&#34;Retrieve the contents of this document, if it exists.&#34;&#34;&#34;
+        try:
+            response = await self._documents._stub.get(key=_doc_ref_to_wire(self))
+            return _document_from_wire(documents=self._documents, message=response.document)
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
+
+    async def set(self, content: dict):
+        &#34;&#34;&#34;
+        Set the contents of this document.
+
+        If the document exists it will be updated, otherwise a new document will be created.
+        &#34;&#34;&#34;
+        try:
+            await self._documents._stub.set(
+                key=_doc_ref_to_wire(self),
+                content=_struct_from_dict(content),
+            )
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
+
+    async def delete(self):
+        &#34;&#34;&#34;Delete this document, if it exists.&#34;&#34;&#34;
+        try:
+            await self._documents._stub.delete(
+                key=_doc_ref_to_wire(self),
+            )
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.api.documents.DocumentRef.id"><code class="name">var <span class="ident">id</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.documents.DocumentRef.parent"><code class="name">var <span class="ident">parent</span> : <a title="nitric.api.documents.CollectionRef" href="#nitric.api.documents.CollectionRef">CollectionRef</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.api.documents.DocumentRef.collection"><code class="name flex">
+<span>def <span class="ident">collection</span></span>(<span>self, name: str) ‑> <a title="nitric.api.documents.CollectionRef" href="#nitric.api.documents.CollectionRef">CollectionRef</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a reference to a sub-collection of this document.</p>
+<p>This is currently only supported to one level of depth.
+e.g. Documents().collection('a').doc('b').collection('c').doc('d') is valid,
+Documents().collection('a').doc('b').collection('c').doc('d').collection('e') is invalid (1 level too deep).</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def collection(self, name: str) -&gt; CollectionRef:
+    &#34;&#34;&#34;
+    Return a reference to a sub-collection of this document.
+
+    This is currently only supported to one level of depth.
+    e.g. Documents().collection(&#39;a&#39;).doc(&#39;b&#39;).collection(&#39;c&#39;).doc(&#39;d&#39;) is valid,
+    Documents().collection(&#39;a&#39;).doc(&#39;b&#39;).collection(&#39;c&#39;).doc(&#39;d&#39;).collection(&#39;e&#39;) is invalid (1 level too deep).
+    &#34;&#34;&#34;
+    current_depth = self.parent.sub_collection_depth()
+    if current_depth &gt;= MAX_SUB_COLLECTION_DEPTH:
+        # Collection nesting is only supported to a maximum depth.
+        raise CollectionDepthException(
+            f&#34;sub-collections supported to a depth of {MAX_SUB_COLLECTION_DEPTH}, &#34;
+            f&#34;attempted to create new collection with depth {current_depth + 1}&#34;
+        )
+    return CollectionRef(_documents=self._documents, name=name, parent=self)</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.documents.DocumentRef.delete"><code class="name flex">
+<span>async def <span class="ident">delete</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Delete this document, if it exists.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def delete(self):
+    &#34;&#34;&#34;Delete this document, if it exists.&#34;&#34;&#34;
+    try:
+        await self._documents._stub.delete(
+            key=_doc_ref_to_wire(self),
+        )
+    except GRPCError as grpc_err:
+        raise exception_from_grpc_error(grpc_err)</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.documents.DocumentRef.get"><code class="name flex">
+<span>async def <span class="ident">get</span></span>(<span>self) ‑> <a title="nitric.api.documents.Document" href="#nitric.api.documents.Document">Document</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieve the contents of this document, if it exists.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def get(self) -&gt; Document:
+    &#34;&#34;&#34;Retrieve the contents of this document, if it exists.&#34;&#34;&#34;
+    try:
+        response = await self._documents._stub.get(key=_doc_ref_to_wire(self))
+        return _document_from_wire(documents=self._documents, message=response.document)
+    except GRPCError as grpc_err:
+        raise exception_from_grpc_error(grpc_err)</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.documents.DocumentRef.set"><code class="name flex">
+<span>async def <span class="ident">set</span></span>(<span>self, content: dict)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the contents of this document.</p>
+<p>If the document exists it will be updated, otherwise a new document will be created.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def set(self, content: dict):
+    &#34;&#34;&#34;
+    Set the contents of this document.
+
+    If the document exists it will be updated, otherwise a new document will be created.
+    &#34;&#34;&#34;
+    try:
+        await self._documents._stub.set(
+            key=_doc_ref_to_wire(self),
+            content=_struct_from_dict(content),
+        )
+    except GRPCError as grpc_err:
+        raise exception_from_grpc_error(grpc_err)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.api.documents.Documents"><code class="flex name class">
+<span>class <span class="ident">Documents</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Nitric client for interacting with document collections.</p>
+<p>This client insulates application code from stack specific event operations or SDKs.</p>
+<p>Construct a Nitric Document Client.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Documents(object):
+    &#34;&#34;&#34;
+    Nitric client for interacting with document collections.
+
+    This client insulates application code from stack specific event operations or SDKs.
+    &#34;&#34;&#34;
+
+    _stub: DocumentServiceStub
+
+    def __init__(self):
+        &#34;&#34;&#34;Construct a Nitric Document Client.&#34;&#34;&#34;
+        self._channel = new_default_channel()
+        self._stub = DocumentServiceStub(channel=self._channel)
+
+    def __del__(self):
+        # close the channel when this client is destroyed
+        if self._channel is not None:
+            self._channel.close()
+
+    def collection(self, name: str) -&gt; CollectionRef:
+        &#34;&#34;&#34;Return a reference to a document collection.&#34;&#34;&#34;
+        return CollectionRef(_documents=self, name=name)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.api.documents.Documents.collection"><code class="name flex">
+<span>def <span class="ident">collection</span></span>(<span>self, name: str) ‑> <a title="nitric.api.documents.CollectionRef" href="#nitric.api.documents.CollectionRef">CollectionRef</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a reference to a document collection.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def collection(self, name: str) -&gt; CollectionRef:
+    &#34;&#34;&#34;Return a reference to a document collection.&#34;&#34;&#34;
+    return CollectionRef(_documents=self, name=name)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.api.documents.Expression"><code class="flex name class">
+<span>class <span class="ident">Expression</span></span>
+<span>(</span><span>operand: str, operator: Union[<a title="nitric.api.documents.Operator" href="#nitric.api.documents.Operator">Operator</a>, str], value: Union[str, int, float, bool])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Query expressions, representing a boolean operation used for query filters.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Expression:
+    &#34;&#34;&#34;Query expressions, representing a boolean operation used for query filters.&#34;&#34;&#34;
+
+    operand: str
+    operator: Union[Operator, str]
+    value: Union[str, int, float, bool]
+
+    def __post_init__(self):
+        if isinstance(self.operator, str):
+            # Convert string operators to their enum values
+            self.operator = Operator(self.operator)
+
+    def _value_to_expression_value(self):
+        &#34;&#34;&#34;Return an ExpressionValue message representation of the value of this expression.&#34;&#34;&#34;
+        if isinstance(self.value, str):
+            return ExpressionValue(string_value=self.value)
+        # Check bool before numbers, because booleans are numbers.
+        if isinstance(self.value, bool):
+            return ExpressionValue(bool_value=self.value)
+        if isinstance(self.value, int):
+            return ExpressionValue(int_value=self.value)
+        if isinstance(self.value, float):
+            return ExpressionValue(double_value=self.value)
+
+    def _to_wire(self):
+        &#34;&#34;&#34;Return the Expression protobuf message representation of this expression.&#34;&#34;&#34;
+        return ExpressionMessage(
+            operand=self.operand,
+            operator=self.operator.value,
+            value=self._value_to_expression_value(),
+        )
+
+    def __str__(self):
+        return &#34;{0} {1} {2}&#34;.format(self.operand, self.operator.name, self.value)</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.api.documents.Expression.operand"><code class="name">var <span class="ident">operand</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.documents.Expression.operator"><code class="name">var <span class="ident">operator</span> : Union[<a title="nitric.api.documents.Operator" href="#nitric.api.documents.Operator">Operator</a>, str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.documents.Expression.value"><code class="name">var <span class="ident">value</span> : Union[str, int, float, bool]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.api.documents.Operator"><code class="flex name class">
+<span>class <span class="ident">Operator</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Valid query expression operators.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Operator(Enum):
+    &#34;&#34;&#34;Valid query expression operators.&#34;&#34;&#34;
+
+    less_than = &#34;&lt;&#34;
+    greater_than = &#34;&gt;&#34;
+    less_than_or_equal = &#34;&lt;=&#34;
+    greater_than_or_equal = &#34;&gt;=&#34;
+    equals = &#34;==&#34;
+    starts_with = &#34;startsWith&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.api.documents.Operator.equals"><code class="name">var <span class="ident">equals</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.documents.Operator.greater_than"><code class="name">var <span class="ident">greater_than</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.documents.Operator.greater_than_or_equal"><code class="name">var <span class="ident">greater_than_or_equal</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.documents.Operator.less_than"><code class="name">var <span class="ident">less_than</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.documents.Operator.less_than_or_equal"><code class="name">var <span class="ident">less_than_or_equal</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.documents.Operator.starts_with"><code class="name">var <span class="ident">starts_with</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.api.documents.QueryBuilder"><code class="flex name class">
+<span>class <span class="ident">QueryBuilder</span></span>
+<span>(</span><span>documents: <a title="nitric.api.documents.Documents" href="#nitric.api.documents.Documents">Documents</a>, collection: <a title="nitric.api.documents.CollectionRef" href="#nitric.api.documents.CollectionRef">CollectionRef</a>, paging_token: Any = None, limit: int = 0, expressions: List[<a title="nitric.api.documents.Expression" href="#nitric.api.documents.Expression">Expression</a>] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Document query builder for retrieving documents from a collection based on filters.</p>
+<p>Construct a new QueryBuilder.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class QueryBuilder:
+    &#34;&#34;&#34;Document query builder for retrieving documents from a collection based on filters.&#34;&#34;&#34;
+
+    _documents: Documents
+    _collection: CollectionRef
+    _paging_token: Any
+    _limit: int
+    _expressions: List[Expression]
+
+    def __init__(
+        self,
+        documents: Documents,
+        collection: CollectionRef,
+        paging_token: Any = None,
+        limit: int = 0,
+        expressions: List[Expression] = None,
+    ):
+        &#34;&#34;&#34;Construct a new QueryBuilder.&#34;&#34;&#34;
+        self._documents = documents
+        self._collection = collection
+        self._paging_token = paging_token
+        self._limit = limit  # default to unlimited.
+        if expressions is None:
+            self._expressions = []
+        else:
+            self._expressions = expressions
+
+    def _flat_expressions(self, expressions) -&gt; List[Expression]:
+        &#34;&#34;&#34;Process possible inputs for .where() into a flattened list of expressions.&#34;&#34;&#34;
+        if isinstance(expressions, tuple) and len(expressions) == 3 and isinstance(expressions[0], str):
+            # handle the special case where an expression was passed in as its component arguments.
+            # e.g. .where(&#39;age&#39;, &#39;&lt;&#39;, 30) instead of .where(condition(&#39;age&#39;) &gt; 30)
+            return [Expression(*expressions)]
+        if isinstance(expressions, Expression):
+            # when a single expression is received, wrap in a list and return it
+            return [expressions]
+        else:
+            # flatten lists of lists into single dimension list of expressions
+            exps = []
+            for exp in expressions:
+                exps = exps + self._flat_expressions(exp)
+            return exps
+
+    def where(
+        self,
+        *expressions: Union[
+            Expression, List[Expression], Union[str, Operator, int, bool, Tuple[str, Union[str, Operator], Any]]
+        ],
+    ) -&gt; QueryBuilder:
+        &#34;&#34;&#34;
+        Add a filter expression to the query.
+
+        :param expressions: a single expression or a set of expression args or a variadic/tuple/list of expressions.
+
+        Examples
+        --------
+            .where(&#39;age&#39;, &#39;&gt;&#39;, 20)
+            .where(condition(&#39;age&#39;) &gt; 20)
+            .where(condition(&#39;age&#39;).gt(20))
+            .where(
+                condition(&#39;age&#39;) &gt; 20,
+                condition(&#39;age&#39;) &lt; 50,
+            )
+            .where(
+                [
+                    condition(&#39;age&#39;) &gt; 20,
+                    condition(&#39;age&#39;) &lt; 50,
+                ]
+            )
+            .where(
+                (&#39;age&#39;, &#39;&gt;&#39;, 20),
+                (&#39;age&#39;, &#39;&lt;&#39;, 50),
+            )
+
+        &#34;&#34;&#34;
+        for expression in self._flat_expressions(expressions):
+            self._expressions.append(expression)
+        return self
+
+    def page_from(self, token) -&gt; QueryBuilder:
+        &#34;&#34;&#34;
+        Set the paging token for the query.
+
+        Used when requesting subsequent pages from a query.
+        &#34;&#34;&#34;
+        self._paging_token = token
+        return self
+
+    def limit(self, limit: int) -&gt; QueryBuilder:
+        &#34;&#34;&#34;Set the maximum number of results returned by this query.&#34;&#34;&#34;
+        if limit is None or not isinstance(limit, int) or limit &lt; 0:
+            raise ValueError(&#34;limit must be a positive integer or 0 for unlimited.&#34;)
+        self._limit = limit
+        return self
+
+    def _expressions_to_wire(self) -&gt; List[ExpressionMessage]:
+        &#34;&#34;&#34;Return this queries&#39; expressions as a list of their protobuf message representation.&#34;&#34;&#34;
+        return [expressions._to_wire() for expressions in self._expressions]
+
+    async def stream(self) -&gt; AsyncIterator[Document]:
+        &#34;&#34;&#34;Return all query results as a stream.&#34;&#34;&#34;
+        # TODO: add limit, expressions and paging token to query.
+        if self._paging_token is not None:
+            raise ValueError(&#34;page_from() should not be used with streamed queries.&#34;)
+
+        try:
+            async for result in self._documents._stub.query_stream(
+                collection=_collection_to_wire(self._collection),
+                expressions=self._expressions_to_wire(),
+                limit=self._limit,
+            ):
+                yield _document_from_wire(documents=self._documents, message=result.document)
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
+
+    async def fetch(self) -&gt; QueryResultsPage:
+        &#34;&#34;&#34;
+        Fetch a single page of results.
+
+        If a page has been fetched previously, a token can be provided via paging_from(), to fetch the subsequent pages.
+        &#34;&#34;&#34;
+        try:
+            results = await self._documents._stub.query(
+                collection=_collection_to_wire(self._collection),
+                expressions=self._expressions_to_wire(),
+                limit=self._limit,
+                paging_token=self._paging_token,
+            )
+
+            return QueryResultsPage(
+                paging_token=results.paging_token if results.paging_token else None,
+                documents=[
+                    _document_from_wire(documents=self._documents, message=result) for result in results.documents
+                ],
+            )
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
+
+    def __eq__(self, other):
+        return self.__repr__() == other.__repr__()
+
+    def __str__(self):
+        repr_str = &#34;from {0}&#34;.format(str(self._collection))
+        if self._paging_token:
+            repr_str += &#34;, paging token {0}&#34;.format(str(self._paging_token))
+        if len(self._expressions):
+            repr_str += &#34;, where &#34; + &#34; and &#34;.join([str(exp) for exp in self._expressions])
+        if self._limit != 1:
+            repr_str += &#34;, limit to {0} results&#34;.format(self._limit)
+
+        return &#34;Query({0})&#34;.format(repr_str)
+
+    def __repr__(self):
+        repr_str = &#34;Documents.collection({0}).query()&#34;.format(self._collection)
+        if self._paging_token:
+            repr_str += &#34;.page_from({0})&#34;.format(self._paging_token)
+        if len(self._expressions):
+            repr_str += &#34;&#34;.join([&#34;.where({0})&#34;.format(str(exp)) for exp in self._expressions])
+        if self._limit != 1:
+            repr_str += &#34;.limit({0})&#34;.format(self._limit)
+
+        return repr_str</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.api.documents.QueryBuilder.fetch"><code class="name flex">
+<span>async def <span class="ident">fetch</span></span>(<span>self) ‑> <a title="nitric.api.documents.QueryResultsPage" href="#nitric.api.documents.QueryResultsPage">QueryResultsPage</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Fetch a single page of results.</p>
+<p>If a page has been fetched previously, a token can be provided via paging_from(), to fetch the subsequent pages.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def fetch(self) -&gt; QueryResultsPage:
+    &#34;&#34;&#34;
+    Fetch a single page of results.
+
+    If a page has been fetched previously, a token can be provided via paging_from(), to fetch the subsequent pages.
+    &#34;&#34;&#34;
+    try:
+        results = await self._documents._stub.query(
+            collection=_collection_to_wire(self._collection),
+            expressions=self._expressions_to_wire(),
+            limit=self._limit,
+            paging_token=self._paging_token,
+        )
+
+        return QueryResultsPage(
+            paging_token=results.paging_token if results.paging_token else None,
+            documents=[
+                _document_from_wire(documents=self._documents, message=result) for result in results.documents
+            ],
+        )
+    except GRPCError as grpc_err:
+        raise exception_from_grpc_error(grpc_err)</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.documents.QueryBuilder.limit"><code class="name flex">
+<span>def <span class="ident">limit</span></span>(<span>self, limit: int) ‑> <a title="nitric.api.documents.QueryBuilder" href="#nitric.api.documents.QueryBuilder">QueryBuilder</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the maximum number of results returned by this query.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def limit(self, limit: int) -&gt; QueryBuilder:
+    &#34;&#34;&#34;Set the maximum number of results returned by this query.&#34;&#34;&#34;
+    if limit is None or not isinstance(limit, int) or limit &lt; 0:
+        raise ValueError(&#34;limit must be a positive integer or 0 for unlimited.&#34;)
+    self._limit = limit
+    return self</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.documents.QueryBuilder.page_from"><code class="name flex">
+<span>def <span class="ident">page_from</span></span>(<span>self, token) ‑> <a title="nitric.api.documents.QueryBuilder" href="#nitric.api.documents.QueryBuilder">QueryBuilder</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the paging token for the query.</p>
+<p>Used when requesting subsequent pages from a query.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def page_from(self, token) -&gt; QueryBuilder:
+    &#34;&#34;&#34;
+    Set the paging token for the query.
+
+    Used when requesting subsequent pages from a query.
+    &#34;&#34;&#34;
+    self._paging_token = token
+    return self</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.documents.QueryBuilder.stream"><code class="name flex">
+<span>async def <span class="ident">stream</span></span>(<span>self) ‑> AsyncIterator[<a title="nitric.api.documents.Document" href="#nitric.api.documents.Document">Document</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return all query results as a stream.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def stream(self) -&gt; AsyncIterator[Document]:
+    &#34;&#34;&#34;Return all query results as a stream.&#34;&#34;&#34;
+    # TODO: add limit, expressions and paging token to query.
+    if self._paging_token is not None:
+        raise ValueError(&#34;page_from() should not be used with streamed queries.&#34;)
+
+    try:
+        async for result in self._documents._stub.query_stream(
+            collection=_collection_to_wire(self._collection),
+            expressions=self._expressions_to_wire(),
+            limit=self._limit,
+        ):
+            yield _document_from_wire(documents=self._documents, message=result.document)
+    except GRPCError as grpc_err:
+        raise exception_from_grpc_error(grpc_err)</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.documents.QueryBuilder.where"><code class="name flex">
+<span>def <span class="ident">where</span></span>(<span>self, *expressions: Union[<a title="nitric.api.documents.Expression" href="#nitric.api.documents.Expression">Expression</a>, List[<a title="nitric.api.documents.Expression" href="#nitric.api.documents.Expression">Expression</a>], Union[str, <a title="nitric.api.documents.Operator" href="#nitric.api.documents.Operator">Operator</a>, int, bool, Tuple[str, Union[str, <a title="nitric.api.documents.Operator" href="#nitric.api.documents.Operator">Operator</a>], Any]]]) ‑> <a title="nitric.api.documents.QueryBuilder" href="#nitric.api.documents.QueryBuilder">QueryBuilder</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add a filter expression to the query.</p>
+<p>:param expressions: a single expression or a set of expression args or a variadic/tuple/list of expressions.</p>
+<h2 id="examples">Examples</h2>
+<pre><code>.where('age', '&gt;', 20)
+.where(condition('age') &gt; 20)
+.where(condition('age').gt(20))
+.where(
+    condition('age') &gt; 20,
+    condition('age') &lt; 50,
+)
+.where(
+    [
+        condition('age') &gt; 20,
+        condition('age') &lt; 50,
+    ]
+)
+.where(
+    ('age', '&gt;', 20),
+    ('age', '&lt;', 50),
+)
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def where(
+    self,
+    *expressions: Union[
+        Expression, List[Expression], Union[str, Operator, int, bool, Tuple[str, Union[str, Operator], Any]]
+    ],
+) -&gt; QueryBuilder:
+    &#34;&#34;&#34;
+    Add a filter expression to the query.
+
+    :param expressions: a single expression or a set of expression args or a variadic/tuple/list of expressions.
+
+    Examples
+    --------
+        .where(&#39;age&#39;, &#39;&gt;&#39;, 20)
+        .where(condition(&#39;age&#39;) &gt; 20)
+        .where(condition(&#39;age&#39;).gt(20))
+        .where(
+            condition(&#39;age&#39;) &gt; 20,
+            condition(&#39;age&#39;) &lt; 50,
+        )
+        .where(
+            [
+                condition(&#39;age&#39;) &gt; 20,
+                condition(&#39;age&#39;) &lt; 50,
+            ]
+        )
+        .where(
+            (&#39;age&#39;, &#39;&gt;&#39;, 20),
+            (&#39;age&#39;, &#39;&lt;&#39;, 50),
+        )
+
+    &#34;&#34;&#34;
+    for expression in self._flat_expressions(expressions):
+        self._expressions.append(expression)
+    return self</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.api.documents.QueryResultsPage"><code class="flex name class">
+<span>class <span class="ident">QueryResultsPage</span></span>
+<span>(</span><span>paging_token: any = &lt;factory&gt;, documents: List[<a title="nitric.api.documents.Document" href="#nitric.api.documents.Document">Document</a>] = &lt;factory&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents a page of results from a query.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class QueryResultsPage:
+    &#34;&#34;&#34;Represents a page of results from a query.&#34;&#34;&#34;
+
+    paging_token: any = field(default_factory=lambda: None)
+    documents: List[Document] = field(default_factory=lambda: [])
+
+    def has_more_pages(self) -&gt; bool:
+        &#34;&#34;&#34;Return false if the page token is None or empty (both represent no more pages).&#34;&#34;&#34;
+        return bool(self.paging_token)</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.api.documents.QueryResultsPage.documents"><code class="name">var <span class="ident">documents</span> : List[<a title="nitric.api.documents.Document" href="#nitric.api.documents.Document">Document</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.documents.QueryResultsPage.paging_token"><code class="name">var <span class="ident">paging_token</span> : <built-in function any></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.api.documents.QueryResultsPage.has_more_pages"><code class="name flex">
+<span>def <span class="ident">has_more_pages</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return false if the page token is None or empty (both represent no more pages).</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def has_more_pages(self) -&gt; bool:
+    &#34;&#34;&#34;Return false if the page token is None or empty (both represent no more pages).&#34;&#34;&#34;
+    return bool(self.paging_token)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="nitric.api" href="index.html">nitric.api</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="nitric.api.documents.condition" href="#nitric.api.documents.condition">condition</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="nitric.api.documents.CollectionDepthException" href="#nitric.api.documents.CollectionDepthException">CollectionDepthException</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.api.documents.CollectionGroupRef" href="#nitric.api.documents.CollectionGroupRef">CollectionGroupRef</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.documents.CollectionGroupRef.from_collection_ref" href="#nitric.api.documents.CollectionGroupRef.from_collection_ref">from_collection_ref</a></code></li>
+<li><code><a title="nitric.api.documents.CollectionGroupRef.is_sub_collection" href="#nitric.api.documents.CollectionGroupRef.is_sub_collection">is_sub_collection</a></code></li>
+<li><code><a title="nitric.api.documents.CollectionGroupRef.name" href="#nitric.api.documents.CollectionGroupRef.name">name</a></code></li>
+<li><code><a title="nitric.api.documents.CollectionGroupRef.parent" href="#nitric.api.documents.CollectionGroupRef.parent">parent</a></code></li>
+<li><code><a title="nitric.api.documents.CollectionGroupRef.query" href="#nitric.api.documents.CollectionGroupRef.query">query</a></code></li>
+<li><code><a title="nitric.api.documents.CollectionGroupRef.sub_collection_depth" href="#nitric.api.documents.CollectionGroupRef.sub_collection_depth">sub_collection_depth</a></code></li>
+<li><code><a title="nitric.api.documents.CollectionGroupRef.to_collection_ref" href="#nitric.api.documents.CollectionGroupRef.to_collection_ref">to_collection_ref</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.api.documents.CollectionRef" href="#nitric.api.documents.CollectionRef">CollectionRef</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.documents.CollectionRef.collection" href="#nitric.api.documents.CollectionRef.collection">collection</a></code></li>
+<li><code><a title="nitric.api.documents.CollectionRef.doc" href="#nitric.api.documents.CollectionRef.doc">doc</a></code></li>
+<li><code><a title="nitric.api.documents.CollectionRef.is_sub_collection" href="#nitric.api.documents.CollectionRef.is_sub_collection">is_sub_collection</a></code></li>
+<li><code><a title="nitric.api.documents.CollectionRef.name" href="#nitric.api.documents.CollectionRef.name">name</a></code></li>
+<li><code><a title="nitric.api.documents.CollectionRef.parent" href="#nitric.api.documents.CollectionRef.parent">parent</a></code></li>
+<li><code><a title="nitric.api.documents.CollectionRef.query" href="#nitric.api.documents.CollectionRef.query">query</a></code></li>
+<li><code><a title="nitric.api.documents.CollectionRef.sub_collection_depth" href="#nitric.api.documents.CollectionRef.sub_collection_depth">sub_collection_depth</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.api.documents.Document" href="#nitric.api.documents.Document">Document</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.documents.Document.collection" href="#nitric.api.documents.Document.collection">collection</a></code></li>
+<li><code><a title="nitric.api.documents.Document.content" href="#nitric.api.documents.Document.content">content</a></code></li>
+<li><code><a title="nitric.api.documents.Document.id" href="#nitric.api.documents.Document.id">id</a></code></li>
+<li><code><a title="nitric.api.documents.Document.ref" href="#nitric.api.documents.Document.ref">ref</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.api.documents.DocumentRef" href="#nitric.api.documents.DocumentRef">DocumentRef</a></code></h4>
+<ul class="two-column">
+<li><code><a title="nitric.api.documents.DocumentRef.collection" href="#nitric.api.documents.DocumentRef.collection">collection</a></code></li>
+<li><code><a title="nitric.api.documents.DocumentRef.delete" href="#nitric.api.documents.DocumentRef.delete">delete</a></code></li>
+<li><code><a title="nitric.api.documents.DocumentRef.get" href="#nitric.api.documents.DocumentRef.get">get</a></code></li>
+<li><code><a title="nitric.api.documents.DocumentRef.id" href="#nitric.api.documents.DocumentRef.id">id</a></code></li>
+<li><code><a title="nitric.api.documents.DocumentRef.parent" href="#nitric.api.documents.DocumentRef.parent">parent</a></code></li>
+<li><code><a title="nitric.api.documents.DocumentRef.set" href="#nitric.api.documents.DocumentRef.set">set</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.api.documents.Documents" href="#nitric.api.documents.Documents">Documents</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.documents.Documents.collection" href="#nitric.api.documents.Documents.collection">collection</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.api.documents.Expression" href="#nitric.api.documents.Expression">Expression</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.documents.Expression.operand" href="#nitric.api.documents.Expression.operand">operand</a></code></li>
+<li><code><a title="nitric.api.documents.Expression.operator" href="#nitric.api.documents.Expression.operator">operator</a></code></li>
+<li><code><a title="nitric.api.documents.Expression.value" href="#nitric.api.documents.Expression.value">value</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.api.documents.Operator" href="#nitric.api.documents.Operator">Operator</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.documents.Operator.equals" href="#nitric.api.documents.Operator.equals">equals</a></code></li>
+<li><code><a title="nitric.api.documents.Operator.greater_than" href="#nitric.api.documents.Operator.greater_than">greater_than</a></code></li>
+<li><code><a title="nitric.api.documents.Operator.greater_than_or_equal" href="#nitric.api.documents.Operator.greater_than_or_equal">greater_than_or_equal</a></code></li>
+<li><code><a title="nitric.api.documents.Operator.less_than" href="#nitric.api.documents.Operator.less_than">less_than</a></code></li>
+<li><code><a title="nitric.api.documents.Operator.less_than_or_equal" href="#nitric.api.documents.Operator.less_than_or_equal">less_than_or_equal</a></code></li>
+<li><code><a title="nitric.api.documents.Operator.starts_with" href="#nitric.api.documents.Operator.starts_with">starts_with</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.api.documents.QueryBuilder" href="#nitric.api.documents.QueryBuilder">QueryBuilder</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.documents.QueryBuilder.fetch" href="#nitric.api.documents.QueryBuilder.fetch">fetch</a></code></li>
+<li><code><a title="nitric.api.documents.QueryBuilder.limit" href="#nitric.api.documents.QueryBuilder.limit">limit</a></code></li>
+<li><code><a title="nitric.api.documents.QueryBuilder.page_from" href="#nitric.api.documents.QueryBuilder.page_from">page_from</a></code></li>
+<li><code><a title="nitric.api.documents.QueryBuilder.stream" href="#nitric.api.documents.QueryBuilder.stream">stream</a></code></li>
+<li><code><a title="nitric.api.documents.QueryBuilder.where" href="#nitric.api.documents.QueryBuilder.where">where</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.api.documents.QueryResultsPage" href="#nitric.api.documents.QueryResultsPage">QueryResultsPage</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.documents.QueryResultsPage.documents" href="#nitric.api.documents.QueryResultsPage.documents">documents</a></code></li>
+<li><code><a title="nitric.api.documents.QueryResultsPage.has_more_pages" href="#nitric.api.documents.QueryResultsPage.has_more_pages">has_more_pages</a></code></li>
+<li><code><a title="nitric.api.documents.QueryResultsPage.paging_token" href="#nitric.api.documents.QueryResultsPage.paging_token">paging_token</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>
