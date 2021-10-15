@@ -7,6 +7,7 @@ install:
 
 docs:
 	@echo Generating SDK Documentation
+	@rm -rf docs/nitric
 	@pdoc3 -f --html -o docs nitric
 
 clean:
