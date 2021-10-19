@@ -21,7 +21,7 @@ from unittest.mock import patch, AsyncMock, Mock, call
 
 import pytest
 
-from nitric.faas import start, FunctionServer, EventContext, HttpContext
+from nitric.faas import start, FunctionServer, HttpContext, compose_middleware, HttpResponse
 
 from nitricapi.nitric.faas.v1 import (
     ServerMessage,
@@ -46,6 +46,21 @@ class MockAsyncChannel:
 
 
 class EventClientTest(IsolatedAsyncioTestCase):
+    async def test_compose_middleware(self):
+        async def middleware(ctx: HttpContext, next) -> HttpContext:
+            ctx.res.status = 401
+            return await next(ctx)
+
+        async def handler(ctx: HttpContext) -> HttpContext:
+            ctx.res.body = "some text"
+            return ctx
+
+        composed = compose_middleware(middleware, handler)
+
+        ctx = HttpContext(response=HttpResponse(), request=None)
+        result = await composed(ctx)
+        assert result.res.status == 401
+
     def test_start_with_one_handler(self):
         mock_server_constructor = Mock()
         mock_server = Object()

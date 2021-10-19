@@ -217,16 +217,33 @@ def compose_middleware(*middlewares: Union[Middleware, List[Middleware]]) -> Mid
     The resulting middleware will effectively be a chain of the provided middleware,
     where each calls the next in the chain when they're successful.
     """
+    middlewares = list(middlewares)
     if len(middlewares) == 1 and not isinstance(middlewares[0], list):
         return middlewares[0]
 
     middlewares = [compose_middleware(m) if isinstance(m, list) else m for m in middlewares]
 
     async def handler(ctx, next_middleware=lambda ctx: ctx):
-        middleware_chain = functools.reduce(
-            lambda acc_next, cur: lambda context: cur(context, acc_next), reversed(middlewares + (next_middleware,))
-        )
-        return middleware_chain(ctx)
+        def reduceChain(acc_next, cur):
+            async def chainedMiddleware(context):
+                # Count the positional arguments to determine if the function is a handler or middleware.
+                all_args = cur.__code__.co_argcount
+                kwargs = len(cur.__defaults__) if cur.__defaults__ is not None else 0
+                pos_args = all_args - kwargs
+                if pos_args == 2:
+                    # Call the middleware with next and return the result
+                    return (
+                        (await cur(context, acc_next)) if asyncio.iscoroutinefunction(cur) else cur(context, acc_next)
+                    )
+                else:
+                    # Call the handler with ctx only, then call the remainder of the middleware chain
+                    result = (await cur(context)) if asyncio.iscoroutinefunction(cur) else cur(context)
+                    return (await acc_next(result)) if asyncio.iscoroutinefunction(acc_next) else acc_next(result)
+
+            return chainedMiddleware
+
+        middleware_chain = functools.reduce(reduceChain, reversed(middlewares + [next_middleware]))
+        return await middleware_chain(ctx)
 
     return handler
 
