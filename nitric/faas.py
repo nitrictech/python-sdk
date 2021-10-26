@@ -224,8 +224,8 @@ def compose_middleware(*middlewares: Union[Middleware, List[Middleware]]) -> Mid
     middlewares = [compose_middleware(m) if isinstance(m, list) else m for m in middlewares]
 
     async def handler(ctx, next_middleware=lambda ctx: ctx):
-        def reduceChain(acc_next, cur):
-            async def chainedMiddleware(context):
+        def reduce_chain(acc_next, cur):
+            async def chained_middleware(context):
                 # Count the positional arguments to determine if the function is a handler or middleware.
                 all_args = cur.__code__.co_argcount
                 kwargs = len(cur.__defaults__) if cur.__defaults__ is not None else 0
@@ -240,9 +240,9 @@ def compose_middleware(*middlewares: Union[Middleware, List[Middleware]]) -> Mid
                     result = (await cur(context)) if asyncio.iscoroutinefunction(cur) else cur(context)
                     return (await acc_next(result)) if asyncio.iscoroutinefunction(acc_next) else acc_next(result)
 
-            return chainedMiddleware
+            return chained_middleware
 
-        middleware_chain = functools.reduce(reduceChain, reversed(middlewares + [next_middleware]))
+        middleware_chain = functools.reduce(reduce_chain, reversed(middlewares + [next_middleware]))
         return await middleware_chain(ctx)
 
     return handler
@@ -296,7 +296,7 @@ class FunctionServer:
         if not self._any_handler and not self._http_handler and not self._event_handler:
             raise Exception("At least one handler function must be provided.")
 
-        asyncio.run(self.run())
+        asyncio.run(self._run())
 
     @property
     def _http_handler(self):
@@ -306,7 +306,7 @@ class FunctionServer:
     def _event_handler(self):
         return self.__event_handler if self.__event_handler else self._any_handler
 
-    async def run(self):
+    async def _run(self):
         """Register a new FaaS worker with the Membrane, using the provided function as the handler."""
         channel = new_default_channel()
         client = FaasServiceStub(channel)
