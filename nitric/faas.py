@@ -217,16 +217,33 @@ def compose_middleware(*middlewares: Union[Middleware, List[Middleware]]) -> Mid
     The resulting middleware will effectively be a chain of the provided middleware,
     where each calls the next in the chain when they're successful.
     """
+    middlewares = list(middlewares)
     if len(middlewares) == 1 and not isinstance(middlewares[0], list):
         return middlewares[0]
 
     middlewares = [compose_middleware(m) if isinstance(m, list) else m for m in middlewares]
 
     async def handler(ctx, next_middleware=lambda ctx: ctx):
-        middleware_chain = functools.reduce(
-            lambda acc_next, cur: lambda context: cur(context, acc_next), reversed(middlewares + (next_middleware,))
-        )
-        return middleware_chain(ctx)
+        def reduce_chain(acc_next, cur):
+            async def chained_middleware(context):
+                # Count the positional arguments to determine if the function is a handler or middleware.
+                all_args = cur.__code__.co_argcount
+                kwargs = len(cur.__defaults__) if cur.__defaults__ is not None else 0
+                pos_args = all_args - kwargs
+                if pos_args == 2:
+                    # Call the middleware with next and return the result
+                    return (
+                        (await cur(context, acc_next)) if asyncio.iscoroutinefunction(cur) else cur(context, acc_next)
+                    )
+                else:
+                    # Call the handler with ctx only, then call the remainder of the middleware chain
+                    result = (await cur(context)) if asyncio.iscoroutinefunction(cur) else cur(context)
+                    return (await acc_next(result)) if asyncio.iscoroutinefunction(acc_next) else acc_next(result)
+
+            return chained_middleware
+
+        middleware_chain = functools.reduce(reduce_chain, reversed(middlewares + [next_middleware]))
+        return await middleware_chain(ctx)
 
     return handler
 
@@ -279,7 +296,7 @@ class FunctionServer:
         if not self._any_handler and not self._http_handler and not self._event_handler:
             raise Exception("At least one handler function must be provided.")
 
-        asyncio.run(self.run())
+        asyncio.run(self._run())
 
     @property
     def _http_handler(self):
@@ -289,7 +306,7 @@ class FunctionServer:
     def _event_handler(self):
         return self.__event_handler if self.__event_handler else self._any_handler
 
-    async def run(self):
+    async def _run(self):
         """Register a new FaaS worker with the Membrane, using the provided function as the handler."""
         channel = new_default_channel()
         client = FaasServiceStub(channel)

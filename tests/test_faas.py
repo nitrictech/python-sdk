@@ -21,7 +21,7 @@ from unittest.mock import patch, AsyncMock, Mock, call
 
 import pytest
 
-from nitric.faas import start, FunctionServer, EventContext, HttpContext
+from nitric.faas import start, FunctionServer, HttpContext, compose_middleware, HttpResponse
 
 from nitricapi.nitric.faas.v1 import (
     ServerMessage,
@@ -46,6 +46,21 @@ class MockAsyncChannel:
 
 
 class EventClientTest(IsolatedAsyncioTestCase):
+    async def test_compose_middleware(self):
+        async def middleware(ctx: HttpContext, next) -> HttpContext:
+            ctx.res.status = 401
+            return await next(ctx)
+
+        async def handler(ctx: HttpContext) -> HttpContext:
+            ctx.res.body = "some text"
+            return ctx
+
+        composed = compose_middleware(middleware, handler)
+
+        ctx = HttpContext(response=HttpResponse(), request=None)
+        result = await composed(ctx)
+        assert result.res.status == 401
+
     def test_start_with_one_handler(self):
         mock_server_constructor = Mock()
         mock_server = Object()
@@ -94,7 +109,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         mock_run.return_value = mock_run_coroutine
 
         with patch("nitric.faas.compose_middleware", mock_compose):
-            with patch("nitric.faas.FunctionServer.run", mock_run):
+            with patch("nitric.faas.FunctionServer._run", mock_run):
                 with patch("asyncio.run", mock_asyncio_run):
                     FunctionServer().start(mock_handler)
 
@@ -124,7 +139,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
             "nitricapi.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
-            await FunctionServer().http(mock_handler).run()
+            await FunctionServer().http(mock_handler)._run()
 
         # gRPC channel created
         mock_grpc_channel.assert_called_once()
@@ -165,7 +180,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
             "nitricapi.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
-            await FunctionServer().http(mock_http_handler).event(mock_event_handler).run()
+            await FunctionServer().http(mock_http_handler).event(mock_event_handler)._run()
 
         # accept the init response from server
         assert 1 == stream_calls
@@ -200,7 +215,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
             "nitricapi.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
-            await FunctionServer().http(mock_http_handler).event(mock_event_handler).run()
+            await FunctionServer().http(mock_http_handler).event(mock_event_handler)._run()
 
         # accept the init response from server
         assert 1 == stream_calls
@@ -235,7 +250,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
             "nitricapi.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
-            await FunctionServer().http(mock_http_handler).event(mock_event_handler).run()
+            await FunctionServer().http(mock_http_handler).event(mock_event_handler)._run()
 
         # accept the init response from server
         assert 1 == stream_calls
@@ -270,7 +285,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
             "nitricapi.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
-            await FunctionServer().http(mock_http_handler).event(mock_event_handler).run()
+            await FunctionServer().http(mock_http_handler).event(mock_event_handler)._run()
 
         # accept the init response from server
         assert 1 == stream_calls
@@ -305,7 +320,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
             "nitricapi.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
-            await FunctionServer().http(mock_http_handler).event(mock_event_handler).run()
+            await FunctionServer().http(mock_http_handler).event(mock_event_handler)._run()
 
         # accept the init response from server
         assert 1 == stream_calls
@@ -334,7 +349,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
             "nitricapi.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
-            await FunctionServer().event(mock_handler).run()
+            await FunctionServer().event(mock_handler)._run()
 
         # accept the trigger response from server
         assert 1 == stream_calls
@@ -373,7 +388,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
             "nitricapi.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
-            await FunctionServer().http(mock_handler).run()
+            await FunctionServer().http(mock_handler)._run()
 
         # accept the trigger response from server
         assert 1 == stream_calls
@@ -414,7 +429,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
             "nitricapi.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
-            await FunctionServer().http(mock_handler).run()
+            await FunctionServer().http(mock_handler)._run()
 
             # accept the trigger response from server
             assert 1 == stream_calls
