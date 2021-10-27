@@ -14,6 +14,7 @@ from nitricapi.nitric.faas.v1 import (
     ClientMessage,
     TriggerRequest,
     TriggerResponse,
+    HeaderValue,
     HttpResponseContext,
     TopicResponseContext,
 )
@@ -70,12 +71,13 @@ def _grpc_response_from_ctx(ctx: TriggerContext) -> TriggerResponse:
     """
     if ctx.http():
         ctx = ctx.http()
+        headers = {k: HeaderValue(value=v) for (k, v) in ctx.res.headers.items()}
+        headers_old = {k: v[0] for (k, v) in ctx.res.headers.items()}
+        data = ctx.res.body if ctx.res.body else bytes()
+
         return TriggerResponse(
-            data=ctx.res.body,
-            http=HttpResponseContext(
-                status=ctx.res.status,
-                headers=ctx.res.headers,
-            ),
+            data=data,
+            http=HttpResponseContext(status=ctx.res.status, headers=headers, headers_old=headers_old),
         )
     elif ctx.event():
         ctx = ctx.event()
@@ -115,7 +117,18 @@ class HttpResponse(Response):
         """Construct a new HttpResponse."""
         self.status = status
         self.headers = headers if headers else {}
-        self.body = body if body else bytes()
+        self._body = body if body else bytes()
+
+    @property
+    def body(self):
+        return self._body
+
+    @body.setter
+    def body(self, value: Union[str, bytes]):
+        if isinstance(value, str):
+            self._body = value.encode("utf-8")
+        else:
+            self._body = value
 
 
 class HttpContext(TriggerContext):
@@ -135,7 +148,7 @@ class HttpContext(TriggerContext):
     def from_grpc_trigger_request(trigger_request: TriggerRequest) -> HttpContext:
         """Construct a new HttpContext from an Http trigger from the Nitric Membrane."""
         if len(trigger_request.http.headers.keys()) > 0:
-            headers = {k: v[0].value for (k, v) in trigger_request.http.headers.items()}
+            headers = {k: v.value for (k, v) in trigger_request.http.headers.items()}
         else:
             headers = trigger_request.http.headers_old
 
@@ -334,6 +347,7 @@ class FunctionServer:
                         else:
                             func = self._any_handler
                         response_ctx = (await func(ctx)) if asyncio.iscoroutinefunction(func) else func(ctx)
+
                         # Send function response back to server
                         await request_channel.send(
                             ClientMessage(
