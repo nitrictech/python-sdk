@@ -152,11 +152,16 @@ class HttpContext(TriggerContext):
         else:
             headers = trigger_request.http.headers_old
 
+        if len(trigger_request.http.query_params.keys()) > 0:
+            query = {k: v.value for (k, v) in trigger_request.http.query_params.items()}
+        else:
+            query = trigger_request.http.query_params_old
+
         return HttpContext(
             request=HttpRequest(
                 data=trigger_request.data,
                 method=trigger_request.http.method,
-                query=trigger_request.http.query_params,
+                query=query,
                 path=trigger_request.http.path,
                 headers=headers,
             )

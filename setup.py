@@ -42,7 +42,7 @@ setuptools.setup(
     ],
     setup_requires=["wheel"],
     install_requires=[
-        "nitric-api==0.12.0rc7",
+        "nitric-api==0.12.0",
         "protobuf==3.13.0",
         "asyncio",
     ],
