@@ -22,7 +22,7 @@ from grpclib import GRPCError
 
 from nitric.api.exception import exception_from_grpc_error
 from nitric.utils import new_default_channel
-from nitric.proto.nitric.storage.v1 import StorageServiceStub
+from nitricapi.nitric.storage.v1 import StorageServiceStub
 
 
 class Storage(object):

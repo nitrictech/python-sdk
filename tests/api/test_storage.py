@@ -38,7 +38,7 @@ class StorageClientTest(IsolatedAsyncioTestCase):
 
         contents = b"some text as bytes"
 
-        with patch("nitric.proto.nitric.storage.v1.StorageServiceStub.write", mock_write):
+        with patch("nitricapi.nitric.storage.v1.StorageServiceStub.write", mock_write):
             bucket = Storage().bucket("test-bucket")
             file = bucket.file("test-file")
             await file.write(contents)
@@ -57,7 +57,7 @@ class StorageClientTest(IsolatedAsyncioTestCase):
         mock_response.body = contents
         mock_read.return_value = mock_response
 
-        with patch("nitric.proto.nitric.storage.v1.StorageServiceStub.read", mock_read):
+        with patch("nitricapi.nitric.storage.v1.StorageServiceStub.read", mock_read):
             bucket = Storage().bucket("test-bucket")
             file = bucket.file("test-file")
             response = await file.read()
@@ -73,7 +73,7 @@ class StorageClientTest(IsolatedAsyncioTestCase):
         mock_read = AsyncMock()
         mock_read.return_value = Object()
 
-        with patch("nitric.proto.nitric.storage.v1.StorageServiceStub.delete", mock_read):
+        with patch("nitricapi.nitric.storage.v1.StorageServiceStub.delete", mock_read):
             bucket = Storage().bucket("test-bucket")
             file = bucket.file("test-file")
             await file.delete()
@@ -87,7 +87,7 @@ class StorageClientTest(IsolatedAsyncioTestCase):
         mock_write = AsyncMock()
         mock_write.side_effect = GRPCError(Status.UNKNOWN, "test error")
 
-        with patch("nitric.proto.nitric.storage.v1.StorageServiceStub.write", mock_write):
+        with patch("nitricapi.nitric.storage.v1.StorageServiceStub.write", mock_write):
             with pytest.raises(UnknownException) as e:
                 await Storage().bucket("test-bucket").file("test-file").write(b"some text as bytes")
 
@@ -95,7 +95,7 @@ class StorageClientTest(IsolatedAsyncioTestCase):
         mock_read = AsyncMock()
         mock_read.side_effect = GRPCError(Status.UNKNOWN, "test error")
 
-        with patch("nitric.proto.nitric.storage.v1.StorageServiceStub.read", mock_read):
+        with patch("nitricapi.nitric.storage.v1.StorageServiceStub.read", mock_read):
             with pytest.raises(UnknownException) as e:
                 await Storage().bucket("test-bucket").file("test-file").read()
 
@@ -103,6 +103,6 @@ class StorageClientTest(IsolatedAsyncioTestCase):
         mock_delete = AsyncMock()
         mock_delete.side_effect = GRPCError(Status.UNKNOWN, "test error")
 
-        with patch("nitric.proto.nitric.storage.v1.StorageServiceStub.delete", mock_delete):
+        with patch("nitricapi.nitric.storage.v1.StorageServiceStub.delete", mock_delete):
             with pytest.raises(UnknownException) as e:
                 await Storage().bucket("test-bucket").file("test-file").delete()

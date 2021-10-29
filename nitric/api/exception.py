@@ -26,8 +26,7 @@ class NitricServiceException(Exception):
 
 
 class AbortedException(NitricServiceException):
-    """The operation was aborted, typically due to a concurrency issue such as a sequencer check failure or
-    transaction abort."""
+    """The operation was aborted, typically due to a concurrency issue such as a transaction abort."""
 
     pass
 
@@ -144,6 +143,7 @@ class UnknownException(NitricServiceException):
 
 
 def exception_from_grpc_error(error: GRPCError):
+    """Translate a gRPC error to a nitric api exception."""
     return exception_from_grpc_code(error.status.value, error.message)
 
 

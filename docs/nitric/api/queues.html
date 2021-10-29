@@ -44,40 +44,58 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from __future__ import annotations
+
 from typing import List, Union
-from nitric.utils import new_default_channel, _struct_from_dict
-from nitric.proto.nitric.queue.v1 import QueueStub, NitricTask, FailedTask as WireFailedTask
+
+from grpclib import GRPCError
+
+from nitric.api.exception import FailedPreconditionException, exception_from_grpc_error, InvalidArgumentException
+from nitric.utils import new_default_channel, _struct_from_dict, _dict_from_struct
+from nitricapi.nitric.queue.v1 import QueueServiceStub, NitricTask, FailedTask as WireFailedTask
 from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True, order=True)
 class Task(object):
-    &#34;&#34;&#34;Represents a NitricTask.&#34;&#34;&#34;
+    &#34;&#34;&#34;A task to be sent to a Queue.&#34;&#34;&#34;
+
+    id: str = field(default=None)
+    payload_type: str = field(default=None)
+    payload: dict = field(default_factory=dict)
+
+
+@dataclass(frozen=True, order=True)
+class ReceivedTask(object):
+    &#34;&#34;&#34;A reference to a task received from a Queue, with a lease.&#34;&#34;&#34;
 
     id: str = field(default=None)
     payload_type: str = field(default=None)
     payload: dict = field(default_factory=dict)
     lease_id: str = field(default=None)
-    _queue_stub: QueueStub = field(default=None)
-    _queue: str = field(default=None)
+    _queueing: Queues = field(default=None)
+    _queue: Queue = field(default=None)
 
     async def complete(self):
-        &#34;&#34;&#34;Mark this task as complete and remove it from the queue.&#34;&#34;&#34;
-        if self._queue_stub is None or self._queue is None or self._queue == &#34;&#34;:
-            raise Exception(&#34;Task was not created via Queue.&#34;)
-        if self.lease_id is None:
-            raise Exception(
-                &#34;No lease_id available for task. Tasks must be received using Queue.receive to have a &#34;
-                &#34;valid lease_id.&#34;
+        &#34;&#34;&#34;
+        Mark this task as complete and remove it from the queue.
+
+        Only callable for tasks that have been received from a Queue.
+        &#34;&#34;&#34;
+        if self._queueing is None or self._queue is None or self.lease_id is None:
+            raise FailedPreconditionException(
+                &#34;Task is missing internal client or lease id, was it returned from &#34; &#34;queue.receive?&#34;
             )
-        await self._queue_stub.complete(queue=self._queue, lease_id=self.lease_id)
+        try:
+            await self._queueing._queue_stub.complete(queue=self._queue.name, lease_id=self.lease_id)
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
 
 @dataclass(frozen=True, order=True)
 class FailedTask(Task):
-    &#34;&#34;&#34;Represents a failed queue publish for an event.&#34;&#34;&#34;
+    &#34;&#34;&#34;Represents a failed queue publish.&#34;&#34;&#34;
 
-    lease_id: str = None  # failed tasks should never have a lease id.
     message: str = field(default=&#34;&#34;)
 
 
@@ -95,18 +113,20 @@ def _task_to_wire(task: Task) -&gt; NitricTask:
     )
 
 
-def _wire_to_task(task: NitricTask) -&gt; Task:
+def _wire_to_received_task(task: NitricTask, queueing: Queues = None, queue: Queue = None) -&gt; ReceivedTask:
     &#34;&#34;&#34;
     Convert a Nitric Queue Task (protobuf) to a Nitric Task (python SDK).
 
     :param task: to convert
     :return: converted task
     &#34;&#34;&#34;
-    return Task(
+    return ReceivedTask(
         id=task.id,
         payload_type=task.payload_type,
-        payload=task.payload.to_dict(),
+        payload=_dict_from_struct(task.payload),
         lease_id=task.lease_id,
+        _queueing=queueing,
+        _queue=queue,
     )
 
 
@@ -117,13 +137,12 @@ def _wire_to_failed_task(failed_task: WireFailedTask) -&gt; FailedTask:
     :param failed_task: the failed task
     :return: the Failed Task with failure message
     &#34;&#34;&#34;
-    task = _wire_to_task(failed_task.task)
+    task = _wire_to_received_task(failed_task.task)
 
     return FailedTask(
         id=task.id,
         payload_type=task.payload_type,
         payload=task.payload,
-        lease_id=task.lease_id,
         message=failed_task.message,
     )
 
@@ -132,7 +151,7 @@ def _wire_to_failed_task(failed_task: WireFailedTask) -&gt; FailedTask:
 class Queue(object):
     &#34;&#34;&#34;A reference to a queue from a queue service, used to perform operations on that queue.&#34;&#34;&#34;
 
-    _queue_stub: QueueStub
+    _queueing: Queues
     name: str
 
     async def send(
@@ -157,11 +176,12 @@ class Queue(object):
             # TODO: handle tasks that are just a payload
             task = Task(**task)
 
-        await self._queue_stub.send(queue=self.name, task=_task_to_wire(task))
+        try:
+            await self._queueing._queue_stub.send(queue=self.name, task=_task_to_wire(task))
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
-    async def _send_batch(
-        self, tasks: List[Union[Task, dict]] = None, raise_on_failure: bool = True
-    ) -&gt; List[FailedTask]:
+    async def _send_batch(self, tasks: List[Union[Task, dict]], raise_on_failure: bool = True) -&gt; List[FailedTask]:
         &#34;&#34;&#34;
         Push a collection of tasks to a queue, which can be retrieved by other services.
 
@@ -169,14 +189,16 @@ class Queue(object):
         :param raise_on_failure: Whether to raise an exception when one or more tasks fails to send
         :return: PushResponse containing a list containing details of any messages that failed to publish.
         &#34;&#34;&#34;
-        if tasks is None:
-            tasks = []
+        if tasks is None or len(tasks) &lt; 1:
+            raise InvalidArgumentException(&#34;No tasks provided, nothing to send.&#34;)
 
         wire_tasks = [_task_to_wire(Task(**task) if isinstance(task, dict) else task) for task in tasks]
 
-        response = await self._queue_stub.send_batch(queue=self.name, tasks=wire_tasks)
-
-        return [_wire_to_failed_task(failed_task) for failed_task in response.failed_tasks]
+        try:
+            response = await self._queueing._queue_stub.send_batch(queue=self.name, tasks=wire_tasks)
+            return [_wire_to_failed_task(failed_task) for failed_task in response.failed_tasks]
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
     async def receive(self, limit: int = None) -&gt; List[Task]:
         &#34;&#34;&#34;
@@ -195,26 +217,30 @@ class Queue(object):
         if limit is None or limit &lt; 1:
             limit = 1
 
-        response = await self._queue_stub.receive(queue=self.name, depth=limit)
+        try:
+            response = await self._queueing._queue_stub.receive(queue=self.name, depth=limit)
+            # Map the response protobuf response items to Python SDK Nitric Tasks
+            return [_wire_to_received_task(task=task, queueing=self._queueing, queue=self) for task in response.tasks]
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
-        # Map the response protobuf response items to Python SDK Nitric Tasks
-        return [_wire_to_task(task) for task in response.tasks]
 
-
-class QueueClient(object):
-    &#34;&#34;&#34;
-    Nitric generic publish/subscribe tasking client.
-
-    This client insulates application code from stack specific task/topic operations or SDKs.
-    &#34;&#34;&#34;
+class Queues(object):
+    &#34;&#34;&#34;Queueing client, providing access to Queue and Task references and operations on those entities.&#34;&#34;&#34;
 
     def __init__(self):
         &#34;&#34;&#34;Construct a Nitric Queue Client.&#34;&#34;&#34;
-        self._queue_stub = QueueStub(channel=new_default_channel())
+        self.channel = new_default_channel()
+        self._queue_stub = QueueServiceStub(channel=self.channel)
+
+    def __del__(self):
+        # close the channel when this client is destroyed
+        if self.channel is not None:
+            self.channel.close()
 
     def queue(self, name: str):
         &#34;&#34;&#34;Return a reference to a queue from the connected queue service.&#34;&#34;&#34;
-        return Queue(_queue_stub=self._queue_stub, name=name)</code></pre>
+        return Queue(_queueing=self, name=name)</code></pre>
 </details>
 </section>
 <section>
@@ -228,18 +254,17 @@ class QueueClient(object):
 <dl>
 <dt id="nitric.api.queues.FailedTask"><code class="flex name class">
 <span>class <span class="ident">FailedTask</span></span>
-<span>(</span><span>id: str = None, payload_type: str = None, payload: dict = &lt;factory&gt;, lease_id: str = None, message: str = '')</span>
+<span>(</span><span>id: str = None, payload_type: str = None, payload: dict = &lt;factory&gt;, message: str = '')</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Represents a failed queue publish for an event.</p></div>
+<div class="desc"><p>Represents a failed queue publish.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class FailedTask(Task):
-    &#34;&#34;&#34;Represents a failed queue publish for an event.&#34;&#34;&#34;
+    &#34;&#34;&#34;Represents a failed queue publish.&#34;&#34;&#34;
 
-    lease_id: str = None  # failed tasks should never have a lease id.
     message: str = field(default=&#34;&#34;)</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -248,27 +273,15 @@ class QueueClient(object):
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="nitric.api.queues.FailedTask.lease_id"><code class="name">var <span class="ident">lease_id</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="nitric.api.queues.FailedTask.message"><code class="name">var <span class="ident">message</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 </dl>
-<h3>Inherited members</h3>
-<ul class="hlist">
-<li><code><b><a title="nitric.api.queues.Task" href="#nitric.api.queues.Task">Task</a></b></code>:
-<ul class="hlist">
-<li><code><a title="nitric.api.queues.Task.complete" href="#nitric.api.queues.Task.complete">complete</a></code></li>
-</ul>
-</li>
-</ul>
 </dd>
 <dt id="nitric.api.queues.Queue"><code class="flex name class">
 <span>class <span class="ident">Queue</span></span>
-<span>(</span><span>_queue_stub: <a title="nitric.proto.nitric.queue.v1.QueueStub" href="../proto/nitric/queue/v1/index.html#nitric.proto.nitric.queue.v1.QueueStub">QueueStub</a>, name: str)</span>
+<span>(</span><span>_queueing: <a title="nitric.api.queues.Queues" href="#nitric.api.queues.Queues">Queues</a>, name: str)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A reference to a queue from a queue service, used to perform operations on that queue.</p></div>
@@ -279,7 +292,7 @@ class QueueClient(object):
 <pre><code class="python">class Queue(object):
     &#34;&#34;&#34;A reference to a queue from a queue service, used to perform operations on that queue.&#34;&#34;&#34;
 
-    _queue_stub: QueueStub
+    _queueing: Queues
     name: str
 
     async def send(
@@ -304,11 +317,12 @@ class QueueClient(object):
             # TODO: handle tasks that are just a payload
             task = Task(**task)
 
-        await self._queue_stub.send(queue=self.name, task=_task_to_wire(task))
+        try:
+            await self._queueing._queue_stub.send(queue=self.name, task=_task_to_wire(task))
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
-    async def _send_batch(
-        self, tasks: List[Union[Task, dict]] = None, raise_on_failure: bool = True
-    ) -&gt; List[FailedTask]:
+    async def _send_batch(self, tasks: List[Union[Task, dict]], raise_on_failure: bool = True) -&gt; List[FailedTask]:
         &#34;&#34;&#34;
         Push a collection of tasks to a queue, which can be retrieved by other services.
 
@@ -316,14 +330,16 @@ class QueueClient(object):
         :param raise_on_failure: Whether to raise an exception when one or more tasks fails to send
         :return: PushResponse containing a list containing details of any messages that failed to publish.
         &#34;&#34;&#34;
-        if tasks is None:
-            tasks = []
+        if tasks is None or len(tasks) &lt; 1:
+            raise InvalidArgumentException(&#34;No tasks provided, nothing to send.&#34;)
 
         wire_tasks = [_task_to_wire(Task(**task) if isinstance(task, dict) else task) for task in tasks]
 
-        response = await self._queue_stub.send_batch(queue=self.name, tasks=wire_tasks)
-
-        return [_wire_to_failed_task(failed_task) for failed_task in response.failed_tasks]
+        try:
+            response = await self._queueing._queue_stub.send_batch(queue=self.name, tasks=wire_tasks)
+            return [_wire_to_failed_task(failed_task) for failed_task in response.failed_tasks]
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
 
     async def receive(self, limit: int = None) -&gt; List[Task]:
         &#34;&#34;&#34;
@@ -342,10 +358,12 @@ class QueueClient(object):
         if limit is None or limit &lt; 1:
             limit = 1
 
-        response = await self._queue_stub.receive(queue=self.name, depth=limit)
-
-        # Map the response protobuf response items to Python SDK Nitric Tasks
-        return [_wire_to_task(task) for task in response.tasks]</code></pre>
+        try:
+            response = await self._queueing._queue_stub.receive(queue=self.name, depth=limit)
+            # Map the response protobuf response items to Python SDK Nitric Tasks
+            return [_wire_to_received_task(task=task, queueing=self._queueing, queue=self) for task in response.tasks]
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
@@ -388,10 +406,12 @@ returned to the queue for reprocessing.</p>
     if limit is None or limit &lt; 1:
         limit = 1
 
-    response = await self._queue_stub.receive(queue=self.name, depth=limit)
-
-    # Map the response protobuf response items to Python SDK Nitric Tasks
-    return [_wire_to_task(task) for task in response.tasks]</code></pre>
+    try:
+        response = await self._queueing._queue_stub.receive(queue=self.name, depth=limit)
+        # Map the response protobuf response items to Python SDK Nitric Tasks
+        return [_wire_to_received_task(task=task, queueing=self._queueing, queue=self) for task in response.tasks]
+    except GRPCError as grpc_err:
+        raise exception_from_grpc_error(grpc_err)</code></pre>
 </details>
 </dd>
 <dt id="nitric.api.queues.Queue.send"><code class="name flex">
@@ -428,40 +448,44 @@ the queue.</p>
         # TODO: handle tasks that are just a payload
         task = Task(**task)
 
-    await self._queue_stub.send(queue=self.name, task=_task_to_wire(task))</code></pre>
+    try:
+        await self._queueing._queue_stub.send(queue=self.name, task=_task_to_wire(task))
+    except GRPCError as grpc_err:
+        raise exception_from_grpc_error(grpc_err)</code></pre>
 </details>
 </dd>
 </dl>
 </dd>
-<dt id="nitric.api.queues.QueueClient"><code class="flex name class">
-<span>class <span class="ident">QueueClient</span></span>
+<dt id="nitric.api.queues.Queues"><code class="flex name class">
+<span>class <span class="ident">Queues</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Nitric generic publish/subscribe tasking client.</p>
-<p>This client insulates application code from stack specific task/topic operations or SDKs.</p>
+<div class="desc"><p>Queueing client, providing access to Queue and Task references and operations on those entities.</p>
 <p>Construct a Nitric Queue Client.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class QueueClient(object):
-    &#34;&#34;&#34;
-    Nitric generic publish/subscribe tasking client.
-
-    This client insulates application code from stack specific task/topic operations or SDKs.
-    &#34;&#34;&#34;
+<pre><code class="python">class Queues(object):
+    &#34;&#34;&#34;Queueing client, providing access to Queue and Task references and operations on those entities.&#34;&#34;&#34;
 
     def __init__(self):
         &#34;&#34;&#34;Construct a Nitric Queue Client.&#34;&#34;&#34;
-        self._queue_stub = QueueStub(channel=new_default_channel())
+        self.channel = new_default_channel()
+        self._queue_stub = QueueServiceStub(channel=self.channel)
+
+    def __del__(self):
+        # close the channel when this client is destroyed
+        if self.channel is not None:
+            self.channel.close()
 
     def queue(self, name: str):
         &#34;&#34;&#34;Return a reference to a queue from the connected queue service.&#34;&#34;&#34;
-        return Queue(_queue_stub=self._queue_stub, name=name)</code></pre>
+        return Queue(_queueing=self, name=name)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="nitric.api.queues.QueueClient.queue"><code class="name flex">
+<dt id="nitric.api.queues.Queues.queue"><code class="name flex">
 <span>def <span class="ident">queue</span></span>(<span>self, name: str)</span>
 </code></dt>
 <dd>
@@ -472,41 +496,111 @@ the queue.</p>
 </summary>
 <pre><code class="python">def queue(self, name: str):
     &#34;&#34;&#34;Return a reference to a queue from the connected queue service.&#34;&#34;&#34;
-    return Queue(_queue_stub=self._queue_stub, name=name)</code></pre>
+    return Queue(_queueing=self, name=name)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.api.queues.ReceivedTask"><code class="flex name class">
+<span>class <span class="ident">ReceivedTask</span></span>
+<span>(</span><span>id: str = None, payload_type: str = None, payload: dict = &lt;factory&gt;, lease_id: str = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A reference to a task received from a Queue, with a lease.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ReceivedTask(object):
+    &#34;&#34;&#34;A reference to a task received from a Queue, with a lease.&#34;&#34;&#34;
+
+    id: str = field(default=None)
+    payload_type: str = field(default=None)
+    payload: dict = field(default_factory=dict)
+    lease_id: str = field(default=None)
+    _queueing: Queues = field(default=None)
+    _queue: Queue = field(default=None)
+
+    async def complete(self):
+        &#34;&#34;&#34;
+        Mark this task as complete and remove it from the queue.
+
+        Only callable for tasks that have been received from a Queue.
+        &#34;&#34;&#34;
+        if self._queueing is None or self._queue is None or self.lease_id is None:
+            raise FailedPreconditionException(
+                &#34;Task is missing internal client or lease id, was it returned from &#34; &#34;queue.receive?&#34;
+            )
+        try:
+            await self._queueing._queue_stub.complete(queue=self._queue.name, lease_id=self.lease_id)
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.api.queues.ReceivedTask.id"><code class="name">var <span class="ident">id</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.queues.ReceivedTask.lease_id"><code class="name">var <span class="ident">lease_id</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.queues.ReceivedTask.payload"><code class="name">var <span class="ident">payload</span> : dict</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.api.queues.ReceivedTask.payload_type"><code class="name">var <span class="ident">payload_type</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.api.queues.ReceivedTask.complete"><code class="name flex">
+<span>async def <span class="ident">complete</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Mark this task as complete and remove it from the queue.</p>
+<p>Only callable for tasks that have been received from a Queue.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def complete(self):
+    &#34;&#34;&#34;
+    Mark this task as complete and remove it from the queue.
+
+    Only callable for tasks that have been received from a Queue.
+    &#34;&#34;&#34;
+    if self._queueing is None or self._queue is None or self.lease_id is None:
+        raise FailedPreconditionException(
+            &#34;Task is missing internal client or lease id, was it returned from &#34; &#34;queue.receive?&#34;
+        )
+    try:
+        await self._queueing._queue_stub.complete(queue=self._queue.name, lease_id=self.lease_id)
+    except GRPCError as grpc_err:
+        raise exception_from_grpc_error(grpc_err)</code></pre>
 </details>
 </dd>
 </dl>
 </dd>
 <dt id="nitric.api.queues.Task"><code class="flex name class">
 <span>class <span class="ident">Task</span></span>
-<span>(</span><span>id: str = None, payload_type: str = None, payload: dict = &lt;factory&gt;, lease_id: str = None)</span>
+<span>(</span><span>id: str = None, payload_type: str = None, payload: dict = &lt;factory&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Represents a NitricTask.</p></div>
+<div class="desc"><p>A task to be sent to a Queue.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Task(object):
-    &#34;&#34;&#34;Represents a NitricTask.&#34;&#34;&#34;
+    &#34;&#34;&#34;A task to be sent to a Queue.&#34;&#34;&#34;
 
     id: str = field(default=None)
     payload_type: str = field(default=None)
-    payload: dict = field(default_factory=dict)
-    lease_id: str = field(default=None)
-    _queue_stub: QueueStub = field(default=None)
-    _queue: str = field(default=None)
-
-    async def complete(self):
-        &#34;&#34;&#34;Mark this task as complete and remove it from the queue.&#34;&#34;&#34;
-        if self._queue_stub is None or self._queue is None or self._queue == &#34;&#34;:
-            raise Exception(&#34;Task was not created via Queue.&#34;)
-        if self.lease_id is None:
-            raise Exception(
-                &#34;No lease_id available for task. Tasks must be received using Queue.receive to have a &#34;
-                &#34;valid lease_id.&#34;
-            )
-        await self._queue_stub.complete(queue=self._queue, lease_id=self.lease_id)</code></pre>
+    payload: dict = field(default_factory=dict)</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -518,10 +612,6 @@ the queue.</p>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="nitric.api.queues.Task.lease_id"><code class="name">var <span class="ident">lease_id</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt id="nitric.api.queues.Task.payload"><code class="name">var <span class="ident">payload</span> : dict</code></dt>
 <dd>
 <div class="desc"></div>
@@ -529,30 +619,6 @@ the queue.</p>
 <dt id="nitric.api.queues.Task.payload_type"><code class="name">var <span class="ident">payload_type</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
-</dd>
-</dl>
-<h3>Methods</h3>
-<dl>
-<dt id="nitric.api.queues.Task.complete"><code class="name flex">
-<span>async def <span class="ident">complete</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Mark this task as complete and remove it from the queue.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">async def complete(self):
-    &#34;&#34;&#34;Mark this task as complete and remove it from the queue.&#34;&#34;&#34;
-    if self._queue_stub is None or self._queue is None or self._queue == &#34;&#34;:
-        raise Exception(&#34;Task was not created via Queue.&#34;)
-    if self.lease_id is None:
-        raise Exception(
-            &#34;No lease_id available for task. Tasks must be received using Queue.receive to have a &#34;
-            &#34;valid lease_id.&#34;
-        )
-    await self._queue_stub.complete(queue=self._queue, lease_id=self.lease_id)</code></pre>
-</details>
 </dd>
 </dl>
 </dd>
@@ -575,7 +641,6 @@ the queue.</p>
 <li>
 <h4><code><a title="nitric.api.queues.FailedTask" href="#nitric.api.queues.FailedTask">FailedTask</a></code></h4>
 <ul class="">
-<li><code><a title="nitric.api.queues.FailedTask.lease_id" href="#nitric.api.queues.FailedTask.lease_id">lease_id</a></code></li>
 <li><code><a title="nitric.api.queues.FailedTask.message" href="#nitric.api.queues.FailedTask.message">message</a></code></li>
 </ul>
 </li>
@@ -588,17 +653,25 @@ the queue.</p>
 </ul>
 </li>
 <li>
-<h4><code><a title="nitric.api.queues.QueueClient" href="#nitric.api.queues.QueueClient">QueueClient</a></code></h4>
+<h4><code><a title="nitric.api.queues.Queues" href="#nitric.api.queues.Queues">Queues</a></code></h4>
 <ul class="">
-<li><code><a title="nitric.api.queues.QueueClient.queue" href="#nitric.api.queues.QueueClient.queue">queue</a></code></li>
+<li><code><a title="nitric.api.queues.Queues.queue" href="#nitric.api.queues.Queues.queue">queue</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.api.queues.ReceivedTask" href="#nitric.api.queues.ReceivedTask">ReceivedTask</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.api.queues.ReceivedTask.complete" href="#nitric.api.queues.ReceivedTask.complete">complete</a></code></li>
+<li><code><a title="nitric.api.queues.ReceivedTask.id" href="#nitric.api.queues.ReceivedTask.id">id</a></code></li>
+<li><code><a title="nitric.api.queues.ReceivedTask.lease_id" href="#nitric.api.queues.ReceivedTask.lease_id">lease_id</a></code></li>
+<li><code><a title="nitric.api.queues.ReceivedTask.payload" href="#nitric.api.queues.ReceivedTask.payload">payload</a></code></li>
+<li><code><a title="nitric.api.queues.ReceivedTask.payload_type" href="#nitric.api.queues.ReceivedTask.payload_type">payload_type</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="nitric.api.queues.Task" href="#nitric.api.queues.Task">Task</a></code></h4>
 <ul class="">
-<li><code><a title="nitric.api.queues.Task.complete" href="#nitric.api.queues.Task.complete">complete</a></code></li>
 <li><code><a title="nitric.api.queues.Task.id" href="#nitric.api.queues.Task.id">id</a></code></li>
-<li><code><a title="nitric.api.queues.Task.lease_id" href="#nitric.api.queues.Task.lease_id">lease_id</a></code></li>
 <li><code><a title="nitric.api.queues.Task.payload" href="#nitric.api.queues.Task.payload">payload</a></code></li>
 <li><code><a title="nitric.api.queues.Task.payload_type" href="#nitric.api.queues.Task.payload_type">payload_type</a></code></li>
 </ul>

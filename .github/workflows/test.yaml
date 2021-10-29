@@ -17,8 +17,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2.3.1
       with:
-        token: ${{secrets.SUBMOD_PAT}}
-        submodules: recursive
         fetch-depth: 0 # needed to retrieve most recent tag
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
@@ -26,8 +24,6 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install
       run: make install
-    - name: Generate gRPC Client
-      run: make grpc-client
     - name: Run Tox
       # Run tox using the version of Python in `PATH`
       run: tox -e py

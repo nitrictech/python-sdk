@@ -25,7 +25,7 @@ from grpclib import GRPCError, Status
 
 from nitric.api import Events, Event
 from nitric.api.exception import UnknownException
-from nitric.proto.nitric.event.v1 import TopicListResponse, NitricTopic
+from nitricapi.nitric.event.v1 import TopicListResponse, NitricTopic
 from nitric.utils import _struct_from_dict
 
 
@@ -42,7 +42,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
 
         payload = {"content": "of event"}
 
-        with patch("nitric.proto.nitric.event.v1.EventServiceStub.publish", mock_publish):
+        with patch("nitricapi.nitric.event.v1.EventServiceStub.publish", mock_publish):
             topic = Events().topic("test-topic")
             event = await topic.publish(Event(payload=payload))
 
@@ -65,7 +65,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
 
         payload = {"content": "of event"}
 
-        with patch("nitric.proto.nitric.event.v1.EventServiceStub.publish", mock_publish):
+        with patch("nitricapi.nitric.event.v1.EventServiceStub.publish", mock_publish):
             topic = Events().topic("test-topic")
             await topic.publish({"id": "123", "payload": payload})
 
@@ -85,7 +85,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
 
         payload = {"content": "of event"}
 
-        with patch("nitric.proto.nitric.event.v1.EventServiceStub.publish", mock_publish):
+        with patch("nitricapi.nitric.event.v1.EventServiceStub.publish", mock_publish):
             topic = Events().topic("test-topic")
             with pytest.raises(Exception):
                 await topic.publish((1, 2, 3))
@@ -98,7 +98,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
 
         payload = {"content": "of event"}
 
-        with patch("nitric.proto.nitric.event.v1.EventServiceStub.publish", mock_publish):
+        with patch("nitricapi.nitric.event.v1.EventServiceStub.publish", mock_publish):
             topic = Events().topic("test-topic")
             await topic.publish()
 
@@ -121,7 +121,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
 
         payload = {"content": "of event"}
 
-        with patch("nitric.proto.nitric.event.v1.TopicServiceStub.list", mock_list_topics):
+        with patch("nitricapi.nitric.event.v1.TopicServiceStub.list", mock_list_topics):
             topics = await Events().topics()
 
         # Check expected values were passed to Stub
@@ -134,7 +134,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         mock_publish = AsyncMock()
         mock_publish.side_effect = GRPCError(Status.UNKNOWN, "test error")
 
-        with patch("nitric.proto.nitric.event.v1.EventServiceStub.publish", mock_publish):
+        with patch("nitricapi.nitric.event.v1.EventServiceStub.publish", mock_publish):
             with pytest.raises(UnknownException) as e:
                 await Events().topic("test-topic").publish(Event(payload={}))
 
@@ -142,6 +142,6 @@ class EventClientTest(IsolatedAsyncioTestCase):
         mock_get_topics = AsyncMock()
         mock_get_topics.side_effect = GRPCError(Status.UNKNOWN, "test error")
 
-        with patch("nitric.proto.nitric.event.v1.TopicServiceStub.list", mock_get_topics):
+        with patch("nitricapi.nitric.event.v1.TopicServiceStub.list", mock_get_topics):
             with pytest.raises(UnknownException) as e:
                 await Events().topics()

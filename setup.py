@@ -11,12 +11,12 @@ def get_current_version_tag():
     tags = str(output, "utf-8").strip().split("\n")
 
     version_tags = [tag for tag in tags if re.match(r"^v?(\d*\.){2}\d$", tag)]
-    dev_tags = [tag for tag in tags if re.match(r"^v?(\d*\.){2}\d-\d*-[a-z\d]{8}$", tag)]
+    rc_tags = [tag for tag in tags if re.match(r"^v?(\d*\.){2}\d*-rc\.\d*$", tag)]
 
     if len(version_tags) == 1:
         return version_tags.pop()[1:]
-    elif len(dev_tags) == 1:
-        base_tag, num_commits = dev_tags.pop().split("-")[:2]
+    elif len(rc_tags) == 1:
+        base_tag, num_commits = rc_tags.pop().split("-rc.")[:2]
         return "{}.dev{}".format(base_tag, num_commits)[1:]
     else:
         return "0.0.0.dev0"
@@ -42,15 +42,12 @@ setuptools.setup(
     ],
     setup_requires=["wheel"],
     install_requires=[
+        "nitric-api==0.12.0",
         "protobuf==3.13.0",
-        "betterproto==2.0.0b3",
         "asyncio",
     ],
     extras_require={
         "dev": [
-            "betterproto[compiler]==2.0.0b3",
-            # "grpcio==1.33.2",
-            "grpcio-tools==1.33.2",
             "tox==3.20.1",
             "twine==3.2.0",
             "pytest==6.0.1",

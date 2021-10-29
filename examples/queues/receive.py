@@ -1,8 +1,9 @@
 # [START import]
 from nitric.api import Queues, Task
+
 # [END import]
 async def queues_receive():
-# [START snippet]
+    # [START snippet]
     # Construct a new queue client with default settings
     queue = Queues().queue("my-queue")
 
@@ -13,4 +14,6 @@ async def queues_receive():
 
         # Complete the task if it was processed successfully
         await task.complete()
+
+
 # [END snippet]
