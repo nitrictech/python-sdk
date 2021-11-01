@@ -10,7 +10,7 @@ async def events_event_ids():
     payload = {"content": "of event"}
 
     # Publish an event to the topic 'my-topic'
-    event = await topic.publish(Event(payload=payload))
+    event = await topic.publish(Event(id="unique-event-id", payload=payload))
 
 
 # [END snippet]
