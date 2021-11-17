@@ -110,7 +110,7 @@ class File(object):
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    async def presign_url(self, mode: FileMode = FileMode.READ, expiry: int = 3600):
+    async def sign_url(self, mode: FileMode = FileMode.READ, expiry: int = 3600):
         """Generated a signed url for reading or writing to a file"""
 
         try:
