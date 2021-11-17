@@ -83,6 +83,22 @@ class StorageClientTest(IsolatedAsyncioTestCase):
         assert mock_read.call_args.kwargs["bucket_name"] == "test-bucket"
         assert mock_read.call_args.kwargs["key"] == "test-file"
 
+    async def test_presign_url(self):
+        mock_pre_sign_url = AsyncMock()
+        mock_pre_sign_url.return_value = Object()
+
+        with patch("nitricapi.nitric.storage.v1.StorageServiceStub.pre_sign_url", mock_pre_sign_url):
+            bucket = Storage().bucket("test-bucket")
+            file = bucket.file("test-file")
+            await file.presign_url()
+
+        # Check expected values were passed to Stub
+        mock_pre_sign_url.assert_called_once()
+        assert mock_pre_sign_url.call_args.kwargs["bucket_name"] == "test-bucket"
+        assert mock_pre_sign_url.call_args.kwargs["key"] == "test-file"
+        assert mock_pre_sign_url.call_args.kwargs["operation"] == 0
+        assert mock_pre_sign_url.call_args.kwargs["expiry"] == 3600
+
     async def test_write_error(self):
         mock_write = AsyncMock()
         mock_write.side_effect = GRPCError(Status.UNKNOWN, "test error")
@@ -106,3 +122,11 @@ class StorageClientTest(IsolatedAsyncioTestCase):
         with patch("nitricapi.nitric.storage.v1.StorageServiceStub.delete", mock_delete):
             with pytest.raises(UnknownException) as e:
                 await Storage().bucket("test-bucket").file("test-file").delete()
+
+    async def test_presign_url_error(self):
+        mock_pre_sign_url = AsyncMock()
+        mock_pre_sign_url.side_effect = GRPCError(Status.UNKNOWN, "test error")
+
+        with patch("nitricapi.nitric.storage.v1.StorageServiceStub.pre_sign_url", mock_pre_sign_url):
+            with pytest.raises(UnknownException) as e:
+                await Storage().bucket("test-bucket").file("test-file").presign_url()
