@@ -20,9 +20,10 @@ from dataclasses import dataclass
 
 from grpclib import GRPCError
 
-from nitric.api.exception import exception_from_grpc_error
+from nitric.api.exception import exception_from_grpc_error, InvalidArgumentException
 from nitric.utils import new_default_channel
-from nitricapi.nitric.storage.v1 import StorageServiceStub
+from nitricapi.nitric.storage.v1 import StorageServiceStub, StoragePreSignUrlRequestOperation
+from enum import Enum
 
 
 class Storage(object):
@@ -59,6 +60,22 @@ class Bucket(object):
         return File(_storage=self._storage, _bucket=self.name, key=key)
 
 
+class FileMode(Enum):
+    """Definition of available operation modes for file signed URLs."""
+
+    READ = 0
+    WRITE = 1
+
+    def to_request_operation(self) -> StoragePreSignUrlRequestOperation:
+        """Convert FileMode to a StoragePreSignUrlRequestOperation"""
+        if self == FileMode.READ:
+            return StoragePreSignUrlRequestOperation.READ
+        elif self == FileMode.WRITE:
+            return StoragePreSignUrlRequestOperation.WRITE
+        else:
+            raise InvalidArgumentException("Invalid FileMode")
+
+
 @dataclass(frozen=True, order=True)
 class File(object):
     """A reference to a file in a bucket, used to perform operations on that file."""
@@ -90,5 +107,15 @@ class File(object):
         """Delete this file from the bucket."""
         try:
             await self._storage._storage_stub.delete(bucket_name=self._bucket, key=self.key)
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
+
+    async def sign_url(self, mode: FileMode = FileMode.READ, expiry: int = 3600):
+        """Generated a signed url for reading or writing to a file"""
+
+        try:
+            await self._storage._storage_stub.pre_sign_url(
+                bucket_name=self._bucket, key=self.key, operation=mode.to_request_operation(), expiry=expiry
+            )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
