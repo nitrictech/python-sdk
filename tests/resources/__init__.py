@@ -16,21 +16,3 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Nitric API SDK."""
-from nitric.api.events import Events, Event, TopicRef
-from nitric.api.queues import Queues, Task, FailedTask
-from nitric.api.storage import Storage
-from nitric.api.documents import Documents
-from nitric.api.secrets import Secrets
-
-__all__ = [
-    "Events",
-    "Queues",
-    "Documents",
-    "Storage",
-    "Event",
-    "Task",
-    "FailedTask",
-    "TopicRef",
-    "Secrets",
-]
