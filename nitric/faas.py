@@ -416,7 +416,6 @@ class FunctionServer:
     async def start(self, *handlers: Union[Middleware, List[Middleware]]):
         """Start the function server using the provided trigger handlers."""
         self._any_handler = compose_middleware(*handlers) if len(handlers) > 0 else None
-        # TODO: implement the server
         if not self._any_handler and not self._http_handler and not self._event_handler:
             raise Exception("At least one handler function must be provided.")
 
