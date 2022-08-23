@@ -45,11 +45,11 @@ class Storage(object):
 
     def bucket(self, name: str):
         """Return a reference to a bucket from the connected storage service."""
-        return Bucket(_storage=self, name=name)
+        return BucketRef(_storage=self, name=name)
 
 
 @dataclass(frozen=True, order=True)
-class Bucket(object):
+class BucketRef(object):
     """A reference to a bucket in a storage service, used to the perform operations on that bucket."""
 
     _storage: Storage
@@ -67,7 +67,7 @@ class FileMode(Enum):
     WRITE = 1
 
     def to_request_operation(self) -> StoragePreSignUrlRequestOperation:
-        """Convert FileMode to a StoragePreSignUrlRequestOperation"""
+        """Convert FileMode to a StoragePreSignUrlRequestOperation."""
         if self == FileMode.READ:
             return StoragePreSignUrlRequestOperation.READ
         elif self == FileMode.WRITE:
@@ -111,8 +111,7 @@ class File(object):
             raise exception_from_grpc_error(grpc_err)
 
     async def sign_url(self, mode: FileMode = FileMode.READ, expiry: int = 3600):
-        """Generated a signed url for reading or writing to a file"""
-
+        """Generate a signed URL for reading or writing to a file."""
         try:
             await self._storage._storage_stub.pre_sign_url(
                 bucket_name=self._bucket, key=self.key, operation=mode.to_request_operation(), expiry=expiry

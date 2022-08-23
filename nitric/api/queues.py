@@ -46,7 +46,7 @@ class ReceivedTask(object):
     payload: dict = field(default_factory=dict)
     lease_id: str = field(default=None)
     _queueing: Queues = field(default=None)
-    _queue: Queue = field(default=None)
+    _queue: QueueRef = field(default=None)
 
     async def complete(self):
         """
@@ -85,7 +85,7 @@ def _task_to_wire(task: Task) -> NitricTask:
     )
 
 
-def _wire_to_received_task(task: NitricTask, queueing: Queues = None, queue: Queue = None) -> ReceivedTask:
+def _wire_to_received_task(task: NitricTask, queueing: Queues = None, queue: QueueRef = None) -> ReceivedTask:
     """
     Convert a Nitric Queue Task (protobuf) to a Nitric Task (python SDK).
 
@@ -120,7 +120,7 @@ def _wire_to_failed_task(failed_task: WireFailedTask) -> FailedTask:
 
 
 @dataclass(frozen=True, order=True)
-class Queue(object):
+class QueueRef(object):
     """A reference to a queue from a queue service, used to perform operations on that queue."""
 
     _queueing: Queues
@@ -212,4 +212,4 @@ class Queues(object):
 
     def queue(self, name: str):
         """Return a reference to a queue from the connected queue service."""
-        return Queue(_queueing=self, name=name)
+        return QueueRef(_queueing=self, name=name)

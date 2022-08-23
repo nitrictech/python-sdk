@@ -42,8 +42,8 @@ setuptools.setup(
     ],
     setup_requires=["wheel"],
     install_requires=[
-        "nitric-api==0.12.0",
-        "protobuf==3.13.0",
+        "nitric-api==0.17.0",
+        "protobuf==3.19.4",
         "asyncio",
     ],
     extras_require={
@@ -53,7 +53,7 @@ setuptools.setup(
             "pytest==6.0.1",
             "pytest-cov==2.10.1",
             "pre-commit==2.12.0",
-            "black==21.4b2",
+            "black==22.3",
             "flake8==3.9.1",
             "flake8",
             "flake8-bugbear",
