@@ -25,7 +25,7 @@ Read full documentation [here](https://nitrictech.github.io/python-sdk/).
 > nitric is included in all python related projects by default
 
 ```bash
-nitric make:stack
+nitric stack new
 ```
 
 Then select `official/Python Stack`
