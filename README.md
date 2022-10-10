@@ -20,7 +20,7 @@ Read full documentation [here](https://nitrictech.github.io/python-sdk/).
 
 ## Getting Started
 
-### Using the [Nitric CLI](https://github.com/nitric-tech/cli)
+### Using the [Nitric CLI](https://github.com/nitrictech/cli)
 
 > nitric is included in all python related projects by default
 
