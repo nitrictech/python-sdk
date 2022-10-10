@@ -493,7 +493,7 @@ class FunctionServer:
                         response = _create_internal_error_response(srv_msg.trigger_request)
                         await request_channel.send(ClientMessage(id=srv_msg.id, trigger_response=response))
                 else:
-                    print("unhandled message type {msg_type}, skipping")
+                    print(f"unhandled message type {msg_type}, skipping")
                     continue
                 if request_channel.done():
                     break

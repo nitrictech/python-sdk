@@ -105,8 +105,6 @@ class Topic(BaseResource):
         self.server.event(func)
         Nitric._register_worker(self.server)
 
-        # return decorator
-
 
 def topic(name: str) -> Topic:
     """
