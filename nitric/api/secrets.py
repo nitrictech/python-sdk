@@ -46,15 +46,15 @@ class Secrets(object):
 
     def secret(self, name: str):
         """Return a reference to a secret container from the connected secrets management service."""
-        return SecretContainer(_secrets=self, name=name)
+        return SecretContainerRef(_secrets=self, name=name)
 
 
-def _secret_to_wire(secret: SecretContainer) -> SecretMessage:
+def _secret_to_wire(secret: SecretContainerRef) -> SecretMessage:
     return SecretMessage(name=secret.name)
 
 
 @dataclass(frozen=True)
-class SecretContainer(object):
+class SecretContainerRef(object):
     """A reference to a secret container, used to store and retrieve secret versions."""
 
     _secrets: Secrets
@@ -104,7 +104,7 @@ class SecretVersion(object):
     """A reference to a version of a secret, used to access the value of the version."""
 
     _secrets: Secrets
-    secret: SecretContainer
+    secret: SecretContainerRef
     id: str
 
     async def access(self) -> SecretValue:

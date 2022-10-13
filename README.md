@@ -8,42 +8,36 @@
 
 # Nitric Python SDK
 
-The Python SDK supports the use of the cloud-portable [Nitric](https://nitric.io) framework with Python 3.7+.
+The Python SDK supports the use of the cloud-portable [Nitric](https://nitric.io) framework with Python 3.
 
 > The Nitric Python SDK is currently in Preview, API changes are likely prior to v1.x release.
 
 Read full documentation [here](https://nitrictech.github.io/python-sdk/).
 
-## Usage
+## Prerequisites
 
-### Nitric Functions (FaaS):
+- Python 3.8+
 
- - Install Python 3.7+
- - Install the [Nitric CLI](https://nitric.io/docs/installation?lang=python)
- - Create / Open a Nitric Project
- - Make a Python37 function
- 
- ```bash
-# Create a new project
-nitric make:project example-python
-cd example-python
+## Getting Started
 
-# Create a python37 Nitric Function
-nitric make:service function/python37 example-function
+### Using the [Nitric CLI](https://github.com/nitrictech/cli)
+
+> nitric is included in all python related projects by default
+
+```bash
+nitric stack new
 ```
 
-> note: The SDK will be included in the requirements.txt of a new Python function by default.
+Then select `official/Python Stack`
 
-### Standard Python Project
+### Adding to an existing project
 
- - Install Python 3.7+
+**pip**
 
 ```bash
 # Install the Nitric SDK
 pip3 install nitric
 ```
 
-```python
-# import classes/modules as required
-from nitric.api import Events, KeyValueClient
-```
+## Usage
+[Nitric Documentation](https://nitric.io/docs)

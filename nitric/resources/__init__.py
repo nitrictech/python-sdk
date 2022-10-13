@@ -16,21 +16,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Nitric API SDK."""
-from nitric.api.events import Events, Event, TopicRef
-from nitric.api.queues import Queues, Task, FailedTask
-from nitric.api.storage import Storage
-from nitric.api.documents import Documents
-from nitric.api.secrets import Secrets
+"""Nitric Python SDK API Documentation. See: https://nitric.io/docs?lang=python for full framework documentation."""
+
+from nitric.resources.apis import Api, api
+from nitric.resources.buckets import Bucket, bucket
+from nitric.resources.collections import Collection, collection
+from nitric.resources.queues import Queue, queue
+from nitric.resources.schedules import Schedule, schedule
+from nitric.resources.secrets import Secret, secret
+from nitric.resources.topics import Topic, topic
 
 __all__ = [
-    "Events",
-    "Queues",
-    "Documents",
-    "Storage",
-    "Event",
-    "Task",
-    "FailedTask",
-    "TopicRef",
-    "Secrets",
+    "api",
+    "Api",
+    "bucket",
+    "Bucket",
+    "collection",
+    "Collection",
+    "queue",
+    "Queue",
+    "Schedule",
+    "schedule",
+    "secret",
+    "Secret",
+    "topic",
+    "Topic"
 ]

@@ -46,7 +46,7 @@ def _event_to_wire(event: Event) -> NitricEvent:
 
 
 @dataclass(frozen=True, order=True)
-class Topic(object):
+class TopicRef(object):
     """A reference to a topic on an event service, used to perform operations on that topic."""
 
     _events: Events
@@ -94,7 +94,7 @@ class Events(object):
         if self.channel is not None:
             self.channel.close()
 
-    async def topics(self) -> List[Topic]:
+    async def topics(self) -> List[TopicRef]:
         """Get a list of topics available for publishing or subscription."""
         try:
             response = await self._topic_stub.list()
@@ -102,6 +102,6 @@ class Events(object):
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    def topic(self, name: str) -> Topic:
+    def topic(self, name: str) -> TopicRef:
         """Return a reference to a topic."""
-        return Topic(_events=self, name=name)
+        return TopicRef(_events=self, name=name)
