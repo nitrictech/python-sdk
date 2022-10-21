@@ -143,6 +143,14 @@ class HttpRequest(Request):
         self.headers = headers
 
     @property
+    def json(self) -> Optional[Any]:
+        """Attempt the body of the request as JSON, returns None if request body is not JSON"""
+        try:
+            return json.loads(self.body)
+        except:
+            return None
+
+    @property
     def body(self):
         """Get the body of the request as text."""
         return self.data.decode("utf-8")
