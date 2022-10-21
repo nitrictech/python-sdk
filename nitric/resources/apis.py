@@ -205,6 +205,17 @@ class Api(BaseResource):
             r.patch(function, opts=opts)
 
         return decorator
+    
+    def put(self, match: str, opts: MethodOptions = None):
+        """Define an HTTP route which will respond to HTTP PUT requests."""
+        if opts is None:
+            opts = MethodOptions()
+
+        def decorator(function: HttpMiddleware):
+            r = self.route(match)
+            r.put(function, opts=opts)
+
+        return decorator
 
 
 class Route:
@@ -271,7 +282,5 @@ class Method:
         Nitric._register_worker(self.server)
 
 def api(name: str) -> Api:
-    """
-
-    """
+    """Create a new API resource"""
     return Nitric._create_resource(Api, name)
