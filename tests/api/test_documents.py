@@ -42,7 +42,8 @@ from nitricapi.nitric.document.v1 import (
     DocumentQueryResponse,
     Expression,
     ExpressionValue,
-    DocumentQueryStreamResponse,
+    DocumentQueryStreamResponse, DocumentSetRequest, DocumentGetRequest, DocumentDeleteRequest, DocumentQueryRequest,
+    DocumentQueryStreamRequest,
 )
 from nitricapi.nitric.event.v1 import TopicListResponse, NitricTopic
 from nitric.utils import _struct_from_dict
@@ -60,15 +61,17 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
             await Documents().collection("a").doc("b").set({"a": 1})
 
         mock_set.assert_called_once_with(
-            key=Key(
-                collection=Collection(name="a"),
-                id="b",
-            ),
-            content=Struct(
-                fields={
-                    "a": Value(number_value=1.0),
-                },
-            ),
+            document_set_request=DocumentSetRequest(
+                key=Key(
+                    collection=Collection(name="a"),
+                    id="b",
+                ),
+                content=Struct(
+                    fields={
+                        "a": Value(number_value=1.0),
+                    },
+                ),
+            )
         )
 
     async def test_set_subcollection_document(self):
@@ -78,21 +81,23 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
             await Documents().collection("a").doc("b").collection("c").doc("d").set({"a": 1})
 
         mock_set.assert_called_once_with(
-            key=Key(
-                collection=Collection(
-                    name="c",
-                    parent=Key(
-                        collection=Collection(name="a"),
-                        id="b",
+            document_set_request=DocumentSetRequest(
+                key=Key(
+                    collection=Collection(
+                        name="c",
+                        parent=Key(
+                            collection=Collection(name="a"),
+                            id="b",
+                        ),
                     ),
+                    id="d",
                 ),
-                id="d",
-            ),
-            content=Struct(
-                fields={
-                    "a": Value(number_value=1.0),
-                },
-            ),
+                content=Struct(
+                    fields={
+                        "a": Value(number_value=1.0),
+                    },
+                ),
+            )
         )
 
     async def test_get_document(self):
@@ -112,9 +117,11 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
             response = await Documents().collection("a").doc("b").get()
 
         mock_get.assert_called_once_with(
-            key=Key(
-                collection=Collection(name="a"),
-                id="b",
+            document_get_request=DocumentGetRequest(
+                key=Key(
+                    collection=Collection(name="a"),
+                    id="b",
+                )
             )
         )
         self.assertEqual(1.0, response.content["a"])
@@ -143,15 +150,17 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
             response: SdkDocument = await Documents().collection("a").doc("b").collection("c").doc("d").get()
 
         mock_get.assert_called_once_with(
-            key=Key(
-                collection=Collection(
-                    name="c",
-                    parent=Key(
-                        collection=Collection(name="a"),
-                        id="b",
+            document_get_request=DocumentGetRequest(
+                key=Key(
+                    collection=Collection(
+                        name="c",
+                        parent=Key(
+                            collection=Collection(name="a"),
+                            id="b",
+                        ),
                     ),
-                ),
-                id="d",
+                    id="d",
+                )
             )
         )
         self.assertEqual(1.0, response.content["a"])
@@ -167,9 +176,11 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
             await Documents().collection("a").doc("b").delete()
 
         mock_delete.assert_called_once_with(
-            key=Key(
-                collection=Collection(name="a"),
-                id="b",
+            document_delete_request=DocumentDeleteRequest(
+                key=Key(
+                    collection=Collection(name="a"),
+                    id="b",
+                )
             )
         )
 
@@ -180,15 +191,17 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
             await Documents().collection("a").doc("b").collection("c").doc("d").delete()
 
         mock_delete.assert_called_once_with(
-            key=Key(
-                collection=Collection(
-                    name="c",
-                    parent=Key(
-                        collection=Collection(name="a"),
-                        id="b",
+            document_delete_request=DocumentDeleteRequest(
+                key=Key(
+                    collection=Collection(
+                        name="c",
+                        parent=Key(
+                            collection=Collection(name="a"),
+                            id="b",
+                        ),
                     ),
-                ),
-                id="d",
+                    id="d",
+                )
             )
         )
 
@@ -245,15 +258,17 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
             )
 
         mock_query.assert_called_once_with(
-            collection=Collection(name="a"),
-            expressions=[
-                Expression(operand="name", operator="startsWith", value=ExpressionValue(string_value="test")),
-                Expression(operand="age", operator=">", value=ExpressionValue(int_value=3)),
-                Expression(operand="dollar", operator="<", value=ExpressionValue(double_value=2.0)),
-                Expression(operand="true", operator="==", value=ExpressionValue(bool_value=True)),
-            ],
-            limit=3,
-            paging_token=None,
+            document_query_request=DocumentQueryRequest(
+                collection=Collection(name="a"),
+                expressions=[
+                    Expression(operand="name", operator="startsWith", value=ExpressionValue(string_value="test")),
+                    Expression(operand="age", operator=">", value=ExpressionValue(int_value=3)),
+                    Expression(operand="dollar", operator="<", value=ExpressionValue(double_value=2.0)),
+                    Expression(operand="true", operator="==", value=ExpressionValue(bool_value=True)),
+                ],
+                limit=3,
+                paging_token=None,
+            )
         )
 
         self.assertEqual({"b": "c"}, results.paging_token)
@@ -287,15 +302,17 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
             )
 
         mock_query.assert_called_once_with(
-            collection=Collection(name="b", parent=Key(Collection(name="a"), id="")),
-            expressions=[
-                Expression(operand="name", operator="startsWith", value=ExpressionValue(string_value="test")),
-                Expression(operand="age", operator=">", value=ExpressionValue(int_value=3)),
-                Expression(operand="dollar", operator="<", value=ExpressionValue(double_value=2.0)),
-                Expression(operand="true", operator="==", value=ExpressionValue(bool_value=True)),
-            ],
-            limit=3,
-            paging_token=None,
+            document_query_request=DocumentQueryRequest(
+                collection=Collection(name="b", parent=Key(Collection(name="a"), id="")),
+                expressions=[
+                    Expression(operand="name", operator="startsWith", value=ExpressionValue(string_value="test")),
+                    Expression(operand="age", operator=">", value=ExpressionValue(int_value=3)),
+                    Expression(operand="dollar", operator="<", value=ExpressionValue(double_value=2.0)),
+                    Expression(operand="true", operator="==", value=ExpressionValue(bool_value=True)),
+                ],
+                limit=3,
+                paging_token=None,
+            )
         )
 
         self.assertEqual({"b": "c"}, results.paging_token)
@@ -329,15 +346,16 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
                 results.append(result)
 
         self.assertEqual(3, stream_calls)
-        self.assertEqual(
-            {
-                "collection": Collection(name="a"),
-                "expressions": [
+        self.assertEqual({
+            'document_query_stream_request': DocumentQueryStreamRequest(
+                collection=Collection(name="a"),
+                expressions=[
                     Expression(operand="name", operator="startsWith", value=ExpressionValue(string_value="test"))
                 ],
-                "limit": 0,
-            },
-            call_args,
+                limit=0
+            ),
+        },
+        call_args,
         )
         self.assertEqual([{"a": i} for i in range(3)], [doc.content for doc in results])
 
