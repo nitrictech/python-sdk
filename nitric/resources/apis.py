@@ -28,13 +28,11 @@ from nitricapi.nitric.resource.v1 import (
     ApiResource,
     ApiScopes,
     ApiSecurityDefinition,
-    ApiSecurityDefinitionJwt
+    ApiSecurityDefinitionJwt, ResourceDeclareRequest
 )
 from nitric.utils import new_default_channel
 from grpclib import GRPCError
 from nitric.api.exception import exception_from_grpc_error
-import importlib
-
 
 class JwtSecurityDefinition:
     """Represents the JWT security definition for an API."""
@@ -85,7 +83,7 @@ def _to_resource(b: Api) -> Resource:
     return Resource(name=b.name, type=ResourceType.Api)
 
 
-def security_definition_to_grpc_declaration(security_definitions: SecurityDefinition) -> ApiSecurityDefinition:
+def security_definition_to_grpc_declaration(security_definitions: dict[str,SecurityDefinition]) -> Union[dict[str, ApiSecurityDefinition], None]:
     if security_definitions is None or len(security_definitions) == 0:
         return None
     return {
@@ -132,10 +130,12 @@ class Api(BaseResource):
     async def _register(self):
         try:
             await self._resources_stub.declare(
-                resource=_to_resource(self), 
-                api=ApiResource(
-                    security_definitions=security_definition_to_grpc_declaration(self.security_definitions), 
-                    security=security_to_grpc_declaration(self.security)
+                resource_declare_request=ResourceDeclareRequest(
+                    resource=_to_resource(self),
+                    api=ApiResource(
+                        security_definitions=security_definition_to_grpc_declaration(self.security_definitions),
+                        security=security_to_grpc_declaration(self.security)
+                    )
                 )
             )
         except GRPCError as grpc_err:

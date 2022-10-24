@@ -32,7 +32,8 @@ from nitricapi.nitric.document.v1 import (
     Key as KeyMessage,
     Expression as ExpressionMessage,
     ExpressionValue,
-    Document as DocumentMessage,
+    Document as DocumentMessage, DocumentSetRequest, DocumentGetRequest, DocumentDeleteRequest,
+    DocumentQueryStreamRequest, DocumentQueryRequest,
 )
 
 from nitric.utils import new_default_channel, _dict_from_struct, _struct_from_dict
@@ -74,7 +75,9 @@ class DocumentRef:
     async def get(self) -> Document:
         """Retrieve the contents of this document, if it exists."""
         try:
-            response = await self._documents._stub.get(key=_doc_ref_to_wire(self))
+            response = await self._documents._stub.get(document_get_request=DocumentGetRequest(
+                key=_doc_ref_to_wire(self)
+            ))
             return _document_from_wire(documents=self._documents, message=response.document)
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
@@ -87,8 +90,10 @@ class DocumentRef:
         """
         try:
             await self._documents._stub.set(
-                key=_doc_ref_to_wire(self),
-                content=_struct_from_dict(content),
+                document_set_request=DocumentSetRequest(
+                    key=_doc_ref_to_wire(self),
+                    content=_struct_from_dict(content),
+                )
             )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
@@ -96,9 +101,9 @@ class DocumentRef:
     async def delete(self):
         """Delete this document, if it exists."""
         try:
-            await self._documents._stub.delete(
+            await self._documents._stub.delete(document_delete_request=DocumentDeleteRequest(
                 key=_doc_ref_to_wire(self),
-            )
+            ))
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
@@ -497,9 +502,11 @@ class QueryBuilder:
 
         try:
             async for result in self._documents._stub.query_stream(
-                collection=_collection_to_wire(self._collection),
-                expressions=self._expressions_to_wire(),
-                limit=self._limit,
+                document_query_stream_request=DocumentQueryStreamRequest(
+                    collection=_collection_to_wire(self._collection),
+                    expressions=self._expressions_to_wire(),
+                    limit=self._limit,
+                )
             ):
                 yield _document_from_wire(documents=self._documents, message=result.document)
         except GRPCError as grpc_err:
@@ -513,10 +520,12 @@ class QueryBuilder:
         """
         try:
             results = await self._documents._stub.query(
-                collection=_collection_to_wire(self._collection),
-                expressions=self._expressions_to_wire(),
-                limit=self._limit,
-                paging_token=self._paging_token,
+                document_query_request=DocumentQueryRequest(
+                    collection=_collection_to_wire(self._collection),
+                    expressions=self._expressions_to_wire(),
+                    limit=self._limit,
+                    paging_token=self._paging_token,
+                )
             )
 
             return QueryResultsPage(

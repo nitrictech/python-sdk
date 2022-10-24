@@ -22,7 +22,8 @@ from grpclib import GRPCError
 
 from nitric.api.exception import exception_from_grpc_error, InvalidArgumentException
 from nitric.utils import new_default_channel
-from nitricapi.nitric.storage.v1 import StorageServiceStub, StoragePreSignUrlRequestOperation
+from nitricapi.nitric.storage.v1 import StorageServiceStub, StoragePreSignUrlRequestOperation, StorageWriteRequest, \
+    StorageReadRequest, StorageDeleteRequest, StoragePreSignUrlRequest
 from enum import Enum
 
 
@@ -75,7 +76,6 @@ class FileMode(Enum):
         else:
             raise InvalidArgumentException("Invalid FileMode")
 
-
 @dataclass(frozen=True, order=True)
 class File(object):
     """A reference to a file in a bucket, used to perform operations on that file."""
@@ -91,14 +91,14 @@ class File(object):
         Will create the file if it doesn't already exist.
         """
         try:
-            await self._storage._storage_stub.write(bucket_name=self._bucket, key=self.key, body=body)
+            await self._storage._storage_stub.write(storage_write_request=StorageWriteRequest(bucket_name=self._bucket, key=self.key, body=body))
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
     async def read(self) -> bytes:
         """Read this files contents from the bucket."""
         try:
-            response = await self._storage._storage_stub.read(bucket_name=self._bucket, key=self.key)
+            response = await self._storage._storage_stub.read(StorageReadRequest(bucket_name=self._bucket, key=self.key))
             return response.body
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
@@ -106,7 +106,7 @@ class File(object):
     async def delete(self):
         """Delete this file from the bucket."""
         try:
-            await self._storage._storage_stub.delete(bucket_name=self._bucket, key=self.key)
+            await self._storage._storage_stub.delete(StorageDeleteRequest(bucket_name=self._bucket, key=self.key))
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
@@ -114,7 +114,9 @@ class File(object):
         """Generate a signed URL for reading or writing to a file."""
         try:
             await self._storage._storage_stub.pre_sign_url(
-                bucket_name=self._bucket, key=self.key, operation=mode.to_request_operation(), expiry=expiry
+                storage_pre_sign_url_request=StoragePreSignUrlRequest(
+                    bucket_name=self._bucket, key=self.key, operation=mode.to_request_operation(), expiry=expiry
+                )
             )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)

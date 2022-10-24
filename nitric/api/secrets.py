@@ -24,7 +24,8 @@ from grpclib import GRPCError
 
 from nitric.api.exception import exception_from_grpc_error
 from nitric.utils import new_default_channel
-from nitricapi.nitric.secret.v1 import SecretServiceStub, Secret as SecretMessage, SecretVersion as VersionMessage
+from nitricapi.nitric.secret.v1 import SecretServiceStub, Secret as SecretMessage, SecretVersion as VersionMessage, \
+    SecretPutRequest, SecretAccessRequest
 
 
 class Secrets(object):
@@ -72,7 +73,7 @@ class SecretContainerRef(object):
         secret_message = _secret_to_wire(self)
 
         try:
-            response = await self._secrets._secrets_stub.put(secret=secret_message, value=value)
+            response = await self._secrets._secrets_stub.put(secret_put_request=SecretPutRequest(secret=secret_message, value=value))
             return self.version(version=response.secret_version.version)
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
@@ -111,7 +112,7 @@ class SecretVersion(object):
         """Return the value stored against this version of the secret."""
         version_message = _secret_version_to_wire(self)
         try:
-            response = await self._secrets._secrets_stub.access(secret_version=version_message)
+            response = await self._secrets._secrets_stub.access(secret_access_request=SecretAccessRequest(secret_version=version_message))
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
