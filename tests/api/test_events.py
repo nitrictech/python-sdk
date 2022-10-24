@@ -25,7 +25,7 @@ from grpclib import GRPCError, Status
 
 from nitric.api import Events, Event
 from nitric.api.exception import UnknownException
-from nitricapi.nitric.event.v1 import TopicListResponse, NitricTopic
+from nitricapi.nitric.event.v1 import TopicListResponse, NitricTopic, EventPublishRequest, NitricEvent
 from nitric.utils import _struct_from_dict
 
 
@@ -50,12 +50,17 @@ class EventClientTest(IsolatedAsyncioTestCase):
         assert event.id == "test-id"
 
         # Check expected values were passed to Stub
-        mock_publish.assert_called_once()
-        assert mock_publish.call_args.kwargs["topic"] == "test-topic"
-        assert mock_publish.call_args.kwargs["event"].id is None
-        assert mock_publish.call_args.kwargs["event"].payload_type is None
-        assert len(mock_publish.call_args.kwargs["event"].payload.fields) == 1
-        assert mock_publish.call_args.kwargs["event"].payload == _struct_from_dict(payload)
+        # mock_publish.assert_called_once()
+        mock_publish.assert_called_once_with(
+            event_publish_request=EventPublishRequest(
+                topic="test-topic",
+                event=NitricEvent(
+                    id=None,
+                    payload_type=None,
+                    payload=_struct_from_dict(payload)
+                )
+            )
+        )
 
     async def test_publish_dict(self):
         mock_publish = AsyncMock()
@@ -69,13 +74,16 @@ class EventClientTest(IsolatedAsyncioTestCase):
             topic = Events().topic("test-topic")
             await topic.publish({"id": "123", "payload": payload})
 
-        # Check expected values were passed to Stub
-        mock_publish.assert_called_once()
-        assert mock_publish.call_args.kwargs["topic"] == "test-topic"
-        assert mock_publish.call_args.kwargs["event"].id == "123"
-        assert mock_publish.call_args.kwargs["event"].payload_type is None
-        assert len(mock_publish.call_args.kwargs["event"].payload.fields) == 1
-        assert mock_publish.call_args.kwargs["event"].payload == _struct_from_dict(payload)
+        mock_publish.assert_called_once_with(
+            event_publish_request=EventPublishRequest(
+                topic="test-topic",
+                event=NitricEvent(
+                    id="123",
+                    payload=_struct_from_dict(payload),
+                    payload_type=None
+                )
+            )
+        )
 
     async def test_publish_invalid_type(self):
         mock_publish = AsyncMock()
@@ -103,11 +111,16 @@ class EventClientTest(IsolatedAsyncioTestCase):
             await topic.publish()
 
         # Check expected values were passed to Stub
-        mock_publish.assert_called_once()
-        assert mock_publish.call_args.kwargs["topic"] == "test-topic"
-        assert mock_publish.call_args.kwargs["event"].id is None
-        assert mock_publish.call_args.kwargs["event"].payload_type is None
-        assert mock_publish.call_args.kwargs["event"].payload == Struct()
+        mock_publish.assert_called_once_with(
+            event_publish_request=EventPublishRequest(
+                topic="test-topic",
+                event=NitricEvent(
+                    id=None,
+                    payload=Struct(),
+                    payload_type=None
+                )
+            )
+        )
 
     async def test_get_topics(self):
         mock_list_topics = AsyncMock()
