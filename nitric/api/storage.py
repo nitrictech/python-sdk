@@ -98,7 +98,7 @@ class File(object):
     async def read(self) -> bytes:
         """Read this files contents from the bucket."""
         try:
-            response = await self._storage._storage_stub.read(StorageReadRequest(bucket_name=self._bucket, key=self.key))
+            response = await self._storage._storage_stub.read(storage_read_request=StorageReadRequest(bucket_name=self._bucket, key=self.key))
             return response.body
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
@@ -106,7 +106,7 @@ class File(object):
     async def delete(self):
         """Delete this file from the bucket."""
         try:
-            await self._storage._storage_stub.delete(StorageDeleteRequest(bucket_name=self._bucket, key=self.key))
+            await self._storage._storage_stub.delete(storage_delete_request=StorageDeleteRequest(bucket_name=self._bucket, key=self.key))
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
