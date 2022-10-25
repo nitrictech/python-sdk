@@ -49,7 +49,6 @@ class BaseResource(ABC):
         """
         # Todo: store the resource reference in a cache to avoid duplicate registrations
         r = cls(name)
-        # r._reg = r._register()
         try:
             loop = asyncio.get_running_loop()
             r._reg = loop.create_task(r._register())
