@@ -95,7 +95,7 @@ class Secret(BaseResource):
             resources=[_to_resource(self)],
         )
         try:
-            await self._resources_stub.declare(ResourceDeclareRequest(resource=Resource(type=ResourceType.Policy), policy=policy))
+            await self._resources_stub.declare(resource_declare_request=ResourceDeclareRequest(resource=Resource(type=ResourceType.Policy), policy=policy))
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
