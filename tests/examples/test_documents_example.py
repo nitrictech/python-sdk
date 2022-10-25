@@ -17,7 +17,8 @@
 # limitations under the License.
 #
 from examples.documents.sub_col_query import documents_sub_col_query
-from nitricapi.nitric.document.v1 import Collection, DocumentGetResponse, DocumentQueryStreamResponse, Document, Key
+from nitricapi.nitric.document.v1 import Collection, DocumentGetResponse, DocumentQueryStreamResponse, Document, Key, \
+    DocumentGetRequest
 from examples.documents.set import documents_set
 from examples.documents.get import documents_get
 from examples.documents.delete import documents_delete
@@ -61,9 +62,11 @@ class DocumentsExamplesTest(IsolatedAsyncioTestCase):
             await documents_get()
 
         mock_get.assert_called_once_with(
-            key=Key(
-                collection=Collection(name="products"),
-                id="nitric",
+            document_get_request=DocumentGetRequest(
+                key=Key(
+                    collection=Collection(name="products"),
+                    id="nitric",
+                )
             )
         )
 

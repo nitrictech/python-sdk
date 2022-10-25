@@ -25,7 +25,8 @@ from grpclib import GRPCError, Status
 from nitric.api import Secrets
 from nitric.api.exception import UnknownException
 from nitric.api.secrets import SecretValue
-from nitricapi.nitric.secret.v1 import SecretPutResponse, SecretVersion, Secret, SecretAccessResponse
+from nitricapi.nitric.secret.v1 import SecretPutResponse, SecretVersion, Secret, SecretAccessResponse, SecretPutRequest, \
+    SecretAccessRequest
 
 
 class Object(object):
@@ -45,9 +46,10 @@ class SecretsClientTest(IsolatedAsyncioTestCase):
             result = await secret.put(b"a test secret value")
 
         # Check expected values were passed to Stub
-        mock_put.assert_called_once()
-        assert mock_put.call_args.kwargs["secret"] == Secret(name="test-secret")
-        assert mock_put.call_args.kwargs["value"] == b"a test secret value"
+        mock_put.assert_called_once_with(secret_put_request=SecretPutRequest(
+            secret=Secret(name="test-secret"),
+            value=b"a test secret value"
+        ))
 
         # Check the returned value
         assert result.id == "test-version"
@@ -65,8 +67,10 @@ class SecretsClientTest(IsolatedAsyncioTestCase):
             await secret.put("a test secret value")  # string, not bytes
 
         # Check expected values were passed to Stub
-        mock_put.assert_called_once()
-        assert mock_put.call_args.kwargs["value"] == b"a test secret value"  # value should still be bytes when sent.
+        mock_put.assert_called_once_with(secret_put_request=SecretPutRequest(
+            secret=Secret(name="test-secret"),
+            value=b"a test secret value"
+        ))
 
     async def test_latest(self):
         version = Secrets().secret("test-secret").latest()
@@ -87,11 +91,13 @@ class SecretsClientTest(IsolatedAsyncioTestCase):
             result = await version.access()
 
             # Check expected values were passed to Stub
-            mock_access.assert_called_once()
-            assert mock_access.call_args.kwargs["secret_version"] == SecretVersion(
-                secret=Secret(name="test-secret"),
-                version="latest",
-            )
+            mock_access.assert_called_once_with(secret_access_request=SecretAccessRequest(
+                secret_version=SecretVersion(
+                    secret=Secret(name="test-secret"),
+                    version="latest"
+
+                )
+            ))
 
             # Check the returned value
             assert result.version.id == "response-version"

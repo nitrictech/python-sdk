@@ -33,7 +33,7 @@ from nitricapi.nitric.resource.v1 import (
     ResourceServiceStub,
     PolicyResource,
     ResourceType,
-    Action,
+    Action, ResourceDeclareRequest,
 )
 
 from nitric.resources.base import BaseResource
@@ -79,7 +79,7 @@ class Secret(BaseResource):
 
     async def _register(self):
         try:
-            await self._resources_stub.declare(resource=_to_resource(self))
+            await self._resources_stub.declare(resource_declare_request=ResourceDeclareRequest(resource=_to_resource(self)))
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
@@ -87,7 +87,7 @@ class Secret(BaseResource):
         """Request the specified permissions to this resource."""
         # Ensure registration of the resource is complete before requesting permissions.
         if self._reg is not None:
-            await asyncio.wait({self._reg})
+            await self._reg
 
         policy = PolicyResource(
             principals=[Resource(type=ResourceType.Function)],
@@ -95,7 +95,7 @@ class Secret(BaseResource):
             resources=[_to_resource(self)],
         )
         try:
-            await self._resources_stub.declare(policy=policy)
+            await self._resources_stub.declare(resource_declare_request=ResourceDeclareRequest(resource=Resource(type=ResourceType.Policy), policy=policy))
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 

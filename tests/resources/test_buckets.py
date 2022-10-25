@@ -18,9 +18,12 @@
 #
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import patch, AsyncMock
+
+from nitricapi.nitric.storage.v1 import StorageWriteRequest
+
 from nitric.resources import bucket
 
-from nitricapi.nitric.resource.v1 import Action
+from nitricapi.nitric.resource.v1 import Action, ResourceDeclareRequest, Resource, ResourceType, PolicyResource
 
 
 class Object(object):
@@ -37,9 +40,14 @@ class BucketTest(IsolatedAsyncioTestCase):
             await bucket("test-bucket").allow(["writing"])
 
         # Check expected values were passed to Stub
-        mock_declare.assert_called()
-        self.assertEqual(mock_declare.call_args.kwargs["policy"].resources[0].name, "test-bucket")
-        self.assertEqual(mock_declare.call_args.kwargs["policy"].actions, [Action.BucketFilePut])
+        mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
+            resource=Resource(type=ResourceType.Policy),
+            policy=PolicyResource(
+                principals=[Resource(type=ResourceType.Function)],
+                actions=[Action.BucketFilePut],
+                resources=[Resource(type=ResourceType.Bucket, name="test-bucket")]
+            )
+        ))
 
     async def test_create_allow_reading(self):
         mock_declare = AsyncMock()
@@ -50,10 +58,14 @@ class BucketTest(IsolatedAsyncioTestCase):
             await bucket("test-bucket").allow(["reading"])
 
         # Check expected values were passed to Stub
-        mock_declare.assert_called()
-
-        self.assertEqual(mock_declare.call_args.kwargs["policy"].resources[0].name, "test-bucket")
-        self.assertEqual(mock_declare.call_args.kwargs["policy"].actions, [Action.BucketFileGet, Action.BucketFileList])
+        mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
+            resource=Resource(type=ResourceType.Policy),
+            policy=PolicyResource(
+                principals=[Resource(type=ResourceType.Function)],
+                actions=[Action.BucketFileGet, Action.BucketFileList],
+                resources=[Resource(type=ResourceType.Bucket, name="test-bucket")]
+            )
+        ))
 
     async def test_create_allow_deleting(self):
         mock_declare = AsyncMock()
@@ -64,9 +76,14 @@ class BucketTest(IsolatedAsyncioTestCase):
             await bucket("test-bucket").allow(["deleting"])
 
         # Check expected values were passed to Stub
-        mock_declare.assert_called()
-        self.assertEqual(mock_declare.call_args.kwargs["policy"].resources[0].name, "test-bucket")
-        self.assertEqual(mock_declare.call_args.kwargs["policy"].actions, [Action.BucketFileDelete])
+        mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
+            resource=Resource(type=ResourceType.Policy),
+            policy=PolicyResource(
+                principals=[Resource(type=ResourceType.Function)],
+                actions=[Action.BucketFileDelete],
+                resources=[Resource(type=ResourceType.Bucket, name="test-bucket")]
+            )
+        ))
 
     async def test_create_allow_all(self):
         mock_declare = AsyncMock()
@@ -77,17 +94,19 @@ class BucketTest(IsolatedAsyncioTestCase):
             await bucket("test-bucket").allow(["deleting", "reading", "writing"])
 
         # Check expected values were passed to Stub
-        mock_declare.assert_called()
-        self.assertEqual(mock_declare.call_args.kwargs["policy"].resources[0].name, "test-bucket")
-        self.assertEqual(
-            mock_declare.call_args.kwargs["policy"].actions,
-            [
-                Action.BucketFileDelete,
-                Action.BucketFileGet,
-                Action.BucketFileList,
-                Action.BucketFilePut,
-            ],
-        )
+        mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
+            resource=Resource(type=ResourceType.Policy),
+            policy=PolicyResource(
+                principals=[Resource(type=ResourceType.Function)],
+                actions=[
+                    Action.BucketFileDelete,
+                    Action.BucketFileGet,
+                    Action.BucketFileList,
+                    Action.BucketFilePut
+                ],
+                resources=[Resource(type=ResourceType.Bucket, name="test-bucket")]
+            )
+        ))
 
     async def test_create_allow_all_reversed_policy(self):
         mock_declare = AsyncMock()
@@ -98,17 +117,20 @@ class BucketTest(IsolatedAsyncioTestCase):
             await bucket("test-bucket").allow(["writing", "reading", "deleting"])
 
         # Check expected values were passed to Stub
-        mock_declare.assert_called()
-        self.assertEqual(mock_declare.call_args.kwargs["policy"].resources[0].name, "test-bucket")
-        self.assertLessEqual(
-            mock_declare.call_args.kwargs["policy"].actions,
-            [
-                Action.BucketFilePut,
-                Action.BucketFileGet,
-                Action.BucketFileList,
-                Action.BucketFileDelete,
-            ],
-        )
+        mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
+            resource=Resource(type=ResourceType.Policy),
+            policy=PolicyResource(
+                principals=[Resource(type=ResourceType.Function)],
+                actions=[
+                    Action.BucketFilePut,
+                    Action.BucketFileGet,
+                    Action.BucketFileList,
+                    Action.BucketFileDelete,
+                ],
+                resources=[Resource(type=ResourceType.Bucket, name="test-bucket")]
+            )
+        ))
+
 
     async def test_write(self):
         mock_declare = AsyncMock()
@@ -124,8 +146,22 @@ class BucketTest(IsolatedAsyncioTestCase):
                 file = b.file("test-file")
                 await file.write(contents)
 
-        # Check expected values were passed to Stub
-        print(f"num calls: {len(mock_declare.mock_calls)}")
-        self.assertEqual(mock_write.call_args.kwargs["bucket_name"], "test-bucket")
-        self.assertEqual(mock_write.call_args.kwargs["key"], "test-file")
-        self.assertEqual(mock_write.call_args.kwargs["body"], contents)
+        # Check expected resources were declared
+        mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
+            resource=Resource(type=ResourceType.Policy),
+            policy=PolicyResource(
+                principals=[Resource(type=ResourceType.Function)],
+                actions=[
+                    Action.BucketFilePut,
+                ],
+                resources=[Resource(type=ResourceType.Bucket, name="test-bucket")]
+            )
+        ))
+
+        # Check correct data was written
+        mock_write.assert_called_with(storage_write_request=StorageWriteRequest(
+            bucket_name="test-bucket",
+            key="test-file",
+            body=contents
+
+        ))

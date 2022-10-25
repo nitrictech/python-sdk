@@ -21,6 +21,8 @@ from unittest.mock import patch, AsyncMock
 
 import pytest
 from grpclib import GRPCError, Status
+from nitricapi.nitric.storage.v1 import StorageWriteRequest, StorageReadRequest, StorageDeleteRequest, \
+    StoragePreSignUrlRequest, StoragePreSignUrlRequestOperation
 
 from nitric.api import Storage
 from nitric.api.exception import UnknownException
@@ -44,10 +46,11 @@ class StorageClientTest(IsolatedAsyncioTestCase):
             await file.write(contents)
 
         # Check expected values were passed to Stub
-        mock_write.assert_called_once()
-        assert mock_write.call_args.kwargs["bucket_name"] == "test-bucket"
-        assert mock_write.call_args.kwargs["key"] == "test-file"
-        assert mock_write.call_args.kwargs["body"] == contents
+        mock_write.assert_called_once_with(storage_write_request=StorageWriteRequest(
+            bucket_name="test-bucket",
+            key="test-file",
+            body=contents
+        ))
 
     async def test_read(self):
         contents = b"some text as bytes"
@@ -65,23 +68,25 @@ class StorageClientTest(IsolatedAsyncioTestCase):
         assert response == contents
 
         # Check expected values were passed to Stub
-        mock_read.assert_called_once()
-        assert mock_read.call_args.kwargs["bucket_name"] == "test-bucket"
-        assert mock_read.call_args.kwargs["key"] == "test-file"
+        mock_read.assert_called_once_with(storage_read_request=StorageReadRequest(
+            bucket_name="test-bucket",
+            key="test-file",
+        ))
 
     async def test_delete(self):
-        mock_read = AsyncMock()
-        mock_read.return_value = Object()
+        mock_delete = AsyncMock()
+        mock_delete.return_value = Object()
 
-        with patch("nitricapi.nitric.storage.v1.StorageServiceStub.delete", mock_read):
+        with patch("nitricapi.nitric.storage.v1.StorageServiceStub.delete", mock_delete):
             bucket = Storage().bucket("test-bucket")
             file = bucket.file("test-file")
             await file.delete()
 
         # Check expected values were passed to Stub
-        mock_read.assert_called_once()
-        assert mock_read.call_args.kwargs["bucket_name"] == "test-bucket"
-        assert mock_read.call_args.kwargs["key"] == "test-file"
+        mock_delete.assert_called_once_with(storage_delete_request=StorageDeleteRequest(
+            bucket_name="test-bucket",
+            key="test-file",
+        ))
 
     async def test_sign_url(self):
         mock_pre_sign_url = AsyncMock()
@@ -93,11 +98,12 @@ class StorageClientTest(IsolatedAsyncioTestCase):
             await file.sign_url()
 
         # Check expected values were passed to Stub
-        mock_pre_sign_url.assert_called_once()
-        assert mock_pre_sign_url.call_args.kwargs["bucket_name"] == "test-bucket"
-        assert mock_pre_sign_url.call_args.kwargs["key"] == "test-file"
-        assert mock_pre_sign_url.call_args.kwargs["operation"] == 0
-        assert mock_pre_sign_url.call_args.kwargs["expiry"] == 3600
+        mock_pre_sign_url.assert_called_once_with(storage_pre_sign_url_request=StoragePreSignUrlRequest(
+            bucket_name="test-bucket",
+            key="test-file",
+            operation=StoragePreSignUrlRequestOperation.READ,
+            expiry=3600
+        ))
 
     async def test_write_error(self):
         mock_write = AsyncMock()

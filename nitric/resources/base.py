@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import asyncio
 from abc import ABC, abstractmethod
+from asyncio import Task
 
 from typing import TypeVar, Type, Coroutine, Union
 
@@ -33,7 +34,7 @@ class BaseResource(ABC):
 
     def __init__(self):
         """Construct a new resource."""
-        self._reg: Union[Coroutine, None] = None
+        self._reg: Union[Task, None] = None
 
     @abstractmethod
     async def _register(self):
@@ -48,10 +49,9 @@ class BaseResource(ABC):
         """
         # Todo: store the resource reference in a cache to avoid duplicate registrations
         r = cls(name)
-        r._reg = r._register()
         try:
             loop = asyncio.get_running_loop()
-            loop.create_task(r._reg)
+            r._reg = loop.create_task(r._register())
         except RuntimeError:
             loop = asyncio.get_event_loop()
             loop.run_until_complete(r._reg)
