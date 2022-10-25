@@ -87,7 +87,7 @@ class Secret(BaseResource):
         """Request the specified permissions to this resource."""
         # Ensure registration of the resource is complete before requesting permissions.
         if self._reg is not None:
-            await asyncio.wait({self._reg})
+            await self._reg
 
         policy = PolicyResource(
             principals=[Resource(type=ResourceType.Function)],

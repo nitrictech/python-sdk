@@ -86,7 +86,7 @@ class Collection(BaseResource):
         """Request the required permissions for this collection."""
         # Ensure registration of the resource is complete before requesting permissions.
         if self._reg is not None:
-            await asyncio.wait({self._reg})
+            await self._reg
 
         policy = PolicyResource(
             principals=[Resource(type=ResourceType.Function)],
