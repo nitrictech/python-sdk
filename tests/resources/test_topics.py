@@ -20,7 +20,7 @@ from unittest import IsolatedAsyncioTestCase
 from unittest.mock import patch, AsyncMock, Mock
 from nitric.resources import topic
 
-from nitricapi.nitric.resource.v1 import Action
+from nitricapi.nitric.resource.v1 import Action, ResourceDeclareRequest, Resource, ResourceType, PolicyResource
 from nitric.utils import _struct_from_dict
 
 
@@ -45,29 +45,13 @@ class TopicTest(IsolatedAsyncioTestCase):
             await topic("test-topic").allow(["publishing"])
 
         # Check expected values were passed to Stub
-        self.assertEqual(len(mock_declare.mock_calls), 2)
-
-        self.assertEqual(mock_declare.call_args.kwargs["policy"].resources[0].name, "test-topic")
-        self.assertListEqual(mock_declare.call_args.kwargs["policy"].actions, [Action.TopicEventPublish])
-
-    async def test_publish_dict(self):
-        mock_publish = AsyncMock()
-        mock_declare = AsyncMock()
-        mock_response = Object()
-        mock_response.id = "123"
-        mock_publish.return_value = mock_response
-
-        payload = {"content": "of event"}
-
-        with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
-            with patch("nitricapi.nitric.event.v1.EventServiceStub.publish", mock_publish):
-                t = await topic("test-topic").allow(["publishing"])
-                await t.publish({"id": "123", "payload": payload})
-
-        # Check expected values were passed to Stub
-        mock_publish.assert_called_once()
-        assert mock_publish.call_args.kwargs["topic"] == "test-topic"
-        assert mock_publish.call_args.kwargs["event"].id == "123"
-        assert mock_publish.call_args.kwargs["event"].payload_type is None
-        assert len(mock_publish.call_args.kwargs["event"].payload.fields) == 1
-        assert mock_publish.call_args.kwargs["event"].payload == _struct_from_dict(payload)
+        mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
+            resource=Resource(type=ResourceType.Policy),
+            policy=PolicyResource(
+                principals=[Resource(type=ResourceType.Function)],
+                actions=[
+                    Action.TopicEventPublish
+                ],
+                resources=[Resource(type=ResourceType.Topic, name="test-topic")]
+            )
+        ))
