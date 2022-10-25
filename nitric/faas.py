@@ -178,6 +178,7 @@ class HttpResponse(Response):
             self._body = value
         else:
             self._body = json.dumps(value).encode("utf-8")
+            self.headers['Content-Type'] = ['application/json']
             
 
 
