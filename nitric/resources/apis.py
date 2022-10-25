@@ -142,7 +142,7 @@ class Api(BaseResource):
             raise exception_from_grpc_error(grpc_err)
 
 
-    def route(self, match: str, opts: RouteOptions = None) -> Route:
+    def _route(self, match: str, opts: RouteOptions = None) -> Route:
         """Define an HTTP route to be handled by this API."""
         if opts is None:
             opts = RouteOptions()
@@ -151,13 +151,35 @@ class Api(BaseResource):
         self.routes.append(r)
         return r
 
+    def all(self, match: str, opts: MethodOptions = None):
+        """Define an HTTP route which will respond to HTTP GET requests."""
+        if opts is None:
+            opts = MethodOptions()
+
+        def decorator(function: HttpMiddleware):
+            r = self._route(match)
+            r.method([HttpMethod.GET, HttpMethod.POST, HttpMethod.PATCH, HttpMethod.PUT, HttpMethod.DELETE, HttpMethod.OPTIONS], function, opts)
+            
+        return decorator
+
+    def methods(self, methods: List[HttpMethod], match: str, opts: MethodOptions = None):
+        """Define an HTTP route which will respond to HTTP GET requests."""
+        if opts is None:
+            opts = MethodOptions()
+
+        def decorator(function: HttpMiddleware):
+            r = self._route(match)
+            r.method(methods, function, opts)
+            
+        return decorator
+
     def get(self, match: str, opts: MethodOptions = None):
         """Define an HTTP route which will respond to HTTP GET requests."""
         if opts is None:
             opts = MethodOptions()
 
         def decorator(function: HttpMiddleware):
-            r = self.route(match)
+            r = self._route(match)
             r.get(function, opts=opts)
 
         return decorator
@@ -168,7 +190,7 @@ class Api(BaseResource):
             opts = MethodOptions()
 
         def decorator(function: HttpMiddleware):
-            r = self.route(match)
+            r = self._route(match)
             r.post(function, opts=opts)
 
         return decorator
@@ -179,7 +201,7 @@ class Api(BaseResource):
             opts = MethodOptions()
 
         def decorator(function: HttpMiddleware):
-            r = self.route(match)
+            r = self._route(match)
             r.delete(function, opts=opts)
 
         return decorator
@@ -190,7 +212,7 @@ class Api(BaseResource):
             opts = MethodOptions()
 
         def decorator(function: HttpMiddleware):
-            r = self.route(match)
+            r = self._route(match)
             r.options(function, opts=opts)
 
         return decorator
@@ -201,8 +223,19 @@ class Api(BaseResource):
             opts = MethodOptions()
 
         def decorator(function: HttpMiddleware):
-            r = self.route(match)
+            r = self._route(match)
             r.patch(function, opts=opts)
+
+        return decorator
+    
+    def put(self, match: str, opts: MethodOptions = None):
+        """Define an HTTP route which will respond to HTTP PUT requests."""
+        if opts is None:
+            opts = MethodOptions()
+
+        def decorator(function: HttpMiddleware):
+            r = self._route(match)
+            r.put(function, opts=opts)
 
         return decorator
 
@@ -271,7 +304,5 @@ class Method:
         Nitric._register_worker(self.server)
 
 def api(name: str) -> Api:
-    """
-
-    """
+    """Create a new API resource"""
     return Nitric._create_resource(Api, name)

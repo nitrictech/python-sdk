@@ -143,6 +143,14 @@ class HttpRequest(Request):
         self.headers = headers
 
     @property
+    def json(self) -> Optional[Any]:
+        """Get the body of the request as JSON, returns None if request body is not JSON"""
+        try:
+            return json.loads(self.body)
+        except:
+            return None
+
+    @property
     def body(self):
         """Get the body of the request as text."""
         return self.data.decode("utf-8")
@@ -163,11 +171,14 @@ class HttpResponse(Response):
         return self._body
 
     @body.setter
-    def body(self, value: Union[str, bytes]):
+    def body(self, value: Union[str, bytes, Any]):
         if isinstance(value, str):
             self._body = value.encode("utf-8")
-        else:
+        elif isinstance(value, bytes):
             self._body = value
+        else:
+            self._body = json.dumps(value).encode("utf-8")
+            
 
 
 class HttpContext(TriggerContext):

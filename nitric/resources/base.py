@@ -54,6 +54,6 @@ class BaseResource(ABC):
             r._reg = loop.create_task(r._register())
         except RuntimeError:
             loop = asyncio.get_event_loop()
-            loop.run_until_complete(r._reg)
+            loop.run_until_complete(r._register())
 
         return r
