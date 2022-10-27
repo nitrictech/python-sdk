@@ -36,7 +36,7 @@ from nitricapi.nitric.resource.v1 import (
     Action, ResourceDeclareRequest,
 )
 
-from nitric.resources.base import BaseResource
+from nitric.resources.base import BaseResource, SecureResource
 
 
 class CollectionPermission(Enum):
@@ -47,56 +47,47 @@ class CollectionPermission(Enum):
     deleting = "deleting"
 
 
-def _perms_to_actions(permissions: List[Union[CollectionPermission, str]]) -> List[Action]:
-    permission_actions_map = {
-        CollectionPermission.reading: [Action.CollectionDocumentRead, Action.CollectionQuery, Action.CollectionList],
-        CollectionPermission.writing: [Action.CollectionDocumentWrite, Action.CollectionList],
-        CollectionPermission.deleting: [Action.CollectionDocumentDelete, Action.CollectionList],
-    }
-    # convert strings to the enum value where needed
-    perms = [
-        permission if isinstance(permission, CollectionPermission) else CollectionPermission[permission.lower()]
-        for permission in permissions
-    ]
-
-    return [action for perm in perms for action in permission_actions_map[perm]]
 
 
-def _to_resource(collection: Collection) -> Resource:
-    return Resource(name=collection.name, type=ResourceType.Collection)
 
 
-class Collection(BaseResource):
+
+class Collection(SecureResource):
     """A document collection resource."""
 
     def __init__(self, name: str):
         """Construct a new document collection."""
         super().__init__()
         self.name = name
-        self._channel = new_default_channel()
-        self._resources_stub = ResourceServiceStub(channel=self._channel)
 
     async def _register(self):
         try:
-            await self._resources_stub.declare(resource_declare_request=ResourceDeclareRequest(resource=_to_resource(self)))
+            await self._resources_stub.declare(resource_declare_request=ResourceDeclareRequest(resource=self._to_resource()))
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    async def allow(self, permissions: List[Union[CollectionPermission, str]]) -> CollectionRef:
+    def _to_resource(self) -> Resource:
+        return Resource(name=self.name, type=ResourceType.Collection)
+
+    def _perms_to_actions(self, permissions: List[Union[CollectionPermission, str]]) -> List[Action]:
+        permission_actions_map = {
+            CollectionPermission.reading: [Action.CollectionDocumentRead, Action.CollectionQuery,
+                                           Action.CollectionList],
+            CollectionPermission.writing: [Action.CollectionDocumentWrite, Action.CollectionList],
+            CollectionPermission.deleting: [Action.CollectionDocumentDelete, Action.CollectionList],
+        }
+        # convert strings to the enum value where needed
+        perms = [
+            permission if isinstance(permission, CollectionPermission) else CollectionPermission[permission.lower()]
+            for permission in permissions
+        ]
+
+        return [action for perm in perms for action in permission_actions_map[perm]]
+
+    def allow(self, permissions: List[Union[CollectionPermission, str]]) -> CollectionRef:
         """Request the required permissions for this collection."""
         # Ensure registration of the resource is complete before requesting permissions.
-        if self._reg is not None:
-            await self._reg
-
-        policy = PolicyResource(
-            principals=[Resource(type=ResourceType.Function)],
-            actions=_perms_to_actions(permissions),
-            resources=[_to_resource(self)],
-        )
-        try:
-            await self._resources_stub.declare(resource_declare_request=ResourceDeclareRequest(resource=Resource(type=ResourceType.Policy), policy=policy))
-        except GRPCError as grpc_err:
-            raise exception_from_grpc_error(grpc_err)
+        self._register_policy(permissions)
 
         return Documents().collection(self.name)
 

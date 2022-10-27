@@ -40,7 +40,7 @@ class CollectionTest(IsolatedAsyncioTestCase):
         mock_declare.return_value = mock_response
 
         with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
-            await collection("test-collection").allow(["writing"])
+            collection("test-collection").allow(["writing"])
 
         # Check expected values were passed to Stub
         mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
@@ -61,7 +61,7 @@ class CollectionTest(IsolatedAsyncioTestCase):
         mock_declare.return_value = mock_response
 
         with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
-            await collection("test-collection").allow(["reading"])
+            collection("test-collection").allow(["reading"])
 
         # Check expected values were passed to Stub
         mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
@@ -83,7 +83,7 @@ class CollectionTest(IsolatedAsyncioTestCase):
         mock_declare.return_value = mock_response
 
         with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
-            await collection("test-collection").allow(["deleting"])
+            collection("test-collection").allow(["deleting"])
 
         # Check expected values were passed to Stub
         mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
@@ -104,7 +104,7 @@ class CollectionTest(IsolatedAsyncioTestCase):
         mock_declare.return_value = mock_response
 
         with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
-            await collection("test-collection").allow(["deleting", "reading", "writing"])
+            collection("test-collection").allow(["deleting", "reading", "writing"])
 
         # Check expected values were passed to Stub
         mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
@@ -130,7 +130,7 @@ class CollectionTest(IsolatedAsyncioTestCase):
         mock_declare.return_value = mock_response
 
         with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
-            await collection("test-collection").allow(["writing", "reading", "deleting"])
+            collection("test-collection").allow(["writing", "reading", "deleting"])
 
         # Check expected values were passed to Stub
         mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
