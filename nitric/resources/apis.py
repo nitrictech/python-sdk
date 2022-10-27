@@ -124,9 +124,6 @@ class Api(BaseResource):
         self.security_definitions = opts.security_definitions
         self.security = opts.security
 
-        self._channel = new_default_channel()
-        self._resources_stub = ResourceServiceStub(channel=self._channel)
-
     async def _register(self):
         try:
             await self._resources_stub.declare(

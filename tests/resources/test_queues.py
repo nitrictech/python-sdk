@@ -29,13 +29,13 @@ class Object(object):
 
 
 class QueueTest(IsolatedAsyncioTestCase):
-    async def test_create_allow_sending(self):
+    def test_create_allow_sending(self):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response
 
         with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
-            await queue("test-queue").allow(["sending"])
+            queue("test-queue").allow(["sending"])
 
         # Check expected values were passed to Stub
         mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
@@ -51,13 +51,13 @@ class QueueTest(IsolatedAsyncioTestCase):
             )
         ))
 
-    async def test_create_allow_receiving(self):
+    def test_create_allow_receiving(self):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response
 
         with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
-            await queue("test-queue").allow(["receiving"])
+            queue("test-queue").allow(["receiving"])
 
         # Check expected values were passed to Stub
         mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
@@ -73,13 +73,13 @@ class QueueTest(IsolatedAsyncioTestCase):
             )
         ))
 
-    async def test_create_allow_all(self):
+    def test_create_allow_all(self):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response
 
         with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
-            await queue("test-queue").allow(["sending", "receiving"])
+            queue("test-queue").allow(["sending", "receiving"])
 
         # Check expected values were passed to Stub
         mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(

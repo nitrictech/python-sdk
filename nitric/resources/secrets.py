@@ -36,7 +36,7 @@ from nitricapi.nitric.resource.v1 import (
     Action, ResourceDeclareRequest,
 )
 
-from nitric.resources.base import BaseResource
+from nitric.resources.base import BaseResource, SecureResource
 
 
 class SecretPermission(Enum):
@@ -46,25 +46,9 @@ class SecretPermission(Enum):
     putting = "putting"
 
 
-def _perms_to_actions(permissions: List[Union[SecretPermission, str]]) -> List[Action]:
-    permissions_actions_map = {
-        SecretPermission.accessing: [Action.SecretAccess],
-        SecretPermission.putting: [Action.SecretPut],
-    }
-    # convert strings to the enum value where needed
-    perms = [
-        permission if isinstance(permission, SecretPermission) else SecretPermission[permission.lower()]
-        for permission in permissions
-    ]
-
-    return [action for perm in perms for action in permissions_actions_map[perm]]
 
 
-def _to_resource(sec: Secret) -> Resource:
-    return Resource(name=sec.name, type=ResourceType.Secret)
-
-
-class Secret(BaseResource):
+class Secret(SecureResource):
     """A secret resource, used for storing and retrieving secret versions and values."""
 
     name: str
@@ -74,30 +58,33 @@ class Secret(BaseResource):
         """Construct a new secret resource reference."""
         super().__init__()
         self.name = name
-        self._channel = new_default_channel()
-        self._resources_stub = ResourceServiceStub(channel=self._channel)
+
+    def _to_resource(self) -> Resource:
+        return Resource(name=self.name, type=ResourceType.Secret)
 
     async def _register(self):
         try:
-            await self._resources_stub.declare(resource_declare_request=ResourceDeclareRequest(resource=_to_resource(self)))
+            await self._resources_stub.declare(resource_declare_request=ResourceDeclareRequest(resource=self._to_resource()))
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    async def allow(self, permissions: List[Union[SecretPermission, str]]) -> SecretContainerRef:
+    def _perms_to_actions(self, permissions: List[Union[SecretPermission, str]]) -> List[Action]:
+        permissions_actions_map = {
+            SecretPermission.accessing: [Action.SecretAccess],
+            SecretPermission.putting: [Action.SecretPut],
+        }
+        # convert strings to the enum value where needed
+        perms = [
+            permission if isinstance(permission, SecretPermission) else SecretPermission[permission.lower()]
+            for permission in permissions
+        ]
+
+        return [action for perm in perms for action in permissions_actions_map[perm]]
+
+    def allow(self, permissions: List[Union[SecretPermission, str]]) -> SecretContainerRef:
         """Request the specified permissions to this resource."""
-        # Ensure registration of the resource is complete before requesting permissions.
-        if self._reg is not None:
-            await self._reg
 
-        policy = PolicyResource(
-            principals=[Resource(type=ResourceType.Function)],
-            actions=_perms_to_actions(permissions),
-            resources=[_to_resource(self)],
-        )
-        try:
-            await self._resources_stub.declare(resource_declare_request=ResourceDeclareRequest(resource=Resource(type=ResourceType.Policy), policy=policy))
-        except GRPCError as grpc_err:
-            raise exception_from_grpc_error(grpc_err)
+        self._register_policy(permissions)
 
         return Secrets().secret(self.name)
 
