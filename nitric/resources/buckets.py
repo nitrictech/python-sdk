@@ -18,8 +18,6 @@
 #
 from __future__ import annotations
 
-import asyncio
-
 from nitric.api.exception import exception_from_grpc_error
 from nitric.api.storage import BucketRef, Storage
 from typing import List, Union
@@ -27,16 +25,13 @@ from enum import Enum
 from grpclib import GRPCError
 
 from nitric.application import Nitric
-from nitric.utils import new_default_channel
 from nitricapi.nitric.resource.v1 import (
     Resource,
-    ResourceServiceStub,
-    PolicyResource,
     ResourceType,
     Action, ResourceDeclareRequest,
 )
 
-from nitric.resources.base import BaseResource, SecureResource
+from nitric.resources.base import SecureResource
 
 
 class BucketPermission(Enum):

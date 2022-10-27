@@ -26,17 +26,14 @@ from enum import Enum
 from grpclib import GRPCError
 
 from nitric.application import Nitric
-from nitric.utils import new_default_channel
 from nitric.api.secrets import Secrets, SecretContainerRef
 from nitricapi.nitric.resource.v1 import (
     Resource,
-    ResourceServiceStub,
-    PolicyResource,
     ResourceType,
     Action, ResourceDeclareRequest,
 )
 
-from nitric.resources.base import BaseResource, SecureResource
+from nitric.resources.base import SecureResource
 
 
 class SecretPermission(Enum):

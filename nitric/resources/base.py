@@ -22,7 +22,7 @@ import asyncio
 from abc import ABC, abstractmethod
 from asyncio import Task
 
-from typing import TypeVar, Type, Coroutine, Union, List
+from typing import TypeVar, Type, Union, List
 
 from grpclib import GRPCError
 from nitricapi.nitric.resource.v1 import Action, PolicyResource, Resource, ResourceType, ResourceDeclareRequest, \
