@@ -36,7 +36,7 @@ class MockAsyncChannel:
 
 
 class TopicTest(IsolatedAsyncioTestCase):
-    async def test_create_allow_publishing(self):
+    def test_create_allow_publishing(self):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response

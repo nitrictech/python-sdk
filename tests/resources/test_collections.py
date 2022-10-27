@@ -34,7 +34,7 @@ class Object(object):
 
 
 class CollectionTest(IsolatedAsyncioTestCase):
-    async def test_create_allow_writing(self):
+    def test_create_allow_writing(self):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response
@@ -55,7 +55,7 @@ class CollectionTest(IsolatedAsyncioTestCase):
             )
         ))
 
-    async def test_create_allow_reading(self):
+    def test_create_allow_reading(self):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response
@@ -77,7 +77,7 @@ class CollectionTest(IsolatedAsyncioTestCase):
             )
         ))
 
-    async def test_create_allow_deleting(self):
+    def test_create_allow_deleting(self):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response
@@ -98,7 +98,7 @@ class CollectionTest(IsolatedAsyncioTestCase):
             )
         ))
 
-    async def test_create_allow_all(self):
+    def test_create_allow_all(self):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response
@@ -124,7 +124,7 @@ class CollectionTest(IsolatedAsyncioTestCase):
             )
         ))
 
-    async def test_create_allow_all_reversed_policy(self):
+    def test_create_allow_all_reversed_policy(self):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response

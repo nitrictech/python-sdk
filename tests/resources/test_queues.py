@@ -29,7 +29,7 @@ class Object(object):
 
 
 class QueueTest(IsolatedAsyncioTestCase):
-    async def test_create_allow_sending(self):
+    def test_create_allow_sending(self):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response
@@ -51,7 +51,7 @@ class QueueTest(IsolatedAsyncioTestCase):
             )
         ))
 
-    async def test_create_allow_receiving(self):
+    def test_create_allow_receiving(self):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response
@@ -73,7 +73,7 @@ class QueueTest(IsolatedAsyncioTestCase):
             )
         ))
 
-    async def test_create_allow_all(self):
+    def test_create_allow_all(self):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response

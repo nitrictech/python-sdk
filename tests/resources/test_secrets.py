@@ -29,7 +29,7 @@ class Object(object):
 
 
 class SecretTest(IsolatedAsyncioTestCase):
-    async def test_allow_put(self):
+    def test_allow_put(self):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response
@@ -50,7 +50,7 @@ class SecretTest(IsolatedAsyncioTestCase):
         ))
 
 
-    async def test_allow_access(self):
+    def test_allow_access(self):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response

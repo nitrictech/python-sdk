@@ -94,13 +94,8 @@ class SecureResource(BaseResource):
                                                                 policy=policy))
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
-        pass
 
     def _register_policy(self, permissions: List[str]):
-        try:
-            loop = asyncio.get_running_loop()
-            loop.create_task(self._register_policy_async(permissions))
-        except RuntimeError:
-            loop = asyncio.get_event_loop()
-            loop.run_until_complete(self._register_policy_async(permissions))
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(self._register_policy_async(permissions))
 
