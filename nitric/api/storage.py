@@ -17,13 +17,15 @@
 # limitations under the License.
 #
 from dataclasses import dataclass
+from typing import List
 
 from grpclib import GRPCError
+from nitric.api.storage import File
 
 from nitric.api.exception import exception_from_grpc_error, InvalidArgumentException
 from nitric.utils import new_default_channel
 from nitricapi.nitric.storage.v1 import StorageServiceStub, StoragePreSignUrlRequestOperation, StorageWriteRequest, \
-    StorageReadRequest, StorageDeleteRequest, StoragePreSignUrlRequest
+    StorageReadRequest, StorageDeleteRequest, StoragePreSignUrlRequest, StorageListFilesRequest
 from enum import Enum
 
 
@@ -60,6 +62,9 @@ class BucketRef(object):
         """Return a reference to a file in this bucket."""
         return File(_storage=self._storage, _bucket=self.name, key=key)
 
+    async def files(self) -> List[File]:
+        resp = await self._storage._storage_stub.list_files(storage_list_files_request=StorageListFilesRequest(bucket_name=self.name))
+        return [self.file(f.key) for f in resp.files]
 
 class FileMode(Enum):
     """Definition of available operation modes for file signed URLs."""
