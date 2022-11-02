@@ -35,7 +35,7 @@ class SecretTest(IsolatedAsyncioTestCase):
         mock_declare.return_value = mock_response
 
         with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
-            secret("test-secret").allow(["putting"])
+            secret("test-secret").allow("putting")
 
         # Check expected values were passed to Stub
         mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
@@ -56,7 +56,7 @@ class SecretTest(IsolatedAsyncioTestCase):
         mock_declare.return_value = mock_response
 
         with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
-            secret("test-secret").allow(["accessing"])
+            secret("test-secret").allow("accessing")
 
         # Check expected values were passed to Stub
         mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(

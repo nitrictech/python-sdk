@@ -60,7 +60,7 @@ class Bucket(SecureResource):
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    def _perms_to_actions(self, permissions: List[Union[BucketPermission, str]]) -> List[Action]:
+    def _perms_to_actions(self, *args: [Union[BucketPermission, str]]) -> List[Action]:
         permission_actions_map = {
             BucketPermission.reading: [Action.BucketFileGet, Action.BucketFileList],
             BucketPermission.writing: [Action.BucketFilePut],
@@ -69,16 +69,16 @@ class Bucket(SecureResource):
         # convert strings to the enum value where needed
         perms = [
             permission if isinstance(permission, BucketPermission) else BucketPermission[permission.lower()]
-            for permission in permissions
+            for permission in args
         ]
         return [action for perm in perms for action in permission_actions_map[perm]]
 
     def _to_resource(self) -> Resource:
         return Resource(name=self.name, type=ResourceType.Bucket)
 
-    def allow(self, permissions: List[Union[BucketPermission, str]]) -> BucketRef:
+    def allow(self, *args: Union[BucketPermission, str]) -> BucketRef:
         """Request the required permissions for this resource."""
-        self._register_policy(permissions)
+        self._register_policy(*args)
 
         return Storage().bucket(self.name)
 

@@ -65,7 +65,7 @@ class Secret(SecureResource):
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    def _perms_to_actions(self, permissions: List[Union[SecretPermission, str]]) -> List[Action]:
+    def _perms_to_actions(self, *args: Union[SecretPermission, str]) -> List[Action]:
         permissions_actions_map = {
             SecretPermission.accessing: [Action.SecretAccess],
             SecretPermission.putting: [Action.SecretPut],
@@ -73,15 +73,15 @@ class Secret(SecureResource):
         # convert strings to the enum value where needed
         perms = [
             permission if isinstance(permission, SecretPermission) else SecretPermission[permission.lower()]
-            for permission in permissions
+            for permission in args
         ]
 
         return [action for perm in perms for action in permissions_actions_map[perm]]
 
-    def allow(self, permissions: List[Union[SecretPermission, str]]) -> SecretContainerRef:
+    def allow(self, *args: Union[SecretPermission, str]) -> SecretContainerRef:
         """Request the specified permissions to this resource."""
 
-        self._register_policy(permissions)
+        self._register_policy(*args)
 
         return Secrets().secret(self.name)
 

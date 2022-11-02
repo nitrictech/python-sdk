@@ -72,7 +72,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
 
         with patch("nitricapi.nitric.event.v1.EventServiceStub.publish", mock_publish):
             topic = Events().topic("test-topic")
-            await topic.publish({"id": "123", "payload": payload})
+            await topic.publish(Event(id="123", payload=payload))
 
         mock_publish.assert_called_once_with(
             event_publish_request=EventPublishRequest(

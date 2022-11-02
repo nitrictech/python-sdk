@@ -20,8 +20,6 @@ from dataclasses import dataclass
 from typing import List
 
 from grpclib import GRPCError
-from nitric.api.storage import File
-
 from nitric.api.exception import exception_from_grpc_error, InvalidArgumentException
 from nitric.utils import new_default_channel
 from nitricapi.nitric.storage.v1 import StorageServiceStub, StoragePreSignUrlRequestOperation, StorageWriteRequest, \
@@ -62,9 +60,11 @@ class BucketRef(object):
         """Return a reference to a file in this bucket."""
         return File(_storage=self._storage, _bucket=self.name, key=key)
 
-    async def files(self) -> List[File]:
-        resp = await self._storage._storage_stub.list_files(storage_list_files_request=StorageListFilesRequest(bucket_name=self.name))
+    async def files(self):
+        resp = await self._storage._storage_stub.list_files(
+            storage_list_files_request=StorageListFilesRequest(bucket_name=self.name))
         return [self.file(f.key) for f in resp.files]
+
 
 class FileMode(Enum):
     """Definition of available operation modes for file signed URLs."""
@@ -81,6 +81,7 @@ class FileMode(Enum):
         else:
             raise InvalidArgumentException("Invalid FileMode")
 
+
 @dataclass(frozen=True, order=True)
 class File(object):
     """A reference to a file in a bucket, used to perform operations on that file."""
@@ -96,14 +97,16 @@ class File(object):
         Will create the file if it doesn't already exist.
         """
         try:
-            await self._storage._storage_stub.write(storage_write_request=StorageWriteRequest(bucket_name=self._bucket, key=self.key, body=body))
+            await self._storage._storage_stub.write(
+                storage_write_request=StorageWriteRequest(bucket_name=self._bucket, key=self.key, body=body))
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
     async def read(self) -> bytes:
         """Read this files contents from the bucket."""
         try:
-            response = await self._storage._storage_stub.read(storage_read_request=StorageReadRequest(bucket_name=self._bucket, key=self.key))
+            response = await self._storage._storage_stub.read(
+                storage_read_request=StorageReadRequest(bucket_name=self._bucket, key=self.key))
             return response.body
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
@@ -111,7 +114,8 @@ class File(object):
     async def delete(self):
         """Delete this file from the bucket."""
         try:
-            await self._storage._storage_stub.delete(storage_delete_request=StorageDeleteRequest(bucket_name=self._bucket, key=self.key))
+            await self._storage._storage_stub.delete(
+                storage_delete_request=StorageDeleteRequest(bucket_name=self._bucket, key=self.key))
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
