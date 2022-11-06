@@ -144,10 +144,12 @@ class HttpRequest(Request):
 
     @property
     def json(self) -> Optional[Any]:
-        """Get the body of the request as JSON, returns None if request body is not JSON"""
+        """Get the body of the request as JSON, returns None if request body is not JSON."""
         try:
             return json.loads(self.body)
-        except:
+        except json.JSONDecodeError:
+            return None
+        except TypeError:
             return None
 
     @property
@@ -178,8 +180,7 @@ class HttpResponse(Response):
             self._body = value
         else:
             self._body = json.dumps(value).encode("utf-8")
-            self.headers['Content-Type'] = ['application/json']
-            
+            self.headers["Content-Type"] = ["application/json"]
 
 
 class HttpContext(TriggerContext):
@@ -509,6 +510,9 @@ class FunctionServer:
                     continue
                 if request_channel.done():
                     break
+        except asyncio.CancelledError:
+            # Membrane has closed stream after init
+            print("stream from Membrane closed, closing client stream")
         except ConnectionRefusedError as cre:
             traceback.print_exc()
             raise ConnectionRefusedError("Failed to register function with Membrane") from cre
@@ -516,7 +520,6 @@ class FunctionServer:
             traceback.print_exc()
             raise Exception("An unexpected error occurred.") from e
         finally:
-            print("stream from Membrane closed, closing client stream")
             # The channel must be closed to complete the gRPC connection
             request_channel.close()
             channel.close()
