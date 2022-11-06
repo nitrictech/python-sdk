@@ -114,7 +114,7 @@ class File(object):
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    async def upload_url(self, expiry: int = 3600):
+    async def upload_url(self, expiry: int = 600):
         await self.sign_url(mode=FileMode.WRITE, expiry=expiry)
 
     async def download_url(self, expiry: int = 3600):
