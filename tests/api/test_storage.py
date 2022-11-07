@@ -103,7 +103,7 @@ class StorageClientTest(IsolatedAsyncioTestCase):
         with patch("nitricapi.nitric.storage.v1.StorageServiceStub.pre_sign_url", mock_pre_sign_url):
             bucket = Storage().bucket("test-bucket")
             file = bucket.file("test-file")
-            await file.sign_url()
+            url = await file.sign_url()
 
         # Check expected values were passed to Stub
         mock_pre_sign_url.assert_called_once_with(
@@ -114,6 +114,9 @@ class StorageClientTest(IsolatedAsyncioTestCase):
                 expiry=3600,
             )
         )
+
+        # check the URL is returned
+        assert url == "www.example.com"
 
     async def test_write_error(self):
         mock_write = AsyncMock()
