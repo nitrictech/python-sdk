@@ -21,8 +21,14 @@ from unittest.mock import patch, AsyncMock
 
 import pytest
 from grpclib import GRPCError, Status
-from nitricapi.nitric.storage.v1 import StorageWriteRequest, StorageReadRequest, StorageDeleteRequest, \
-    StoragePreSignUrlRequest, StoragePreSignUrlRequestOperation
+from nitricapi.nitric.storage.v1 import (
+    StorageWriteRequest,
+    StorageReadRequest,
+    StorageDeleteRequest,
+    StoragePreSignUrlRequest,
+    StoragePreSignUrlRequestOperation,
+    StoragePreSignUrlResponse,
+)
 
 from nitric.api import Storage
 from nitric.api.exception import UnknownException
@@ -46,11 +52,9 @@ class StorageClientTest(IsolatedAsyncioTestCase):
             await file.write(contents)
 
         # Check expected values were passed to Stub
-        mock_write.assert_called_once_with(storage_write_request=StorageWriteRequest(
-            bucket_name="test-bucket",
-            key="test-file",
-            body=contents
-        ))
+        mock_write.assert_called_once_with(
+            storage_write_request=StorageWriteRequest(bucket_name="test-bucket", key="test-file", body=contents)
+        )
 
     async def test_read(self):
         contents = b"some text as bytes"
@@ -68,10 +72,12 @@ class StorageClientTest(IsolatedAsyncioTestCase):
         assert response == contents
 
         # Check expected values were passed to Stub
-        mock_read.assert_called_once_with(storage_read_request=StorageReadRequest(
-            bucket_name="test-bucket",
-            key="test-file",
-        ))
+        mock_read.assert_called_once_with(
+            storage_read_request=StorageReadRequest(
+                bucket_name="test-bucket",
+                key="test-file",
+            )
+        )
 
     async def test_delete(self):
         mock_delete = AsyncMock()
@@ -83,14 +89,16 @@ class StorageClientTest(IsolatedAsyncioTestCase):
             await file.delete()
 
         # Check expected values were passed to Stub
-        mock_delete.assert_called_once_with(storage_delete_request=StorageDeleteRequest(
-            bucket_name="test-bucket",
-            key="test-file",
-        ))
+        mock_delete.assert_called_once_with(
+            storage_delete_request=StorageDeleteRequest(
+                bucket_name="test-bucket",
+                key="test-file",
+            )
+        )
 
     async def test_sign_url(self):
         mock_pre_sign_url = AsyncMock()
-        mock_pre_sign_url.return_value = Object()
+        mock_pre_sign_url.return_value = StoragePreSignUrlResponse(url="www.example.com")
 
         with patch("nitricapi.nitric.storage.v1.StorageServiceStub.pre_sign_url", mock_pre_sign_url):
             bucket = Storage().bucket("test-bucket")
@@ -98,12 +106,14 @@ class StorageClientTest(IsolatedAsyncioTestCase):
             await file.sign_url()
 
         # Check expected values were passed to Stub
-        mock_pre_sign_url.assert_called_once_with(storage_pre_sign_url_request=StoragePreSignUrlRequest(
-            bucket_name="test-bucket",
-            key="test-file",
-            operation=StoragePreSignUrlRequestOperation.READ,
-            expiry=3600
-        ))
+        mock_pre_sign_url.assert_called_once_with(
+            storage_pre_sign_url_request=StoragePreSignUrlRequest(
+                bucket_name="test-bucket",
+                key="test-file",
+                operation=StoragePreSignUrlRequestOperation.READ,
+                expiry=3600,
+            )
+        )
 
     async def test_write_error(self):
         mock_write = AsyncMock()

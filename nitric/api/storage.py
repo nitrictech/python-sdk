@@ -98,7 +98,8 @@ class File(object):
         """
         try:
             await self._storage._storage_stub.write(
-                storage_write_request=StorageWriteRequest(bucket_name=self._bucket, key=self.key, body=body))
+                storage_write_request=StorageWriteRequest(bucket_name=self._bucket, key=self.key, body=body)
+            )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
@@ -106,7 +107,8 @@ class File(object):
         """Read this files contents from the bucket."""
         try:
             response = await self._storage._storage_stub.read(
-                storage_read_request=StorageReadRequest(bucket_name=self._bucket, key=self.key))
+                storage_read_request=StorageReadRequest(bucket_name=self._bucket, key=self.key)
+            )
             return response.body
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
@@ -115,7 +117,8 @@ class File(object):
         """Delete this file from the bucket."""
         try:
             await self._storage._storage_stub.delete(
-                storage_delete_request=StorageDeleteRequest(bucket_name=self._bucket, key=self.key))
+                storage_delete_request=StorageDeleteRequest(bucket_name=self._bucket, key=self.key)
+            )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
@@ -128,10 +131,11 @@ class File(object):
     async def sign_url(self, mode: FileMode = FileMode.READ, expiry: int = 3600):
         """Generate a signed URL for reading or writing to a file."""
         try:
-            await self._storage._storage_stub.pre_sign_url(
+            response = await self._storage._storage_stub.pre_sign_url(
                 storage_pre_sign_url_request=StoragePreSignUrlRequest(
                     bucket_name=self._bucket, key=self.key, operation=mode.to_request_operation(), expiry=expiry
                 )
             )
+            return response.url
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
