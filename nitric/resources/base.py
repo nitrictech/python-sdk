@@ -28,7 +28,7 @@ from grpclib import GRPCError
 from nitricapi.nitric.resource.v1 import Action, PolicyResource, Resource, ResourceType, ResourceDeclareRequest, \
     ResourceServiceStub
 
-from nitric.api.exception import exception_from_grpc_error
+from nitric.api.exception import exception_from_grpc_error, NitricResourceException
 from nitric.utils import new_default_channel
 
 T = TypeVar("T", bound="BaseResource")
@@ -96,6 +96,11 @@ class SecureResource(BaseResource):
             raise exception_from_grpc_error(grpc_err)
 
     def _register_policy(self, *args: str):
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(self._register_policy_async(*args))
+        try:
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(self._register_policy_async(*args))
+        except RuntimeError:
+            # TODO: Check nitric runtime ENV variable
+            raise NitricResourceException("Nitric resource declared at runtime! Move resource declarations to top level of scripts")
+
 
