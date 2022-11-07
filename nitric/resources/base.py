@@ -76,16 +76,16 @@ class SecureResource(BaseResource):
         pass
 
     @abstractmethod
-    def _perms_to_actions(self, permissions: List[str]) -> List[Action]:
+    def _perms_to_actions(self, *args: str) -> List[Action]:
         pass
 
-    async def _register_policy_async(self, permissions: List[str]):
+    async def _register_policy_async(self, *args: str):
         # if self._reg is not None:
         #     await asyncio.wait({self._reg})
 
         policy = PolicyResource(
             principals=[Resource(type=ResourceType.Function)],
-            actions=self._perms_to_actions(permissions),
+            actions=self._perms_to_actions(*args),
             resources=[self._to_resource()],
         )
         try:
@@ -95,7 +95,7 @@ class SecureResource(BaseResource):
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    def _register_policy(self, permissions: List[str]):
+    def _register_policy(self, *args: str):
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(self._register_policy_async(permissions))
+        loop.run_until_complete(self._register_policy_async(*args))
 

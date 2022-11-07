@@ -67,8 +67,7 @@ class TopicRef(object):
             event = Event()
 
         if isinstance(event, dict):
-            # TODO: handle events that are just a payload
-            event = Event(**event)
+            event = Event(payload=event)
 
         try:
             response = await self._events._stub.publish(

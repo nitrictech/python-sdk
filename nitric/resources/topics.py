@@ -62,20 +62,20 @@ class Topic(SecureResource):
     def _to_resource(self) -> Resource:
         return Resource(name=self.name, type=ResourceType.Topic)
 
-    def _perms_to_actions(self, permissions: List[Union[TopicPermission, str]]) -> List[Action]:
+    def _perms_to_actions(self, *args: Union[TopicPermission, str]) -> List[Action]:
         _permMap = {TopicPermission.publishing: [Action.TopicEventPublish]}
         # convert strings to the enum value where needed
         perms = [
             permission if isinstance(permission, TopicPermission) else TopicPermission[permission.lower()]
-            for permission in permissions
+            for permission in args
         ]
 
         return [action for perm in perms for action in _permMap[perm]]
 
-    def allow(self, permissions: List[Union[TopicPermission, str]]) -> TopicRef:
+    def allow(self, *args: Union[TopicPermission, str]) -> TopicRef:
         """Request the specified permissions to this resource."""
 
-        self._register_policy(permissions)
+        self._register_policy(*args)
 
         return Events().topic(self.name)
 

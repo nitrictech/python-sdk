@@ -61,7 +61,7 @@ class Collection(SecureResource):
     def _to_resource(self) -> Resource:
         return Resource(name=self.name, type=ResourceType.Collection)
 
-    def _perms_to_actions(self, permissions: List[Union[CollectionPermission, str]]) -> List[Action]:
+    def _perms_to_actions(self, *args: Union[CollectionPermission, str]) -> List[Action]:
         permission_actions_map = {
             CollectionPermission.reading: [Action.CollectionDocumentRead, Action.CollectionQuery,
                                            Action.CollectionList],
@@ -71,15 +71,15 @@ class Collection(SecureResource):
         # convert strings to the enum value where needed
         perms = [
             permission if isinstance(permission, CollectionPermission) else CollectionPermission[permission.lower()]
-            for permission in permissions
+            for permission in args
         ]
 
         return [action for perm in perms for action in permission_actions_map[perm]]
 
-    def allow(self, permissions: List[Union[CollectionPermission, str]]) -> CollectionRef:
+    def allow(self, *args: Union[CollectionPermission, str]) -> CollectionRef:
         """Request the required permissions for this collection."""
         # Ensure registration of the resource is complete before requesting permissions.
-        self._register_policy(permissions)
+        self._register_policy(*args)
 
         return Documents().collection(self.name)
 

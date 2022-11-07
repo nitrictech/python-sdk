@@ -54,7 +54,7 @@ class Queue(SecureResource):
     def _to_resource(self) -> Resource:
         return Resource(name=self.name, type=ResourceType.Queue)
 
-    def _perms_to_actions(self, permissions: List[Union[QueuePermission, str]]) -> List[Action]:
+    def _perms_to_actions(self, *args: Union[QueuePermission, str]) -> List[Action]:
         permission_actions_map = {
             QueuePermission.sending: [Action.QueueSend, Action.QueueList, Action.QueueDetail],
             QueuePermission.receiving: [Action.QueueReceive, Action.QueueList, Action.QueueDetail],
@@ -62,7 +62,7 @@ class Queue(SecureResource):
         # convert strings to the enum value where needed
         perms = [
             permission if isinstance(permission, QueuePermission) else QueuePermission[permission.lower()]
-            for permission in permissions
+            for permission in args
         ]
 
         return [action for perm in perms for action in permission_actions_map[perm]]
@@ -74,10 +74,10 @@ class Queue(SecureResource):
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    def allow(self, permissions: List[Union[QueuePermission, str]]) -> QueueRef:
+    def allow(self, *args: Union[QueuePermission, str]) -> QueueRef:
         """Request the required permissions for this queue."""
         # Ensure registration of the resource is complete before requesting permissions.
-        self._register_policy(permissions)
+        self._register_policy(*args)
 
         return Queues().queue(self.name)
 
