@@ -1,10 +1,26 @@
 <p align="center">
-  <img src="https://github.com/nitrictech/python-sdk/raw/main/docs/assets/dot-matrix-logo-python.png" alt="Nitric Python SDK Logo"/>
+  <a href="https://nitric.io">
+    <img src="docs/assets/nitric-logo.svg" width="120" alt="Nitric Logo"/>
+  </a>
 </p>
 
-![test status](https://github.com/nitrictech/python-sdk/actions/workflows/test.yaml/badge.svg?branch=main)
-[![codecov](https://codecov.io/gh/nitrictech/python-sdk/branch/main/graph/badge.svg?token=SBFRNSZ4ZF)](https://codecov.io/gh/nitrictech/python-sdk)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nitrictech_python-sdk&metric=alert_status)](https://sonarcloud.io/dashboard?id=nitrictech_python-sdk)
+<h2 align="center">
+  Build <a href="https://nitric.io">nitric</a> applications with Python
+</h2>
+
+<p align="center">
+  <a href="https://actions-badge.atrox.dev/nitrictech/python-sdk/goto?ref=main"><img alt="Build Status" src="https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fnitrictech%2Fpython-sdk%2Fbadge%3Fref%3Dmain&style=for-the-badge" /></a>
+  <a href="https://codecov.io/gh/nitrictech/python-sdk">
+    <img alt="Codecov" src="https://img.shields.io/codecov/c/gh/nitrictech/python-sdk?style=for-the-badge&token=SBFRNSZ4ZF">
+  </a>
+  <a href="https://npmjs.org/package/@nitric/sdk">
+    <img alt="Version" src="https://img.shields.io/pypi/v/nitric?style=for-the-badge">
+  </a>
+  <a href="https://npmjs.org/package/@nitric/sdk">
+    <img alt="Downloads/week" src="https://img.shields.io/pypi/dw/nitric?style=for-the-badge">
+  </a>
+  <a href="https://discord.gg/Webemece5C"><img alt="Discord" src="https://img.shields.io/discord/955259353043173427?label=discord&style=for-the-badge"></a>
+</p>
 
 # Nitric Python SDK
 
@@ -16,7 +32,7 @@ Read full documentation [here](https://nitrictech.github.io/python-sdk/).
 
 ## Prerequisites
 
-- Python 3.8+
+- Python 3.10+
 
 ## Getting Started
 
