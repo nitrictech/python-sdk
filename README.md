@@ -22,17 +22,25 @@
   <a href="https://discord.gg/Webemece5C"><img alt="Discord" src="https://img.shields.io/discord/955259353043173427?label=discord&style=for-the-badge"></a>
 </p>
 
-# Nitric Python SDK
+The Python SDK supports the use of the [Nitric](https://nitric.io) framework with Python 3.10+. For more information check out the main [Nitric repo](https://github.com/nitrictech/nitric).
 
-The Python SDK supports the use of the cloud-portable [Nitric](https://nitric.io) framework with Python 3.
+Python SDKs provide an infrastructure-from-code style that lets you define resources in code. You can also write the functions that support the logic behind APIs, subscribers and schedules.
 
-> The Nitric Python SDK is currently in Preview, API changes are likely prior to v1.x release.
+You can request the type of access you need to resources such as publishing for topics, without dealing directly with IAM or policy documents.
 
-Read full documentation [here](https://nitrictech.github.io/python-sdk/).
+## Status
 
-## Prerequisites
+The SDK is in early stage development and APIs and interfaces are still subject to breaking changes. We’d love your feedback as we build additional functionality!
 
-- Python 3.10+
+## Get in touch
+
+- Ask questions in [GitHub discussions](https://github.com/nitrictech/nitric/discussions)
+
+- Join us on [Discord](https://discord.gg/Webemece5C)
+
+- Find us on [Twitter](https://twitter.com/nitric_io)
+
+- Send us an [email](mailto:maintainers@nitric.io)
 
 ## Getting Started
 
@@ -41,10 +49,10 @@ Read full documentation [here](https://nitrictech.github.io/python-sdk/).
 > nitric is included in all python related projects by default
 
 ```bash
-nitric stack new
+nitric new
 ```
 
-Then select `official/Python Stack`
+Follow the prompts and select `official/Python - Starter` as your template
 
 ### Adding to an existing project
 
@@ -53,6 +61,11 @@ Then select `official/Python Stack`
 ```bash
 # Install the Nitric SDK
 pip3 install nitric
+```
+
+**pipenv**
+```
+pipenv install nitric
 ```
 
 ## Usage
