@@ -16,7 +16,7 @@
   <a href="https://npmjs.org/package/@nitric/sdk">
     <img alt="Version" src="https://img.shields.io/pypi/v/nitric?style=for-the-badge">
   </a>
-  <a href="https://npmjs.org/package/@nitric/sdk">
+  <a href="https://pypi.org/project/nitric">
     <img alt="Downloads/week" src="https://img.shields.io/pypi/dw/nitric?style=for-the-badge">
   </a>
   <a href="https://discord.gg/Webemece5C"><img alt="Discord" src="https://img.shields.io/discord/955259353043173427?label=discord&style=for-the-badge"></a>
