@@ -1,22 +1,46 @@
 <p align="center">
-  <img src="https://github.com/nitrictech/python-sdk/raw/main/docs/assets/dot-matrix-logo-python.png" alt="Nitric Python SDK Logo"/>
+  <a href="https://nitric.io">
+    <img src="docs/assets/nitric-logo.svg" width="120" alt="Nitric Logo"/>
+  </a>
 </p>
 
-![test status](https://github.com/nitrictech/python-sdk/actions/workflows/test.yaml/badge.svg?branch=main)
-[![codecov](https://codecov.io/gh/nitrictech/python-sdk/branch/main/graph/badge.svg?token=SBFRNSZ4ZF)](https://codecov.io/gh/nitrictech/python-sdk)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nitrictech_python-sdk&metric=alert_status)](https://sonarcloud.io/dashboard?id=nitrictech_python-sdk)
+<h2 align="center">
+  Build <a href="https://nitric.io">nitric</a> applications with Python
+</h2>
 
-# Nitric Python SDK
+<p align="center">
+  <a href="https://actions-badge.atrox.dev/nitrictech/python-sdk/goto?ref=main"><img alt="Build Status" src="https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fnitrictech%2Fpython-sdk%2Fbadge%3Fref%3Dmain&style=for-the-badge" /></a>
+  <a href="https://codecov.io/gh/nitrictech/python-sdk">
+    <img alt="Codecov" src="https://img.shields.io/codecov/c/gh/nitrictech/python-sdk?style=for-the-badge&token=SBFRNSZ4ZF">
+  </a>
+  <a href="https://npmjs.org/package/@nitric/sdk">
+    <img alt="Version" src="https://img.shields.io/pypi/v/nitric?style=for-the-badge">
+  </a>
+  <a href="https://pypi.org/project/nitric">
+    <img alt="Downloads/week" src="https://img.shields.io/pypi/dw/nitric?style=for-the-badge">
+  </a>
+  <a href="https://discord.gg/Webemece5C"><img alt="Discord" src="https://img.shields.io/discord/955259353043173427?label=discord&style=for-the-badge"></a>
+</p>
 
-The Python SDK supports the use of the cloud-portable [Nitric](https://nitric.io) framework with Python 3.
+The Python SDK supports the use of the [Nitric](https://nitric.io) framework with Python 3.10+. For more information check out the main [Nitric repo](https://github.com/nitrictech/nitric).
 
-> The Nitric Python SDK is currently in Preview, API changes are likely prior to v1.x release.
+Python SDKs provide an infrastructure-from-code style that lets you define resources in code. You can also write the functions that support the logic behind APIs, subscribers and schedules.
 
-Read full documentation [here](https://nitrictech.github.io/python-sdk/).
+You can request the type of access you need to resources such as publishing for topics, without dealing directly with IAM or policy documents.
 
-## Prerequisites
+## Status
 
-- Python 3.8+
+The SDK is in early stage development and APIs and interfaces are still subject to breaking changes. We’d love your feedback as we build additional functionality!
+
+## Get in touch
+
+- Ask questions in [GitHub discussions](https://github.com/nitrictech/nitric/discussions)
+
+- Join us on [Discord](https://discord.gg/Webemece5C)
+
+- Find us on [Twitter](https://twitter.com/nitric_io)
+
+- Send us an [email](mailto:maintainers@nitric.io)
 
 ## Getting Started
 
@@ -25,10 +49,10 @@ Read full documentation [here](https://nitrictech.github.io/python-sdk/).
 > nitric is included in all python related projects by default
 
 ```bash
-nitric stack new
+nitric new
 ```
 
-Then select `official/Python Stack`
+Follow the prompts and select `official/Python - Starter` as your template
 
 ### Adding to an existing project
 
@@ -37,6 +61,11 @@ Then select `official/Python Stack`
 ```bash
 # Install the Nitric SDK
 pip3 install nitric
+```
+
+**pipenv**
+```
+pipenv install nitric
 ```
 
 ## Usage
