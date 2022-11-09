@@ -25,10 +25,16 @@ from asyncio import Task
 from typing import TypeVar, Type, Union, List
 
 from grpclib import GRPCError
-from nitricapi.nitric.resource.v1 import Action, PolicyResource, Resource, ResourceType, ResourceDeclareRequest, \
-    ResourceServiceStub
+from nitricapi.nitric.resource.v1 import (
+    Action,
+    PolicyResource,
+    Resource,
+    ResourceType,
+    ResourceDeclareRequest,
+    ResourceServiceStub,
+)
 
-from nitric.api.exception import exception_from_grpc_error
+from nitric.api.exception import exception_from_grpc_error, NitricResourceException
 from nitric.utils import new_default_channel
 
 T = TypeVar("T", bound="BaseResource")
@@ -69,7 +75,7 @@ class BaseResource(ABC):
 
 
 class SecureResource(BaseResource):
-    """A secure base resource class"""
+    """A secure base resource class."""
 
     @abstractmethod
     def _to_resource(self) -> Resource:
@@ -90,12 +96,20 @@ class SecureResource(BaseResource):
         )
         try:
             await self._resources_stub.declare(
-                resource_declare_request=ResourceDeclareRequest(resource=Resource(type=ResourceType.Policy),
-                                                                policy=policy))
+                resource_declare_request=ResourceDeclareRequest(
+                    resource=Resource(type=ResourceType.Policy), policy=policy
+                )
+            )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
     def _register_policy(self, *args: str):
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(self._register_policy_async(*args))
-
+        try:
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(self._register_policy_async(*args))
+        except RuntimeError:
+            # TODO: Check nitric runtime ENV variable
+            raise NitricResourceException(
+                "Nitric resources cannot be declared at runtime e.g. within the scope of a function. \
+                    Move resource declarations to the top level of scripts so that they can be safely provisioned"
+            )
