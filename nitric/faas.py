@@ -41,6 +41,7 @@ from nitricapi.nitric.faas.v1 import (
     SubscriptionWorker,
     ScheduleRate,
 )
+import grpclib
 import asyncio
 from abc import ABC
 
@@ -510,6 +511,8 @@ class FunctionServer:
                     continue
                 if request_channel.done():
                     break
+        except grpclib.exceptions.StreamTerminatedError:
+            print("stream from Membrane closed, closing client stream")
         except asyncio.CancelledError:
             # Membrane has closed stream after init
             print("stream from Membrane closed, closing client stream")
