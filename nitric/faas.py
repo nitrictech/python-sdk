@@ -383,7 +383,7 @@ class Frequency(Enum):
     @staticmethod
     def as_str_list() -> List[str]:
         """Return all frequency values as a list of strings."""
-        return [frequency.value for frequency in Frequency]
+        return [str(frequency.value) for frequency in Frequency]
 
 
 class MethodOptions:
@@ -391,9 +391,14 @@ class MethodOptions:
 
     security: dict[str, List[str]]
 
+    def __init__(self, security: dict[str, List[str]] = None):
+        """Construct a new HTTP method options object."""
+        self.security = security
+
 
 class FaasWorkerOptions:
     """Empty worker options for generic function handlers."""
+    pass
 
 
 FaasClientOptions = Union[ApiWorkerOptions, RateWorkerOptions, SubscriptionWorkerOptions, FaasWorkerOptions]
