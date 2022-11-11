@@ -20,7 +20,7 @@ from unittest import IsolatedAsyncioTestCase
 from unittest.mock import patch, AsyncMock
 from nitric.resources import queue
 
-from nitricapi.nitric.resource.v1 import Action
+from nitricapi.nitric.resource.v1 import Action, ResourceDeclareRequest, Resource, ResourceType, PolicyResource
 from nitric.utils import _struct_from_dict
 
 
@@ -29,88 +29,71 @@ class Object(object):
 
 
 class QueueTest(IsolatedAsyncioTestCase):
-    async def test_create_allow_sending(self):
+    def test_create_allow_sending(self):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response
 
         with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
-            await queue("test-queue").allow(["sending"])
+            queue("test-queue").allow("sending")
 
         # Check expected values were passed to Stub
-        mock_declare.assert_called()
-        self.assertEqual(mock_declare.call_args.kwargs["policy"].resources[0].name, "test-queue")
-        self.assertListEqual(
-            mock_declare.call_args.kwargs["policy"].actions,
-            [
-                Action.QueueSend,
-                Action.QueueList,
-                Action.QueueDetail,
-            ],
-        )
+        mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
+            resource=Resource(type=ResourceType.Policy),
+            policy=PolicyResource(
+                principals=[Resource(type=ResourceType.Function)],
+                actions=[
+                    Action.QueueSend,
+                    Action.QueueList,
+                    Action.QueueDetail,
+                ],
+                resources=[Resource(type=ResourceType.Queue, name="test-queue")]
+            )
+        ))
 
-    async def test_create_allow_receiving(self):
+    def test_create_allow_receiving(self):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response
 
         with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
-            await queue("test-queue").allow(["receiving"])
+            queue("test-queue").allow("receiving")
 
         # Check expected values were passed to Stub
-        mock_declare.assert_called()
+        mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
+            resource=Resource(type=ResourceType.Policy),
+            policy=PolicyResource(
+                principals=[Resource(type=ResourceType.Function)],
+                actions=[
+                    Action.QueueReceive,
+                    Action.QueueList,
+                    Action.QueueDetail,
+                ],
+                resources=[Resource(type=ResourceType.Queue, name="test-queue")]
+            )
+        ))
 
-        self.assertEqual(mock_declare.call_args.kwargs["policy"].resources[0].name, "test-queue")
-        self.assertListEqual(
-            mock_declare.call_args.kwargs["policy"].actions,
-            [
-                Action.QueueReceive,
-                Action.QueueList,
-                Action.QueueDetail,
-            ],
-        )
-
-    async def test_create_allow_all(self):
+    def test_create_allow_all(self):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response
 
         with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
-            await queue("test-queue").allow(["sending", "receiving"])
+            queue("test-queue").allow("sending", "receiving")
 
         # Check expected values were passed to Stub
-        mock_declare.assert_called()
-        self.assertEqual(mock_declare.call_args.kwargs["policy"].resources[0].name, "test-queue")
-        self.assertListEqual(
-            mock_declare.call_args.kwargs["policy"].actions,
-            [
-                Action.QueueSend,
-                Action.QueueList,
-                Action.QueueDetail,
-                Action.QueueReceive,
-                Action.QueueList,
-                Action.QueueDetail,
-            ],
-        )
-
-    async def test_send_dict(self):
-        mock_send = AsyncMock()
-        mock_declare = AsyncMock()
-
-        mock_response = Object()
-        mock_send.return_value = mock_response
-
-        payload = {"content": "of task"}
-
-        with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
-            with patch("nitricapi.nitric.queue.v1.QueueServiceStub.send", mock_send):
-                q = await queue("test-queue").allow(["sending"])
-                await q.send({"id": "123", "payload": payload})
-
-        # Check expected values were passed to Stub
-        mock_send.assert_called_once()
-        self.assertEqual(mock_send.call_args.kwargs["queue"], "test-queue")
-        self.assertEqual(mock_send.call_args.kwargs["task"].id, "123")
-        self.assertIsNone(mock_send.call_args.kwargs["task"].payload_type)
-        self.assertEqual(len(mock_send.call_args.kwargs["task"].payload.fields), 1)
-        self.assertEqual(mock_send.call_args.kwargs["task"].payload, _struct_from_dict(payload))
+        mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
+            resource=Resource(type=ResourceType.Policy),
+            policy=PolicyResource(
+                principals=[Resource(type=ResourceType.Function)],
+                actions=[
+                    Action.QueueSend,
+                    Action.QueueList,
+                    Action.QueueDetail,
+                    Action.QueueReceive,
+                    Action.QueueList,
+                    Action.QueueDetail,
+                ],
+                resources=[Resource(type=ResourceType.Queue, name="test-queue")]
+            )
+        ))

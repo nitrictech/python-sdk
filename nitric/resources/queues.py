@@ -18,24 +18,19 @@
 #
 from __future__ import annotations
 
-import asyncio
-
 from nitric.api.exception import exception_from_grpc_error
 from typing import List, Union
 from enum import Enum
 from grpclib import GRPCError
 from nitric.api.queues import QueueRef, Queues
 from nitric.application import Nitric
-from nitric.utils import new_default_channel
 from nitricapi.nitric.resource.v1 import (
     Resource,
-    ResourceServiceStub,
-    PolicyResource,
     ResourceType,
-    Action,
+    Action, ResourceDeclareRequest,
 )
 
-from nitric.resources.base import BaseResource
+from nitric.resources.base import SecureResource
 
 
 class QueuePermission(Enum):
@@ -45,25 +40,7 @@ class QueuePermission(Enum):
     receiving = "receiving"
 
 
-def _perms_to_actions(permissions: List[Union[QueuePermission, str]]) -> List[Action]:
-    permission_actions_map = {
-        QueuePermission.sending: [Action.QueueSend, Action.QueueList, Action.QueueDetail],
-        QueuePermission.receiving: [Action.QueueReceive, Action.QueueList, Action.QueueDetail],
-    }
-    # convert strings to the enum value where needed
-    perms = [
-        permission if isinstance(permission, QueuePermission) else QueuePermission[permission.lower()]
-        for permission in permissions
-    ]
-
-    return [action for perm in perms for action in permission_actions_map[perm]]
-
-
-def _to_resource(queue: Queue) -> Resource:
-    return Resource(name=queue.name, type=ResourceType.Queue)
-
-
-class Queue(BaseResource):
+class Queue(SecureResource):
     """A queue resource."""
 
     name: str
@@ -71,31 +48,36 @@ class Queue(BaseResource):
 
     def __init__(self, name: str):
         """Construct a new queue resource."""
+        super().__init__()
         self.name = name
-        self._channel = new_default_channel()
-        self._resources_stub = ResourceServiceStub(channel=self._channel)
+
+    def _to_resource(self) -> Resource:
+        return Resource(name=self.name, type=ResourceType.Queue)
+
+    def _perms_to_actions(self, *args: Union[QueuePermission, str]) -> List[Action]:
+        permission_actions_map = {
+            QueuePermission.sending: [Action.QueueSend, Action.QueueList, Action.QueueDetail],
+            QueuePermission.receiving: [Action.QueueReceive, Action.QueueList, Action.QueueDetail],
+        }
+        # convert strings to the enum value where needed
+        perms = [
+            permission if isinstance(permission, QueuePermission) else QueuePermission[permission.lower()]
+            for permission in args
+        ]
+
+        return [action for perm in perms for action in permission_actions_map[perm]]
 
     async def _register(self):
         try:
-            await self._resources_stub.declare(resource=_to_resource(self))
+            await self._resources_stub.declare(
+                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource()))
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    async def allow(self, permissions: List[Union[QueuePermission, str]]) -> QueueRef:
+    def allow(self, *args: Union[QueuePermission, str]) -> QueueRef:
         """Request the required permissions for this queue."""
         # Ensure registration of the resource is complete before requesting permissions.
-        if self._reg is not None:
-            await asyncio.wait({self._reg})
-
-        policy = PolicyResource(
-            principals=[Resource(type=ResourceType.Function)],
-            actions=_perms_to_actions(permissions),
-            resources=[_to_resource(self)],
-        )
-        try:
-            await self._resources_stub.declare(policy=policy)
-        except GRPCError as grpc_err:
-            raise exception_from_grpc_error(grpc_err)
+        self._register_policy(*args)
 
         return Queues().queue(self.name)
 

@@ -41,6 +41,7 @@ from nitricapi.nitric.faas.v1 import (
     SubscriptionWorker,
     ScheduleRate,
 )
+import grpclib
 import asyncio
 from abc import ABC
 
@@ -143,6 +144,16 @@ class HttpRequest(Request):
         self.headers = headers
 
     @property
+    def json(self) -> Optional[Any]:
+        """Get the body of the request as JSON, returns None if request body is not JSON."""
+        try:
+            return json.loads(self.body)
+        except json.JSONDecodeError:
+            return None
+        except TypeError:
+            return None
+
+    @property
     def body(self):
         """Get the body of the request as text."""
         return self.data.decode("utf-8")
@@ -163,11 +174,14 @@ class HttpResponse(Response):
         return self._body
 
     @body.setter
-    def body(self, value: Union[str, bytes]):
+    def body(self, value: Union[str, bytes, Any]):
         if isinstance(value, str):
             self._body = value.encode("utf-8")
-        else:
+        elif isinstance(value, bytes):
             self._body = value
+        else:
+            self._body = json.dumps(value).encode("utf-8")
+            self.headers["Content-Type"] = ["application/json"]
 
 
 class HttpContext(TriggerContext):
@@ -497,6 +511,11 @@ class FunctionServer:
                     continue
                 if request_channel.done():
                     break
+        except grpclib.exceptions.StreamTerminatedError:
+            print("stream from Membrane closed, closing client stream")
+        except asyncio.CancelledError:
+            # Membrane has closed stream after init
+            print("stream from Membrane closed, closing client stream")
         except ConnectionRefusedError as cre:
             traceback.print_exc()
             raise ConnectionRefusedError("Failed to register function with Membrane") from cre
@@ -504,7 +523,6 @@ class FunctionServer:
             traceback.print_exc()
             raise Exception("An unexpected error occurred.") from e
         finally:
-            print("stream from Membrane closed, closing client stream")
             # The channel must be closed to complete the gRPC connection
             request_channel.close()
             channel.close()

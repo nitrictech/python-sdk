@@ -18,8 +18,6 @@
 #
 from __future__ import annotations
 
-import asyncio
-
 from nitric.api.exception import exception_from_grpc_error
 from nitric.api.storage import BucketRef, Storage
 from typing import List, Union
@@ -27,16 +25,13 @@ from enum import Enum
 from grpclib import GRPCError
 
 from nitric.application import Nitric
-from nitric.utils import new_default_channel
 from nitricapi.nitric.resource.v1 import (
     Resource,
-    ResourceServiceStub,
-    PolicyResource,
     ResourceType,
-    Action,
+    Action, ResourceDeclareRequest,
 )
 
-from nitric.resources.base import BaseResource
+from nitric.resources.base import SecureResource
 
 
 class BucketPermission(Enum):
@@ -47,25 +42,7 @@ class BucketPermission(Enum):
     deleting = "deleting"
 
 
-def _perms_to_actions(permissions: List[Union[BucketPermission, str]]) -> List[Action]:
-    permission_actions_map = {
-        BucketPermission.reading: [Action.BucketFileGet, Action.BucketFileList],
-        BucketPermission.writing: [Action.BucketFilePut],
-        BucketPermission.deleting: [Action.BucketFileDelete],
-    }
-    # convert strings to the enum value where needed
-    perms = [
-        permission if isinstance(permission, BucketPermission) else BucketPermission[permission.lower()]
-        for permission in permissions
-    ]
-    return [action for perm in perms for action in permission_actions_map[perm]]
-
-
-def _to_resource(b: Bucket) -> Resource:
-    return Resource(name=b.name, type=ResourceType.Bucket)
-
-
-class Bucket(BaseResource):
+class Bucket(SecureResource):
     """A bucket resource, used for storage and retrieval of blob/binary data."""
 
     name: str
@@ -75,30 +52,33 @@ class Bucket(BaseResource):
         """Create a bucket with the name provided or references it if it already exists."""
         super().__init__()
         self.name = name
-        self._channel = new_default_channel()
-        self._resources_stub = ResourceServiceStub(channel=self._channel)
 
     async def _register(self):
         try:
-            await self._resources_stub.declare(resource=_to_resource(self))
+            await self._resources_stub.declare(
+                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource()))
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    async def allow(self, permissions: List[str]) -> BucketRef:
+    def _perms_to_actions(self, *args: [Union[BucketPermission, str]]) -> List[Action]:
+        permission_actions_map = {
+            BucketPermission.reading: [Action.BucketFileGet, Action.BucketFileList],
+            BucketPermission.writing: [Action.BucketFilePut],
+            BucketPermission.deleting: [Action.BucketFileDelete],
+        }
+        # convert strings to the enum value where needed
+        perms = [
+            permission if isinstance(permission, BucketPermission) else BucketPermission[permission.lower()]
+            for permission in args
+        ]
+        return [action for perm in perms for action in permission_actions_map[perm]]
+
+    def _to_resource(self) -> Resource:
+        return Resource(name=self.name, type=ResourceType.Bucket)
+
+    def allow(self, *args: Union[BucketPermission, str]) -> BucketRef:
         """Request the required permissions for this resource."""
-        # Ensure registration of the resource is complete before requesting permissions.
-        if self._reg is not None:
-            await asyncio.wait({self._reg})
-
-        policy = PolicyResource(
-            principals=[Resource(type=ResourceType.Function)],
-            actions=_perms_to_actions(permissions),
-            resources=[_to_resource(self)],
-        )
-        try:
-            await self._resources_stub.declare(policy=policy)
-        except GRPCError as grpc_err:
-            raise exception_from_grpc_error(grpc_err)
+        self._register_policy(*args)
 
         return Storage().bucket(self.name)
 

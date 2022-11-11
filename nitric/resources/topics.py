@@ -18,8 +18,6 @@
 #
 from __future__ import annotations
 
-import asyncio
-
 from nitric.api.events import Events, TopicRef
 from nitric.api.exception import exception_from_grpc_error
 from typing import List, Union
@@ -27,16 +25,13 @@ from enum import Enum
 from grpclib import GRPCError
 from nitric.application import Nitric
 from nitric.faas import EventMiddleware, FunctionServer, SubscriptionWorkerOptions
-from nitric.utils import new_default_channel
 from nitricapi.nitric.resource.v1 import (
     Resource,
-    ResourceServiceStub,
-    PolicyResource,
     ResourceType,
-    Action,
+    Action, ResourceDeclareRequest,
 )
 
-from nitric.resources.base import BaseResource
+from nitric.resources.base import SecureResource
 
 
 class TopicPermission(Enum):
@@ -45,22 +40,7 @@ class TopicPermission(Enum):
     publishing = "publishing"
 
 
-def _perms_to_actions(permissions: List[Union[TopicPermission, str]]) -> List[Action]:
-    _permMap = {TopicPermission.publishing: [Action.TopicEventPublish]}
-    # convert strings to the enum value where needed
-    perms = [
-        permission if isinstance(permission, TopicPermission) else TopicPermission[permission.lower()]
-        for permission in permissions
-    ]
-
-    return [action for perm in perms for action in _permMap[perm]]
-
-
-def _to_resource(topic: Topic) -> Resource:
-    return Resource(name=topic.name, type=ResourceType.Topic)
-
-
-class Topic(BaseResource):
+class Topic(SecureResource):
     """A topic resource, used for asynchronous messaging between functions."""
 
     name: str
@@ -71,30 +51,31 @@ class Topic(BaseResource):
         """Construct a new topic."""
         super().__init__()
         self.name = name
-        self._channel = new_default_channel()
-        self._resources_stub = ResourceServiceStub(channel=self._channel)
 
     async def _register(self):
         try:
-            await self._resources_stub.declare(resource=_to_resource(self))
+            await self._resources_stub.declare(
+                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource()))
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    async def allow(self, permissions: List[str]) -> TopicRef:
-        """Request the permissions required for this topic."""
-        # Ensure registration of the resource is complete before requesting permissions.
-        if self._reg is not None:
-            await asyncio.wait({self._reg})
+    def _to_resource(self) -> Resource:
+        return Resource(name=self.name, type=ResourceType.Topic)
 
-        policy = PolicyResource(
-            principals=[Resource(type=ResourceType.Function)],
-            actions=_perms_to_actions(permissions),
-            resources=[_to_resource(self)],
-        )
-        try:
-            await self._resources_stub.declare(policy=policy)
-        except GRPCError as grpc_err:
-            raise exception_from_grpc_error(grpc_err)
+    def _perms_to_actions(self, *args: Union[TopicPermission, str]) -> List[Action]:
+        _permMap = {TopicPermission.publishing: [Action.TopicEventPublish]}
+        # convert strings to the enum value where needed
+        perms = [
+            permission if isinstance(permission, TopicPermission) else TopicPermission[permission.lower()]
+            for permission in args
+        ]
+
+        return [action for perm in perms for action in _permMap[perm]]
+
+    def allow(self, *args: Union[TopicPermission, str]) -> TopicRef:
+        """Request the specified permissions to this resource."""
+
+        self._register_policy(*args)
 
         return Events().topic(self.name)
 

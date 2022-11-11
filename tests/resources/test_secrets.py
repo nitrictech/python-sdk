@@ -20,7 +20,7 @@ from unittest import IsolatedAsyncioTestCase
 from unittest.mock import patch, AsyncMock
 from nitric.resources import secret
 
-from nitricapi.nitric.resource.v1 import Action
+from nitricapi.nitric.resource.v1 import Action, ResourceDeclareRequest, Resource, ResourceType, PolicyResource
 from nitricapi.nitric.secret.v1 import SecretPutResponse, SecretVersion, Secret
 
 
@@ -29,46 +29,43 @@ class Object(object):
 
 
 class SecretTest(IsolatedAsyncioTestCase):
-    async def test_allow_put(self):
+    def test_allow_put(self):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response
 
         with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
-            await secret("test-secret").allow(["putting"])
+            secret("test-secret").allow("putting")
 
         # Check expected values were passed to Stub
-        mock_declare.assert_called()
-        self.assertEqual(mock_declare.call_args.kwargs["policy"].resources[0].name, "test-secret")
-        self.assertListEqual(mock_declare.call_args.kwargs["policy"].actions, [Action.SecretPut])
+        mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
+            resource=Resource(type=ResourceType.Policy),
+            policy=PolicyResource(
+                principals=[Resource(type=ResourceType.Function)],
+                actions=[
+                    Action.SecretPut
+                ],
+                resources=[Resource(type=ResourceType.Secret, name="test-secret")]
+            )
+        ))
 
-    async def test_allow_access(self):
+
+    def test_allow_access(self):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response
 
         with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
-            await secret("test-secret").allow(["accessing"])
+            secret("test-secret").allow("accessing")
 
         # Check expected values were passed to Stub
-        mock_declare.assert_called()
-        self.assertEqual(mock_declare.call_args.kwargs["policy"].resources[0].name, "test-secret")
-        self.assertListEqual(mock_declare.call_args.kwargs["policy"].actions, [Action.SecretAccess])
-
-    async def test_put_string(self):
-        mock_put = AsyncMock()
-        mock_declare = AsyncMock()
-
-        mock_response = SecretPutResponse(
-            secret_version=SecretVersion(secret=Secret(name="test-secret"), version="test-version")
-        )
-        mock_put.return_value = mock_response
-
-        with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
-            with patch("nitricapi.nitric.secret.v1.SecretServiceStub.put", mock_put):
-                s = await secret("test-secret").allow(["accessing"])
-                await s.put("a test secret value")  # string, not bytes
-
-        # Check expected values were passed to Stub
-        mock_put.assert_called_once()
-        assert mock_put.call_args.kwargs["value"] == b"a test secret value"  # value should still be bytes when sent.
+        mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
+            resource=Resource(type=ResourceType.Policy),
+            policy=PolicyResource(
+                principals=[Resource(type=ResourceType.Function)],
+                actions=[
+                    Action.SecretAccess
+                ],
+                resources=[Resource(type=ResourceType.Secret, name="test-secret")]
+            )
+        ))

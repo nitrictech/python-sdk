@@ -141,6 +141,8 @@ class UnknownException(NitricServiceException):
 
     pass
 
+class NitricResourceException(Exception):
+    pass
 
 def exception_from_grpc_error(error: GRPCError):
     """Translate a gRPC error to a nitric api exception."""
