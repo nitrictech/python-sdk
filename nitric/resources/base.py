@@ -56,14 +56,14 @@ class BaseResource(ABC):
         pass
 
     @classmethod
-    def make(cls: Type[T], name: str) -> T:
+    def make(cls: Type[T], name: str, *args, **kwargs) -> T:
         """
         Create and register the resource.
 
         The registration process for resources async, so this method should be used instead of __init__.
         """
         # Todo: store the resource reference in a cache to avoid duplicate registrations
-        r = cls(name)
+        r = cls(name, *args, **kwargs)
         try:
             loop = asyncio.get_running_loop()
             r._reg = loop.create_task(r._register())
