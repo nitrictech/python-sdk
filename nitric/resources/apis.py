@@ -27,7 +27,8 @@ from nitricapi.nitric.resource.v1 import (
     ApiResource,
     ApiScopes,
     ApiSecurityDefinition,
-    ApiSecurityDefinitionJwt, ResourceDeclareRequest
+    ApiSecurityDefinitionJwt,
+    ResourceDeclareRequest,
 )
 from grpclib import GRPCError
 from nitric.api.exception import exception_from_grpc_error
@@ -55,11 +56,11 @@ class ApiOptions:
     security: Union[dict[str, List[str]], None]
 
     def __init__(
-            self,
-            path: str = "",
-            middleware: List[Middleware] = None,
-            security_definitions: dict[str, SecurityDefinition] = None,
-            security: dict[str, List[str]] = None,
+        self,
+        path: str = "",
+        middleware: List[Middleware] = None,
+        security_definitions: dict[str, SecurityDefinition] = None,
+        security: dict[str, List[str]] = None,
     ):
         """Construct a new API options object."""
         self.middleware = middleware
@@ -82,23 +83,21 @@ def _to_resource(b: Api) -> Resource:
     return Resource(name=b.name, type=ResourceType.Api)
 
 
-def security_definition_to_grpc_declaration(security_definitions: dict[str, SecurityDefinition]) -> Union[
-    dict[str, ApiSecurityDefinition], None]:
+def _security_definition_to_grpc_declaration(
+    security_definitions: dict[str, SecurityDefinition]
+) -> Union[dict[str, ApiSecurityDefinition], None]:
     if security_definitions is None or len(security_definitions) == 0:
         return None
     return {
-        k: ApiSecurityDefinition(
-            jwt=ApiSecurityDefinitionJwt(issuer=v.issuer, audiences=v.audiences)
-        ) for k, v in security_definitions.items()
+        k: ApiSecurityDefinition(jwt=ApiSecurityDefinitionJwt(issuer=v.issuer, audiences=v.audiences))
+        for k, v in security_definitions.items()
     }
 
 
-def security_to_grpc_declaration(security: dict[str, List[str]]) -> dict[str, ApiScopes]:
+def _security_to_grpc_declaration(security: dict[str, List[str]]) -> dict[str, ApiScopes] | None:
     if security is None or len(security) == 0:
         return None
-    return {
-        k: ApiScopes(v) for k, v in security.items()
-    }
+    return {k: ApiScopes(v) for k, v in security.items()}
 
 
 class Api(BaseResource):
@@ -131,9 +130,9 @@ class Api(BaseResource):
                 resource_declare_request=ResourceDeclareRequest(
                     resource=_to_resource(self),
                     api=ApiResource(
-                        security_definitions=security_definition_to_grpc_declaration(self.security_definitions),
-                        security=security_to_grpc_declaration(self.security)
-                    )
+                        security_definitions=_security_definition_to_grpc_declaration(self.security_definitions),
+                        security=_security_to_grpc_declaration(self.security),
+                    ),
                 )
             )
         except GRPCError as grpc_err:
@@ -155,8 +154,18 @@ class Api(BaseResource):
 
         def decorator(function: HttpMiddleware):
             r = self._route(match)
-            r.method([HttpMethod.GET, HttpMethod.POST, HttpMethod.PATCH, HttpMethod.PUT, HttpMethod.DELETE,
-                      HttpMethod.OPTIONS], function, opts)
+            r.method(
+                [
+                    HttpMethod.GET,
+                    HttpMethod.POST,
+                    HttpMethod.PATCH,
+                    HttpMethod.PUT,
+                    HttpMethod.DELETE,
+                    HttpMethod.OPTIONS,
+                ],
+                function,
+                opts=opts,
+            )
 
         return decorator
 
@@ -167,7 +176,7 @@ class Api(BaseResource):
 
         def decorator(function: HttpMiddleware):
             r = self._route(match)
-            r.method(methods, function, opts)
+            r.method(methods, function, opts=opts)
 
         return decorator
 
@@ -289,7 +298,7 @@ class Method:
     opts: MethodOptions
 
     def __init__(
-            self, route: Route, methods: List[HttpMethod], *middleware: HttpMiddleware, opts: MethodOptions = None
+        self, route: Route, methods: List[HttpMethod], *middleware: HttpMiddleware, opts: MethodOptions = None
     ):
         """Construct a method handler for the specified route."""
         self.route = route
@@ -302,6 +311,6 @@ class Method:
         Nitric._register_worker(self.server)
 
 
-def api(name: str) -> Api:
-    """Create a new API resource"""
-    return Nitric._create_resource(Api, name)
+def api(name: str, opts: ApiOptions = None) -> Api:
+    """Create a new API resource."""
+    return Nitric._create_resource(Api, name, opts=opts)
