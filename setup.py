@@ -43,7 +43,7 @@ setuptools.setup(
     setup_requires=["wheel"],
     install_requires=[
         "nitric-api==0.18.0",
-        "protobuf==3.19.4",
+        "protobuf==3.19.5",
         "asyncio",
     ],
     extras_require={
