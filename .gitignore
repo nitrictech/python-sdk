@@ -1,6 +1,3 @@
-# Protoc Output Files
-nitric/proto/
-
 .idea/
 
 # Byte-compiled / optimized / DLL files
@@ -145,3 +142,5 @@ cython_debug/
 
 
 .vscode/
+
+contracts/

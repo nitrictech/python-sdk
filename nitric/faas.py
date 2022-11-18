@@ -27,7 +27,7 @@ from typing import Dict, Union, List, TypeVar, Callable, Coroutine, Any, Optiona
 import betterproto
 from betterproto.grpc.util.async_channel import AsyncChannel
 from nitric.utils import new_default_channel
-from nitricapi.nitric.faas.v1 import (
+from nitric.proto.nitric.faas.v1 import (
     FaasServiceStub,
     InitRequest,
     ClientMessage,
@@ -398,6 +398,7 @@ class MethodOptions:
 
 class FaasWorkerOptions:
     """Empty worker options for generic function handlers."""
+
     pass
 
 

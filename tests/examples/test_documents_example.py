@@ -17,8 +17,14 @@
 # limitations under the License.
 #
 from examples.documents.sub_col_query import documents_sub_col_query
-from nitricapi.nitric.document.v1 import Collection, DocumentGetResponse, DocumentQueryStreamResponse, Document, Key, \
-    DocumentGetRequest
+from nitric.proto.nitric.document.v1 import (
+    Collection,
+    DocumentGetResponse,
+    DocumentQueryStreamResponse,
+    Document,
+    Key,
+    DocumentGetRequest,
+)
 from examples.documents.set import documents_set
 from examples.documents.get import documents_get
 from examples.documents.delete import documents_delete
@@ -40,7 +46,7 @@ class DocumentsExamplesTest(IsolatedAsyncioTestCase):
     async def test_set_document(self):
         mock_set = AsyncMock()
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.set", mock_set):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.set", mock_set):
             await documents_set()
 
         mock_set.assert_called_once()
@@ -58,7 +64,7 @@ class DocumentsExamplesTest(IsolatedAsyncioTestCase):
             ),
         )
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.get", mock_get):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.get", mock_get):
             await documents_get()
 
         mock_get.assert_called_once_with(
@@ -73,7 +79,7 @@ class DocumentsExamplesTest(IsolatedAsyncioTestCase):
     async def test_delete_document(self):
         mock_delete = AsyncMock()
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.delete", mock_delete):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.delete", mock_delete):
             await documents_delete()
 
         mock_delete.assert_called_once()
@@ -81,7 +87,7 @@ class DocumentsExamplesTest(IsolatedAsyncioTestCase):
     async def test_query_document(self):
         mock_query = AsyncMock()
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.query", mock_query):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.query", mock_query):
             await documents_query()
 
         mock_query.assert_called_once()
@@ -89,7 +95,7 @@ class DocumentsExamplesTest(IsolatedAsyncioTestCase):
     async def test_paged_results_document(self):
         mock_query = AsyncMock()
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.query", mock_query):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.query", mock_query):
             await documents_paged_results()
 
         mock_query.assert_called()
@@ -97,7 +103,7 @@ class DocumentsExamplesTest(IsolatedAsyncioTestCase):
     async def test_query_filter_document(self):
         mock_query = AsyncMock()
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.query", mock_query):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.query", mock_query):
             await documents_query_filter()
 
         mock_query.assert_called_once()
@@ -105,7 +111,7 @@ class DocumentsExamplesTest(IsolatedAsyncioTestCase):
     async def test_query_limits_document(self):
         mock_query = AsyncMock()
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.query", mock_query):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.query", mock_query):
             await documents_query_limits()
 
         mock_query.assert_called_once()
@@ -113,7 +119,7 @@ class DocumentsExamplesTest(IsolatedAsyncioTestCase):
     async def test_sub_doc_query_document(self):
         mock_query = AsyncMock()
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.query", mock_query):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.query", mock_query):
             await documents_sub_doc_query()
 
         mock_query.assert_called_once()
@@ -121,7 +127,7 @@ class DocumentsExamplesTest(IsolatedAsyncioTestCase):
     async def test_sub_col_query_document(self):
         mock_query = AsyncMock()
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.query", mock_query):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.query", mock_query):
             await documents_sub_col_query()
 
         mock_query.assert_called_once()
@@ -140,7 +146,7 @@ class DocumentsExamplesTest(IsolatedAsyncioTestCase):
                     document=Document(content=Struct(fields={"a": Value(number_value=i)}))
                 )
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.query_stream", mock_stream):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.query_stream", mock_stream):
             await documents_streamed()
 
         self.assertEqual(3, stream_calls)

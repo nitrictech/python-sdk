@@ -24,8 +24,15 @@ from grpclib import GRPCError
 
 from nitric.api.exception import FailedPreconditionException, exception_from_grpc_error, InvalidArgumentException
 from nitric.utils import new_default_channel, _struct_from_dict, _dict_from_struct
-from nitricapi.nitric.queue.v1 import QueueServiceStub, NitricTask, FailedTask as WireFailedTask, QueueCompleteRequest, \
-    QueueSendRequest, QueueSendBatchRequest, QueueReceiveRequest
+from nitric.proto.nitric.queue.v1 import (
+    QueueServiceStub,
+    NitricTask,
+    FailedTask as WireFailedTask,
+    QueueCompleteRequest,
+    QueueSendRequest,
+    QueueSendBatchRequest,
+    QueueReceiveRequest,
+)
 from dataclasses import dataclass, field
 
 
@@ -60,7 +67,9 @@ class ReceivedTask(object):
                 "Task is missing internal client or lease id, was it returned from " "queue.receive?"
             )
         try:
-            await self._queueing._queue_stub.complete(queue_complete_request=QueueCompleteRequest(queue=self._queue.name, lease_id=self.lease_id))
+            await self._queueing._queue_stub.complete(
+                queue_complete_request=QueueCompleteRequest(queue=self._queue.name, lease_id=self.lease_id)
+            )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
@@ -150,7 +159,9 @@ class QueueRef(object):
             task = Task(**task)
 
         try:
-            await self._queueing._queue_stub.send(queue_send_request=QueueSendRequest(queue=self.name, task=_task_to_wire(task)))
+            await self._queueing._queue_stub.send(
+                queue_send_request=QueueSendRequest(queue=self.name, task=_task_to_wire(task))
+            )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
@@ -168,7 +179,9 @@ class QueueRef(object):
         wire_tasks = [_task_to_wire(Task(**task) if isinstance(task, dict) else task) for task in tasks]
 
         try:
-            response = await self._queueing._queue_stub.send_batch(queue_send_batch_request=QueueSendBatchRequest(queue=self.name, tasks=wire_tasks))
+            response = await self._queueing._queue_stub.send_batch(
+                queue_send_batch_request=QueueSendBatchRequest(queue=self.name, tasks=wire_tasks)
+            )
             return [_wire_to_failed_task(failed_task) for failed_task in response.failed_tasks]
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
@@ -191,7 +204,9 @@ class QueueRef(object):
             limit = 1
 
         try:
-            response = await self._queueing._queue_stub.receive(queue_receive_request=QueueReceiveRequest(queue=self.name, depth=limit))
+            response = await self._queueing._queue_stub.receive(
+                queue_receive_request=QueueReceiveRequest(queue=self.name, depth=limit)
+            )
             # Map the response protobuf response items to Python SDK Nitric Tasks
             return [_wire_to_received_task(task=task, queueing=self._queueing, queue=self) for task in response.tasks]
         except GRPCError as grpc_err:

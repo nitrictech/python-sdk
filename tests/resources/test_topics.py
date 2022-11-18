@@ -19,7 +19,7 @@
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import patch, AsyncMock, Mock
 
-from nitricapi.nitric.resource.v1 import Action, ResourceDeclareRequest, Resource, ResourceType, PolicyResource
+from nitric.proto.nitric.resource.v1 import Action, ResourceDeclareRequest, Resource, ResourceType, PolicyResource
 
 from nitric.resources import topic
 
@@ -41,17 +41,17 @@ class TopicTest(IsolatedAsyncioTestCase):
         mock_response = Object()
         mock_declare.return_value = mock_response
 
-        with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
+        with patch("nitric.proto.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
             topic("test-topic").allow("publishing")
 
         # Check expected values were passed to Stub
-        mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
-            resource=Resource(type=ResourceType.Policy),
-            policy=PolicyResource(
-                principals=[Resource(type=ResourceType.Function)],
-                actions=[
-                    Action.TopicEventPublish
-                ],
-                resources=[Resource(type=ResourceType.Topic, name="test-topic")]
+        mock_declare.assert_called_with(
+            resource_declare_request=ResourceDeclareRequest(
+                resource=Resource(type=ResourceType.Policy),
+                policy=PolicyResource(
+                    principals=[Resource(type=ResourceType.Function)],
+                    actions=[Action.TopicEventPublish],
+                    resources=[Resource(type=ResourceType.Topic, name="test-topic")],
+                ),
             )
-        ))
+        )

@@ -25,7 +25,7 @@ from asyncio import Task
 from typing import TypeVar, Type, Union, List
 
 from grpclib import GRPCError
-from nitricapi.nitric.resource.v1 import (
+from nitric.proto.nitric.resource.v1 import (
     Action,
     PolicyResource,
     Resource,

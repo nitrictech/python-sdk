@@ -19,11 +19,11 @@
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import patch, AsyncMock
 
-from nitricapi.nitric.storage.v1 import StorageWriteRequest
+from nitric.proto.nitric.storage.v1 import StorageWriteRequest
 
 from nitric.resources import bucket
 
-from nitricapi.nitric.resource.v1 import Action, ResourceDeclareRequest, Resource, ResourceType, PolicyResource
+from nitric.proto.nitric.resource.v1 import Action, ResourceDeclareRequest, Resource, ResourceType, PolicyResource
 
 
 class Object(object):
@@ -36,98 +36,107 @@ class BucketTest(IsolatedAsyncioTestCase):
         mock_response = Object()
         mock_declare.return_value = mock_response
 
-        with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
+        with patch("nitric.proto.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
             bucket("test-bucket").allow("writing")
 
         # Check expected values were passed to Stub
-        mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
-            resource=Resource(type=ResourceType.Policy),
-            policy=PolicyResource(
-                principals=[Resource(type=ResourceType.Function)],
-                actions=[Action.BucketFilePut],
-                resources=[Resource(type=ResourceType.Bucket, name="test-bucket")]
+        mock_declare.assert_called_with(
+            resource_declare_request=ResourceDeclareRequest(
+                resource=Resource(type=ResourceType.Policy),
+                policy=PolicyResource(
+                    principals=[Resource(type=ResourceType.Function)],
+                    actions=[Action.BucketFilePut],
+                    resources=[Resource(type=ResourceType.Bucket, name="test-bucket")],
+                ),
             )
-        ))
+        )
 
     def test_create_allow_reading(self):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response
 
-        with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
+        with patch("nitric.proto.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
             bucket("test-bucket").allow("reading")
 
         # Check expected values were passed to Stub
-        mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
-            resource=Resource(type=ResourceType.Policy),
-            policy=PolicyResource(
-                principals=[Resource(type=ResourceType.Function)],
-                actions=[Action.BucketFileGet, Action.BucketFileList],
-                resources=[Resource(type=ResourceType.Bucket, name="test-bucket")]
+        mock_declare.assert_called_with(
+            resource_declare_request=ResourceDeclareRequest(
+                resource=Resource(type=ResourceType.Policy),
+                policy=PolicyResource(
+                    principals=[Resource(type=ResourceType.Function)],
+                    actions=[Action.BucketFileGet, Action.BucketFileList],
+                    resources=[Resource(type=ResourceType.Bucket, name="test-bucket")],
+                ),
             )
-        ))
+        )
 
     def test_create_allow_deleting(self):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response
 
-        with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
+        with patch("nitric.proto.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
             bucket("test-bucket").allow("deleting")
 
         # Check expected values were passed to Stub
-        mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
-            resource=Resource(type=ResourceType.Policy),
-            policy=PolicyResource(
-                principals=[Resource(type=ResourceType.Function)],
-                actions=[Action.BucketFileDelete],
-                resources=[Resource(type=ResourceType.Bucket, name="test-bucket")]
+        mock_declare.assert_called_with(
+            resource_declare_request=ResourceDeclareRequest(
+                resource=Resource(type=ResourceType.Policy),
+                policy=PolicyResource(
+                    principals=[Resource(type=ResourceType.Function)],
+                    actions=[Action.BucketFileDelete],
+                    resources=[Resource(type=ResourceType.Bucket, name="test-bucket")],
+                ),
             )
-        ))
+        )
 
     def test_create_allow_all(self):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response
 
-        with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
+        with patch("nitric.proto.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
             bucket("test-bucket").allow("deleting", "reading", "writing")
 
         # Check expected values were passed to Stub
-        mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
-            resource=Resource(type=ResourceType.Policy),
-            policy=PolicyResource(
-                principals=[Resource(type=ResourceType.Function)],
-                actions=[
-                    Action.BucketFileDelete,
-                    Action.BucketFileGet,
-                    Action.BucketFileList,
-                    Action.BucketFilePut
-                ],
-                resources=[Resource(type=ResourceType.Bucket, name="test-bucket")]
+        mock_declare.assert_called_with(
+            resource_declare_request=ResourceDeclareRequest(
+                resource=Resource(type=ResourceType.Policy),
+                policy=PolicyResource(
+                    principals=[Resource(type=ResourceType.Function)],
+                    actions=[
+                        Action.BucketFileDelete,
+                        Action.BucketFileGet,
+                        Action.BucketFileList,
+                        Action.BucketFilePut,
+                    ],
+                    resources=[Resource(type=ResourceType.Bucket, name="test-bucket")],
+                ),
             )
-        ))
+        )
 
     def test_create_allow_all_reversed_policy(self):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response
 
-        with patch("nitricapi.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
+        with patch("nitric.proto.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
             bucket("test-bucket").allow("writing", "reading", "deleting")
 
         # Check expected values were passed to Stub
-        mock_declare.assert_called_with(resource_declare_request=ResourceDeclareRequest(
-            resource=Resource(type=ResourceType.Policy),
-            policy=PolicyResource(
-                principals=[Resource(type=ResourceType.Function)],
-                actions=[
-                    Action.BucketFilePut,
-                    Action.BucketFileGet,
-                    Action.BucketFileList,
-                    Action.BucketFileDelete,
-                ],
-                resources=[Resource(type=ResourceType.Bucket, name="test-bucket")]
+        mock_declare.assert_called_with(
+            resource_declare_request=ResourceDeclareRequest(
+                resource=Resource(type=ResourceType.Policy),
+                policy=PolicyResource(
+                    principals=[Resource(type=ResourceType.Function)],
+                    actions=[
+                        Action.BucketFilePut,
+                        Action.BucketFileGet,
+                        Action.BucketFileList,
+                        Action.BucketFileDelete,
+                    ],
+                    resources=[Resource(type=ResourceType.Bucket, name="test-bucket")],
+                ),
             )
-        ))
-
+        )

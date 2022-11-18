@@ -21,7 +21,7 @@ from unittest.mock import patch, AsyncMock
 
 import pytest
 from grpclib import GRPCError, Status
-from nitricapi.nitric.storage.v1 import (
+from nitric.proto.nitric.storage.v1 import (
     StorageWriteRequest,
     StorageReadRequest,
     StorageDeleteRequest,
@@ -46,7 +46,7 @@ class StorageClientTest(IsolatedAsyncioTestCase):
 
         contents = b"some text as bytes"
 
-        with patch("nitricapi.nitric.storage.v1.StorageServiceStub.write", mock_write):
+        with patch("nitric.proto.nitric.storage.v1.StorageServiceStub.write", mock_write):
             bucket = Storage().bucket("test-bucket")
             file = bucket.file("test-file")
             await file.write(contents)
@@ -64,7 +64,7 @@ class StorageClientTest(IsolatedAsyncioTestCase):
         mock_response.body = contents
         mock_read.return_value = mock_response
 
-        with patch("nitricapi.nitric.storage.v1.StorageServiceStub.read", mock_read):
+        with patch("nitric.proto.nitric.storage.v1.StorageServiceStub.read", mock_read):
             bucket = Storage().bucket("test-bucket")
             file = bucket.file("test-file")
             response = await file.read()
@@ -83,7 +83,7 @@ class StorageClientTest(IsolatedAsyncioTestCase):
         mock_delete = AsyncMock()
         mock_delete.return_value = Object()
 
-        with patch("nitricapi.nitric.storage.v1.StorageServiceStub.delete", mock_delete):
+        with patch("nitric.proto.nitric.storage.v1.StorageServiceStub.delete", mock_delete):
             bucket = Storage().bucket("test-bucket")
             file = bucket.file("test-file")
             await file.delete()
@@ -100,7 +100,7 @@ class StorageClientTest(IsolatedAsyncioTestCase):
         mock_pre_sign_url = AsyncMock()
         mock_pre_sign_url.return_value = StoragePreSignUrlResponse(url="www.example.com")
 
-        with patch("nitricapi.nitric.storage.v1.StorageServiceStub.pre_sign_url", mock_pre_sign_url):
+        with patch("nitric.proto.nitric.storage.v1.StorageServiceStub.pre_sign_url", mock_pre_sign_url):
             bucket = Storage().bucket("test-bucket")
             file = bucket.file("test-file")
             url = await file.sign_url()
@@ -122,7 +122,7 @@ class StorageClientTest(IsolatedAsyncioTestCase):
         mock_write = AsyncMock()
         mock_write.side_effect = GRPCError(Status.UNKNOWN, "test error")
 
-        with patch("nitricapi.nitric.storage.v1.StorageServiceStub.write", mock_write):
+        with patch("nitric.proto.nitric.storage.v1.StorageServiceStub.write", mock_write):
             with pytest.raises(UnknownException) as e:
                 await Storage().bucket("test-bucket").file("test-file").write(b"some text as bytes")
 
@@ -130,7 +130,7 @@ class StorageClientTest(IsolatedAsyncioTestCase):
         mock_read = AsyncMock()
         mock_read.side_effect = GRPCError(Status.UNKNOWN, "test error")
 
-        with patch("nitricapi.nitric.storage.v1.StorageServiceStub.read", mock_read):
+        with patch("nitric.proto.nitric.storage.v1.StorageServiceStub.read", mock_read):
             with pytest.raises(UnknownException) as e:
                 await Storage().bucket("test-bucket").file("test-file").read()
 
@@ -138,7 +138,7 @@ class StorageClientTest(IsolatedAsyncioTestCase):
         mock_delete = AsyncMock()
         mock_delete.side_effect = GRPCError(Status.UNKNOWN, "test error")
 
-        with patch("nitricapi.nitric.storage.v1.StorageServiceStub.delete", mock_delete):
+        with patch("nitric.proto.nitric.storage.v1.StorageServiceStub.delete", mock_delete):
             with pytest.raises(UnknownException) as e:
                 await Storage().bucket("test-bucket").file("test-file").delete()
 
@@ -146,6 +146,6 @@ class StorageClientTest(IsolatedAsyncioTestCase):
         mock_pre_sign_url = AsyncMock()
         mock_pre_sign_url.side_effect = GRPCError(Status.UNKNOWN, "test error")
 
-        with patch("nitricapi.nitric.storage.v1.StorageServiceStub.pre_sign_url", mock_pre_sign_url):
+        with patch("nitric.proto.nitric.storage.v1.StorageServiceStub.pre_sign_url", mock_pre_sign_url):
             with pytest.raises(UnknownException) as e:
                 await Storage().bucket("test-bucket").file("test-file").sign_url()

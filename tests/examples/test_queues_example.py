@@ -18,7 +18,7 @@
 #
 from typing import List
 
-from nitricapi.nitric.queue.v1 import NitricTask, QueueSendBatchResponse, QueueSendResponse, FailedTask
+from nitric.proto.nitric.queue.v1 import NitricTask, QueueSendBatchResponse, QueueSendResponse, FailedTask
 
 from examples.queues.failed import queues_failed
 from examples.queues.receive import queues_receive
@@ -32,7 +32,7 @@ class QueuesExamplesTest(IsolatedAsyncioTestCase):
     async def test_receive_queue(self):
         mock_receive = AsyncMock()
 
-        with patch("nitricapi.nitric.queue.v1.QueueServiceStub.receive", mock_receive):
+        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.receive", mock_receive):
             await queues_receive()
 
         mock_receive.assert_called_once()
@@ -40,7 +40,7 @@ class QueuesExamplesTest(IsolatedAsyncioTestCase):
     async def test_send_queue(self):
         mock_send = AsyncMock()
 
-        with patch("nitricapi.nitric.queue.v1.QueueServiceStub.send", mock_send):
+        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.send", mock_send):
             await queues_send()
 
         mock_send.assert_called_once()
@@ -58,7 +58,7 @@ class QueuesExamplesTest(IsolatedAsyncioTestCase):
             ]
         )
 
-        with patch("nitricapi.nitric.queue.v1.QueueServiceStub.send_batch", mock_failed):
+        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.send_batch", mock_failed):
             await queues_failed()
 
         mock_failed.assert_called_once()
