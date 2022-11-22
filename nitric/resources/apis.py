@@ -21,7 +21,7 @@ from typing import List, Union
 from nitric.faas import ApiWorkerOptions, FunctionServer, HttpMiddleware, Middleware, MethodOptions, HttpMethod
 from nitric.application import Nitric
 from nitric.resources.base import BaseResource
-from nitricapi.nitric.resource.v1 import (
+from nitric.proto.nitric.resource.v1 import (
     Resource,
     ResourceType,
     ApiResource,

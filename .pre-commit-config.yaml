@@ -3,7 +3,7 @@ repos:
     rev: stable
     hooks:
     - id: black
-      exclude: ^(examples)/
+      exclude: ^(examples|nitric/proto)/
 -   repo: https://github.com/pycqa/flake8
     rev: 3.7.9
     hooks:

@@ -24,10 +24,11 @@ from enum import Enum
 from grpclib import GRPCError
 from nitric.api.queues import QueueRef, Queues
 from nitric.application import Nitric
-from nitricapi.nitric.resource.v1 import (
+from nitric.proto.nitric.resource.v1 import (
     Resource,
     ResourceType,
-    Action, ResourceDeclareRequest,
+    Action,
+    ResourceDeclareRequest,
 )
 
 from nitric.resources.base import SecureResource
@@ -70,7 +71,8 @@ class Queue(SecureResource):
     async def _register(self):
         try:
             await self._resources_stub.declare(
-                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource()))
+                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
+            )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 

@@ -42,8 +42,9 @@ setuptools.setup(
     ],
     setup_requires=["wheel"],
     install_requires=[
-        "nitric-api==0.18.0",
-        "protobuf==3.19.4",
+        # "nitric-api==0.18.0",
+        "protobuf==3.19.5",
+        "betterproto==2.0.0b5",
         "asyncio",
     ],
     extras_require={
@@ -63,6 +64,11 @@ setuptools.setup(
             "pip-licenses==3.3.1",
             "licenseheaders==0.8.8",
             "pdoc3==0.9.2",
+            "markupsafe==2.0.1",
+            "betterproto[compiler]==2.0.0b5",
+            # "grpcio==1.33.2",
+            "grpcio-tools==1.44.0",
+            "twine==3.2.0",
         ]
     },
     python_requires=">=3.7",

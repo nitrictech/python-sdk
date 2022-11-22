@@ -17,13 +17,19 @@
 # limitations under the License.
 #
 from dataclasses import dataclass
-from typing import List
 
 from grpclib import GRPCError
 from nitric.api.exception import exception_from_grpc_error, InvalidArgumentException
 from nitric.utils import new_default_channel
-from nitricapi.nitric.storage.v1 import StorageServiceStub, StoragePreSignUrlRequestOperation, StorageWriteRequest, \
-    StorageReadRequest, StorageDeleteRequest, StoragePreSignUrlRequest, StorageListFilesRequest
+from nitric.proto.nitric.storage.v1 import (
+    StorageServiceStub,
+    StoragePreSignUrlRequestOperation,
+    StorageWriteRequest,
+    StorageReadRequest,
+    StorageDeleteRequest,
+    StoragePreSignUrlRequest,
+    StorageListFilesRequest,
+)
 from enum import Enum
 
 
@@ -61,8 +67,10 @@ class BucketRef(object):
         return File(_storage=self._storage, _bucket=self.name, key=key)
 
     async def files(self):
+        """Return a list of files in this bucket."""
         resp = await self._storage._storage_stub.list_files(
-            storage_list_files_request=StorageListFilesRequest(bucket_name=self.name))
+            storage_list_files_request=StorageListFilesRequest(bucket_name=self.name)
+        )
         return [self.file(f.key) for f in resp.files]
 
 
@@ -123,9 +131,11 @@ class File(object):
             raise exception_from_grpc_error(grpc_err)
 
     async def upload_url(self, expiry: int = 600):
+        """Get a temporary writable URL to this file."""
         await self.sign_url(mode=FileMode.WRITE, expiry=expiry)
 
     async def download_url(self, expiry: int = 600):
+        """Get a temporary readable URL to this file."""
         await self.sign_url(mode=FileMode.READ, expiry=expiry)
 
     async def sign_url(self, mode: FileMode = FileMode.READ, expiry: int = 3600):

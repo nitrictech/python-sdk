@@ -26,12 +26,16 @@ from grpclib import GRPCError, Status
 from nitric.api import Queues, Task
 from nitric.api.exception import UnknownException
 from nitric.api.queues import ReceivedTask
-from nitricapi.nitric.queue.v1 import (
+from nitric.proto.nitric.queue.v1 import (
     QueueReceiveResponse,
     NitricTask,
     QueueCompleteResponse,
     QueueSendBatchResponse,
-    FailedTask, QueueSendRequest, QueueSendBatchRequest, QueueReceiveRequest, QueueCompleteRequest,
+    FailedTask,
+    QueueSendRequest,
+    QueueSendBatchRequest,
+    QueueReceiveRequest,
+    QueueCompleteRequest,
 )
 from nitric.utils import _struct_from_dict
 
@@ -48,19 +52,16 @@ class QueueClientTest(IsolatedAsyncioTestCase):
 
         payload = {"content": "of task"}
 
-        with patch("nitricapi.nitric.queue.v1.QueueServiceStub.send", mock_send):
+        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.send", mock_send):
             queue = Queues().queue("test-queue")
             await queue.send(Task(payload=payload))
 
         # Check expected values were passed to Stub
-        mock_send.assert_called_once_with(queue_send_request=QueueSendRequest(
-            queue="test-queue",
-            task=NitricTask(
-                id=None,
-                payload_type=None,
-                payload=_struct_from_dict(payload)
+        mock_send.assert_called_once_with(
+            queue_send_request=QueueSendRequest(
+                queue="test-queue", task=NitricTask(id=None, payload_type=None, payload=_struct_from_dict(payload))
             )
-        ))
+        )
 
     async def test_send_with_failed(self):
         payload = {"content": "of task"}
@@ -78,22 +79,19 @@ class QueueClientTest(IsolatedAsyncioTestCase):
             ]
         )
 
-        with patch("nitricapi.nitric.queue.v1.QueueServiceStub.send_batch", mock_send):
+        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.send_batch", mock_send):
             queue = Queues().queue("test-queue")
             failed = await queue.send([Task(payload=payload) for i in range(2)])
 
-        mock_send.assert_called_once_with(queue_send_batch_request=QueueSendBatchRequest(
-            queue="test-queue",
-            tasks=[NitricTask(
-                id=None,
-                payload_type=None,
-                payload=_struct_from_dict(payload)
-            ), NitricTask(
-                id=None,
-                payload_type=None,
-                payload=_struct_from_dict(payload)
-            )]
-        ))
+        mock_send.assert_called_once_with(
+            queue_send_batch_request=QueueSendBatchRequest(
+                queue="test-queue",
+                tasks=[
+                    NitricTask(id=None, payload_type=None, payload=_struct_from_dict(payload)),
+                    NitricTask(id=None, payload_type=None, payload=_struct_from_dict(payload)),
+                ],
+            )
+        )
 
         # Check that the failed task is returned with its details
         self.assertEqual(1, len(failed))
@@ -107,19 +105,16 @@ class QueueClientTest(IsolatedAsyncioTestCase):
 
         payload = {"content": "of task"}
 
-        with patch("nitricapi.nitric.queue.v1.QueueServiceStub.send", mock_send):
+        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.send", mock_send):
             queue = Queues().queue("test-queue")
             await queue.send({"id": "123", "payload": payload})
 
         # Check expected values were passed to Stub
-        mock_send.assert_called_once_with(queue_send_request=QueueSendRequest(
-            queue="test-queue",
-            task=NitricTask(
-                id="123",
-                payload_type=None,
-                payload=_struct_from_dict(payload)
+        mock_send.assert_called_once_with(
+            queue_send_request=QueueSendRequest(
+                queue="test-queue", task=NitricTask(id="123", payload_type=None, payload=_struct_from_dict(payload))
             )
-        ))
+        )
 
     async def test_send_invalid_type(self):
         mock_send = AsyncMock()
@@ -128,7 +123,7 @@ class QueueClientTest(IsolatedAsyncioTestCase):
 
         payload = {"content": "of task"}
 
-        with patch("nitricapi.nitric.queue.v1.QueueServiceStub.send", mock_send):
+        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.send", mock_send):
             queue = Queues().queue("test-queue")
             with pytest.raises(AttributeError):
                 await queue.send((1, 2, 3))
@@ -140,20 +135,16 @@ class QueueClientTest(IsolatedAsyncioTestCase):
 
         payload = {"content": "of task"}
 
-        with patch("nitricapi.nitric.queue.v1.QueueServiceStub.send", mock_send):
+        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.send", mock_send):
             queue = Queues().queue("test-queue")
             await queue.send()
 
         # Check expected values were passed to Stub
-        mock_send.assert_called_once_with(queue_send_request=QueueSendRequest(
-            queue="test-queue",
-            task=NitricTask(
-                id=None,
-                payload_type=None,
-                payload=Struct()
+        mock_send.assert_called_once_with(
+            queue_send_request=QueueSendRequest(
+                queue="test-queue", task=NitricTask(id=None, payload_type=None, payload=Struct())
             )
-        ))
-
+        )
 
     async def test_send_empty_list(self):
         with pytest.raises(Exception) as e_info:
@@ -173,16 +164,13 @@ class QueueClientTest(IsolatedAsyncioTestCase):
             ]
         )
 
-        with patch("nitricapi.nitric.queue.v1.QueueServiceStub.receive", mock_receive):
+        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.receive", mock_receive):
             queueing = Queues()
             queue = queueing.queue("test-queue")
             (task,) = await queue.receive()
 
         # Check expected values were passed to Stub
-        mock_receive.assert_called_once_with(queue_receive_request=QueueReceiveRequest(
-            queue="test-queue",
-            depth=1
-        ))
+        mock_receive.assert_called_once_with(queue_receive_request=QueueReceiveRequest(queue="test-queue", depth=1))
 
         self.assertEqual("test-task", task.id)
         self.assertEqual("test-lease", task.lease_id)
@@ -204,15 +192,11 @@ class QueueClientTest(IsolatedAsyncioTestCase):
             ]
         )
 
-        with patch("nitricapi.nitric.queue.v1.QueueServiceStub.receive", mock_receive):
+        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.receive", mock_receive):
             await Queues().queue("test-queue").receive(limit=3)  # explicitly set a limit
 
         # Check expected values were passed to Stub
-        mock_receive.assert_called_once_with(queue_receive_request=QueueReceiveRequest(
-            queue="test-queue",
-            depth=3
-        ))
-
+        mock_receive.assert_called_once_with(queue_receive_request=QueueReceiveRequest(queue="test-queue", depth=3))
 
     async def test_receive_below_minimum_limit(self):
         mock_receive = AsyncMock()
@@ -227,26 +211,20 @@ class QueueClientTest(IsolatedAsyncioTestCase):
             ]
         )
 
-        with patch("nitricapi.nitric.queue.v1.QueueServiceStub.receive", mock_receive):
+        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.receive", mock_receive):
             await Queues().queue("test-queue").receive(limit=0)  # explicitly set a limit
 
-        mock_receive.assert_called_once_with(queue_receive_request=QueueReceiveRequest(
-            queue="test-queue",
-            depth=1
-        ))
+        mock_receive.assert_called_once_with(queue_receive_request=QueueReceiveRequest(queue="test-queue", depth=1))
 
     async def test_receive_task_without_payload(self):
         mock_receive = AsyncMock()
         mock_receive.return_value = QueueReceiveResponse(tasks=[NitricTask(id="test-task", lease_id="test-lease")])
 
-        with patch("nitricapi.nitric.queue.v1.QueueServiceStub.receive", mock_receive):
+        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.receive", mock_receive):
             (task,) = await Queues().queue("test-queue").receive(limit=0)  # explicitly set a limit
 
         # Verify that an empty dict is returned for payload and no payload type.
-        mock_receive.assert_called_once_with(queue_receive_request=QueueReceiveRequest(
-            queue="test-queue",
-            depth=1
-        ))
+        mock_receive.assert_called_once_with(queue_receive_request=QueueReceiveRequest(queue="test-queue", depth=1))
 
         self.assertEqual("", task.payload_type)
         self.assertEqual({}, task.payload)
@@ -258,13 +236,12 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         queueing = Queues()
         task = ReceivedTask(lease_id="test-lease", _queueing=queueing, _queue=queueing.queue("test-queue"))
 
-        with patch("nitricapi.nitric.queue.v1.QueueServiceStub.complete", mock_complete):
+        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.complete", mock_complete):
             await task.complete()
 
-        mock_complete.assert_called_once_with(queue_complete_request=QueueCompleteRequest(
-            queue="test-queue",
-            lease_id="test-lease"
-        ))
+        mock_complete.assert_called_once_with(
+            queue_complete_request=QueueCompleteRequest(queue="test-queue", lease_id="test-lease")
+        )
 
     async def test_complete_task_without_client(self):
         queueing = Queues()
@@ -279,7 +256,7 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         mock_send = AsyncMock()
         mock_send.side_effect = GRPCError(Status.UNKNOWN, "test error")
 
-        with patch("nitricapi.nitric.queue.v1.QueueServiceStub.send", mock_send):
+        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.send", mock_send):
             with pytest.raises(UnknownException) as e:
                 await Queues().queue("test-queue").send(Task(payload={"content": "of task"}))
 
@@ -287,7 +264,7 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         mock_send = AsyncMock()
         mock_send.side_effect = GRPCError(Status.UNKNOWN, "test error")
 
-        with patch("nitricapi.nitric.queue.v1.QueueServiceStub.send_batch", mock_send):
+        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.send_batch", mock_send):
             with pytest.raises(UnknownException) as e:
                 await Queues().queue("test-queue").send([Task(payload={"content": "of task"}) for i in range(2)])
 
@@ -295,7 +272,7 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         mock_receive = AsyncMock()
         mock_receive.side_effect = GRPCError(Status.UNKNOWN, "test error")
 
-        with patch("nitricapi.nitric.queue.v1.QueueServiceStub.receive", mock_receive):
+        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.receive", mock_receive):
             with pytest.raises(UnknownException) as e:
                 await Queues().queue("test-queue").receive()
 
@@ -306,6 +283,6 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         queueing = Queues()
         task = ReceivedTask(lease_id="test-lease", _queueing=queueing, _queue=queueing.queue("test-queue"))
 
-        with patch("nitricapi.nitric.queue.v1.QueueServiceStub.complete", mock_complete):
+        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.complete", mock_complete):
             with pytest.raises(UnknownException) as e:
                 await task.complete()
