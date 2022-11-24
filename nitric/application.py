@@ -1,5 +1,6 @@
 import asyncio
 from nitric.faas import FunctionServer
+from nitric.api.exception import NitricUnavailableException
 
 # from nitric.resources.base import BaseResource
 from typing import Dict, List, Type, Any, TypeVar
@@ -28,11 +29,16 @@ class Nitric:
 
     @classmethod
     def _create_resource(cls, resource: Type[BT], name: str, *args, **kwargs) -> BT:
-        resource_type = resource.__name__.lower()
-        if cls._cache.get(resource_type).get(name) is None:
-            cls._cache[resource_type][name] = resource.make(name, *args, **kwargs)
+        try:
+            resource_type = resource.__name__.lower()
+            if cls._cache.get(resource_type).get(name) is None:
+                cls._cache[resource_type][name] = resource.make(name, *args, **kwargs)
 
-        return cls._cache[resource_type][name]
+            return cls._cache[resource_type][name]
+        except ConnectionRefusedError:
+            raise NitricUnavailableException(
+                'Unable to connect to a nitric server! If you\'re running locally make sure to run "nitric start"'
+            )
 
     @classmethod
     def run(cls):
@@ -50,3 +56,7 @@ class Nitric:
             loop.run_until_complete(asyncio.gather(*[wkr.start() for wkr in cls._workers]))
         except KeyboardInterrupt:
             print("\nexiting")
+        except ConnectionRefusedError:
+            raise NitricUnavailableException(
+                'Unable to connect to a nitric server! If you\'re running locally make sure to run "nitric start"'
+            )
