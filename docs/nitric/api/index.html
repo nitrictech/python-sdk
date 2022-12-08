@@ -46,7 +46,7 @@
 # limitations under the License.
 #
 &#34;&#34;&#34;Nitric API SDK.&#34;&#34;&#34;
-from nitric.api.events import Events, Event, Topic
+from nitric.api.events import Events, Event, TopicRef
 from nitric.api.queues import Queues, Task, FailedTask
 from nitric.api.storage import Storage
 from nitric.api.documents import Documents
@@ -60,7 +60,7 @@ __all__ = [
     &#34;Event&#34;,
     &#34;Task&#34;,
     &#34;FailedTask&#34;,
-    &#34;Topic&#34;,
+    &#34;TopicRef&#34;,
     &#34;Secrets&#34;,
 ]</code></pre>
 </details>
@@ -167,7 +167,8 @@ __all__ = [
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Event(object):
+<pre><code class="python">@dataclass(frozen=True, order=True)
+class Event(object):
     &#34;&#34;&#34;Eventing client, providing access to Topic and Event references and operations on those entities.&#34;&#34;&#34;
 
     payload: dict = field(default_factory=dict)
@@ -219,22 +220,22 @@ __all__ = [
         if self.channel is not None:
             self.channel.close()
 
-    async def topics(self) -&gt; List[Topic]:
+    async def topics(self) -&gt; List[TopicRef]:
         &#34;&#34;&#34;Get a list of topics available for publishing or subscription.&#34;&#34;&#34;
         try:
-            response = await self._topic_stub.list()
+            response = await self._topic_stub.list(topic_list_request=TopicListRequest())
             return [self.topic(topic.name) for topic in response.topics]
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    def topic(self, name: str) -&gt; Topic:
+    def topic(self, name: str) -&gt; TopicRef:
         &#34;&#34;&#34;Return a reference to a topic.&#34;&#34;&#34;
-        return Topic(_events=self, name=name)</code></pre>
+        return TopicRef(_events=self, name=name)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
 <dt id="nitric.api.Events.topic"><code class="name flex">
-<span>def <span class="ident">topic</span></span>(<span>self, name: str) ‑> <a title="nitric.api.events.Topic" href="events.html#nitric.api.events.Topic">Topic</a></span>
+<span>def <span class="ident">topic</span></span>(<span>self, name: str) ‑> <a title="nitric.api.events.TopicRef" href="events.html#nitric.api.events.TopicRef">TopicRef</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Return a reference to a topic.</p></div>
@@ -242,13 +243,13 @@ __all__ = [
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def topic(self, name: str) -&gt; Topic:
+<pre><code class="python">def topic(self, name: str) -&gt; TopicRef:
     &#34;&#34;&#34;Return a reference to a topic.&#34;&#34;&#34;
-    return Topic(_events=self, name=name)</code></pre>
+    return TopicRef(_events=self, name=name)</code></pre>
 </details>
 </dd>
 <dt id="nitric.api.Events.topics"><code class="name flex">
-<span>async def <span class="ident">topics</span></span>(<span>self) ‑> List[<a title="nitric.api.events.Topic" href="events.html#nitric.api.events.Topic">Topic</a>]</span>
+<span>async def <span class="ident">topics</span></span>(<span>self) ‑> List[<a title="nitric.api.events.TopicRef" href="events.html#nitric.api.events.TopicRef">TopicRef</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get a list of topics available for publishing or subscription.</p></div>
@@ -256,10 +257,10 @@ __all__ = [
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">async def topics(self) -&gt; List[Topic]:
+<pre><code class="python">async def topics(self) -&gt; List[TopicRef]:
     &#34;&#34;&#34;Get a list of topics available for publishing or subscription.&#34;&#34;&#34;
     try:
-        response = await self._topic_stub.list()
+        response = await self._topic_stub.list(topic_list_request=TopicListRequest())
         return [self.topic(topic.name) for topic in response.topics]
     except GRPCError as grpc_err:
         raise exception_from_grpc_error(grpc_err)</code></pre>
@@ -277,7 +278,8 @@ __all__ = [
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class FailedTask(Task):
+<pre><code class="python">@dataclass(frozen=True, order=True)
+class FailedTask(Task):
     &#34;&#34;&#34;Represents a failed queue publish.&#34;&#34;&#34;
 
     message: str = field(default=&#34;&#34;)</code></pre>
@@ -319,7 +321,7 @@ __all__ = [
 
     def queue(self, name: str):
         &#34;&#34;&#34;Return a reference to a queue from the connected queue service.&#34;&#34;&#34;
-        return Queue(_queueing=self, name=name)</code></pre>
+        return QueueRef(_queueing=self, name=name)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
@@ -334,7 +336,7 @@ __all__ = [
 </summary>
 <pre><code class="python">def queue(self, name: str):
     &#34;&#34;&#34;Return a reference to a queue from the connected queue service.&#34;&#34;&#34;
-    return Queue(_queueing=self, name=name)</code></pre>
+    return QueueRef(_queueing=self, name=name)</code></pre>
 </details>
 </dd>
 </dl>
@@ -369,7 +371,7 @@ __all__ = [
 
     def secret(self, name: str):
         &#34;&#34;&#34;Return a reference to a secret container from the connected secrets management service.&#34;&#34;&#34;
-        return SecretContainer(_secrets=self, name=name)</code></pre>
+        return SecretContainerRef(_secrets=self, name=name)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
@@ -384,7 +386,7 @@ __all__ = [
 </summary>
 <pre><code class="python">def secret(self, name: str):
     &#34;&#34;&#34;Return a reference to a secret container from the connected secrets management service.&#34;&#34;&#34;
-    return SecretContainer(_secrets=self, name=name)</code></pre>
+    return SecretContainerRef(_secrets=self, name=name)</code></pre>
 </details>
 </dd>
 </dl>
@@ -419,7 +421,7 @@ __all__ = [
 
     def bucket(self, name: str):
         &#34;&#34;&#34;Return a reference to a bucket from the connected storage service.&#34;&#34;&#34;
-        return Bucket(_storage=self, name=name)</code></pre>
+        return BucketRef(_storage=self, name=name)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
@@ -434,7 +436,7 @@ __all__ = [
 </summary>
 <pre><code class="python">def bucket(self, name: str):
     &#34;&#34;&#34;Return a reference to a bucket from the connected storage service.&#34;&#34;&#34;
-    return Bucket(_storage=self, name=name)</code></pre>
+    return BucketRef(_storage=self, name=name)</code></pre>
 </details>
 </dd>
 </dl>
@@ -449,7 +451,8 @@ __all__ = [
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Task(object):
+<pre><code class="python">@dataclass(frozen=True, order=True)
+class Task(object):
     &#34;&#34;&#34;A task to be sent to a Queue.&#34;&#34;&#34;
 
     id: str = field(default=None)
@@ -476,8 +479,8 @@ __all__ = [
 </dd>
 </dl>
 </dd>
-<dt id="nitric.api.Topic"><code class="flex name class">
-<span>class <span class="ident">Topic</span></span>
+<dt id="nitric.api.TopicRef"><code class="flex name class">
+<span>class <span class="ident">TopicRef</span></span>
 <span>(</span><span>_events: <a title="nitric.api.Events" href="#nitric.api.Events">Events</a>, name: str)</span>
 </code></dt>
 <dd>
@@ -486,7 +489,8 @@ __all__ = [
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Topic(object):
+<pre><code class="python">@dataclass(frozen=True, order=True)
+class TopicRef(object):
     &#34;&#34;&#34;A reference to a topic on an event service, used to perform operations on that topic.&#34;&#34;&#34;
 
     _events: Events
@@ -506,25 +510,28 @@ __all__ = [
             event = Event()
 
         if isinstance(event, dict):
-            # TODO: handle events that are just a payload
-            event = Event(**event)
+            event = Event(payload=event)
 
         try:
-            response = await self._events._stub.publish(topic=self.name, event=_event_to_wire(event))
+            response = await self._events._stub.publish(
+                event_publish_request=EventPublishRequest(
+                    topic=self.name, event=_event_to_wire(event)
+                )
+            )
             return Event(**{**event.__dict__.copy(), **{&#34;id&#34;: response.id}})
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
-<dt id="nitric.api.Topic.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dt id="nitric.api.TopicRef.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="nitric.api.Topic.publish"><code class="name flex">
+<dt id="nitric.api.TopicRef.publish"><code class="name flex">
 <span>async def <span class="ident">publish</span></span>(<span>self, event: Union[<a title="nitric.api.Event" href="#nitric.api.Event">Event</a>, dict] = None) ‑> <a title="nitric.api.events.Event" href="events.html#nitric.api.events.Event">Event</a></span>
 </code></dt>
 <dd>
@@ -549,11 +556,14 @@ __all__ = [
         event = Event()
 
     if isinstance(event, dict):
-        # TODO: handle events that are just a payload
-        event = Event(**event)
+        event = Event(payload=event)
 
     try:
-        response = await self._events._stub.publish(topic=self.name, event=_event_to_wire(event))
+        response = await self._events._stub.publish(
+            event_publish_request=EventPublishRequest(
+                topic=self.name, event=_event_to_wire(event)
+            )
+        )
         return Event(**{**event.__dict__.copy(), **{&#34;id&#34;: response.id}})
     except GRPCError as grpc_err:
         raise exception_from_grpc_error(grpc_err)</code></pre>
@@ -642,10 +652,10 @@ __all__ = [
 </ul>
 </li>
 <li>
-<h4><code><a title="nitric.api.Topic" href="#nitric.api.Topic">Topic</a></code></h4>
+<h4><code><a title="nitric.api.TopicRef" href="#nitric.api.TopicRef">TopicRef</a></code></h4>
 <ul class="">
-<li><code><a title="nitric.api.Topic.name" href="#nitric.api.Topic.name">name</a></code></li>
-<li><code><a title="nitric.api.Topic.publish" href="#nitric.api.Topic.publish">publish</a></code></li>
+<li><code><a title="nitric.api.TopicRef.name" href="#nitric.api.TopicRef.name">name</a></code></li>
+<li><code><a title="nitric.api.TopicRef.publish" href="#nitric.api.TopicRef.publish">publish</a></code></li>
 </ul>
 </li>
 </ul>

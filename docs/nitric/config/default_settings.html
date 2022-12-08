@@ -44,13 +44,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import os
 
 # Provides a set of default settings that env vars can replace
-
 # Nitric Membrane Service Address
-SERVICE_BIND = &#34;127.0.0.1:50051&#34;
-# Child Process (User Code) Host Address
-CHILD_ADDRESS = &#34;127.0.0.1:8080&#34;</code></pre>
+SERVICE_BIND = os.environ.get(&#39;SERVICE_ADDRESS&#39;, &#39;127.0.0.1:50051&#39;);</code></pre>
 </details>
 </section>
 <section>

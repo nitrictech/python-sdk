@@ -1,4 +1,30 @@
+#
+# Copyright (c) 2021 Nitric Technologies Pty Ltd.
+#
+# This file is part of Nitric Python 3 SDK.
+# See https://github.com/nitrictech/python-sdk for further info.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 import asyncio
+import os
+
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider, sampling
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.grpc import GrpcInstrumentorClient
+
 from nitric.faas import FunctionServer
 from nitric.api.exception import NitricUnavailableException
 
@@ -47,7 +73,20 @@ class Nitric:
 
         This will execute in an existing event loop if there is one, otherwise it will attempt to create its own.
         """
+        provider = None
         try:
+            if os.environ.get("OTELCOL_BIN"):
+                otlp_exporter = OTLPSpanExporter(endpoint="http://localhost:4317", insecure=True)
+
+                provider = TracerProvider(
+                    active_span_processor=BatchSpanProcessor(otlp_exporter),
+                    sampler=sampling.ParentBased(),
+                )
+                trace.set_tracer_provider(provider)
+
+                grpc_client_instrumentor = GrpcInstrumentorClient()
+                grpc_client_instrumentor.instrument()
+
             try:
                 loop = asyncio.get_running_loop()
             except RuntimeError:
@@ -60,3 +99,6 @@ class Nitric:
             raise NitricUnavailableException(
                 'Unable to connect to a nitric server! If you\'re running locally make sure to run "nitric start"'
             )
+        finally:
+            if provider is not None:
+                provider.force_flush()

@@ -52,7 +52,8 @@ from grpclib import GRPCError
 
 from nitric.api.exception import FailedPreconditionException, exception_from_grpc_error, InvalidArgumentException
 from nitric.utils import new_default_channel, _struct_from_dict, _dict_from_struct
-from proto.nitric.queue.v1 import QueueServiceStub, NitricTask, FailedTask as WireFailedTask
+from nitricapi.nitric.queue.v1 import QueueServiceStub, NitricTask, FailedTask as WireFailedTask, QueueCompleteRequest, \
+    QueueSendRequest, QueueSendBatchRequest, QueueReceiveRequest
 from dataclasses import dataclass, field
 
 
@@ -74,7 +75,7 @@ class ReceivedTask(object):
     payload: dict = field(default_factory=dict)
     lease_id: str = field(default=None)
     _queueing: Queues = field(default=None)
-    _queue: Queue = field(default=None)
+    _queue: QueueRef = field(default=None)
 
     async def complete(self):
         &#34;&#34;&#34;
@@ -87,7 +88,7 @@ class ReceivedTask(object):
                 &#34;Task is missing internal client or lease id, was it returned from &#34; &#34;queue.receive?&#34;
             )
         try:
-            await self._queueing._queue_stub.complete(queue=self._queue.name, lease_id=self.lease_id)
+            await self._queueing._queue_stub.complete(queue_complete_request=QueueCompleteRequest(queue=self._queue.name, lease_id=self.lease_id))
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
@@ -113,7 +114,7 @@ def _task_to_wire(task: Task) -&gt; NitricTask:
     )
 
 
-def _wire_to_received_task(task: NitricTask, queueing: Queues = None, queue: Queue = None) -&gt; ReceivedTask:
+def _wire_to_received_task(task: NitricTask, queueing: Queues = None, queue: QueueRef = None) -&gt; ReceivedTask:
     &#34;&#34;&#34;
     Convert a Nitric Queue Task (protobuf) to a Nitric Task (python SDK).
 
@@ -148,7 +149,7 @@ def _wire_to_failed_task(failed_task: WireFailedTask) -&gt; FailedTask:
 
 
 @dataclass(frozen=True, order=True)
-class Queue(object):
+class QueueRef(object):
     &#34;&#34;&#34;A reference to a queue from a queue service, used to perform operations on that queue.&#34;&#34;&#34;
 
     _queueing: Queues
@@ -177,7 +178,7 @@ class Queue(object):
             task = Task(**task)
 
         try:
-            await self._queueing._queue_stub.send(queue=self.name, task=_task_to_wire(task))
+            await self._queueing._queue_stub.send(queue_send_request=QueueSendRequest(queue=self.name, task=_task_to_wire(task)))
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
@@ -195,7 +196,7 @@ class Queue(object):
         wire_tasks = [_task_to_wire(Task(**task) if isinstance(task, dict) else task) for task in tasks]
 
         try:
-            response = await self._queueing._queue_stub.send_batch(queue=self.name, tasks=wire_tasks)
+            response = await self._queueing._queue_stub.send_batch(queue_send_batch_request=QueueSendBatchRequest(queue=self.name, tasks=wire_tasks))
             return [_wire_to_failed_task(failed_task) for failed_task in response.failed_tasks]
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
@@ -218,7 +219,7 @@ class Queue(object):
             limit = 1
 
         try:
-            response = await self._queueing._queue_stub.receive(queue=self.name, depth=limit)
+            response = await self._queueing._queue_stub.receive(queue_receive_request=QueueReceiveRequest(queue=self.name, depth=limit))
             # Map the response protobuf response items to Python SDK Nitric Tasks
             return [_wire_to_received_task(task=task, queueing=self._queueing, queue=self) for task in response.tasks]
         except GRPCError as grpc_err:
@@ -240,7 +241,7 @@ class Queues(object):
 
     def queue(self, name: str):
         &#34;&#34;&#34;Return a reference to a queue from the connected queue service.&#34;&#34;&#34;
-        return Queue(_queueing=self, name=name)</code></pre>
+        return QueueRef(_queueing=self, name=name)</code></pre>
 </details>
 </section>
 <section>
@@ -262,7 +263,8 @@ class Queues(object):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class FailedTask(Task):
+<pre><code class="python">@dataclass(frozen=True, order=True)
+class FailedTask(Task):
     &#34;&#34;&#34;Represents a failed queue publish.&#34;&#34;&#34;
 
     message: str = field(default=&#34;&#34;)</code></pre>
@@ -279,8 +281,8 @@ class Queues(object):
 </dd>
 </dl>
 </dd>
-<dt id="nitric.api.queues.Queue"><code class="flex name class">
-<span>class <span class="ident">Queue</span></span>
+<dt id="nitric.api.queues.QueueRef"><code class="flex name class">
+<span>class <span class="ident">QueueRef</span></span>
 <span>(</span><span>_queueing: <a title="nitric.api.queues.Queues" href="#nitric.api.queues.Queues">Queues</a>, name: str)</span>
 </code></dt>
 <dd>
@@ -289,7 +291,8 @@ class Queues(object):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Queue(object):
+<pre><code class="python">@dataclass(frozen=True, order=True)
+class QueueRef(object):
     &#34;&#34;&#34;A reference to a queue from a queue service, used to perform operations on that queue.&#34;&#34;&#34;
 
     _queueing: Queues
@@ -318,7 +321,7 @@ class Queues(object):
             task = Task(**task)
 
         try:
-            await self._queueing._queue_stub.send(queue=self.name, task=_task_to_wire(task))
+            await self._queueing._queue_stub.send(queue_send_request=QueueSendRequest(queue=self.name, task=_task_to_wire(task)))
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
@@ -336,7 +339,7 @@ class Queues(object):
         wire_tasks = [_task_to_wire(Task(**task) if isinstance(task, dict) else task) for task in tasks]
 
         try:
-            response = await self._queueing._queue_stub.send_batch(queue=self.name, tasks=wire_tasks)
+            response = await self._queueing._queue_stub.send_batch(queue_send_batch_request=QueueSendBatchRequest(queue=self.name, tasks=wire_tasks))
             return [_wire_to_failed_task(failed_task) for failed_task in response.failed_tasks]
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
@@ -359,7 +362,7 @@ class Queues(object):
             limit = 1
 
         try:
-            response = await self._queueing._queue_stub.receive(queue=self.name, depth=limit)
+            response = await self._queueing._queue_stub.receive(queue_receive_request=QueueReceiveRequest(queue=self.name, depth=limit))
             # Map the response protobuf response items to Python SDK Nitric Tasks
             return [_wire_to_received_task(task=task, queueing=self._queueing, queue=self) for task in response.tasks]
         except GRPCError as grpc_err:
@@ -367,14 +370,14 @@ class Queues(object):
 </details>
 <h3>Class variables</h3>
 <dl>
-<dt id="nitric.api.queues.Queue.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dt id="nitric.api.queues.QueueRef.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="nitric.api.queues.Queue.receive"><code class="name flex">
+<dt id="nitric.api.queues.QueueRef.receive"><code class="name flex">
 <span>async def <span class="ident">receive</span></span>(<span>self, limit: int = None) ‑> List[<a title="nitric.api.queues.Task" href="#nitric.api.queues.Task">Task</a>]</span>
 </code></dt>
 <dd>
@@ -407,14 +410,14 @@ returned to the queue for reprocessing.</p>
         limit = 1
 
     try:
-        response = await self._queueing._queue_stub.receive(queue=self.name, depth=limit)
+        response = await self._queueing._queue_stub.receive(queue_receive_request=QueueReceiveRequest(queue=self.name, depth=limit))
         # Map the response protobuf response items to Python SDK Nitric Tasks
         return [_wire_to_received_task(task=task, queueing=self._queueing, queue=self) for task in response.tasks]
     except GRPCError as grpc_err:
         raise exception_from_grpc_error(grpc_err)</code></pre>
 </details>
 </dd>
-<dt id="nitric.api.queues.Queue.send"><code class="name flex">
+<dt id="nitric.api.queues.QueueRef.send"><code class="name flex">
 <span>async def <span class="ident">send</span></span>(<span>self, tasks: Union[<a title="nitric.api.queues.Task" href="#nitric.api.queues.Task">Task</a>, dict, List[Union[<a title="nitric.api.queues.Task" href="#nitric.api.queues.Task">Task</a>, dict]]] = None) ‑> Union[<a title="nitric.api.queues.Task" href="#nitric.api.queues.Task">Task</a>, List[Union[<a title="nitric.api.queues.Task" href="#nitric.api.queues.Task">Task</a>, <a title="nitric.api.queues.FailedTask" href="#nitric.api.queues.FailedTask">FailedTask</a>]]]</span>
 </code></dt>
 <dd>
@@ -449,7 +452,7 @@ the queue.</p>
         task = Task(**task)
 
     try:
-        await self._queueing._queue_stub.send(queue=self.name, task=_task_to_wire(task))
+        await self._queueing._queue_stub.send(queue_send_request=QueueSendRequest(queue=self.name, task=_task_to_wire(task)))
     except GRPCError as grpc_err:
         raise exception_from_grpc_error(grpc_err)</code></pre>
 </details>
@@ -481,7 +484,7 @@ the queue.</p>
 
     def queue(self, name: str):
         &#34;&#34;&#34;Return a reference to a queue from the connected queue service.&#34;&#34;&#34;
-        return Queue(_queueing=self, name=name)</code></pre>
+        return QueueRef(_queueing=self, name=name)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
@@ -496,7 +499,7 @@ the queue.</p>
 </summary>
 <pre><code class="python">def queue(self, name: str):
     &#34;&#34;&#34;Return a reference to a queue from the connected queue service.&#34;&#34;&#34;
-    return Queue(_queueing=self, name=name)</code></pre>
+    return QueueRef(_queueing=self, name=name)</code></pre>
 </details>
 </dd>
 </dl>
@@ -511,7 +514,8 @@ the queue.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class ReceivedTask(object):
+<pre><code class="python">@dataclass(frozen=True, order=True)
+class ReceivedTask(object):
     &#34;&#34;&#34;A reference to a task received from a Queue, with a lease.&#34;&#34;&#34;
 
     id: str = field(default=None)
@@ -519,7 +523,7 @@ the queue.</p>
     payload: dict = field(default_factory=dict)
     lease_id: str = field(default=None)
     _queueing: Queues = field(default=None)
-    _queue: Queue = field(default=None)
+    _queue: QueueRef = field(default=None)
 
     async def complete(self):
         &#34;&#34;&#34;
@@ -532,7 +536,7 @@ the queue.</p>
                 &#34;Task is missing internal client or lease id, was it returned from &#34; &#34;queue.receive?&#34;
             )
         try:
-            await self._queueing._queue_stub.complete(queue=self._queue.name, lease_id=self.lease_id)
+            await self._queueing._queue_stub.complete(queue_complete_request=QueueCompleteRequest(queue=self._queue.name, lease_id=self.lease_id))
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)</code></pre>
 </details>
@@ -578,7 +582,7 @@ the queue.</p>
             &#34;Task is missing internal client or lease id, was it returned from &#34; &#34;queue.receive?&#34;
         )
     try:
-        await self._queueing._queue_stub.complete(queue=self._queue.name, lease_id=self.lease_id)
+        await self._queueing._queue_stub.complete(queue_complete_request=QueueCompleteRequest(queue=self._queue.name, lease_id=self.lease_id))
     except GRPCError as grpc_err:
         raise exception_from_grpc_error(grpc_err)</code></pre>
 </details>
@@ -595,7 +599,8 @@ the queue.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Task(object):
+<pre><code class="python">@dataclass(frozen=True, order=True)
+class Task(object):
     &#34;&#34;&#34;A task to be sent to a Queue.&#34;&#34;&#34;
 
     id: str = field(default=None)
@@ -645,11 +650,11 @@ the queue.</p>
 </ul>
 </li>
 <li>
-<h4><code><a title="nitric.api.queues.Queue" href="#nitric.api.queues.Queue">Queue</a></code></h4>
+<h4><code><a title="nitric.api.queues.QueueRef" href="#nitric.api.queues.QueueRef">QueueRef</a></code></h4>
 <ul class="">
-<li><code><a title="nitric.api.queues.Queue.name" href="#nitric.api.queues.Queue.name">name</a></code></li>
-<li><code><a title="nitric.api.queues.Queue.receive" href="#nitric.api.queues.Queue.receive">receive</a></code></li>
-<li><code><a title="nitric.api.queues.Queue.send" href="#nitric.api.queues.Queue.send">send</a></code></li>
+<li><code><a title="nitric.api.queues.QueueRef.name" href="#nitric.api.queues.QueueRef.name">name</a></code></li>
+<li><code><a title="nitric.api.queues.QueueRef.receive" href="#nitric.api.queues.QueueRef.receive">receive</a></code></li>
+<li><code><a title="nitric.api.queues.QueueRef.send" href="#nitric.api.queues.QueueRef.send">send</a></code></li>
 </ul>
 </li>
 <li>
