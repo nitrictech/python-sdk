@@ -18,6 +18,7 @@
 #
 from __future__ import annotations
 from typing import List, Union
+from dataclasses import dataclass
 from nitric.faas import ApiWorkerOptions, FunctionServer, HttpMiddleware, Middleware, MethodOptions, HttpMethod
 from nitric.application import Nitric
 from nitric.resources.base import BaseResource
@@ -34,6 +35,7 @@ from grpclib import GRPCError
 from nitric.api.exception import exception_from_grpc_error
 
 
+@dataclass
 class JwtSecurityDefinition:
     """Represents the JWT security definition for an API."""
 
