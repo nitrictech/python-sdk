@@ -30,9 +30,24 @@ from nitricapi.nitric.resource.v1 import (
     ApiSecurityDefinition,
     ApiSecurityDefinitionJwt,
     ResourceDeclareRequest,
+    ResourceDetailsRequest,
 )
 from grpclib import GRPCError
 from nitric.api.exception import exception_from_grpc_error
+
+
+@dataclass
+class ApiDetails:
+    """Represents the APIs deployment details."""
+
+    # the identifier of the resource
+    id: str
+    # The provider this resource is deployed with (e.g. aws)
+    provider: str
+    # The service this resource is deployed on (e.g. ApiGateway)
+    service: str
+    # The url of the API
+    url: str
 
 
 @dataclass
@@ -247,6 +262,23 @@ class Api(BaseResource):
             r.put(function, opts=opts)
 
         return decorator
+
+    async def _details(self) -> ApiDetails:
+        """Get the API deployment details."""
+        try:
+            res = await self._resources_stub.details(
+                resource_details_request=ResourceDetailsRequest(
+                    resource=_to_resource(self),
+                )
+            )
+            return ApiDetails(res.id, res.provider, res.service, res.api.url)
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
+
+    async def URL(self) -> str:
+        """Get the APIs live URL."""
+        details = await self._details()
+        return details.url
 
 
 class Route:
