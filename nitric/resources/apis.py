@@ -34,6 +34,7 @@ from nitric.proto.nitric.resource.v1 import (
 )
 from grpclib import GRPCError
 from nitric.api.exception import exception_from_grpc_error
+from os import path
 
 
 @dataclass
@@ -291,7 +292,7 @@ class Route:
     def __init__(self, api: Api, path: str, opts: RouteOptions):
         """Define a route to be handled by the provided API."""
         self.api = api
-        self.path = path
+        self.path = path.join(api.path, path)
         self.middleware = opts.middleware
 
     def method(self, methods: List[HttpMethod], *middleware: HttpMiddleware, opts: MethodOptions = None):
