@@ -25,8 +25,14 @@ from grpclib import GRPCError, Status
 from nitric.api import Secrets
 from nitric.api.exception import UnknownException
 from nitric.api.secrets import SecretValue
-from nitricapi.nitric.secret.v1 import SecretPutResponse, SecretVersion, Secret, SecretAccessResponse, SecretPutRequest, \
-    SecretAccessRequest
+from nitric.proto.nitric.secret.v1 import (
+    SecretPutResponse,
+    SecretVersion,
+    Secret,
+    SecretAccessResponse,
+    SecretPutRequest,
+    SecretAccessRequest,
+)
 
 
 class Object(object):
@@ -41,15 +47,14 @@ class SecretsClientTest(IsolatedAsyncioTestCase):
         )
         mock_put.return_value = mock_response
 
-        with patch("nitricapi.nitric.secret.v1.SecretServiceStub.put", mock_put):
+        with patch("nitric.proto.nitric.secret.v1.SecretServiceStub.put", mock_put):
             secret = Secrets().secret("test-secret")
             result = await secret.put(b"a test secret value")
 
         # Check expected values were passed to Stub
-        mock_put.assert_called_once_with(secret_put_request=SecretPutRequest(
-            secret=Secret(name="test-secret"),
-            value=b"a test secret value"
-        ))
+        mock_put.assert_called_once_with(
+            secret_put_request=SecretPutRequest(secret=Secret(name="test-secret"), value=b"a test secret value")
+        )
 
         # Check the returned value
         assert result.id == "test-version"
@@ -62,15 +67,14 @@ class SecretsClientTest(IsolatedAsyncioTestCase):
         )
         mock_put.return_value = mock_response
 
-        with patch("nitricapi.nitric.secret.v1.SecretServiceStub.put", mock_put):
+        with patch("nitric.proto.nitric.secret.v1.SecretServiceStub.put", mock_put):
             secret = Secrets().secret("test-secret")
             await secret.put("a test secret value")  # string, not bytes
 
         # Check expected values were passed to Stub
-        mock_put.assert_called_once_with(secret_put_request=SecretPutRequest(
-            secret=Secret(name="test-secret"),
-            value=b"a test secret value"
-        ))
+        mock_put.assert_called_once_with(
+            secret_put_request=SecretPutRequest(secret=Secret(name="test-secret"), value=b"a test secret value")
+        )
 
     async def test_latest(self):
         version = Secrets().secret("test-secret").latest()
@@ -86,18 +90,16 @@ class SecretsClientTest(IsolatedAsyncioTestCase):
         )
         mock_access.return_value = mock_response
 
-        with patch("nitricapi.nitric.secret.v1.SecretServiceStub.access", mock_access):
+        with patch("nitric.proto.nitric.secret.v1.SecretServiceStub.access", mock_access):
             version = Secrets().secret("test-secret").latest()
             result = await version.access()
 
             # Check expected values were passed to Stub
-            mock_access.assert_called_once_with(secret_access_request=SecretAccessRequest(
-                secret_version=SecretVersion(
-                    secret=Secret(name="test-secret"),
-                    version="latest"
-
+            mock_access.assert_called_once_with(
+                secret_access_request=SecretAccessRequest(
+                    secret_version=SecretVersion(secret=Secret(name="test-secret"), version="latest")
                 )
-            ))
+            )
 
             # Check the returned value
             assert result.version.id == "response-version"
@@ -119,7 +121,7 @@ class SecretsClientTest(IsolatedAsyncioTestCase):
         mock_put = AsyncMock()
         mock_put.side_effect = GRPCError(Status.UNKNOWN, "test error")
 
-        with patch("nitricapi.nitric.secret.v1.SecretServiceStub.put", mock_put):
+        with patch("nitric.proto.nitric.secret.v1.SecretServiceStub.put", mock_put):
             with pytest.raises(UnknownException) as e:
                 secret = Secrets().secret("test-secret")
                 await secret.put(b"a test secret value")
@@ -128,6 +130,6 @@ class SecretsClientTest(IsolatedAsyncioTestCase):
         mock_access = AsyncMock()
         mock_access.side_effect = GRPCError(Status.UNKNOWN, "test error")
 
-        with patch("nitricapi.nitric.secret.v1.SecretServiceStub.access", mock_access):
+        with patch("nitric.proto.nitric.secret.v1.SecretServiceStub.access", mock_access):
             with pytest.raises(UnknownException) as e:
                 await Secrets().secret("test-secret").latest().access()

@@ -24,8 +24,13 @@ from grpclib import GRPCError
 
 from nitric.api.exception import exception_from_grpc_error
 from nitric.utils import new_default_channel, _struct_from_dict
-from nitricapi.nitric.event.v1 import EventServiceStub, NitricEvent, TopicServiceStub, EventPublishRequest, \
-    TopicListRequest
+from nitric.proto.nitric.event.v1 import (
+    EventServiceStub,
+    NitricEvent,
+    TopicServiceStub,
+    EventPublishRequest,
+    TopicListRequest,
+)
 from dataclasses import dataclass, field
 
 
@@ -71,9 +76,7 @@ class TopicRef(object):
 
         try:
             response = await self._events._stub.publish(
-                event_publish_request=EventPublishRequest(
-                    topic=self.name, event=_event_to_wire(event)
-                )
+                event_publish_request=EventPublishRequest(topic=self.name, event=_event_to_wire(event))
             )
             return Event(**{**event.__dict__.copy(), **{"id": response.id}})
         except GRPCError as grpc_err:

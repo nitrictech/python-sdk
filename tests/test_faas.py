@@ -23,7 +23,7 @@ import pytest
 
 from nitric.faas import start, FunctionServer, HttpContext, compose_middleware, HttpResponse, FaasWorkerOptions
 
-from nitricapi.nitric.faas.v1 import (
+from nitric.proto.nitric.faas.v1 import (
     ServerMessage,
     InitResponse,
     ClientMessage,
@@ -133,7 +133,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
                 yield message
 
         with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
-            "nitricapi.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
+            "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
             await FunctionServer(opts=FaasWorkerOptions()).http(mock_handler)._run()
 
@@ -174,7 +174,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
                 yield message
 
         with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
-            "nitricapi.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
+            "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
             await FunctionServer(opts=FaasWorkerOptions()).http(mock_http_handler).event(mock_event_handler)._run()
 
@@ -209,7 +209,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
                 yield message
 
         with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
-            "nitricapi.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
+            "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
             await FunctionServer(opts=FaasWorkerOptions()).http(mock_http_handler).event(mock_event_handler)._run()
 
@@ -244,7 +244,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
                 yield message
 
         with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
-            "nitricapi.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
+            "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
             await FunctionServer(opts=FaasWorkerOptions()).http(mock_http_handler).event(mock_event_handler)._run()
 
@@ -279,7 +279,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
                 yield message
 
         with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
-            "nitricapi.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
+            "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
             await FunctionServer(opts=FaasWorkerOptions()).http(mock_http_handler).event(mock_event_handler)._run()
 
@@ -314,7 +314,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
                 yield message
 
         with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
-            "nitricapi.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
+            "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
             await FunctionServer(opts=FaasWorkerOptions()).http(mock_http_handler).event(mock_event_handler)._run()
 
@@ -343,7 +343,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
                 yield message
 
         with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
-            "nitricapi.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
+            "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
             await FunctionServer(opts=FaasWorkerOptions()).event(mock_handler)._run()
 
@@ -382,7 +382,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
                 yield message
 
         with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
-            "nitricapi.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
+            "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
             await FunctionServer(opts=FaasWorkerOptions()).http(mock_handler)._run()
 
@@ -423,7 +423,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
                 yield message
 
         with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
-            "nitricapi.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
+            "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
             await FunctionServer(opts=FaasWorkerOptions()).http(mock_handler)._run()
 
@@ -463,7 +463,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
     #             yield message
     #
     #     with patch("nitric.faas.faas.AsyncChannel", mock_async_channel_init), patch(
-    #         "nitricapi.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
+    #         "proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
     #     ), patch("nitric.faas.faas.new_default_channel", mock_grpc_channel):
     #         await faas._register_function_handler(mock_handler)
     #
@@ -504,7 +504,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
     #             yield message
     #
     #     with patch("nitric.faas.faas.AsyncChannel", mock_async_channel_init), patch(
-    #         "nitricapi.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
+    #         "proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
     #     ), patch("nitric.faas.faas.new_default_channel", mock_grpc_channel):
     #         await faas._register_function_handler(mock_handler)
     #
@@ -553,7 +553,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
     #             yield message
     #
     #     with patch("nitric.faas.faas.AsyncChannel", mock_async_channel_init), patch(
-    #         "nitricapi.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
+    #         "proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
     #     ), patch("nitric.faas.faas.new_default_channel", mock_grpc_channel):
     #         # An exception shouldn't be thrown, even though the serialization fails
     #         await faas._register_function_handler(mock_handler)

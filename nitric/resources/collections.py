@@ -18,8 +18,6 @@
 #
 from __future__ import annotations
 
-import asyncio
-
 from nitric.api.documents import CollectionRef, Documents
 from nitric.api.exception import exception_from_grpc_error
 from typing import List, Union
@@ -27,10 +25,11 @@ from enum import Enum
 from grpclib import GRPCError
 
 from nitric.application import Nitric
-from nitricapi.nitric.resource.v1 import (
+from nitric.proto.nitric.resource.v1 import (
     Resource,
     ResourceType,
-    Action, ResourceDeclareRequest,
+    Action,
+    ResourceDeclareRequest,
 )
 
 from nitric.resources.base import SecureResource
@@ -54,7 +53,9 @@ class Collection(SecureResource):
 
     async def _register(self):
         try:
-            await self._resources_stub.declare(resource_declare_request=ResourceDeclareRequest(resource=self._to_resource()))
+            await self._resources_stub.declare(
+                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
+            )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
@@ -63,8 +64,11 @@ class Collection(SecureResource):
 
     def _perms_to_actions(self, *args: Union[CollectionPermission, str]) -> List[Action]:
         permission_actions_map = {
-            CollectionPermission.reading: [Action.CollectionDocumentRead, Action.CollectionQuery,
-                                           Action.CollectionList],
+            CollectionPermission.reading: [
+                Action.CollectionDocumentRead,
+                Action.CollectionQuery,
+                Action.CollectionList,
+            ],
             CollectionPermission.writing: [Action.CollectionDocumentWrite, Action.CollectionList],
             CollectionPermission.deleting: [Action.CollectionDocumentDelete, Action.CollectionList],
         }

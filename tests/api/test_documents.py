@@ -34,7 +34,7 @@ from nitric.api.documents import (
     QueryResultsPage,
 )
 from nitric.api.exception import UnknownException
-from nitricapi.nitric.document.v1 import (
+from nitric.proto.nitric.document.v1 import (
     Key,
     Collection,
     DocumentGetResponse,
@@ -42,10 +42,14 @@ from nitricapi.nitric.document.v1 import (
     DocumentQueryResponse,
     Expression,
     ExpressionValue,
-    DocumentQueryStreamResponse, DocumentSetRequest, DocumentGetRequest, DocumentDeleteRequest, DocumentQueryRequest,
+    DocumentQueryStreamResponse,
+    DocumentSetRequest,
+    DocumentGetRequest,
+    DocumentDeleteRequest,
+    DocumentQueryRequest,
     DocumentQueryStreamRequest,
 )
-from nitricapi.nitric.event.v1 import TopicListResponse, NitricTopic
+from nitric.proto.nitric.event.v1 import TopicListResponse, NitricTopic
 from nitric.utils import _struct_from_dict
 
 
@@ -57,7 +61,7 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
     async def test_set_document(self):
         mock_set = AsyncMock()
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.set", mock_set):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.set", mock_set):
             await Documents().collection("a").doc("b").set({"a": 1})
 
         mock_set.assert_called_once_with(
@@ -77,7 +81,7 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
     async def test_set_subcollection_document(self):
         mock_set = AsyncMock()
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.set", mock_set):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.set", mock_set):
             await Documents().collection("a").doc("b").collection("c").doc("d").set({"a": 1})
 
         mock_set.assert_called_once_with(
@@ -113,7 +117,7 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
             ),
         )
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.get", mock_get):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.get", mock_get):
             response = await Documents().collection("a").doc("b").get()
 
         mock_get.assert_called_once_with(
@@ -146,7 +150,7 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
             ),
         )
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.get", mock_get):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.get", mock_get):
             response: SdkDocument = await Documents().collection("a").doc("b").collection("c").doc("d").get()
 
         mock_get.assert_called_once_with(
@@ -172,7 +176,7 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
     async def test_delete_document(self):
         mock_delete = AsyncMock()
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.delete", mock_delete):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.delete", mock_delete):
             await Documents().collection("a").doc("b").delete()
 
         mock_delete.assert_called_once_with(
@@ -187,7 +191,7 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
     async def test_delete_subcollection_document(self):
         mock_delete = AsyncMock()
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.delete", mock_delete):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.delete", mock_delete):
             await Documents().collection("a").doc("b").collection("c").doc("d").delete()
 
         mock_delete.assert_called_once_with(
@@ -244,7 +248,7 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
             paging_token={"b": "c"},
         )
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.query", mock_query):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.query", mock_query):
             results = (
                 await Documents()
                 .collection("a")
@@ -287,7 +291,7 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
             paging_token={"b": "c"},
         )
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.query", mock_query):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.query", mock_query):
             results = (
                 await Documents()
                 .collection("a")
@@ -340,22 +344,23 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
                     document=Document(content=Struct(fields={"a": Value(number_value=i)}))
                 )
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.query_stream", mock_stream):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.query_stream", mock_stream):
             results = []
             async for result in Documents().collection("a").query().where("name", "startsWith", "test").stream():
                 results.append(result)
 
         self.assertEqual(3, stream_calls)
-        self.assertEqual({
-            'document_query_stream_request': DocumentQueryStreamRequest(
-                collection=Collection(name="a"),
-                expressions=[
-                    Expression(operand="name", operator="startsWith", value=ExpressionValue(string_value="test"))
-                ],
-                limit=0
-            ),
-        },
-        call_args,
+        self.assertEqual(
+            {
+                "document_query_stream_request": DocumentQueryStreamRequest(
+                    collection=Collection(name="a"),
+                    expressions=[
+                        Expression(operand="name", operator="startsWith", value=ExpressionValue(string_value="test"))
+                    ],
+                    limit=0,
+                ),
+            },
+            call_args,
         )
         self.assertEqual([{"a": i} for i in range(3)], [doc.content for doc in results])
 
@@ -365,7 +370,7 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
         mock_set = AsyncMock()
         mock_set.side_effect = GRPCError(Status.UNKNOWN, "test error")
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.set", mock_set):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.set", mock_set):
             with pytest.raises(UnknownException) as e:
                 await Documents().collection("a").doc("b").set({"a": 1})
 
@@ -373,7 +378,7 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
         mock_get = AsyncMock()
         mock_get.side_effect = GRPCError(Status.UNKNOWN, "test error")
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.get", mock_get):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.get", mock_get):
             with pytest.raises(UnknownException) as e:
                 await Documents().collection("a").doc("b").get()
 
@@ -381,7 +386,7 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
         mock_delete = AsyncMock()
         mock_delete.side_effect = GRPCError(Status.UNKNOWN, "test error")
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.delete", mock_delete):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.delete", mock_delete):
             with pytest.raises(UnknownException) as e:
                 await Documents().collection("a").doc("b").delete()
 
@@ -389,7 +394,7 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
         mock_fetch = AsyncMock()
         mock_fetch.side_effect = GRPCError(Status.UNKNOWN, "test error")
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.query", mock_fetch):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.query", mock_fetch):
             with pytest.raises(UnknownException) as e:
                 await Documents().collection("a").query().fetch()
 
@@ -408,7 +413,7 @@ class DocumentsClientTest(IsolatedAsyncioTestCase):
                     document=Document(content=Struct(fields={"a": Value(number_value=i)}))
                 )
 
-        with patch("nitricapi.nitric.document.v1.DocumentServiceStub.query_stream", mock_stream):
+        with patch("nitric.proto.nitric.document.v1.DocumentServiceStub.query_stream", mock_stream):
             with pytest.raises(UnknownException) as e:
                 async for result in Documents().collection("a").query().stream():
                     assert False

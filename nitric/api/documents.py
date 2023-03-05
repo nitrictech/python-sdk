@@ -26,14 +26,18 @@ from grpclib import GRPCError
 
 from nitric.api.const import MAX_SUB_COLLECTION_DEPTH
 from nitric.api.exception import exception_from_grpc_error
-from nitricapi.nitric.document.v1 import (
+from nitric.proto.nitric.document.v1 import (
     DocumentServiceStub,
     Collection as CollectionMessage,
     Key as KeyMessage,
     Expression as ExpressionMessage,
     ExpressionValue,
-    Document as DocumentMessage, DocumentSetRequest, DocumentGetRequest, DocumentDeleteRequest,
-    DocumentQueryStreamRequest, DocumentQueryRequest,
+    Document as DocumentMessage,
+    DocumentSetRequest,
+    DocumentGetRequest,
+    DocumentDeleteRequest,
+    DocumentQueryStreamRequest,
+    DocumentQueryRequest,
 )
 
 from nitric.utils import new_default_channel, _dict_from_struct, _struct_from_dict
@@ -75,9 +79,9 @@ class DocumentRef:
     async def get(self) -> Document:
         """Retrieve the contents of this document, if it exists."""
         try:
-            response = await self._documents._stub.get(document_get_request=DocumentGetRequest(
-                key=_doc_ref_to_wire(self)
-            ))
+            response = await self._documents._stub.get(
+                document_get_request=DocumentGetRequest(key=_doc_ref_to_wire(self))
+            )
             return _document_from_wire(documents=self._documents, message=response.document)
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
@@ -101,9 +105,11 @@ class DocumentRef:
     async def delete(self):
         """Delete this document, if it exists."""
         try:
-            await self._documents._stub.delete(document_delete_request=DocumentDeleteRequest(
-                key=_doc_ref_to_wire(self),
-            ))
+            await self._documents._stub.delete(
+                document_delete_request=DocumentDeleteRequest(
+                    key=_doc_ref_to_wire(self),
+                )
+            )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 

@@ -25,10 +25,11 @@ from enum import Enum
 from grpclib import GRPCError
 from nitric.application import Nitric
 from nitric.faas import EventMiddleware, FunctionServer, SubscriptionWorkerOptions
-from nitricapi.nitric.resource.v1 import (
+from nitric.proto.nitric.resource.v1 import (
     Resource,
     ResourceType,
-    Action, ResourceDeclareRequest,
+    Action,
+    ResourceDeclareRequest,
 )
 
 from nitric.resources.base import SecureResource
@@ -55,7 +56,8 @@ class Topic(SecureResource):
     async def _register(self):
         try:
             await self._resources_stub.declare(
-                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource()))
+                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
+            )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
@@ -74,14 +76,12 @@ class Topic(SecureResource):
 
     def allow(self, *args: Union[TopicPermission, str]) -> TopicRef:
         """Request the specified permissions to this resource."""
-
         self._register_policy(*args)
 
         return Events().topic(self.name)
 
     def subscribe(self, func: EventMiddleware):
         """Create and return a subscription decorator for this topic."""
-
         self.server = FunctionServer(SubscriptionWorkerOptions(topic=self.name))
         self.server.event(func)
         Nitric._register_worker(self.server)

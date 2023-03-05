@@ -16,6 +16,23 @@ clean:
 	@rm -rf ./build
 	@rm -rf ./dist
 
+NITRIC_VERSION="v0.20.0-rc.2"
+
+download:
+	@curl -L https://github.com/nitrictech/nitric/releases/download/${NITRIC_VERSION}/contracts.tgz -o contracts.tgz
+	@tar xvzf contracts.tgz
+	@rm contracts.tgz
+
+OUTPUT="./nitric/proto"
+CONTRACTS="./contracts"
+
+grpc-client: install download
+	@echo Generating Proto Sources
+	@echo $(OUTPUT)
+	@mkdir -p $(OUTPUT)
+	@python3 -m grpc_tools.protoc -I $(CONTRACTS) --python_betterproto_out=$(OUTPUT) ./contracts/proto/*/*/*.proto
+
+
 license:
 	@echo Applying Apache 2 header to source files
 	@licenseheaders -t tools/apache-2.tmpl -o "Nitric Technologies Pty Ltd" -y 2021 -n "Nitric Python 3 SDK" -u "https://github.com/nitrictech/python-sdk" -d nitric

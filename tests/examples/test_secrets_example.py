@@ -16,7 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from nitricapi.nitric.secret.v1 import Secret, SecretVersion, SecretAccessResponse, SecretPutResponse
+from nitric.proto.nitric.secret.v1 import Secret, SecretVersion, SecretAccessResponse, SecretPutResponse
 from examples.secrets.access import secret_access
 from examples.secrets.put import secret_put
 from examples.secrets.latest import secret_latest
@@ -34,7 +34,7 @@ class SecretsExamplesTest(IsolatedAsyncioTestCase):
         )
         mock_latest.return_value = mock_response
 
-        with patch("nitricapi.nitric.secret.v1.SecretServiceStub.access", mock_latest):
+        with patch("nitric.proto.nitric.secret.v1.SecretServiceStub.access", mock_latest):
             await secret_latest()
 
         mock_latest.assert_called_once()
@@ -53,8 +53,8 @@ class SecretsExamplesTest(IsolatedAsyncioTestCase):
         )
         mock_access.return_value = mock_response
 
-        with patch("nitricapi.nitric.secret.v1.SecretServiceStub.put", mock_put):
-            with patch("nitricapi.nitric.secret.v1.SecretServiceStub.access", mock_access):
+        with patch("nitric.proto.nitric.secret.v1.SecretServiceStub.put", mock_put):
+            with patch("nitric.proto.nitric.secret.v1.SecretServiceStub.access", mock_access):
                 await secret_put()
 
         mock_put.assert_called_once()
@@ -67,7 +67,7 @@ class SecretsExamplesTest(IsolatedAsyncioTestCase):
             value=b"super secret value",
         )
         mock_access.return_value = mock_response
-        with patch("nitricapi.nitric.secret.v1.SecretServiceStub.access", mock_access):
+        with patch("nitric.proto.nitric.secret.v1.SecretServiceStub.access", mock_access):
             await secret_access()
 
         mock_access.assert_called_once()
