@@ -75,7 +75,7 @@ class ApiOptions:
     def __init__(
         self,
         path: str = "",
-        middleware: List[Middleware] = None,
+        middleware: List[Middleware] = [],
         security_definitions: dict[str, SecurityDefinition] = None,
         security: dict[str, List[str]] = None,
     ):
@@ -91,7 +91,7 @@ class RouteOptions:
 
     middleware: Union[None, List[Middleware]]
 
-    def __init__(self, middleware: List[Middleware] = None):
+    def __init__(self, middleware: List[Middleware] = []):
         """Construct a new route options object."""
         self.middleware = middleware
 
@@ -135,7 +135,7 @@ class Api(BaseResource):
             opts = ApiOptions()
 
         self.name = name
-        self.middleware = opts.middleware
+        self.middleware = opts.middleware if opts.middleware is not None else []
         self.path = opts.path
         self.routes = []
         self.security_definitions = opts.security_definitions
@@ -291,8 +291,8 @@ class Route:
     def __init__(self, api: Api, path: str, opts: RouteOptions):
         """Define a route to be handled by the provided API."""
         self.api = api
-        self.path = path
-        self.middleware = opts.middleware
+        self.path = api.path.join(path)
+        self.middleware = opts.middleware if opts.middleware is not None else []
 
     def method(self, methods: List[HttpMethod], *middleware: HttpMiddleware, opts: MethodOptions = None):
         """Register middleware for multiple HTTP Methods."""
@@ -338,7 +338,7 @@ class Method:
         self.route = route
         self.methods = methods
         self.server = FunctionServer(ApiWorkerOptions(route.api.name, route.path, methods, opts))
-        self.server.http(*middleware)
+        self.server.http(*route.api.middleware, *route.middleware, *middleware)
 
     def start(self):
         """Start the server which will respond to incoming requests."""
