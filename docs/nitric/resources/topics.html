@@ -53,10 +53,11 @@ from enum import Enum
 from grpclib import GRPCError
 from nitric.application import Nitric
 from nitric.faas import EventMiddleware, FunctionServer, SubscriptionWorkerOptions
-from nitricapi.nitric.resource.v1 import (
+from nitric.proto.nitric.resource.v1 import (
     Resource,
     ResourceType,
-    Action, ResourceDeclareRequest,
+    Action,
+    ResourceDeclareRequest,
 )
 
 from nitric.resources.base import SecureResource
@@ -83,7 +84,8 @@ class Topic(SecureResource):
     async def _register(self):
         try:
             await self._resources_stub.declare(
-                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource()))
+                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
+            )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
@@ -102,14 +104,12 @@ class Topic(SecureResource):
 
     def allow(self, *args: Union[TopicPermission, str]) -&gt; TopicRef:
         &#34;&#34;&#34;Request the specified permissions to this resource.&#34;&#34;&#34;
-
         self._register_policy(*args)
 
         return Events().topic(self.name)
 
     def subscribe(self, func: EventMiddleware):
         &#34;&#34;&#34;Create and return a subscription decorator for this topic.&#34;&#34;&#34;
-
         self.server = FunctionServer(SubscriptionWorkerOptions(topic=self.name))
         self.server.event(func)
         Nitric._register_worker(self.server)
@@ -181,7 +181,8 @@ def topic(name: str) -&gt; Topic:
     async def _register(self):
         try:
             await self._resources_stub.declare(
-                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource()))
+                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
+            )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
@@ -200,14 +201,12 @@ def topic(name: str) -&gt; Topic:
 
     def allow(self, *args: Union[TopicPermission, str]) -&gt; TopicRef:
         &#34;&#34;&#34;Request the specified permissions to this resource.&#34;&#34;&#34;
-
         self._register_policy(*args)
 
         return Events().topic(self.name)
 
     def subscribe(self, func: EventMiddleware):
         &#34;&#34;&#34;Create and return a subscription decorator for this topic.&#34;&#34;&#34;
-
         self.server = FunctionServer(SubscriptionWorkerOptions(topic=self.name))
         self.server.event(func)
         Nitric._register_worker(self.server)</code></pre>
@@ -220,7 +219,7 @@ def topic(name: str) -&gt; Topic:
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="nitric.resources.topics.Topic.actions"><code class="name">var <span class="ident">actions</span> : List[nitricapi.nitric.resource.v1.Action]</code></dt>
+<dt id="nitric.resources.topics.Topic.actions"><code class="name">var <span class="ident">actions</span> : List[<a title="nitric.proto.nitric.resource.v1.Action" href="../proto/nitric/resource/v1/index.html#nitric.proto.nitric.resource.v1.Action">Action</a>]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -246,7 +245,6 @@ def topic(name: str) -&gt; Topic:
 </summary>
 <pre><code class="python">def allow(self, *args: Union[TopicPermission, str]) -&gt; TopicRef:
     &#34;&#34;&#34;Request the specified permissions to this resource.&#34;&#34;&#34;
-
     self._register_policy(*args)
 
     return Events().topic(self.name)</code></pre>
@@ -263,7 +261,6 @@ def topic(name: str) -&gt; Topic:
 </summary>
 <pre><code class="python">def subscribe(self, func: EventMiddleware):
     &#34;&#34;&#34;Create and return a subscription decorator for this topic.&#34;&#34;&#34;
-
     self.server = FunctionServer(SubscriptionWorkerOptions(topic=self.name))
     self.server.event(func)
     Nitric._register_worker(self.server)</code></pre>
@@ -281,7 +278,7 @@ def topic(name: str) -&gt; Topic:
 </dd>
 <dt id="nitric.resources.topics.TopicPermission"><code class="flex name class">
 <span>class <span class="ident">TopicPermission</span></span>
-<span>(</span><span>*args, **kwds)</span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Valid query expression operators.</p></div>

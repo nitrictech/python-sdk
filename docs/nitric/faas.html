@@ -56,7 +56,7 @@ from opentelemetry import context, propagate
 import betterproto
 from betterproto.grpc.util.async_channel import AsyncChannel
 from nitric.utils import new_default_channel
-from proto.nitric.faas.v1 import (
+from nitric.proto.nitric.faas.v1 import (
     FaasServiceStub,
     InitRequest,
     ClientMessage,
@@ -926,7 +926,7 @@ def payload(self) -&gt; bytes:
 </dd>
 <dt id="nitric.faas.Frequency"><code class="flex name class">
 <span>class <span class="ident">Frequency</span></span>
-<span>(</span><span>*args, **kwds)</span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Valid schedule frequencies.</p></div>
@@ -1334,7 +1334,7 @@ def from_grpc_trigger_request(trigger_request: TriggerRequest) -&gt; HttpContext
 </dd>
 <dt id="nitric.faas.HttpMethod"><code class="flex name class">
 <span>class <span class="ident">HttpMethod</span></span>
-<span>(</span><span>*args, **kwds)</span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Valid query expression operators.</p></div>

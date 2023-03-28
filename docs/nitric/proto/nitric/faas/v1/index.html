@@ -1,0 +1,1431 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>nitric.proto.nitric.faas.v1 API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>nitric.proto.nitric.faas.v1</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#
+# Copyright (c) 2021 Nitric Technologies Pty Ltd.
+#
+# This file is part of Nitric Python 3 SDK.
+# See https://github.com/nitrictech/python-sdk for further info.
+#
+# Licensed under the Apache License, Version 2.0 (the &#34;License&#34;);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an &#34;AS IS&#34; BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Generated by the protocol buffer compiler.  DO NOT EDIT!
+# sources: proto/faas/v1/faas.proto
+# plugin: python-betterproto
+import warnings
+from dataclasses import dataclass
+from typing import (
+    TYPE_CHECKING,
+    AsyncIterable,
+    AsyncIterator,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Union,
+)
+
+import betterproto
+import grpclib
+from betterproto.grpc.grpclib_server import ServiceBase
+
+
+if TYPE_CHECKING:
+    import grpclib.server
+    from betterproto.grpc.grpclib_client import MetadataLike
+    from grpclib.metadata import Deadline
+
+
+@dataclass(eq=False, repr=False)
+class ClientMessage(betterproto.Message):
+    &#34;&#34;&#34;Messages the client is able to send to the server&#34;&#34;&#34;
+
+    id: str = betterproto.string_field(1)
+    &#34;&#34;&#34;Client message ID, used to pair requests/responses&#34;&#34;&#34;
+
+    init_request: &#34;InitRequest&#34; = betterproto.message_field(2, group=&#34;content&#34;)
+    &#34;&#34;&#34;
+    Client initialisation request A worker will not be eligible for triggers
+    until it has identified itself
+    &#34;&#34;&#34;
+
+    trigger_response: &#34;TriggerResponse&#34; = betterproto.message_field(3, group=&#34;content&#34;)
+    &#34;&#34;&#34;Client responsding with result of a trigger&#34;&#34;&#34;
+
+
+@dataclass(eq=False, repr=False)
+class ServerMessage(betterproto.Message):
+    &#34;&#34;&#34;Messages the server is able to send to the client&#34;&#34;&#34;
+
+    id: str = betterproto.string_field(1)
+    &#34;&#34;&#34;Server message ID, used to pair requests/responses&#34;&#34;&#34;
+
+    init_response: &#34;InitResponse&#34; = betterproto.message_field(2, group=&#34;content&#34;)
+    &#34;&#34;&#34;
+    Server responding with client configuration details to an InitRequest
+    &#34;&#34;&#34;
+
+    trigger_request: &#34;TriggerRequest&#34; = betterproto.message_field(3, group=&#34;content&#34;)
+    &#34;&#34;&#34;Server requesting client to process a trigger&#34;&#34;&#34;
+
+
+@dataclass(eq=False, repr=False)
+class ApiWorkerScopes(betterproto.Message):
+    scopes: List[str] = betterproto.string_field(1)
+
+
+@dataclass(eq=False, repr=False)
+class ApiWorkerOptions(betterproto.Message):
+    security: Dict[str, &#34;ApiWorkerScopes&#34;] = betterproto.map_field(
+        1, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+    )
+    &#34;&#34;&#34;Apply security definitions to this operation&#34;&#34;&#34;
+
+    security_disabled: bool = betterproto.bool_field(2)
+    &#34;&#34;&#34;
+    explicitly disable security for this endpoint We need to do this as the
+    default value of a repeated field is always empty so there is no way of
+    knowing if security is explicitly disabled
+    &#34;&#34;&#34;
+
+
+@dataclass(eq=False, repr=False)
+class ApiWorker(betterproto.Message):
+    api: str = betterproto.string_field(1)
+    path: str = betterproto.string_field(2)
+    methods: List[str] = betterproto.string_field(3)
+    options: &#34;ApiWorkerOptions&#34; = betterproto.message_field(4)
+
+
+@dataclass(eq=False, repr=False)
+class SubscriptionWorker(betterproto.Message):
+    topic: str = betterproto.string_field(1)
+
+
+@dataclass(eq=False, repr=False)
+class ScheduleWorker(betterproto.Message):
+    key: str = betterproto.string_field(1)
+    rate: &#34;ScheduleRate&#34; = betterproto.message_field(10, group=&#34;cadence&#34;)
+    cron: &#34;ScheduleCron&#34; = betterproto.message_field(11, group=&#34;cadence&#34;)
+
+
+@dataclass(eq=False, repr=False)
+class ScheduleRate(betterproto.Message):
+    rate: str = betterproto.string_field(1)
+
+
+@dataclass(eq=False, repr=False)
+class ScheduleCron(betterproto.Message):
+    cron: str = betterproto.string_field(1)
+
+
+@dataclass(eq=False, repr=False)
+class InitRequest(betterproto.Message):
+    &#34;&#34;&#34;
+    InitRequest - Identifies a worker as ready to recieve triggers This message
+    will contain information on the type of triggers that a worker is capable
+    of handling
+    &#34;&#34;&#34;
+
+    api: &#34;ApiWorker&#34; = betterproto.message_field(10, group=&#34;Worker&#34;)
+    subscription: &#34;SubscriptionWorker&#34; = betterproto.message_field(11, group=&#34;Worker&#34;)
+    schedule: &#34;ScheduleWorker&#34; = betterproto.message_field(12, group=&#34;Worker&#34;)
+
+
+@dataclass(eq=False, repr=False)
+class InitResponse(betterproto.Message):
+    &#34;&#34;&#34;Placeholder message&#34;&#34;&#34;
+
+    pass
+
+
+@dataclass(eq=False, repr=False)
+class TriggerRequest(betterproto.Message):
+    &#34;&#34;&#34;The server has a trigger for the client to handle&#34;&#34;&#34;
+
+    data: bytes = betterproto.bytes_field(1)
+    &#34;&#34;&#34;The data in the trigger&#34;&#34;&#34;
+
+    mime_type: str = betterproto.string_field(2)
+    &#34;&#34;&#34;Should we supply a mime type for the data? Or rely on context?&#34;&#34;&#34;
+
+    http: &#34;HttpTriggerContext&#34; = betterproto.message_field(3, group=&#34;context&#34;)
+    topic: &#34;TopicTriggerContext&#34; = betterproto.message_field(4, group=&#34;context&#34;)
+
+
+@dataclass(eq=False, repr=False)
+class HeaderValue(betterproto.Message):
+    value: List[str] = betterproto.string_field(1)
+
+
+@dataclass(eq=False, repr=False)
+class QueryValue(betterproto.Message):
+    value: List[str] = betterproto.string_field(1)
+
+
+@dataclass(eq=False, repr=False)
+class HttpTriggerContext(betterproto.Message):
+    method: str = betterproto.string_field(1)
+    &#34;&#34;&#34;The request method&#34;&#34;&#34;
+
+    path: str = betterproto.string_field(2)
+    &#34;&#34;&#34;The path of the request&#34;&#34;&#34;
+
+    headers_old: Dict[str, str] = betterproto.map_field(
+        3, betterproto.TYPE_STRING, betterproto.TYPE_STRING
+    )
+    &#34;&#34;&#34;
+    The old request headers (preserving for backwards compatibility) TODO:
+    Remove in 1.0
+    &#34;&#34;&#34;
+
+    query_params_old: Dict[str, str] = betterproto.map_field(
+        4, betterproto.TYPE_STRING, betterproto.TYPE_STRING
+    )
+    &#34;&#34;&#34;
+    The old query params (preserving for backwards compatibility) TODO: Remove
+    in 1.0
+    &#34;&#34;&#34;
+
+    headers: Dict[str, &#34;HeaderValue&#34;] = betterproto.map_field(
+        5, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+    )
+    &#34;&#34;&#34;HTTP request headers&#34;&#34;&#34;
+
+    query_params: Dict[str, &#34;QueryValue&#34;] = betterproto.map_field(
+        6, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+    )
+    &#34;&#34;&#34;HTTP Query params&#34;&#34;&#34;
+
+    path_params: Dict[str, str] = betterproto.map_field(
+        7, betterproto.TYPE_STRING, betterproto.TYPE_STRING
+    )
+    &#34;&#34;&#34;HTTP Path parameters&#34;&#34;&#34;
+
+    def __post_init__(self) -&gt; None:
+        super().__post_init__()
+        if self.is_set(&#34;headers_old&#34;):
+            warnings.warn(
+                &#34;HttpTriggerContext.headers_old is deprecated&#34;, DeprecationWarning
+            )
+        if self.is_set(&#34;query_params_old&#34;):
+            warnings.warn(
+                &#34;HttpTriggerContext.query_params_old is deprecated&#34;, DeprecationWarning
+            )
+
+
+@dataclass(eq=False, repr=False)
+class TopicTriggerContext(betterproto.Message):
+    topic: str = betterproto.string_field(1)
+    &#34;&#34;&#34;The topic the message was published for&#34;&#34;&#34;
+
+
+@dataclass(eq=False, repr=False)
+class TriggerResponse(betterproto.Message):
+    &#34;&#34;&#34;The worker has successfully processed a trigger&#34;&#34;&#34;
+
+    data: bytes = betterproto.bytes_field(1)
+    &#34;&#34;&#34;The data returned in the response&#34;&#34;&#34;
+
+    http: &#34;HttpResponseContext&#34; = betterproto.message_field(10, group=&#34;context&#34;)
+    &#34;&#34;&#34;response to a http request&#34;&#34;&#34;
+
+    topic: &#34;TopicResponseContext&#34; = betterproto.message_field(11, group=&#34;context&#34;)
+    &#34;&#34;&#34;response to a topic trigger&#34;&#34;&#34;
+
+
+@dataclass(eq=False, repr=False)
+class HttpResponseContext(betterproto.Message):
+    &#34;&#34;&#34;
+    Specific HttpResponse message Note this does not have to be handled by the
+    User at all but they will have the option of control If they choose...
+    &#34;&#34;&#34;
+
+    headers_old: Dict[str, str] = betterproto.map_field(
+        1, betterproto.TYPE_STRING, betterproto.TYPE_STRING
+    )
+    &#34;&#34;&#34;Old HTTP response headers (deprecated) TODO: Remove in 1.0&#34;&#34;&#34;
+
+    status: int = betterproto.int32_field(2)
+    &#34;&#34;&#34;The HTTP status of the request&#34;&#34;&#34;
+
+    headers: Dict[str, &#34;HeaderValue&#34;] = betterproto.map_field(
+        3, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+    )
+    &#34;&#34;&#34;HTTP response headers&#34;&#34;&#34;
+
+    def __post_init__(self) -&gt; None:
+        super().__post_init__()
+        if self.is_set(&#34;headers_old&#34;):
+            warnings.warn(
+                &#34;HttpResponseContext.headers_old is deprecated&#34;, DeprecationWarning
+            )
+
+
+@dataclass(eq=False, repr=False)
+class TopicResponseContext(betterproto.Message):
+    &#34;&#34;&#34;
+    Specific event response message We do not accept responses for events only
+    whether or not they were successfully processed
+    &#34;&#34;&#34;
+
+    success: bool = betterproto.bool_field(1)
+    &#34;&#34;&#34;Success status of the handled event&#34;&#34;&#34;
+
+
+class FaasServiceStub(betterproto.ServiceStub):
+    async def trigger_stream(
+        self,
+        client_message_iterator: Union[
+            AsyncIterable[&#34;ClientMessage&#34;], Iterable[&#34;ClientMessage&#34;]
+        ],
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional[&#34;Deadline&#34;] = None,
+        metadata: Optional[&#34;MetadataLike&#34;] = None
+    ) -&gt; AsyncIterator[&#34;ServerMessage&#34;]:
+        async for response in self._stream_stream(
+            &#34;/nitric.faas.v1.FaasService/TriggerStream&#34;,
+            client_message_iterator,
+            ClientMessage,
+            ServerMessage,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        ):
+            yield response
+
+
+class FaasServiceBase(ServiceBase):
+    async def trigger_stream(
+        self, client_message_iterator: AsyncIterator[&#34;ClientMessage&#34;]
+    ) -&gt; AsyncIterator[&#34;ServerMessage&#34;]:
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def __rpc_trigger_stream(
+        self, stream: &#34;grpclib.server.Stream[ClientMessage, ServerMessage]&#34;
+    ) -&gt; None:
+        request = stream.__aiter__()
+        await self._call_rpc_handler_server_stream(
+            self.trigger_stream,
+            stream,
+            request,
+        )
+
+    def __mapping__(self) -&gt; Dict[str, grpclib.const.Handler]:
+        return {
+            &#34;/nitric.faas.v1.FaasService/TriggerStream&#34;: grpclib.const.Handler(
+                self.__rpc_trigger_stream,
+                grpclib.const.Cardinality.STREAM_STREAM,
+                ClientMessage,
+                ServerMessage,
+            ),
+        }</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.ApiWorker"><code class="flex name class">
+<span>class <span class="ident">ApiWorker</span></span>
+<span>(</span><span>api: str = &lt;object object&gt;, path: str = &lt;object object&gt;, methods: List[str] = &lt;object object&gt;, options: <a title="nitric.proto.nitric.faas.v1.ApiWorkerOptions" href="#nitric.proto.nitric.faas.v1.ApiWorkerOptions">ApiWorkerOptions</a> = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ApiWorker(api: str = <object object at 0x1016c89d0>, path: str = <object object at 0x1016c89d0>, methods: List[str] = <object object at 0x1016c89d0>, options: 'ApiWorkerOptions' = <object object at 0x1016c89d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class ApiWorker(betterproto.Message):
+    api: str = betterproto.string_field(1)
+    path: str = betterproto.string_field(2)
+    methods: List[str] = betterproto.string_field(3)
+    options: &#34;ApiWorkerOptions&#34; = betterproto.message_field(4)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.ApiWorker.api"><code class="name">var <span class="ident">api</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.ApiWorker.methods"><code class="name">var <span class="ident">methods</span> : List[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.ApiWorker.options"><code class="name">var <span class="ident">options</span> : <a title="nitric.proto.nitric.faas.v1.ApiWorkerOptions" href="#nitric.proto.nitric.faas.v1.ApiWorkerOptions">ApiWorkerOptions</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.ApiWorker.path"><code class="name">var <span class="ident">path</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.ApiWorkerOptions"><code class="flex name class">
+<span>class <span class="ident">ApiWorkerOptions</span></span>
+<span>(</span><span>security: Dict[str, ForwardRef('<a title="nitric.proto.nitric.faas.v1.ApiWorkerScopes" href="#nitric.proto.nitric.faas.v1.ApiWorkerScopes">ApiWorkerScopes</a>')] = &lt;object object&gt;, security_disabled: bool = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ApiWorkerOptions(security: Dict[str, ForwardRef('ApiWorkerScopes')] = <object object at 0x1016c89d0>, security_disabled: bool = <object object at 0x1016c89d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class ApiWorkerOptions(betterproto.Message):
+    security: Dict[str, &#34;ApiWorkerScopes&#34;] = betterproto.map_field(
+        1, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+    )
+    &#34;&#34;&#34;Apply security definitions to this operation&#34;&#34;&#34;
+
+    security_disabled: bool = betterproto.bool_field(2)
+    &#34;&#34;&#34;
+    explicitly disable security for this endpoint We need to do this as the
+    default value of a repeated field is always empty so there is no way of
+    knowing if security is explicitly disabled
+    &#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.ApiWorkerOptions.security"><code class="name">var <span class="ident">security</span> : Dict[str, <a title="nitric.proto.nitric.faas.v1.ApiWorkerScopes" href="#nitric.proto.nitric.faas.v1.ApiWorkerScopes">ApiWorkerScopes</a>]</code></dt>
+<dd>
+<div class="desc"><p>Apply security definitions to this operation</p></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.ApiWorkerOptions.security_disabled"><code class="name">var <span class="ident">security_disabled</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>explicitly disable security for this endpoint We need to do this as the
+default value of a repeated field is always empty so there is no way of
+knowing if security is explicitly disabled</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.ApiWorkerScopes"><code class="flex name class">
+<span>class <span class="ident">ApiWorkerScopes</span></span>
+<span>(</span><span>scopes: List[str] = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ApiWorkerScopes(scopes: List[str] = <object object at 0x1016c89d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class ApiWorkerScopes(betterproto.Message):
+    scopes: List[str] = betterproto.string_field(1)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.ApiWorkerScopes.scopes"><code class="name">var <span class="ident">scopes</span> : List[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.ClientMessage"><code class="flex name class">
+<span>class <span class="ident">ClientMessage</span></span>
+<span>(</span><span>id: str = &lt;object object&gt;, init_request: <a title="nitric.proto.nitric.faas.v1.InitRequest" href="#nitric.proto.nitric.faas.v1.InitRequest">InitRequest</a> = &lt;object object&gt;, trigger_response: <a title="nitric.proto.nitric.faas.v1.TriggerResponse" href="#nitric.proto.nitric.faas.v1.TriggerResponse">TriggerResponse</a> = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Messages the client is able to send to the server</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class ClientMessage(betterproto.Message):
+    &#34;&#34;&#34;Messages the client is able to send to the server&#34;&#34;&#34;
+
+    id: str = betterproto.string_field(1)
+    &#34;&#34;&#34;Client message ID, used to pair requests/responses&#34;&#34;&#34;
+
+    init_request: &#34;InitRequest&#34; = betterproto.message_field(2, group=&#34;content&#34;)
+    &#34;&#34;&#34;
+    Client initialisation request A worker will not be eligible for triggers
+    until it has identified itself
+    &#34;&#34;&#34;
+
+    trigger_response: &#34;TriggerResponse&#34; = betterproto.message_field(3, group=&#34;content&#34;)
+    &#34;&#34;&#34;Client responsding with result of a trigger&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.ClientMessage.id"><code class="name">var <span class="ident">id</span> : str</code></dt>
+<dd>
+<div class="desc"><p>Client message ID, used to pair requests/responses</p></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.ClientMessage.init_request"><code class="name">var <span class="ident">init_request</span> : <a title="nitric.proto.nitric.faas.v1.InitRequest" href="#nitric.proto.nitric.faas.v1.InitRequest">InitRequest</a></code></dt>
+<dd>
+<div class="desc"><p>Client initialisation request A worker will not be eligible for triggers
+until it has identified itself</p></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.ClientMessage.trigger_response"><code class="name">var <span class="ident">trigger_response</span> : <a title="nitric.proto.nitric.faas.v1.TriggerResponse" href="#nitric.proto.nitric.faas.v1.TriggerResponse">TriggerResponse</a></code></dt>
+<dd>
+<div class="desc"><p>Client responsding with result of a trigger</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.FaasServiceBase"><code class="flex name class">
+<span>class <span class="ident">FaasServiceBase</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for async gRPC servers.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FaasServiceBase(ServiceBase):
+    async def trigger_stream(
+        self, client_message_iterator: AsyncIterator[&#34;ClientMessage&#34;]
+    ) -&gt; AsyncIterator[&#34;ServerMessage&#34;]:
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def __rpc_trigger_stream(
+        self, stream: &#34;grpclib.server.Stream[ClientMessage, ServerMessage]&#34;
+    ) -&gt; None:
+        request = stream.__aiter__()
+        await self._call_rpc_handler_server_stream(
+            self.trigger_stream,
+            stream,
+            request,
+        )
+
+    def __mapping__(self) -&gt; Dict[str, grpclib.const.Handler]:
+        return {
+            &#34;/nitric.faas.v1.FaasService/TriggerStream&#34;: grpclib.const.Handler(
+                self.__rpc_trigger_stream,
+                grpclib.const.Cardinality.STREAM_STREAM,
+                ClientMessage,
+                ServerMessage,
+            ),
+        }</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.grpc.grpclib_server.ServiceBase</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.FaasServiceBase.trigger_stream"><code class="name flex">
+<span>async def <span class="ident">trigger_stream</span></span>(<span>self, client_message_iterator: AsyncIterator[ForwardRef('<a title="nitric.proto.nitric.faas.v1.ClientMessage" href="#nitric.proto.nitric.faas.v1.ClientMessage">ClientMessage</a>')]) ‑> AsyncIterator[<a title="nitric.proto.nitric.faas.v1.ServerMessage" href="#nitric.proto.nitric.faas.v1.ServerMessage">ServerMessage</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def trigger_stream(
+    self, client_message_iterator: AsyncIterator[&#34;ClientMessage&#34;]
+) -&gt; AsyncIterator[&#34;ServerMessage&#34;]:
+    raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.FaasServiceStub"><code class="flex name class">
+<span>class <span class="ident">FaasServiceStub</span></span>
+<span>(</span><span>channel: Channel, *, timeout: Optional[float] = None, deadline: Optional[ForwardRef('Deadline')] = None, metadata: Union[Mapping[str, Union[str, bytes]], Collection[Tuple[str, Union[str, bytes]]], NoneType] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for async gRPC clients.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FaasServiceStub(betterproto.ServiceStub):
+    async def trigger_stream(
+        self,
+        client_message_iterator: Union[
+            AsyncIterable[&#34;ClientMessage&#34;], Iterable[&#34;ClientMessage&#34;]
+        ],
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional[&#34;Deadline&#34;] = None,
+        metadata: Optional[&#34;MetadataLike&#34;] = None
+    ) -&gt; AsyncIterator[&#34;ServerMessage&#34;]:
+        async for response in self._stream_stream(
+            &#34;/nitric.faas.v1.FaasService/TriggerStream&#34;,
+            client_message_iterator,
+            ClientMessage,
+            ServerMessage,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        ):
+            yield response</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.grpc.grpclib_client.ServiceStub</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream"><code class="name flex">
+<span>async def <span class="ident">trigger_stream</span></span>(<span>self, client_message_iterator: Union[AsyncIterable[ForwardRef('<a title="nitric.proto.nitric.faas.v1.ClientMessage" href="#nitric.proto.nitric.faas.v1.ClientMessage">ClientMessage</a>')], Iterable[ForwardRef('<a title="nitric.proto.nitric.faas.v1.ClientMessage" href="#nitric.proto.nitric.faas.v1.ClientMessage">ClientMessage</a>')]], *, timeout: Optional[float] = None, deadline: Optional[ForwardRef('Deadline')] = None, metadata: Optional[ForwardRef('MetadataLike')] = None) ‑> AsyncIterator[<a title="nitric.proto.nitric.faas.v1.ServerMessage" href="#nitric.proto.nitric.faas.v1.ServerMessage">ServerMessage</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def trigger_stream(
+    self,
+    client_message_iterator: Union[
+        AsyncIterable[&#34;ClientMessage&#34;], Iterable[&#34;ClientMessage&#34;]
+    ],
+    *,
+    timeout: Optional[float] = None,
+    deadline: Optional[&#34;Deadline&#34;] = None,
+    metadata: Optional[&#34;MetadataLike&#34;] = None
+) -&gt; AsyncIterator[&#34;ServerMessage&#34;]:
+    async for response in self._stream_stream(
+        &#34;/nitric.faas.v1.FaasService/TriggerStream&#34;,
+        client_message_iterator,
+        ClientMessage,
+        ServerMessage,
+        timeout=timeout,
+        deadline=deadline,
+        metadata=metadata,
+    ):
+        yield response</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.HeaderValue"><code class="flex name class">
+<span>class <span class="ident">HeaderValue</span></span>
+<span>(</span><span>value: List[str] = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>HeaderValue(value: List[str] = <object object at 0x1016c89d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class HeaderValue(betterproto.Message):
+    value: List[str] = betterproto.string_field(1)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.HeaderValue.value"><code class="name">var <span class="ident">value</span> : List[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.HttpResponseContext"><code class="flex name class">
+<span>class <span class="ident">HttpResponseContext</span></span>
+<span>(</span><span>headers_old: Dict[str, str] = &lt;object object&gt;, status: int = &lt;object object&gt;, headers: Dict[str, ForwardRef('<a title="nitric.proto.nitric.faas.v1.HeaderValue" href="#nitric.proto.nitric.faas.v1.HeaderValue">HeaderValue</a>')] = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Specific HttpResponse message Note this does not have to be handled by the
+User at all but they will have the option of control If they choose&hellip;</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class HttpResponseContext(betterproto.Message):
+    &#34;&#34;&#34;
+    Specific HttpResponse message Note this does not have to be handled by the
+    User at all but they will have the option of control If they choose...
+    &#34;&#34;&#34;
+
+    headers_old: Dict[str, str] = betterproto.map_field(
+        1, betterproto.TYPE_STRING, betterproto.TYPE_STRING
+    )
+    &#34;&#34;&#34;Old HTTP response headers (deprecated) TODO: Remove in 1.0&#34;&#34;&#34;
+
+    status: int = betterproto.int32_field(2)
+    &#34;&#34;&#34;The HTTP status of the request&#34;&#34;&#34;
+
+    headers: Dict[str, &#34;HeaderValue&#34;] = betterproto.map_field(
+        3, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+    )
+    &#34;&#34;&#34;HTTP response headers&#34;&#34;&#34;
+
+    def __post_init__(self) -&gt; None:
+        super().__post_init__()
+        if self.is_set(&#34;headers_old&#34;):
+            warnings.warn(
+                &#34;HttpResponseContext.headers_old is deprecated&#34;, DeprecationWarning
+            )</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.HttpResponseContext.headers"><code class="name">var <span class="ident">headers</span> : Dict[str, <a title="nitric.proto.nitric.faas.v1.HeaderValue" href="#nitric.proto.nitric.faas.v1.HeaderValue">HeaderValue</a>]</code></dt>
+<dd>
+<div class="desc"><p>HTTP response headers</p></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.HttpResponseContext.headers_old"><code class="name">var <span class="ident">headers_old</span> : Dict[str, str]</code></dt>
+<dd>
+<div class="desc"><p>Old HTTP response headers (deprecated) TODO: Remove in 1.0</p></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.HttpResponseContext.status"><code class="name">var <span class="ident">status</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The HTTP status of the request</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.HttpTriggerContext"><code class="flex name class">
+<span>class <span class="ident">HttpTriggerContext</span></span>
+<span>(</span><span>method: str = &lt;object object&gt;, path: str = &lt;object object&gt;, headers_old: Dict[str, str] = &lt;object object&gt;, query_params_old: Dict[str, str] = &lt;object object&gt;, headers: Dict[str, ForwardRef('<a title="nitric.proto.nitric.faas.v1.HeaderValue" href="#nitric.proto.nitric.faas.v1.HeaderValue">HeaderValue</a>')] = &lt;object object&gt;, query_params: Dict[str, ForwardRef('<a title="nitric.proto.nitric.faas.v1.QueryValue" href="#nitric.proto.nitric.faas.v1.QueryValue">QueryValue</a>')] = &lt;object object&gt;, path_params: Dict[str, str] = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>HttpTriggerContext(method: str = <object object at 0x1016c89d0>, path: str = <object object at 0x1016c89d0>, headers_old: Dict[str, str] = <object object at 0x1016c89d0>, query_params_old: Dict[str, str] = <object object at 0x1016c89d0>, headers: Dict[str, ForwardRef('HeaderValue')] = <object object at 0x1016c89d0>, query_params: Dict[str, ForwardRef('QueryValue')] = <object object at 0x1016c89d0>, path_params: Dict[str, str] = <object object at 0x1016c89d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class HttpTriggerContext(betterproto.Message):
+    method: str = betterproto.string_field(1)
+    &#34;&#34;&#34;The request method&#34;&#34;&#34;
+
+    path: str = betterproto.string_field(2)
+    &#34;&#34;&#34;The path of the request&#34;&#34;&#34;
+
+    headers_old: Dict[str, str] = betterproto.map_field(
+        3, betterproto.TYPE_STRING, betterproto.TYPE_STRING
+    )
+    &#34;&#34;&#34;
+    The old request headers (preserving for backwards compatibility) TODO:
+    Remove in 1.0
+    &#34;&#34;&#34;
+
+    query_params_old: Dict[str, str] = betterproto.map_field(
+        4, betterproto.TYPE_STRING, betterproto.TYPE_STRING
+    )
+    &#34;&#34;&#34;
+    The old query params (preserving for backwards compatibility) TODO: Remove
+    in 1.0
+    &#34;&#34;&#34;
+
+    headers: Dict[str, &#34;HeaderValue&#34;] = betterproto.map_field(
+        5, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+    )
+    &#34;&#34;&#34;HTTP request headers&#34;&#34;&#34;
+
+    query_params: Dict[str, &#34;QueryValue&#34;] = betterproto.map_field(
+        6, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+    )
+    &#34;&#34;&#34;HTTP Query params&#34;&#34;&#34;
+
+    path_params: Dict[str, str] = betterproto.map_field(
+        7, betterproto.TYPE_STRING, betterproto.TYPE_STRING
+    )
+    &#34;&#34;&#34;HTTP Path parameters&#34;&#34;&#34;
+
+    def __post_init__(self) -&gt; None:
+        super().__post_init__()
+        if self.is_set(&#34;headers_old&#34;):
+            warnings.warn(
+                &#34;HttpTriggerContext.headers_old is deprecated&#34;, DeprecationWarning
+            )
+        if self.is_set(&#34;query_params_old&#34;):
+            warnings.warn(
+                &#34;HttpTriggerContext.query_params_old is deprecated&#34;, DeprecationWarning
+            )</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.HttpTriggerContext.headers"><code class="name">var <span class="ident">headers</span> : Dict[str, <a title="nitric.proto.nitric.faas.v1.HeaderValue" href="#nitric.proto.nitric.faas.v1.HeaderValue">HeaderValue</a>]</code></dt>
+<dd>
+<div class="desc"><p>HTTP request headers</p></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.HttpTriggerContext.headers_old"><code class="name">var <span class="ident">headers_old</span> : Dict[str, str]</code></dt>
+<dd>
+<div class="desc"><p>The old request headers (preserving for backwards compatibility) TODO:
+Remove in 1.0</p></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.HttpTriggerContext.method"><code class="name">var <span class="ident">method</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The request method</p></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.HttpTriggerContext.path"><code class="name">var <span class="ident">path</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The path of the request</p></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.HttpTriggerContext.path_params"><code class="name">var <span class="ident">path_params</span> : Dict[str, str]</code></dt>
+<dd>
+<div class="desc"><p>HTTP Path parameters</p></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.HttpTriggerContext.query_params"><code class="name">var <span class="ident">query_params</span> : Dict[str, <a title="nitric.proto.nitric.faas.v1.QueryValue" href="#nitric.proto.nitric.faas.v1.QueryValue">QueryValue</a>]</code></dt>
+<dd>
+<div class="desc"><p>HTTP Query params</p></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.HttpTriggerContext.query_params_old"><code class="name">var <span class="ident">query_params_old</span> : Dict[str, str]</code></dt>
+<dd>
+<div class="desc"><p>The old query params (preserving for backwards compatibility) TODO: Remove
+in 1.0</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.InitRequest"><code class="flex name class">
+<span>class <span class="ident">InitRequest</span></span>
+<span>(</span><span>api: <a title="nitric.proto.nitric.faas.v1.ApiWorker" href="#nitric.proto.nitric.faas.v1.ApiWorker">ApiWorker</a> = &lt;object object&gt;, subscription: <a title="nitric.proto.nitric.faas.v1.SubscriptionWorker" href="#nitric.proto.nitric.faas.v1.SubscriptionWorker">SubscriptionWorker</a> = &lt;object object&gt;, schedule: <a title="nitric.proto.nitric.faas.v1.ScheduleWorker" href="#nitric.proto.nitric.faas.v1.ScheduleWorker">ScheduleWorker</a> = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>InitRequest - Identifies a worker as ready to recieve triggers This message
+will contain information on the type of triggers that a worker is capable
+of handling</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class InitRequest(betterproto.Message):
+    &#34;&#34;&#34;
+    InitRequest - Identifies a worker as ready to recieve triggers This message
+    will contain information on the type of triggers that a worker is capable
+    of handling
+    &#34;&#34;&#34;
+
+    api: &#34;ApiWorker&#34; = betterproto.message_field(10, group=&#34;Worker&#34;)
+    subscription: &#34;SubscriptionWorker&#34; = betterproto.message_field(11, group=&#34;Worker&#34;)
+    schedule: &#34;ScheduleWorker&#34; = betterproto.message_field(12, group=&#34;Worker&#34;)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.InitRequest.api"><code class="name">var <span class="ident">api</span> : <a title="nitric.proto.nitric.faas.v1.ApiWorker" href="#nitric.proto.nitric.faas.v1.ApiWorker">ApiWorker</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.InitRequest.schedule"><code class="name">var <span class="ident">schedule</span> : <a title="nitric.proto.nitric.faas.v1.ScheduleWorker" href="#nitric.proto.nitric.faas.v1.ScheduleWorker">ScheduleWorker</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.InitRequest.subscription"><code class="name">var <span class="ident">subscription</span> : <a title="nitric.proto.nitric.faas.v1.SubscriptionWorker" href="#nitric.proto.nitric.faas.v1.SubscriptionWorker">SubscriptionWorker</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.InitResponse"><code class="flex name class">
+<span>class <span class="ident">InitResponse</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Placeholder message</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class InitResponse(betterproto.Message):
+    &#34;&#34;&#34;Placeholder message&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.QueryValue"><code class="flex name class">
+<span>class <span class="ident">QueryValue</span></span>
+<span>(</span><span>value: List[str] = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>QueryValue(value: List[str] = <object object at 0x1016c89d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class QueryValue(betterproto.Message):
+    value: List[str] = betterproto.string_field(1)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.QueryValue.value"><code class="name">var <span class="ident">value</span> : List[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.ScheduleCron"><code class="flex name class">
+<span>class <span class="ident">ScheduleCron</span></span>
+<span>(</span><span>cron: str = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ScheduleCron(cron: str = <object object at 0x1016c89d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class ScheduleCron(betterproto.Message):
+    cron: str = betterproto.string_field(1)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.ScheduleCron.cron"><code class="name">var <span class="ident">cron</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.ScheduleRate"><code class="flex name class">
+<span>class <span class="ident">ScheduleRate</span></span>
+<span>(</span><span>rate: str = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ScheduleRate(rate: str = <object object at 0x1016c89d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class ScheduleRate(betterproto.Message):
+    rate: str = betterproto.string_field(1)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.ScheduleRate.rate"><code class="name">var <span class="ident">rate</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.ScheduleWorker"><code class="flex name class">
+<span>class <span class="ident">ScheduleWorker</span></span>
+<span>(</span><span>key: str = &lt;object object&gt;, rate: <a title="nitric.proto.nitric.faas.v1.ScheduleRate" href="#nitric.proto.nitric.faas.v1.ScheduleRate">ScheduleRate</a> = &lt;object object&gt;, cron: <a title="nitric.proto.nitric.faas.v1.ScheduleCron" href="#nitric.proto.nitric.faas.v1.ScheduleCron">ScheduleCron</a> = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ScheduleWorker(key: str = <object object at 0x1016c89d0>, rate: 'ScheduleRate' = <object object at 0x1016c89d0>, cron: 'ScheduleCron' = <object object at 0x1016c89d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class ScheduleWorker(betterproto.Message):
+    key: str = betterproto.string_field(1)
+    rate: &#34;ScheduleRate&#34; = betterproto.message_field(10, group=&#34;cadence&#34;)
+    cron: &#34;ScheduleCron&#34; = betterproto.message_field(11, group=&#34;cadence&#34;)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.ScheduleWorker.cron"><code class="name">var <span class="ident">cron</span> : <a title="nitric.proto.nitric.faas.v1.ScheduleCron" href="#nitric.proto.nitric.faas.v1.ScheduleCron">ScheduleCron</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.ScheduleWorker.key"><code class="name">var <span class="ident">key</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.ScheduleWorker.rate"><code class="name">var <span class="ident">rate</span> : <a title="nitric.proto.nitric.faas.v1.ScheduleRate" href="#nitric.proto.nitric.faas.v1.ScheduleRate">ScheduleRate</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.ServerMessage"><code class="flex name class">
+<span>class <span class="ident">ServerMessage</span></span>
+<span>(</span><span>id: str = &lt;object object&gt;, init_response: <a title="nitric.proto.nitric.faas.v1.InitResponse" href="#nitric.proto.nitric.faas.v1.InitResponse">InitResponse</a> = &lt;object object&gt;, trigger_request: <a title="nitric.proto.nitric.faas.v1.TriggerRequest" href="#nitric.proto.nitric.faas.v1.TriggerRequest">TriggerRequest</a> = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Messages the server is able to send to the client</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class ServerMessage(betterproto.Message):
+    &#34;&#34;&#34;Messages the server is able to send to the client&#34;&#34;&#34;
+
+    id: str = betterproto.string_field(1)
+    &#34;&#34;&#34;Server message ID, used to pair requests/responses&#34;&#34;&#34;
+
+    init_response: &#34;InitResponse&#34; = betterproto.message_field(2, group=&#34;content&#34;)
+    &#34;&#34;&#34;
+    Server responding with client configuration details to an InitRequest
+    &#34;&#34;&#34;
+
+    trigger_request: &#34;TriggerRequest&#34; = betterproto.message_field(3, group=&#34;content&#34;)
+    &#34;&#34;&#34;Server requesting client to process a trigger&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.ServerMessage.id"><code class="name">var <span class="ident">id</span> : str</code></dt>
+<dd>
+<div class="desc"><p>Server message ID, used to pair requests/responses</p></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.ServerMessage.init_response"><code class="name">var <span class="ident">init_response</span> : <a title="nitric.proto.nitric.faas.v1.InitResponse" href="#nitric.proto.nitric.faas.v1.InitResponse">InitResponse</a></code></dt>
+<dd>
+<div class="desc"><p>Server responding with client configuration details to an InitRequest</p></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.ServerMessage.trigger_request"><code class="name">var <span class="ident">trigger_request</span> : <a title="nitric.proto.nitric.faas.v1.TriggerRequest" href="#nitric.proto.nitric.faas.v1.TriggerRequest">TriggerRequest</a></code></dt>
+<dd>
+<div class="desc"><p>Server requesting client to process a trigger</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.SubscriptionWorker"><code class="flex name class">
+<span>class <span class="ident">SubscriptionWorker</span></span>
+<span>(</span><span>topic: str = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>SubscriptionWorker(topic: str = <object object at 0x1016c89d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class SubscriptionWorker(betterproto.Message):
+    topic: str = betterproto.string_field(1)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.SubscriptionWorker.topic"><code class="name">var <span class="ident">topic</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.TopicResponseContext"><code class="flex name class">
+<span>class <span class="ident">TopicResponseContext</span></span>
+<span>(</span><span>success: bool = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Specific event response message We do not accept responses for events only
+whether or not they were successfully processed</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class TopicResponseContext(betterproto.Message):
+    &#34;&#34;&#34;
+    Specific event response message We do not accept responses for events only
+    whether or not they were successfully processed
+    &#34;&#34;&#34;
+
+    success: bool = betterproto.bool_field(1)
+    &#34;&#34;&#34;Success status of the handled event&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.TopicResponseContext.success"><code class="name">var <span class="ident">success</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>Success status of the handled event</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.TopicTriggerContext"><code class="flex name class">
+<span>class <span class="ident">TopicTriggerContext</span></span>
+<span>(</span><span>topic: str = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>TopicTriggerContext(topic: str = <object object at 0x1016c89d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class TopicTriggerContext(betterproto.Message):
+    topic: str = betterproto.string_field(1)
+    &#34;&#34;&#34;The topic the message was published for&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.TopicTriggerContext.topic"><code class="name">var <span class="ident">topic</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The topic the message was published for</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.TriggerRequest"><code class="flex name class">
+<span>class <span class="ident">TriggerRequest</span></span>
+<span>(</span><span>data: bytes = &lt;object object&gt;, mime_type: str = &lt;object object&gt;, http: <a title="nitric.proto.nitric.faas.v1.HttpTriggerContext" href="#nitric.proto.nitric.faas.v1.HttpTriggerContext">HttpTriggerContext</a> = &lt;object object&gt;, topic: <a title="nitric.proto.nitric.faas.v1.TopicTriggerContext" href="#nitric.proto.nitric.faas.v1.TopicTriggerContext">TopicTriggerContext</a> = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The server has a trigger for the client to handle</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class TriggerRequest(betterproto.Message):
+    &#34;&#34;&#34;The server has a trigger for the client to handle&#34;&#34;&#34;
+
+    data: bytes = betterproto.bytes_field(1)
+    &#34;&#34;&#34;The data in the trigger&#34;&#34;&#34;
+
+    mime_type: str = betterproto.string_field(2)
+    &#34;&#34;&#34;Should we supply a mime type for the data? Or rely on context?&#34;&#34;&#34;
+
+    http: &#34;HttpTriggerContext&#34; = betterproto.message_field(3, group=&#34;context&#34;)
+    topic: &#34;TopicTriggerContext&#34; = betterproto.message_field(4, group=&#34;context&#34;)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.TriggerRequest.data"><code class="name">var <span class="ident">data</span> : bytes</code></dt>
+<dd>
+<div class="desc"><p>The data in the trigger</p></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.TriggerRequest.http"><code class="name">var <span class="ident">http</span> : <a title="nitric.proto.nitric.faas.v1.HttpTriggerContext" href="#nitric.proto.nitric.faas.v1.HttpTriggerContext">HttpTriggerContext</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.TriggerRequest.mime_type"><code class="name">var <span class="ident">mime_type</span> : str</code></dt>
+<dd>
+<div class="desc"><p>Should we supply a mime type for the data? Or rely on context?</p></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.TriggerRequest.topic"><code class="name">var <span class="ident">topic</span> : <a title="nitric.proto.nitric.faas.v1.TopicTriggerContext" href="#nitric.proto.nitric.faas.v1.TopicTriggerContext">TopicTriggerContext</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.TriggerResponse"><code class="flex name class">
+<span>class <span class="ident">TriggerResponse</span></span>
+<span>(</span><span>data: bytes = &lt;object object&gt;, http: <a title="nitric.proto.nitric.faas.v1.HttpResponseContext" href="#nitric.proto.nitric.faas.v1.HttpResponseContext">HttpResponseContext</a> = &lt;object object&gt;, topic: <a title="nitric.proto.nitric.faas.v1.TopicResponseContext" href="#nitric.proto.nitric.faas.v1.TopicResponseContext">TopicResponseContext</a> = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The worker has successfully processed a trigger</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class TriggerResponse(betterproto.Message):
+    &#34;&#34;&#34;The worker has successfully processed a trigger&#34;&#34;&#34;
+
+    data: bytes = betterproto.bytes_field(1)
+    &#34;&#34;&#34;The data returned in the response&#34;&#34;&#34;
+
+    http: &#34;HttpResponseContext&#34; = betterproto.message_field(10, group=&#34;context&#34;)
+    &#34;&#34;&#34;response to a http request&#34;&#34;&#34;
+
+    topic: &#34;TopicResponseContext&#34; = betterproto.message_field(11, group=&#34;context&#34;)
+    &#34;&#34;&#34;response to a topic trigger&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.TriggerResponse.data"><code class="name">var <span class="ident">data</span> : bytes</code></dt>
+<dd>
+<div class="desc"><p>The data returned in the response</p></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.TriggerResponse.http"><code class="name">var <span class="ident">http</span> : <a title="nitric.proto.nitric.faas.v1.HttpResponseContext" href="#nitric.proto.nitric.faas.v1.HttpResponseContext">HttpResponseContext</a></code></dt>
+<dd>
+<div class="desc"><p>response to a http request</p></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.TriggerResponse.topic"><code class="name">var <span class="ident">topic</span> : <a title="nitric.proto.nitric.faas.v1.TopicResponseContext" href="#nitric.proto.nitric.faas.v1.TopicResponseContext">TopicResponseContext</a></code></dt>
+<dd>
+<div class="desc"><p>response to a topic trigger</p></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="nitric.proto.nitric.faas" href="../index.html">nitric.proto.nitric.faas</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.ApiWorker" href="#nitric.proto.nitric.faas.v1.ApiWorker">ApiWorker</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.ApiWorker.api" href="#nitric.proto.nitric.faas.v1.ApiWorker.api">api</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.ApiWorker.methods" href="#nitric.proto.nitric.faas.v1.ApiWorker.methods">methods</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.ApiWorker.options" href="#nitric.proto.nitric.faas.v1.ApiWorker.options">options</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.ApiWorker.path" href="#nitric.proto.nitric.faas.v1.ApiWorker.path">path</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.ApiWorkerOptions" href="#nitric.proto.nitric.faas.v1.ApiWorkerOptions">ApiWorkerOptions</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.ApiWorkerOptions.security" href="#nitric.proto.nitric.faas.v1.ApiWorkerOptions.security">security</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.ApiWorkerOptions.security_disabled" href="#nitric.proto.nitric.faas.v1.ApiWorkerOptions.security_disabled">security_disabled</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.ApiWorkerScopes" href="#nitric.proto.nitric.faas.v1.ApiWorkerScopes">ApiWorkerScopes</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.ApiWorkerScopes.scopes" href="#nitric.proto.nitric.faas.v1.ApiWorkerScopes.scopes">scopes</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.ClientMessage" href="#nitric.proto.nitric.faas.v1.ClientMessage">ClientMessage</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.ClientMessage.id" href="#nitric.proto.nitric.faas.v1.ClientMessage.id">id</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.ClientMessage.init_request" href="#nitric.proto.nitric.faas.v1.ClientMessage.init_request">init_request</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.ClientMessage.trigger_response" href="#nitric.proto.nitric.faas.v1.ClientMessage.trigger_response">trigger_response</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.FaasServiceBase" href="#nitric.proto.nitric.faas.v1.FaasServiceBase">FaasServiceBase</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.FaasServiceBase.trigger_stream" href="#nitric.proto.nitric.faas.v1.FaasServiceBase.trigger_stream">trigger_stream</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.FaasServiceStub" href="#nitric.proto.nitric.faas.v1.FaasServiceStub">FaasServiceStub</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream" href="#nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream">trigger_stream</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.HeaderValue" href="#nitric.proto.nitric.faas.v1.HeaderValue">HeaderValue</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.HeaderValue.value" href="#nitric.proto.nitric.faas.v1.HeaderValue.value">value</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.HttpResponseContext" href="#nitric.proto.nitric.faas.v1.HttpResponseContext">HttpResponseContext</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.HttpResponseContext.headers" href="#nitric.proto.nitric.faas.v1.HttpResponseContext.headers">headers</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.HttpResponseContext.headers_old" href="#nitric.proto.nitric.faas.v1.HttpResponseContext.headers_old">headers_old</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.HttpResponseContext.status" href="#nitric.proto.nitric.faas.v1.HttpResponseContext.status">status</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.HttpTriggerContext" href="#nitric.proto.nitric.faas.v1.HttpTriggerContext">HttpTriggerContext</a></code></h4>
+<ul class="two-column">
+<li><code><a title="nitric.proto.nitric.faas.v1.HttpTriggerContext.headers" href="#nitric.proto.nitric.faas.v1.HttpTriggerContext.headers">headers</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.HttpTriggerContext.headers_old" href="#nitric.proto.nitric.faas.v1.HttpTriggerContext.headers_old">headers_old</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.HttpTriggerContext.method" href="#nitric.proto.nitric.faas.v1.HttpTriggerContext.method">method</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.HttpTriggerContext.path" href="#nitric.proto.nitric.faas.v1.HttpTriggerContext.path">path</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.HttpTriggerContext.path_params" href="#nitric.proto.nitric.faas.v1.HttpTriggerContext.path_params">path_params</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.HttpTriggerContext.query_params" href="#nitric.proto.nitric.faas.v1.HttpTriggerContext.query_params">query_params</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.HttpTriggerContext.query_params_old" href="#nitric.proto.nitric.faas.v1.HttpTriggerContext.query_params_old">query_params_old</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.InitRequest" href="#nitric.proto.nitric.faas.v1.InitRequest">InitRequest</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.InitRequest.api" href="#nitric.proto.nitric.faas.v1.InitRequest.api">api</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.InitRequest.schedule" href="#nitric.proto.nitric.faas.v1.InitRequest.schedule">schedule</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.InitRequest.subscription" href="#nitric.proto.nitric.faas.v1.InitRequest.subscription">subscription</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.InitResponse" href="#nitric.proto.nitric.faas.v1.InitResponse">InitResponse</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.QueryValue" href="#nitric.proto.nitric.faas.v1.QueryValue">QueryValue</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.QueryValue.value" href="#nitric.proto.nitric.faas.v1.QueryValue.value">value</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.ScheduleCron" href="#nitric.proto.nitric.faas.v1.ScheduleCron">ScheduleCron</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.ScheduleCron.cron" href="#nitric.proto.nitric.faas.v1.ScheduleCron.cron">cron</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.ScheduleRate" href="#nitric.proto.nitric.faas.v1.ScheduleRate">ScheduleRate</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.ScheduleRate.rate" href="#nitric.proto.nitric.faas.v1.ScheduleRate.rate">rate</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.ScheduleWorker" href="#nitric.proto.nitric.faas.v1.ScheduleWorker">ScheduleWorker</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.ScheduleWorker.cron" href="#nitric.proto.nitric.faas.v1.ScheduleWorker.cron">cron</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.ScheduleWorker.key" href="#nitric.proto.nitric.faas.v1.ScheduleWorker.key">key</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.ScheduleWorker.rate" href="#nitric.proto.nitric.faas.v1.ScheduleWorker.rate">rate</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.ServerMessage" href="#nitric.proto.nitric.faas.v1.ServerMessage">ServerMessage</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.ServerMessage.id" href="#nitric.proto.nitric.faas.v1.ServerMessage.id">id</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.ServerMessage.init_response" href="#nitric.proto.nitric.faas.v1.ServerMessage.init_response">init_response</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.ServerMessage.trigger_request" href="#nitric.proto.nitric.faas.v1.ServerMessage.trigger_request">trigger_request</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.SubscriptionWorker" href="#nitric.proto.nitric.faas.v1.SubscriptionWorker">SubscriptionWorker</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.SubscriptionWorker.topic" href="#nitric.proto.nitric.faas.v1.SubscriptionWorker.topic">topic</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.TopicResponseContext" href="#nitric.proto.nitric.faas.v1.TopicResponseContext">TopicResponseContext</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.TopicResponseContext.success" href="#nitric.proto.nitric.faas.v1.TopicResponseContext.success">success</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.TopicTriggerContext" href="#nitric.proto.nitric.faas.v1.TopicTriggerContext">TopicTriggerContext</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.TopicTriggerContext.topic" href="#nitric.proto.nitric.faas.v1.TopicTriggerContext.topic">topic</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.TriggerRequest" href="#nitric.proto.nitric.faas.v1.TriggerRequest">TriggerRequest</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.TriggerRequest.data" href="#nitric.proto.nitric.faas.v1.TriggerRequest.data">data</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.TriggerRequest.http" href="#nitric.proto.nitric.faas.v1.TriggerRequest.http">http</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.TriggerRequest.mime_type" href="#nitric.proto.nitric.faas.v1.TriggerRequest.mime_type">mime_type</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.TriggerRequest.topic" href="#nitric.proto.nitric.faas.v1.TriggerRequest.topic">topic</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.TriggerResponse" href="#nitric.proto.nitric.faas.v1.TriggerResponse">TriggerResponse</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.TriggerResponse.data" href="#nitric.proto.nitric.faas.v1.TriggerResponse.data">data</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.TriggerResponse.http" href="#nitric.proto.nitric.faas.v1.TriggerResponse.http">http</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.TriggerResponse.topic" href="#nitric.proto.nitric.faas.v1.TriggerResponse.topic">topic</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>

@@ -54,14 +54,18 @@ from grpclib import GRPCError
 
 from nitric.api.const import MAX_SUB_COLLECTION_DEPTH
 from nitric.api.exception import exception_from_grpc_error
-from proto.nitric.document.v1 import (
+from nitric.proto.nitric.document.v1 import (
     DocumentServiceStub,
     Collection as CollectionMessage,
     Key as KeyMessage,
     Expression as ExpressionMessage,
     ExpressionValue,
-    Document as DocumentMessage, DocumentSetRequest, DocumentGetRequest, DocumentDeleteRequest,
-    DocumentQueryStreamRequest, DocumentQueryRequest,
+    Document as DocumentMessage,
+    DocumentSetRequest,
+    DocumentGetRequest,
+    DocumentDeleteRequest,
+    DocumentQueryStreamRequest,
+    DocumentQueryRequest,
 )
 
 from nitric.utils import new_default_channel, _dict_from_struct, _struct_from_dict
@@ -103,9 +107,9 @@ class DocumentRef:
     async def get(self) -&gt; Document:
         &#34;&#34;&#34;Retrieve the contents of this document, if it exists.&#34;&#34;&#34;
         try:
-            response = await self._documents._stub.get(document_get_request=DocumentGetRequest(
-                key=_doc_ref_to_wire(self)
-            ))
+            response = await self._documents._stub.get(
+                document_get_request=DocumentGetRequest(key=_doc_ref_to_wire(self))
+            )
             return _document_from_wire(documents=self._documents, message=response.document)
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
@@ -129,9 +133,11 @@ class DocumentRef:
     async def delete(self):
         &#34;&#34;&#34;Delete this document, if it exists.&#34;&#34;&#34;
         try:
-            await self._documents._stub.delete(document_delete_request=DocumentDeleteRequest(
-                key=_doc_ref_to_wire(self),
-            ))
+            await self._documents._stub.delete(
+                document_delete_request=DocumentDeleteRequest(
+                    key=_doc_ref_to_wire(self),
+                )
+            )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
@@ -1161,9 +1167,9 @@ class DocumentRef:
     async def get(self) -&gt; Document:
         &#34;&#34;&#34;Retrieve the contents of this document, if it exists.&#34;&#34;&#34;
         try:
-            response = await self._documents._stub.get(document_get_request=DocumentGetRequest(
-                key=_doc_ref_to_wire(self)
-            ))
+            response = await self._documents._stub.get(
+                document_get_request=DocumentGetRequest(key=_doc_ref_to_wire(self))
+            )
             return _document_from_wire(documents=self._documents, message=response.document)
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
@@ -1187,9 +1193,11 @@ class DocumentRef:
     async def delete(self):
         &#34;&#34;&#34;Delete this document, if it exists.&#34;&#34;&#34;
         try:
-            await self._documents._stub.delete(document_delete_request=DocumentDeleteRequest(
-                key=_doc_ref_to_wire(self),
-            ))
+            await self._documents._stub.delete(
+                document_delete_request=DocumentDeleteRequest(
+                    key=_doc_ref_to_wire(self),
+                )
+            )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)</code></pre>
 </details>
@@ -1248,9 +1256,11 @@ Documents().collection('a').doc('b').collection('c').doc('d').collection('e') is
 <pre><code class="python">async def delete(self):
     &#34;&#34;&#34;Delete this document, if it exists.&#34;&#34;&#34;
     try:
-        await self._documents._stub.delete(document_delete_request=DocumentDeleteRequest(
-            key=_doc_ref_to_wire(self),
-        ))
+        await self._documents._stub.delete(
+            document_delete_request=DocumentDeleteRequest(
+                key=_doc_ref_to_wire(self),
+            )
+        )
     except GRPCError as grpc_err:
         raise exception_from_grpc_error(grpc_err)</code></pre>
 </details>
@@ -1267,9 +1277,9 @@ Documents().collection('a').doc('b').collection('c').doc('d').collection('e') is
 <pre><code class="python">async def get(self) -&gt; Document:
     &#34;&#34;&#34;Retrieve the contents of this document, if it exists.&#34;&#34;&#34;
     try:
-        response = await self._documents._stub.get(document_get_request=DocumentGetRequest(
-            key=_doc_ref_to_wire(self)
-        ))
+        response = await self._documents._stub.get(
+            document_get_request=DocumentGetRequest(key=_doc_ref_to_wire(self))
+        )
         return _document_from_wire(documents=self._documents, message=response.document)
     except GRPCError as grpc_err:
         raise exception_from_grpc_error(grpc_err)</code></pre>
@@ -1420,7 +1430,7 @@ class Expression:
 </dd>
 <dt id="nitric.api.documents.Operator"><code class="flex name class">
 <span>class <span class="ident">Operator</span></span>
-<span>(</span><span>*args, **kwds)</span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Valid query expression operators.</p></div>

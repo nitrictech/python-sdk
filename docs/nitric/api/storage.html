@@ -45,13 +45,19 @@
 # limitations under the License.
 #
 from dataclasses import dataclass
-from typing import List
 
 from grpclib import GRPCError
 from nitric.api.exception import exception_from_grpc_error, InvalidArgumentException
 from nitric.utils import new_default_channel
-from nitricapi.nitric.storage.v1 import StorageServiceStub, StoragePreSignUrlRequestOperation, StorageWriteRequest, \
-    StorageReadRequest, StorageDeleteRequest, StoragePreSignUrlRequest, StorageListFilesRequest
+from nitric.proto.nitric.storage.v1 import (
+    StorageServiceStub,
+    StoragePreSignUrlRequestOperation,
+    StorageWriteRequest,
+    StorageReadRequest,
+    StorageDeleteRequest,
+    StoragePreSignUrlRequest,
+    StorageListFilesRequest,
+)
 from enum import Enum
 
 
@@ -89,8 +95,10 @@ class BucketRef(object):
         return File(_storage=self._storage, _bucket=self.name, key=key)
 
     async def files(self):
+        &#34;&#34;&#34;Return a list of files in this bucket.&#34;&#34;&#34;
         resp = await self._storage._storage_stub.list_files(
-            storage_list_files_request=StorageListFilesRequest(bucket_name=self.name))
+            storage_list_files_request=StorageListFilesRequest(bucket_name=self.name)
+        )
         return [self.file(f.key) for f in resp.files]
 
 
@@ -151,9 +159,11 @@ class File(object):
             raise exception_from_grpc_error(grpc_err)
 
     async def upload_url(self, expiry: int = 600):
+        &#34;&#34;&#34;Get a temporary writable URL to this file.&#34;&#34;&#34;
         await self.sign_url(mode=FileMode.WRITE, expiry=expiry)
 
     async def download_url(self, expiry: int = 600):
+        &#34;&#34;&#34;Get a temporary readable URL to this file.&#34;&#34;&#34;
         await self.sign_url(mode=FileMode.READ, expiry=expiry)
 
     async def sign_url(self, mode: FileMode = FileMode.READ, expiry: int = 3600):
@@ -200,8 +210,10 @@ class BucketRef(object):
         return File(_storage=self._storage, _bucket=self.name, key=key)
 
     async def files(self):
+        &#34;&#34;&#34;Return a list of files in this bucket.&#34;&#34;&#34;
         resp = await self._storage._storage_stub.list_files(
-            storage_list_files_request=StorageListFilesRequest(bucket_name=self.name))
+            storage_list_files_request=StorageListFilesRequest(bucket_name=self.name)
+        )
         return [self.file(f.key) for f in resp.files]</code></pre>
 </details>
 <h3>Class variables</h3>
@@ -231,14 +243,16 @@ class BucketRef(object):
 <span>async def <span class="ident">files</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Return a list of files in this bucket.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">async def files(self):
+    &#34;&#34;&#34;Return a list of files in this bucket.&#34;&#34;&#34;
     resp = await self._storage._storage_stub.list_files(
-        storage_list_files_request=StorageListFilesRequest(bucket_name=self.name))
+        storage_list_files_request=StorageListFilesRequest(bucket_name=self.name)
+    )
     return [self.file(f.key) for f in resp.files]</code></pre>
 </details>
 </dd>
@@ -295,9 +309,11 @@ class File(object):
             raise exception_from_grpc_error(grpc_err)
 
     async def upload_url(self, expiry: int = 600):
+        &#34;&#34;&#34;Get a temporary writable URL to this file.&#34;&#34;&#34;
         await self.sign_url(mode=FileMode.WRITE, expiry=expiry)
 
     async def download_url(self, expiry: int = 600):
+        &#34;&#34;&#34;Get a temporary readable URL to this file.&#34;&#34;&#34;
         await self.sign_url(mode=FileMode.READ, expiry=expiry)
 
     async def sign_url(self, mode: FileMode = FileMode.READ, expiry: int = 3600):
@@ -344,12 +360,13 @@ class File(object):
 <span>async def <span class="ident">download_url</span></span>(<span>self, expiry: int = 600)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Get a temporary readable URL to this file.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">async def download_url(self, expiry: int = 600):
+    &#34;&#34;&#34;Get a temporary readable URL to this file.&#34;&#34;&#34;
     await self.sign_url(mode=FileMode.READ, expiry=expiry)</code></pre>
 </details>
 </dd>
@@ -399,12 +416,13 @@ class File(object):
 <span>async def <span class="ident">upload_url</span></span>(<span>self, expiry: int = 600)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Get a temporary writable URL to this file.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">async def upload_url(self, expiry: int = 600):
+    &#34;&#34;&#34;Get a temporary writable URL to this file.&#34;&#34;&#34;
     await self.sign_url(mode=FileMode.WRITE, expiry=expiry)</code></pre>
 </details>
 </dd>
@@ -436,7 +454,7 @@ class File(object):
 </dd>
 <dt id="nitric.api.storage.FileMode"><code class="flex name class">
 <span>class <span class="ident">FileMode</span></span>
-<span>(</span><span>*args, **kwds)</span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Definition of available operation modes for file signed URLs.</p></div>
@@ -477,7 +495,7 @@ class File(object):
 <h3>Methods</h3>
 <dl>
 <dt id="nitric.api.storage.FileMode.to_request_operation"><code class="name flex">
-<span>def <span class="ident">to_request_operation</span></span>(<span>self) ‑> nitricapi.nitric.storage.v1.StoragePreSignUrlRequestOperation</span>
+<span>def <span class="ident">to_request_operation</span></span>(<span>self) ‑> <a title="nitric.proto.nitric.storage.v1.StoragePreSignUrlRequestOperation" href="../proto/nitric/storage/v1/index.html#nitric.proto.nitric.storage.v1.StoragePreSignUrlRequestOperation">StoragePreSignUrlRequestOperation</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Convert FileMode to a StoragePreSignUrlRequestOperation.</p></div>

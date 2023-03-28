@@ -47,7 +47,7 @@
 #
 &#34;&#34;&#34;Nitric Python SDK API Documentation. See: https://nitric.io/docs?lang=python for full framework documentation.&#34;&#34;&#34;
 
-from nitric.resources.apis import Api, api, MethodOptions, ApiOptions
+from nitric.resources.apis import Api, api, MethodOptions, ApiOptions, ApiDetails, JwtSecurityDefinition
 from nitric.resources.buckets import Bucket, bucket
 from nitric.resources.collections import Collection, collection
 from nitric.resources.queues import Queue, queue
@@ -59,6 +59,8 @@ __all__ = [
     &#34;api&#34;,
     &#34;Api&#34;,
     &#34;ApiOptions&#34;,
+    &#34;ApiDetails&#34;,
+    &#34;JwtSecurityDefinition&#34;,
     &#34;MethodOptions&#34;,
     &#34;bucket&#34;,
     &#34;Bucket&#34;,
@@ -71,7 +73,7 @@ __all__ = [
     &#34;secret&#34;,
     &#34;Secret&#34;,
     &#34;topic&#34;,
-    &#34;Topic&#34;
+    &#34;Topic&#34;,
 ]</code></pre>
 </details>
 </section>
@@ -280,7 +282,7 @@ __all__ = [
             opts = ApiOptions()
 
         self.name = name
-        self.middleware = opts.middleware
+        self.middleware = opts.middleware if opts.middleware is not None else []
         self.path = opts.path
         self.routes = []
         self.security_definitions = opts.security_definitions
@@ -406,7 +408,24 @@ __all__ = [
             r = self._route(match)
             r.put(function, opts=opts)
 
-        return decorator</code></pre>
+        return decorator
+
+    async def _details(self) -&gt; ApiDetails:
+        &#34;&#34;&#34;Get the API deployment details.&#34;&#34;&#34;
+        try:
+            res = await self._resources_stub.details(
+                resource_details_request=ResourceDetailsRequest(
+                    resource=_to_resource(self),
+                )
+            )
+            return ApiDetails(res.id, res.provider, res.service, res.api.url)
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
+
+    async def URL(self) -&gt; str:
+        &#34;&#34;&#34;Get the APIs live URL.&#34;&#34;&#34;
+        details = await self._details()
+        return details.url</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -446,6 +465,21 @@ __all__ = [
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="nitric.resources.Api.URL"><code class="name flex">
+<span>async def <span class="ident">URL</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the APIs live URL.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def URL(self) -&gt; str:
+    &#34;&#34;&#34;Get the APIs live URL.&#34;&#34;&#34;
+    details = await self._details()
+    return details.url</code></pre>
+</details>
+</dd>
 <dt id="nitric.resources.Api.all"><code class="name flex">
 <span>def <span class="ident">all</span></span>(<span>self, match: str, opts: <a title="nitric.resources.MethodOptions" href="#nitric.resources.MethodOptions">MethodOptions</a> = None)</span>
 </code></dt>
@@ -635,9 +669,52 @@ __all__ = [
 </li>
 </ul>
 </dd>
+<dt id="nitric.resources.ApiDetails"><code class="flex name class">
+<span>class <span class="ident">ApiDetails</span></span>
+<span>(</span><span>id: str, provider: str, service: str, url: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents the APIs deployment details.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class ApiDetails:
+    &#34;&#34;&#34;Represents the APIs deployment details.&#34;&#34;&#34;
+
+    # the identifier of the resource
+    id: str
+    # The provider this resource is deployed with (e.g. aws)
+    provider: str
+    # The service this resource is deployed on (e.g. ApiGateway)
+    service: str
+    # The url of the API
+    url: str</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.resources.ApiDetails.id"><code class="name">var <span class="ident">id</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.resources.ApiDetails.provider"><code class="name">var <span class="ident">provider</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.resources.ApiDetails.service"><code class="name">var <span class="ident">service</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.resources.ApiDetails.url"><code class="name">var <span class="ident">url</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
 <dt id="nitric.resources.ApiOptions"><code class="flex name class">
 <span>class <span class="ident">ApiOptions</span></span>
-<span>(</span><span>path: str = '', middleware: List[Middleware] = None, security_definitions: dict[str, SecurityDefinition] = None, security: dict[str, List[str]] = None)</span>
+<span>(</span><span>path: str = '', middleware: List[Middleware] = [], security_definitions: dict[str, SecurityDefinition] = None, security: dict[str, List[str]] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Represents options when creating an API, such as middleware to be applied to all HTTP request to the API.</p>
@@ -657,7 +734,7 @@ __all__ = [
     def __init__(
         self,
         path: str = &#34;&#34;,
-        middleware: List[Middleware] = None,
+        middleware: List[Middleware] = [],
         security_definitions: dict[str, SecurityDefinition] = None,
         security: dict[str, List[str]] = None,
     ):
@@ -712,7 +789,8 @@ __all__ = [
     async def _register(self):
         try:
             await self._resources_stub.declare(
-                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource()))
+                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
+            )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
@@ -746,7 +824,7 @@ __all__ = [
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="nitric.resources.Bucket.actions"><code class="name">var <span class="ident">actions</span> : List[nitricapi.nitric.resource.v1.Action]</code></dt>
+<dt id="nitric.resources.Bucket.actions"><code class="name">var <span class="ident">actions</span> : List[<a title="nitric.proto.nitric.resource.v1.Action" href="../proto/nitric/resource/v1/index.html#nitric.proto.nitric.resource.v1.Action">Action</a>]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -804,7 +882,9 @@ __all__ = [
 
     async def _register(self):
         try:
-            await self._resources_stub.declare(resource_declare_request=ResourceDeclareRequest(resource=self._to_resource()))
+            await self._resources_stub.declare(
+                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
+            )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
@@ -813,8 +893,11 @@ __all__ = [
 
     def _perms_to_actions(self, *args: Union[CollectionPermission, str]) -&gt; List[Action]:
         permission_actions_map = {
-            CollectionPermission.reading: [Action.CollectionDocumentRead, Action.CollectionQuery,
-                                           Action.CollectionList],
+            CollectionPermission.reading: [
+                Action.CollectionDocumentRead,
+                Action.CollectionQuery,
+                Action.CollectionList,
+            ],
             CollectionPermission.writing: [Action.CollectionDocumentWrite, Action.CollectionList],
             CollectionPermission.deleting: [Action.CollectionDocumentDelete, Action.CollectionList],
         }
@@ -867,6 +950,35 @@ __all__ = [
 </ul>
 </li>
 </ul>
+</dd>
+<dt id="nitric.resources.JwtSecurityDefinition"><code class="flex name class">
+<span>class <span class="ident">JwtSecurityDefinition</span></span>
+<span>(</span><span>issuer: str, audiences: List[str])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents the JWT security definition for an API.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class JwtSecurityDefinition:
+    &#34;&#34;&#34;Represents the JWT security definition for an API.&#34;&#34;&#34;
+
+    issuer: str
+    audiences: List[str]</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.resources.JwtSecurityDefinition.audiences"><code class="name">var <span class="ident">audiences</span> : List[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.resources.JwtSecurityDefinition.issuer"><code class="name">var <span class="ident">issuer</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
 </dd>
 <dt id="nitric.resources.MethodOptions"><code class="flex name class">
 <span>class <span class="ident">MethodOptions</span></span>
@@ -937,7 +1049,8 @@ __all__ = [
     async def _register(self):
         try:
             await self._resources_stub.declare(
-                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource()))
+                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
+            )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
@@ -956,7 +1069,7 @@ __all__ = [
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="nitric.resources.Queue.actions"><code class="name">var <span class="ident">actions</span> : List[nitricapi.nitric.resource.v1.Action]</code></dt>
+<dt id="nitric.resources.Queue.actions"><code class="name">var <span class="ident">actions</span> : List[<a title="nitric.proto.nitric.resource.v1.Action" href="../proto/nitric/resource/v1/index.html#nitric.proto.nitric.resource.v1.Action">Action</a>]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1144,7 +1257,9 @@ __all__ = [
 
     async def _register(self):
         try:
-            await self._resources_stub.declare(resource_declare_request=ResourceDeclareRequest(resource=self._to_resource()))
+            await self._resources_stub.declare(
+                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
+            )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
@@ -1163,7 +1278,6 @@ __all__ = [
 
     def allow(self, *args: Union[SecretPermission, str]) -&gt; SecretContainerRef:
         &#34;&#34;&#34;Request the specified permissions to this resource.&#34;&#34;&#34;
-
         self._register_policy(*args)
 
         return Secrets().secret(self.name)</code></pre>
@@ -1176,7 +1290,7 @@ __all__ = [
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="nitric.resources.Secret.actions"><code class="name">var <span class="ident">actions</span> : List[nitricapi.nitric.resource.v1.Action]</code></dt>
+<dt id="nitric.resources.Secret.actions"><code class="name">var <span class="ident">actions</span> : List[<a title="nitric.proto.nitric.resource.v1.Action" href="../proto/nitric/resource/v1/index.html#nitric.proto.nitric.resource.v1.Action">Action</a>]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1198,7 +1312,6 @@ __all__ = [
 </summary>
 <pre><code class="python">def allow(self, *args: Union[SecretPermission, str]) -&gt; SecretContainerRef:
     &#34;&#34;&#34;Request the specified permissions to this resource.&#34;&#34;&#34;
-
     self._register_policy(*args)
 
     return Secrets().secret(self.name)</code></pre>
@@ -1240,7 +1353,8 @@ __all__ = [
     async def _register(self):
         try:
             await self._resources_stub.declare(
-                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource()))
+                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
+            )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
@@ -1259,14 +1373,12 @@ __all__ = [
 
     def allow(self, *args: Union[TopicPermission, str]) -&gt; TopicRef:
         &#34;&#34;&#34;Request the specified permissions to this resource.&#34;&#34;&#34;
-
         self._register_policy(*args)
 
         return Events().topic(self.name)
 
     def subscribe(self, func: EventMiddleware):
         &#34;&#34;&#34;Create and return a subscription decorator for this topic.&#34;&#34;&#34;
-
         self.server = FunctionServer(SubscriptionWorkerOptions(topic=self.name))
         self.server.event(func)
         Nitric._register_worker(self.server)</code></pre>
@@ -1279,7 +1391,7 @@ __all__ = [
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="nitric.resources.Topic.actions"><code class="name">var <span class="ident">actions</span> : List[nitricapi.nitric.resource.v1.Action]</code></dt>
+<dt id="nitric.resources.Topic.actions"><code class="name">var <span class="ident">actions</span> : List[<a title="nitric.proto.nitric.resource.v1.Action" href="../proto/nitric/resource/v1/index.html#nitric.proto.nitric.resource.v1.Action">Action</a>]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1305,7 +1417,6 @@ __all__ = [
 </summary>
 <pre><code class="python">def allow(self, *args: Union[TopicPermission, str]) -&gt; TopicRef:
     &#34;&#34;&#34;Request the specified permissions to this resource.&#34;&#34;&#34;
-
     self._register_policy(*args)
 
     return Events().topic(self.name)</code></pre>
@@ -1322,7 +1433,6 @@ __all__ = [
 </summary>
 <pre><code class="python">def subscribe(self, func: EventMiddleware):
     &#34;&#34;&#34;Create and return a subscription decorator for this topic.&#34;&#34;&#34;
-
     self.server = FunctionServer(SubscriptionWorkerOptions(topic=self.name))
     self.server.event(func)
     Nitric._register_worker(self.server)</code></pre>
@@ -1380,6 +1490,7 @@ __all__ = [
 <li>
 <h4><code><a title="nitric.resources.Api" href="#nitric.resources.Api">Api</a></code></h4>
 <ul class="">
+<li><code><a title="nitric.resources.Api.URL" href="#nitric.resources.Api.URL">URL</a></code></li>
 <li><code><a title="nitric.resources.Api.all" href="#nitric.resources.Api.all">all</a></code></li>
 <li><code><a title="nitric.resources.Api.app" href="#nitric.resources.Api.app">app</a></code></li>
 <li><code><a title="nitric.resources.Api.delete" href="#nitric.resources.Api.delete">delete</a></code></li>
@@ -1395,6 +1506,15 @@ __all__ = [
 <li><code><a title="nitric.resources.Api.routes" href="#nitric.resources.Api.routes">routes</a></code></li>
 <li><code><a title="nitric.resources.Api.security" href="#nitric.resources.Api.security">security</a></code></li>
 <li><code><a title="nitric.resources.Api.security_definitions" href="#nitric.resources.Api.security_definitions">security_definitions</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.resources.ApiDetails" href="#nitric.resources.ApiDetails">ApiDetails</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.resources.ApiDetails.id" href="#nitric.resources.ApiDetails.id">id</a></code></li>
+<li><code><a title="nitric.resources.ApiDetails.provider" href="#nitric.resources.ApiDetails.provider">provider</a></code></li>
+<li><code><a title="nitric.resources.ApiDetails.service" href="#nitric.resources.ApiDetails.service">service</a></code></li>
+<li><code><a title="nitric.resources.ApiDetails.url" href="#nitric.resources.ApiDetails.url">url</a></code></li>
 </ul>
 </li>
 <li>
@@ -1418,6 +1538,13 @@ __all__ = [
 <h4><code><a title="nitric.resources.Collection" href="#nitric.resources.Collection">Collection</a></code></h4>
 <ul class="">
 <li><code><a title="nitric.resources.Collection.allow" href="#nitric.resources.Collection.allow">allow</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.resources.JwtSecurityDefinition" href="#nitric.resources.JwtSecurityDefinition">JwtSecurityDefinition</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.resources.JwtSecurityDefinition.audiences" href="#nitric.resources.JwtSecurityDefinition.audiences">audiences</a></code></li>
+<li><code><a title="nitric.resources.JwtSecurityDefinition.issuer" href="#nitric.resources.JwtSecurityDefinition.issuer">issuer</a></code></li>
 </ul>
 </li>
 <li>

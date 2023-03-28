@@ -514,9 +514,7 @@ class TopicRef(object):
 
         try:
             response = await self._events._stub.publish(
-                event_publish_request=EventPublishRequest(
-                    topic=self.name, event=_event_to_wire(event)
-                )
+                event_publish_request=EventPublishRequest(topic=self.name, event=_event_to_wire(event))
             )
             return Event(**{**event.__dict__.copy(), **{&#34;id&#34;: response.id}})
         except GRPCError as grpc_err:
@@ -560,9 +558,7 @@ class TopicRef(object):
 
     try:
         response = await self._events._stub.publish(
-            event_publish_request=EventPublishRequest(
-                topic=self.name, event=_event_to_wire(event)
-            )
+            event_publish_request=EventPublishRequest(topic=self.name, event=_event_to_wire(event))
         )
         return Event(**{**event.__dict__.copy(), **{&#34;id&#34;: response.id}})
     except GRPCError as grpc_err:

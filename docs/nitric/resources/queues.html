@@ -52,10 +52,11 @@ from enum import Enum
 from grpclib import GRPCError
 from nitric.api.queues import QueueRef, Queues
 from nitric.application import Nitric
-from nitricapi.nitric.resource.v1 import (
+from nitric.proto.nitric.resource.v1 import (
     Resource,
     ResourceType,
-    Action, ResourceDeclareRequest,
+    Action,
+    ResourceDeclareRequest,
 )
 
 from nitric.resources.base import SecureResource
@@ -98,7 +99,8 @@ class Queue(SecureResource):
     async def _register(self):
         try:
             await self._resources_stub.declare(
-                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource()))
+                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
+            )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
@@ -191,7 +193,8 @@ def queue(name: str) -&gt; Queue:
     async def _register(self):
         try:
             await self._resources_stub.declare(
-                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource()))
+                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
+            )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
@@ -210,7 +213,7 @@ def queue(name: str) -&gt; Queue:
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="nitric.resources.queues.Queue.actions"><code class="name">var <span class="ident">actions</span> : List[nitricapi.nitric.resource.v1.Action]</code></dt>
+<dt id="nitric.resources.queues.Queue.actions"><code class="name">var <span class="ident">actions</span> : List[<a title="nitric.proto.nitric.resource.v1.Action" href="../proto/nitric/resource/v1/index.html#nitric.proto.nitric.resource.v1.Action">Action</a>]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -250,7 +253,7 @@ def queue(name: str) -&gt; Queue:
 </dd>
 <dt id="nitric.resources.queues.QueuePermission"><code class="flex name class">
 <span>class <span class="ident">QueuePermission</span></span>
-<span>(</span><span>*args, **kwds)</span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Valid query expression operators.</p></div>

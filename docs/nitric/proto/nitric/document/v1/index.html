@@ -1,0 +1,1529 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>nitric.proto.nitric.document.v1 API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>nitric.proto.nitric.document.v1</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#
+# Copyright (c) 2021 Nitric Technologies Pty Ltd.
+#
+# This file is part of Nitric Python 3 SDK.
+# See https://github.com/nitrictech/python-sdk for further info.
+#
+# Licensed under the Apache License, Version 2.0 (the &#34;License&#34;);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an &#34;AS IS&#34; BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Generated by the protocol buffer compiler.  DO NOT EDIT!
+# sources: proto/document/v1/document.proto
+# plugin: python-betterproto
+from dataclasses import dataclass
+from typing import (
+    TYPE_CHECKING,
+    AsyncIterator,
+    Dict,
+    List,
+    Optional,
+)
+
+import betterproto
+import betterproto.lib.google.protobuf as betterproto_lib_google_protobuf
+import grpclib
+from betterproto.grpc.grpclib_server import ServiceBase
+
+
+if TYPE_CHECKING:
+    import grpclib.server
+    from betterproto.grpc.grpclib_client import MetadataLike
+    from grpclib.metadata import Deadline
+
+
+@dataclass(eq=False, repr=False)
+class Collection(betterproto.Message):
+    &#34;&#34;&#34;Provides a Collection type for storing documents&#34;&#34;&#34;
+
+    name: str = betterproto.string_field(1)
+    &#34;&#34;&#34;The collection name&#34;&#34;&#34;
+
+    parent: &#34;Key&#34; = betterproto.message_field(2)
+    &#34;&#34;&#34;
+    Optional parent key, required when the collection is a sub-collection of
+    another document
+    &#34;&#34;&#34;
+
+
+@dataclass(eq=False, repr=False)
+class Key(betterproto.Message):
+    &#34;&#34;&#34;Provides a document identifying key type&#34;&#34;&#34;
+
+    collection: &#34;Collection&#34; = betterproto.message_field(1)
+    &#34;&#34;&#34;The item collection&#34;&#34;&#34;
+
+    id: str = betterproto.string_field(2)
+    &#34;&#34;&#34;The items unique id&#34;&#34;&#34;
+
+
+@dataclass(eq=False, repr=False)
+class Document(betterproto.Message):
+    &#34;&#34;&#34;Provides a return document type&#34;&#34;&#34;
+
+    content: &#34;betterproto_lib_google_protobuf.Struct&#34; = betterproto.message_field(1)
+    &#34;&#34;&#34;The document content (JSON object)&#34;&#34;&#34;
+
+    key: &#34;Key&#34; = betterproto.message_field(2)
+    &#34;&#34;&#34;The document&#39;s unique key, including collection/sub-collections&#34;&#34;&#34;
+
+
+@dataclass(eq=False, repr=False)
+class ExpressionValue(betterproto.Message):
+    int_value: int = betterproto.int64_field(1, group=&#34;kind&#34;)
+    &#34;&#34;&#34;Represents an integer value.&#34;&#34;&#34;
+
+    double_value: float = betterproto.double_field(2, group=&#34;kind&#34;)
+    &#34;&#34;&#34;Represents a double value.&#34;&#34;&#34;
+
+    string_value: str = betterproto.string_field(3, group=&#34;kind&#34;)
+    &#34;&#34;&#34;Represents a string value.&#34;&#34;&#34;
+
+    bool_value: bool = betterproto.bool_field(4, group=&#34;kind&#34;)
+    &#34;&#34;&#34;Represents a boolean value.&#34;&#34;&#34;
+
+
+@dataclass(eq=False, repr=False)
+class Expression(betterproto.Message):
+    &#34;&#34;&#34;Provides a query expression type&#34;&#34;&#34;
+
+    operand: str = betterproto.string_field(1)
+    &#34;&#34;&#34;The query operand or attribute&#34;&#34;&#34;
+
+    operator: str = betterproto.string_field(2)
+    &#34;&#34;&#34;The query operator [ == | &lt; | &lt;= | &gt; | &gt;= | startsWith ]&#34;&#34;&#34;
+
+    value: &#34;ExpressionValue&#34; = betterproto.message_field(3)
+    &#34;&#34;&#34;The query expression value&#34;&#34;&#34;
+
+
+@dataclass(eq=False, repr=False)
+class DocumentGetRequest(betterproto.Message):
+    key: &#34;Key&#34; = betterproto.message_field(1)
+    &#34;&#34;&#34;Key of the document to retrieve&#34;&#34;&#34;
+
+
+@dataclass(eq=False, repr=False)
+class DocumentGetResponse(betterproto.Message):
+    document: &#34;Document&#34; = betterproto.message_field(1)
+    &#34;&#34;&#34;The retrieved value&#34;&#34;&#34;
+
+
+@dataclass(eq=False, repr=False)
+class DocumentSetRequest(betterproto.Message):
+    key: &#34;Key&#34; = betterproto.message_field(1)
+    &#34;&#34;&#34;Key of the document to set&#34;&#34;&#34;
+
+    content: &#34;betterproto_lib_google_protobuf.Struct&#34; = betterproto.message_field(3)
+    &#34;&#34;&#34;The document content to store (JSON object)&#34;&#34;&#34;
+
+
+@dataclass(eq=False, repr=False)
+class DocumentSetResponse(betterproto.Message):
+    pass
+
+
+@dataclass(eq=False, repr=False)
+class DocumentDeleteRequest(betterproto.Message):
+    key: &#34;Key&#34; = betterproto.message_field(1)
+    &#34;&#34;&#34;Key of the document to delete&#34;&#34;&#34;
+
+
+@dataclass(eq=False, repr=False)
+class DocumentDeleteResponse(betterproto.Message):
+    pass
+
+
+@dataclass(eq=False, repr=False)
+class DocumentQueryRequest(betterproto.Message):
+    collection: &#34;Collection&#34; = betterproto.message_field(1)
+    &#34;&#34;&#34;The collection to query&#34;&#34;&#34;
+
+    expressions: List[&#34;Expression&#34;] = betterproto.message_field(3)
+    &#34;&#34;&#34;Optional query expressions&#34;&#34;&#34;
+
+    limit: int = betterproto.int32_field(4)
+    &#34;&#34;&#34;Optional query fetch limit&#34;&#34;&#34;
+
+    paging_token: Dict[str, str] = betterproto.map_field(
+        5, betterproto.TYPE_STRING, betterproto.TYPE_STRING
+    )
+    &#34;&#34;&#34;Optional query paging continuation token&#34;&#34;&#34;
+
+
+@dataclass(eq=False, repr=False)
+class DocumentQueryResponse(betterproto.Message):
+    documents: List[&#34;Document&#34;] = betterproto.message_field(1)
+    &#34;&#34;&#34;The retrieved values&#34;&#34;&#34;
+
+    paging_token: Dict[str, str] = betterproto.map_field(
+        2, betterproto.TYPE_STRING, betterproto.TYPE_STRING
+    )
+    &#34;&#34;&#34;
+    The query paging continuation token, when empty no further results are
+    available
+    &#34;&#34;&#34;
+
+
+@dataclass(eq=False, repr=False)
+class DocumentQueryStreamRequest(betterproto.Message):
+    collection: &#34;Collection&#34; = betterproto.message_field(1)
+    &#34;&#34;&#34;The collection to query&#34;&#34;&#34;
+
+    expressions: List[&#34;Expression&#34;] = betterproto.message_field(3)
+    &#34;&#34;&#34;Optional query expressions&#34;&#34;&#34;
+
+    limit: int = betterproto.int32_field(4)
+    &#34;&#34;&#34;Optional query fetch limit&#34;&#34;&#34;
+
+
+@dataclass(eq=False, repr=False)
+class DocumentQueryStreamResponse(betterproto.Message):
+    document: &#34;Document&#34; = betterproto.message_field(1)
+    &#34;&#34;&#34;The stream document&#34;&#34;&#34;
+
+
+class DocumentServiceStub(betterproto.ServiceStub):
+    async def get(
+        self,
+        document_get_request: &#34;DocumentGetRequest&#34;,
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional[&#34;Deadline&#34;] = None,
+        metadata: Optional[&#34;MetadataLike&#34;] = None
+    ) -&gt; &#34;DocumentGetResponse&#34;:
+        return await self._unary_unary(
+            &#34;/nitric.document.v1.DocumentService/Get&#34;,
+            document_get_request,
+            DocumentGetResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
+
+    async def set(
+        self,
+        document_set_request: &#34;DocumentSetRequest&#34;,
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional[&#34;Deadline&#34;] = None,
+        metadata: Optional[&#34;MetadataLike&#34;] = None
+    ) -&gt; &#34;DocumentSetResponse&#34;:
+        return await self._unary_unary(
+            &#34;/nitric.document.v1.DocumentService/Set&#34;,
+            document_set_request,
+            DocumentSetResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
+
+    async def delete(
+        self,
+        document_delete_request: &#34;DocumentDeleteRequest&#34;,
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional[&#34;Deadline&#34;] = None,
+        metadata: Optional[&#34;MetadataLike&#34;] = None
+    ) -&gt; &#34;DocumentDeleteResponse&#34;:
+        return await self._unary_unary(
+            &#34;/nitric.document.v1.DocumentService/Delete&#34;,
+            document_delete_request,
+            DocumentDeleteResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
+
+    async def query(
+        self,
+        document_query_request: &#34;DocumentQueryRequest&#34;,
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional[&#34;Deadline&#34;] = None,
+        metadata: Optional[&#34;MetadataLike&#34;] = None
+    ) -&gt; &#34;DocumentQueryResponse&#34;:
+        return await self._unary_unary(
+            &#34;/nitric.document.v1.DocumentService/Query&#34;,
+            document_query_request,
+            DocumentQueryResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
+
+    async def query_stream(
+        self,
+        document_query_stream_request: &#34;DocumentQueryStreamRequest&#34;,
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional[&#34;Deadline&#34;] = None,
+        metadata: Optional[&#34;MetadataLike&#34;] = None
+    ) -&gt; AsyncIterator[&#34;DocumentQueryStreamResponse&#34;]:
+        async for response in self._unary_stream(
+            &#34;/nitric.document.v1.DocumentService/QueryStream&#34;,
+            document_query_stream_request,
+            DocumentQueryStreamResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        ):
+            yield response
+
+
+class DocumentServiceBase(ServiceBase):
+    async def get(
+        self, document_get_request: &#34;DocumentGetRequest&#34;
+    ) -&gt; &#34;DocumentGetResponse&#34;:
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def set(
+        self, document_set_request: &#34;DocumentSetRequest&#34;
+    ) -&gt; &#34;DocumentSetResponse&#34;:
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def delete(
+        self, document_delete_request: &#34;DocumentDeleteRequest&#34;
+    ) -&gt; &#34;DocumentDeleteResponse&#34;:
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def query(
+        self, document_query_request: &#34;DocumentQueryRequest&#34;
+    ) -&gt; &#34;DocumentQueryResponse&#34;:
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def query_stream(
+        self, document_query_stream_request: &#34;DocumentQueryStreamRequest&#34;
+    ) -&gt; AsyncIterator[&#34;DocumentQueryStreamResponse&#34;]:
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def __rpc_get(
+        self, stream: &#34;grpclib.server.Stream[DocumentGetRequest, DocumentGetResponse]&#34;
+    ) -&gt; None:
+        request = await stream.recv_message()
+        response = await self.get(request)
+        await stream.send_message(response)
+
+    async def __rpc_set(
+        self, stream: &#34;grpclib.server.Stream[DocumentSetRequest, DocumentSetResponse]&#34;
+    ) -&gt; None:
+        request = await stream.recv_message()
+        response = await self.set(request)
+        await stream.send_message(response)
+
+    async def __rpc_delete(
+        self,
+        stream: &#34;grpclib.server.Stream[DocumentDeleteRequest, DocumentDeleteResponse]&#34;,
+    ) -&gt; None:
+        request = await stream.recv_message()
+        response = await self.delete(request)
+        await stream.send_message(response)
+
+    async def __rpc_query(
+        self,
+        stream: &#34;grpclib.server.Stream[DocumentQueryRequest, DocumentQueryResponse]&#34;,
+    ) -&gt; None:
+        request = await stream.recv_message()
+        response = await self.query(request)
+        await stream.send_message(response)
+
+    async def __rpc_query_stream(
+        self,
+        stream: &#34;grpclib.server.Stream[DocumentQueryStreamRequest, DocumentQueryStreamResponse]&#34;,
+    ) -&gt; None:
+        request = await stream.recv_message()
+        await self._call_rpc_handler_server_stream(
+            self.query_stream,
+            stream,
+            request,
+        )
+
+    def __mapping__(self) -&gt; Dict[str, grpclib.const.Handler]:
+        return {
+            &#34;/nitric.document.v1.DocumentService/Get&#34;: grpclib.const.Handler(
+                self.__rpc_get,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                DocumentGetRequest,
+                DocumentGetResponse,
+            ),
+            &#34;/nitric.document.v1.DocumentService/Set&#34;: grpclib.const.Handler(
+                self.__rpc_set,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                DocumentSetRequest,
+                DocumentSetResponse,
+            ),
+            &#34;/nitric.document.v1.DocumentService/Delete&#34;: grpclib.const.Handler(
+                self.__rpc_delete,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                DocumentDeleteRequest,
+                DocumentDeleteResponse,
+            ),
+            &#34;/nitric.document.v1.DocumentService/Query&#34;: grpclib.const.Handler(
+                self.__rpc_query,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                DocumentQueryRequest,
+                DocumentQueryResponse,
+            ),
+            &#34;/nitric.document.v1.DocumentService/QueryStream&#34;: grpclib.const.Handler(
+                self.__rpc_query_stream,
+                grpclib.const.Cardinality.UNARY_STREAM,
+                DocumentQueryStreamRequest,
+                DocumentQueryStreamResponse,
+            ),
+        }</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="nitric.proto.nitric.document.v1.Collection"><code class="flex name class">
+<span>class <span class="ident">Collection</span></span>
+<span>(</span><span>name: str = &lt;object object&gt;, parent: <a title="nitric.proto.nitric.document.v1.Key" href="#nitric.proto.nitric.document.v1.Key">Key</a> = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Provides a Collection type for storing documents</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class Collection(betterproto.Message):
+    &#34;&#34;&#34;Provides a Collection type for storing documents&#34;&#34;&#34;
+
+    name: str = betterproto.string_field(1)
+    &#34;&#34;&#34;The collection name&#34;&#34;&#34;
+
+    parent: &#34;Key&#34; = betterproto.message_field(2)
+    &#34;&#34;&#34;
+    Optional parent key, required when the collection is a sub-collection of
+    another document
+    &#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.document.v1.Collection.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The collection name</p></div>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.Collection.parent"><code class="name">var <span class="ident">parent</span> : <a title="nitric.proto.nitric.document.v1.Key" href="#nitric.proto.nitric.document.v1.Key">Key</a></code></dt>
+<dd>
+<div class="desc"><p>Optional parent key, required when the collection is a sub-collection of
+another document</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.Document"><code class="flex name class">
+<span>class <span class="ident">Document</span></span>
+<span>(</span><span>content: betterproto_lib_google_protobuf.Struct = &lt;object object&gt;, key: <a title="nitric.proto.nitric.document.v1.Key" href="#nitric.proto.nitric.document.v1.Key">Key</a> = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Provides a return document type</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class Document(betterproto.Message):
+    &#34;&#34;&#34;Provides a return document type&#34;&#34;&#34;
+
+    content: &#34;betterproto_lib_google_protobuf.Struct&#34; = betterproto.message_field(1)
+    &#34;&#34;&#34;The document content (JSON object)&#34;&#34;&#34;
+
+    key: &#34;Key&#34; = betterproto.message_field(2)
+    &#34;&#34;&#34;The document&#39;s unique key, including collection/sub-collections&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.document.v1.Document.content"><code class="name">var <span class="ident">content</span> : betterproto.lib.google.protobuf.Struct</code></dt>
+<dd>
+<div class="desc"><p>The document content (JSON object)</p></div>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.Document.key"><code class="name">var <span class="ident">key</span> : <a title="nitric.proto.nitric.document.v1.Key" href="#nitric.proto.nitric.document.v1.Key">Key</a></code></dt>
+<dd>
+<div class="desc"><p>The document's unique key, including collection/sub-collections</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentDeleteRequest"><code class="flex name class">
+<span>class <span class="ident">DocumentDeleteRequest</span></span>
+<span>(</span><span>key: <a title="nitric.proto.nitric.document.v1.Key" href="#nitric.proto.nitric.document.v1.Key">Key</a> = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>DocumentDeleteRequest(key: 'Key' = <object object at 0x1016c89d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class DocumentDeleteRequest(betterproto.Message):
+    key: &#34;Key&#34; = betterproto.message_field(1)
+    &#34;&#34;&#34;Key of the document to delete&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.document.v1.DocumentDeleteRequest.key"><code class="name">var <span class="ident">key</span> : <a title="nitric.proto.nitric.document.v1.Key" href="#nitric.proto.nitric.document.v1.Key">Key</a></code></dt>
+<dd>
+<div class="desc"><p>Key of the document to delete</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentDeleteResponse"><code class="flex name class">
+<span>class <span class="ident">DocumentDeleteResponse</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>DocumentDeleteResponse()</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class DocumentDeleteResponse(betterproto.Message):
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentGetRequest"><code class="flex name class">
+<span>class <span class="ident">DocumentGetRequest</span></span>
+<span>(</span><span>key: <a title="nitric.proto.nitric.document.v1.Key" href="#nitric.proto.nitric.document.v1.Key">Key</a> = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>DocumentGetRequest(key: 'Key' = <object object at 0x1016c89d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class DocumentGetRequest(betterproto.Message):
+    key: &#34;Key&#34; = betterproto.message_field(1)
+    &#34;&#34;&#34;Key of the document to retrieve&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.document.v1.DocumentGetRequest.key"><code class="name">var <span class="ident">key</span> : <a title="nitric.proto.nitric.document.v1.Key" href="#nitric.proto.nitric.document.v1.Key">Key</a></code></dt>
+<dd>
+<div class="desc"><p>Key of the document to retrieve</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentGetResponse"><code class="flex name class">
+<span>class <span class="ident">DocumentGetResponse</span></span>
+<span>(</span><span>document: <a title="nitric.proto.nitric.document.v1.Document" href="#nitric.proto.nitric.document.v1.Document">Document</a> = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>DocumentGetResponse(document: 'Document' = <object object at 0x1016c89d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class DocumentGetResponse(betterproto.Message):
+    document: &#34;Document&#34; = betterproto.message_field(1)
+    &#34;&#34;&#34;The retrieved value&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.document.v1.DocumentGetResponse.document"><code class="name">var <span class="ident">document</span> : <a title="nitric.proto.nitric.document.v1.Document" href="#nitric.proto.nitric.document.v1.Document">Document</a></code></dt>
+<dd>
+<div class="desc"><p>The retrieved value</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentQueryRequest"><code class="flex name class">
+<span>class <span class="ident">DocumentQueryRequest</span></span>
+<span>(</span><span>collection: <a title="nitric.proto.nitric.document.v1.Collection" href="#nitric.proto.nitric.document.v1.Collection">Collection</a> = &lt;object object&gt;, expressions: List[ForwardRef('<a title="nitric.proto.nitric.document.v1.Expression" href="#nitric.proto.nitric.document.v1.Expression">Expression</a>')] = &lt;object object&gt;, limit: int = &lt;object object&gt;, paging_token: Dict[str, str] = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>DocumentQueryRequest(collection: 'Collection' = <object object at 0x1016c89d0>, expressions: List[ForwardRef('Expression')] = <object object at 0x1016c89d0>, limit: int = <object object at 0x1016c89d0>, paging_token: Dict[str, str] = <object object at 0x1016c89d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class DocumentQueryRequest(betterproto.Message):
+    collection: &#34;Collection&#34; = betterproto.message_field(1)
+    &#34;&#34;&#34;The collection to query&#34;&#34;&#34;
+
+    expressions: List[&#34;Expression&#34;] = betterproto.message_field(3)
+    &#34;&#34;&#34;Optional query expressions&#34;&#34;&#34;
+
+    limit: int = betterproto.int32_field(4)
+    &#34;&#34;&#34;Optional query fetch limit&#34;&#34;&#34;
+
+    paging_token: Dict[str, str] = betterproto.map_field(
+        5, betterproto.TYPE_STRING, betterproto.TYPE_STRING
+    )
+    &#34;&#34;&#34;Optional query paging continuation token&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.document.v1.DocumentQueryRequest.collection"><code class="name">var <span class="ident">collection</span> : <a title="nitric.proto.nitric.document.v1.Collection" href="#nitric.proto.nitric.document.v1.Collection">Collection</a></code></dt>
+<dd>
+<div class="desc"><p>The collection to query</p></div>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentQueryRequest.expressions"><code class="name">var <span class="ident">expressions</span> : List[<a title="nitric.proto.nitric.document.v1.Expression" href="#nitric.proto.nitric.document.v1.Expression">Expression</a>]</code></dt>
+<dd>
+<div class="desc"><p>Optional query expressions</p></div>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentQueryRequest.limit"><code class="name">var <span class="ident">limit</span> : int</code></dt>
+<dd>
+<div class="desc"><p>Optional query fetch limit</p></div>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentQueryRequest.paging_token"><code class="name">var <span class="ident">paging_token</span> : Dict[str, str]</code></dt>
+<dd>
+<div class="desc"><p>Optional query paging continuation token</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentQueryResponse"><code class="flex name class">
+<span>class <span class="ident">DocumentQueryResponse</span></span>
+<span>(</span><span>documents: List[ForwardRef('<a title="nitric.proto.nitric.document.v1.Document" href="#nitric.proto.nitric.document.v1.Document">Document</a>')] = &lt;object object&gt;, paging_token: Dict[str, str] = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>DocumentQueryResponse(documents: List[ForwardRef('Document')] = <object object at 0x1016c89d0>, paging_token: Dict[str, str] = <object object at 0x1016c89d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class DocumentQueryResponse(betterproto.Message):
+    documents: List[&#34;Document&#34;] = betterproto.message_field(1)
+    &#34;&#34;&#34;The retrieved values&#34;&#34;&#34;
+
+    paging_token: Dict[str, str] = betterproto.map_field(
+        2, betterproto.TYPE_STRING, betterproto.TYPE_STRING
+    )
+    &#34;&#34;&#34;
+    The query paging continuation token, when empty no further results are
+    available
+    &#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.document.v1.DocumentQueryResponse.documents"><code class="name">var <span class="ident">documents</span> : List[<a title="nitric.proto.nitric.document.v1.Document" href="#nitric.proto.nitric.document.v1.Document">Document</a>]</code></dt>
+<dd>
+<div class="desc"><p>The retrieved values</p></div>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentQueryResponse.paging_token"><code class="name">var <span class="ident">paging_token</span> : Dict[str, str]</code></dt>
+<dd>
+<div class="desc"><p>The query paging continuation token, when empty no further results are
+available</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentQueryStreamRequest"><code class="flex name class">
+<span>class <span class="ident">DocumentQueryStreamRequest</span></span>
+<span>(</span><span>collection: <a title="nitric.proto.nitric.document.v1.Collection" href="#nitric.proto.nitric.document.v1.Collection">Collection</a> = &lt;object object&gt;, expressions: List[ForwardRef('<a title="nitric.proto.nitric.document.v1.Expression" href="#nitric.proto.nitric.document.v1.Expression">Expression</a>')] = &lt;object object&gt;, limit: int = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>DocumentQueryStreamRequest(collection: 'Collection' = <object object at 0x1016c89d0>, expressions: List[ForwardRef('Expression')] = <object object at 0x1016c89d0>, limit: int = <object object at 0x1016c89d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class DocumentQueryStreamRequest(betterproto.Message):
+    collection: &#34;Collection&#34; = betterproto.message_field(1)
+    &#34;&#34;&#34;The collection to query&#34;&#34;&#34;
+
+    expressions: List[&#34;Expression&#34;] = betterproto.message_field(3)
+    &#34;&#34;&#34;Optional query expressions&#34;&#34;&#34;
+
+    limit: int = betterproto.int32_field(4)
+    &#34;&#34;&#34;Optional query fetch limit&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.document.v1.DocumentQueryStreamRequest.collection"><code class="name">var <span class="ident">collection</span> : <a title="nitric.proto.nitric.document.v1.Collection" href="#nitric.proto.nitric.document.v1.Collection">Collection</a></code></dt>
+<dd>
+<div class="desc"><p>The collection to query</p></div>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentQueryStreamRequest.expressions"><code class="name">var <span class="ident">expressions</span> : List[<a title="nitric.proto.nitric.document.v1.Expression" href="#nitric.proto.nitric.document.v1.Expression">Expression</a>]</code></dt>
+<dd>
+<div class="desc"><p>Optional query expressions</p></div>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentQueryStreamRequest.limit"><code class="name">var <span class="ident">limit</span> : int</code></dt>
+<dd>
+<div class="desc"><p>Optional query fetch limit</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentQueryStreamResponse"><code class="flex name class">
+<span>class <span class="ident">DocumentQueryStreamResponse</span></span>
+<span>(</span><span>document: <a title="nitric.proto.nitric.document.v1.Document" href="#nitric.proto.nitric.document.v1.Document">Document</a> = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>DocumentQueryStreamResponse(document: 'Document' = <object object at 0x1016c89d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class DocumentQueryStreamResponse(betterproto.Message):
+    document: &#34;Document&#34; = betterproto.message_field(1)
+    &#34;&#34;&#34;The stream document&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.document.v1.DocumentQueryStreamResponse.document"><code class="name">var <span class="ident">document</span> : <a title="nitric.proto.nitric.document.v1.Document" href="#nitric.proto.nitric.document.v1.Document">Document</a></code></dt>
+<dd>
+<div class="desc"><p>The stream document</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentServiceBase"><code class="flex name class">
+<span>class <span class="ident">DocumentServiceBase</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for async gRPC servers.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DocumentServiceBase(ServiceBase):
+    async def get(
+        self, document_get_request: &#34;DocumentGetRequest&#34;
+    ) -&gt; &#34;DocumentGetResponse&#34;:
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def set(
+        self, document_set_request: &#34;DocumentSetRequest&#34;
+    ) -&gt; &#34;DocumentSetResponse&#34;:
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def delete(
+        self, document_delete_request: &#34;DocumentDeleteRequest&#34;
+    ) -&gt; &#34;DocumentDeleteResponse&#34;:
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def query(
+        self, document_query_request: &#34;DocumentQueryRequest&#34;
+    ) -&gt; &#34;DocumentQueryResponse&#34;:
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def query_stream(
+        self, document_query_stream_request: &#34;DocumentQueryStreamRequest&#34;
+    ) -&gt; AsyncIterator[&#34;DocumentQueryStreamResponse&#34;]:
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def __rpc_get(
+        self, stream: &#34;grpclib.server.Stream[DocumentGetRequest, DocumentGetResponse]&#34;
+    ) -&gt; None:
+        request = await stream.recv_message()
+        response = await self.get(request)
+        await stream.send_message(response)
+
+    async def __rpc_set(
+        self, stream: &#34;grpclib.server.Stream[DocumentSetRequest, DocumentSetResponse]&#34;
+    ) -&gt; None:
+        request = await stream.recv_message()
+        response = await self.set(request)
+        await stream.send_message(response)
+
+    async def __rpc_delete(
+        self,
+        stream: &#34;grpclib.server.Stream[DocumentDeleteRequest, DocumentDeleteResponse]&#34;,
+    ) -&gt; None:
+        request = await stream.recv_message()
+        response = await self.delete(request)
+        await stream.send_message(response)
+
+    async def __rpc_query(
+        self,
+        stream: &#34;grpclib.server.Stream[DocumentQueryRequest, DocumentQueryResponse]&#34;,
+    ) -&gt; None:
+        request = await stream.recv_message()
+        response = await self.query(request)
+        await stream.send_message(response)
+
+    async def __rpc_query_stream(
+        self,
+        stream: &#34;grpclib.server.Stream[DocumentQueryStreamRequest, DocumentQueryStreamResponse]&#34;,
+    ) -&gt; None:
+        request = await stream.recv_message()
+        await self._call_rpc_handler_server_stream(
+            self.query_stream,
+            stream,
+            request,
+        )
+
+    def __mapping__(self) -&gt; Dict[str, grpclib.const.Handler]:
+        return {
+            &#34;/nitric.document.v1.DocumentService/Get&#34;: grpclib.const.Handler(
+                self.__rpc_get,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                DocumentGetRequest,
+                DocumentGetResponse,
+            ),
+            &#34;/nitric.document.v1.DocumentService/Set&#34;: grpclib.const.Handler(
+                self.__rpc_set,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                DocumentSetRequest,
+                DocumentSetResponse,
+            ),
+            &#34;/nitric.document.v1.DocumentService/Delete&#34;: grpclib.const.Handler(
+                self.__rpc_delete,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                DocumentDeleteRequest,
+                DocumentDeleteResponse,
+            ),
+            &#34;/nitric.document.v1.DocumentService/Query&#34;: grpclib.const.Handler(
+                self.__rpc_query,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                DocumentQueryRequest,
+                DocumentQueryResponse,
+            ),
+            &#34;/nitric.document.v1.DocumentService/QueryStream&#34;: grpclib.const.Handler(
+                self.__rpc_query_stream,
+                grpclib.const.Cardinality.UNARY_STREAM,
+                DocumentQueryStreamRequest,
+                DocumentQueryStreamResponse,
+            ),
+        }</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.grpc.grpclib_server.ServiceBase</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.proto.nitric.document.v1.DocumentServiceBase.delete"><code class="name flex">
+<span>async def <span class="ident">delete</span></span>(<span>self, document_delete_request: <a title="nitric.proto.nitric.document.v1.DocumentDeleteRequest" href="#nitric.proto.nitric.document.v1.DocumentDeleteRequest">DocumentDeleteRequest</a>) ‑> <a title="nitric.proto.nitric.document.v1.DocumentDeleteResponse" href="#nitric.proto.nitric.document.v1.DocumentDeleteResponse">DocumentDeleteResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def delete(
+    self, document_delete_request: &#34;DocumentDeleteRequest&#34;
+) -&gt; &#34;DocumentDeleteResponse&#34;:
+    raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentServiceBase.get"><code class="name flex">
+<span>async def <span class="ident">get</span></span>(<span>self, document_get_request: <a title="nitric.proto.nitric.document.v1.DocumentGetRequest" href="#nitric.proto.nitric.document.v1.DocumentGetRequest">DocumentGetRequest</a>) ‑> <a title="nitric.proto.nitric.document.v1.DocumentGetResponse" href="#nitric.proto.nitric.document.v1.DocumentGetResponse">DocumentGetResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def get(
+    self, document_get_request: &#34;DocumentGetRequest&#34;
+) -&gt; &#34;DocumentGetResponse&#34;:
+    raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentServiceBase.query"><code class="name flex">
+<span>async def <span class="ident">query</span></span>(<span>self, document_query_request: <a title="nitric.proto.nitric.document.v1.DocumentQueryRequest" href="#nitric.proto.nitric.document.v1.DocumentQueryRequest">DocumentQueryRequest</a>) ‑> <a title="nitric.proto.nitric.document.v1.DocumentQueryResponse" href="#nitric.proto.nitric.document.v1.DocumentQueryResponse">DocumentQueryResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def query(
+    self, document_query_request: &#34;DocumentQueryRequest&#34;
+) -&gt; &#34;DocumentQueryResponse&#34;:
+    raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentServiceBase.query_stream"><code class="name flex">
+<span>async def <span class="ident">query_stream</span></span>(<span>self, document_query_stream_request: <a title="nitric.proto.nitric.document.v1.DocumentQueryStreamRequest" href="#nitric.proto.nitric.document.v1.DocumentQueryStreamRequest">DocumentQueryStreamRequest</a>) ‑> AsyncIterator[<a title="nitric.proto.nitric.document.v1.DocumentQueryStreamResponse" href="#nitric.proto.nitric.document.v1.DocumentQueryStreamResponse">DocumentQueryStreamResponse</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def query_stream(
+    self, document_query_stream_request: &#34;DocumentQueryStreamRequest&#34;
+) -&gt; AsyncIterator[&#34;DocumentQueryStreamResponse&#34;]:
+    raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentServiceBase.set"><code class="name flex">
+<span>async def <span class="ident">set</span></span>(<span>self, document_set_request: <a title="nitric.proto.nitric.document.v1.DocumentSetRequest" href="#nitric.proto.nitric.document.v1.DocumentSetRequest">DocumentSetRequest</a>) ‑> <a title="nitric.proto.nitric.document.v1.DocumentSetResponse" href="#nitric.proto.nitric.document.v1.DocumentSetResponse">DocumentSetResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def set(
+    self, document_set_request: &#34;DocumentSetRequest&#34;
+) -&gt; &#34;DocumentSetResponse&#34;:
+    raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentServiceStub"><code class="flex name class">
+<span>class <span class="ident">DocumentServiceStub</span></span>
+<span>(</span><span>channel: Channel, *, timeout: Optional[float] = None, deadline: Optional[ForwardRef('Deadline')] = None, metadata: Union[Mapping[str, Union[str, bytes]], <a title="nitric.proto.nitric.document.v1.Collection" href="#nitric.proto.nitric.document.v1.Collection">Collection</a>[Tuple[str, Union[str, bytes]]], NoneType] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for async gRPC clients.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DocumentServiceStub(betterproto.ServiceStub):
+    async def get(
+        self,
+        document_get_request: &#34;DocumentGetRequest&#34;,
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional[&#34;Deadline&#34;] = None,
+        metadata: Optional[&#34;MetadataLike&#34;] = None
+    ) -&gt; &#34;DocumentGetResponse&#34;:
+        return await self._unary_unary(
+            &#34;/nitric.document.v1.DocumentService/Get&#34;,
+            document_get_request,
+            DocumentGetResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
+
+    async def set(
+        self,
+        document_set_request: &#34;DocumentSetRequest&#34;,
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional[&#34;Deadline&#34;] = None,
+        metadata: Optional[&#34;MetadataLike&#34;] = None
+    ) -&gt; &#34;DocumentSetResponse&#34;:
+        return await self._unary_unary(
+            &#34;/nitric.document.v1.DocumentService/Set&#34;,
+            document_set_request,
+            DocumentSetResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
+
+    async def delete(
+        self,
+        document_delete_request: &#34;DocumentDeleteRequest&#34;,
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional[&#34;Deadline&#34;] = None,
+        metadata: Optional[&#34;MetadataLike&#34;] = None
+    ) -&gt; &#34;DocumentDeleteResponse&#34;:
+        return await self._unary_unary(
+            &#34;/nitric.document.v1.DocumentService/Delete&#34;,
+            document_delete_request,
+            DocumentDeleteResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
+
+    async def query(
+        self,
+        document_query_request: &#34;DocumentQueryRequest&#34;,
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional[&#34;Deadline&#34;] = None,
+        metadata: Optional[&#34;MetadataLike&#34;] = None
+    ) -&gt; &#34;DocumentQueryResponse&#34;:
+        return await self._unary_unary(
+            &#34;/nitric.document.v1.DocumentService/Query&#34;,
+            document_query_request,
+            DocumentQueryResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
+
+    async def query_stream(
+        self,
+        document_query_stream_request: &#34;DocumentQueryStreamRequest&#34;,
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional[&#34;Deadline&#34;] = None,
+        metadata: Optional[&#34;MetadataLike&#34;] = None
+    ) -&gt; AsyncIterator[&#34;DocumentQueryStreamResponse&#34;]:
+        async for response in self._unary_stream(
+            &#34;/nitric.document.v1.DocumentService/QueryStream&#34;,
+            document_query_stream_request,
+            DocumentQueryStreamResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        ):
+            yield response</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.grpc.grpclib_client.ServiceStub</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.proto.nitric.document.v1.DocumentServiceStub.delete"><code class="name flex">
+<span>async def <span class="ident">delete</span></span>(<span>self, document_delete_request: <a title="nitric.proto.nitric.document.v1.DocumentDeleteRequest" href="#nitric.proto.nitric.document.v1.DocumentDeleteRequest">DocumentDeleteRequest</a>, *, timeout: Optional[float] = None, deadline: Optional[ForwardRef('Deadline')] = None, metadata: Optional[ForwardRef('MetadataLike')] = None) ‑> <a title="nitric.proto.nitric.document.v1.DocumentDeleteResponse" href="#nitric.proto.nitric.document.v1.DocumentDeleteResponse">DocumentDeleteResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def delete(
+    self,
+    document_delete_request: &#34;DocumentDeleteRequest&#34;,
+    *,
+    timeout: Optional[float] = None,
+    deadline: Optional[&#34;Deadline&#34;] = None,
+    metadata: Optional[&#34;MetadataLike&#34;] = None
+) -&gt; &#34;DocumentDeleteResponse&#34;:
+    return await self._unary_unary(
+        &#34;/nitric.document.v1.DocumentService/Delete&#34;,
+        document_delete_request,
+        DocumentDeleteResponse,
+        timeout=timeout,
+        deadline=deadline,
+        metadata=metadata,
+    )</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentServiceStub.get"><code class="name flex">
+<span>async def <span class="ident">get</span></span>(<span>self, document_get_request: <a title="nitric.proto.nitric.document.v1.DocumentGetRequest" href="#nitric.proto.nitric.document.v1.DocumentGetRequest">DocumentGetRequest</a>, *, timeout: Optional[float] = None, deadline: Optional[ForwardRef('Deadline')] = None, metadata: Optional[ForwardRef('MetadataLike')] = None) ‑> <a title="nitric.proto.nitric.document.v1.DocumentGetResponse" href="#nitric.proto.nitric.document.v1.DocumentGetResponse">DocumentGetResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def get(
+    self,
+    document_get_request: &#34;DocumentGetRequest&#34;,
+    *,
+    timeout: Optional[float] = None,
+    deadline: Optional[&#34;Deadline&#34;] = None,
+    metadata: Optional[&#34;MetadataLike&#34;] = None
+) -&gt; &#34;DocumentGetResponse&#34;:
+    return await self._unary_unary(
+        &#34;/nitric.document.v1.DocumentService/Get&#34;,
+        document_get_request,
+        DocumentGetResponse,
+        timeout=timeout,
+        deadline=deadline,
+        metadata=metadata,
+    )</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentServiceStub.query"><code class="name flex">
+<span>async def <span class="ident">query</span></span>(<span>self, document_query_request: <a title="nitric.proto.nitric.document.v1.DocumentQueryRequest" href="#nitric.proto.nitric.document.v1.DocumentQueryRequest">DocumentQueryRequest</a>, *, timeout: Optional[float] = None, deadline: Optional[ForwardRef('Deadline')] = None, metadata: Optional[ForwardRef('MetadataLike')] = None) ‑> <a title="nitric.proto.nitric.document.v1.DocumentQueryResponse" href="#nitric.proto.nitric.document.v1.DocumentQueryResponse">DocumentQueryResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def query(
+    self,
+    document_query_request: &#34;DocumentQueryRequest&#34;,
+    *,
+    timeout: Optional[float] = None,
+    deadline: Optional[&#34;Deadline&#34;] = None,
+    metadata: Optional[&#34;MetadataLike&#34;] = None
+) -&gt; &#34;DocumentQueryResponse&#34;:
+    return await self._unary_unary(
+        &#34;/nitric.document.v1.DocumentService/Query&#34;,
+        document_query_request,
+        DocumentQueryResponse,
+        timeout=timeout,
+        deadline=deadline,
+        metadata=metadata,
+    )</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentServiceStub.query_stream"><code class="name flex">
+<span>async def <span class="ident">query_stream</span></span>(<span>self, document_query_stream_request: <a title="nitric.proto.nitric.document.v1.DocumentQueryStreamRequest" href="#nitric.proto.nitric.document.v1.DocumentQueryStreamRequest">DocumentQueryStreamRequest</a>, *, timeout: Optional[float] = None, deadline: Optional[ForwardRef('Deadline')] = None, metadata: Optional[ForwardRef('MetadataLike')] = None) ‑> AsyncIterator[<a title="nitric.proto.nitric.document.v1.DocumentQueryStreamResponse" href="#nitric.proto.nitric.document.v1.DocumentQueryStreamResponse">DocumentQueryStreamResponse</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def query_stream(
+    self,
+    document_query_stream_request: &#34;DocumentQueryStreamRequest&#34;,
+    *,
+    timeout: Optional[float] = None,
+    deadline: Optional[&#34;Deadline&#34;] = None,
+    metadata: Optional[&#34;MetadataLike&#34;] = None
+) -&gt; AsyncIterator[&#34;DocumentQueryStreamResponse&#34;]:
+    async for response in self._unary_stream(
+        &#34;/nitric.document.v1.DocumentService/QueryStream&#34;,
+        document_query_stream_request,
+        DocumentQueryStreamResponse,
+        timeout=timeout,
+        deadline=deadline,
+        metadata=metadata,
+    ):
+        yield response</code></pre>
+</details>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentServiceStub.set"><code class="name flex">
+<span>async def <span class="ident">set</span></span>(<span>self, document_set_request: <a title="nitric.proto.nitric.document.v1.DocumentSetRequest" href="#nitric.proto.nitric.document.v1.DocumentSetRequest">DocumentSetRequest</a>, *, timeout: Optional[float] = None, deadline: Optional[ForwardRef('Deadline')] = None, metadata: Optional[ForwardRef('MetadataLike')] = None) ‑> <a title="nitric.proto.nitric.document.v1.DocumentSetResponse" href="#nitric.proto.nitric.document.v1.DocumentSetResponse">DocumentSetResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def set(
+    self,
+    document_set_request: &#34;DocumentSetRequest&#34;,
+    *,
+    timeout: Optional[float] = None,
+    deadline: Optional[&#34;Deadline&#34;] = None,
+    metadata: Optional[&#34;MetadataLike&#34;] = None
+) -&gt; &#34;DocumentSetResponse&#34;:
+    return await self._unary_unary(
+        &#34;/nitric.document.v1.DocumentService/Set&#34;,
+        document_set_request,
+        DocumentSetResponse,
+        timeout=timeout,
+        deadline=deadline,
+        metadata=metadata,
+    )</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentSetRequest"><code class="flex name class">
+<span>class <span class="ident">DocumentSetRequest</span></span>
+<span>(</span><span>key: <a title="nitric.proto.nitric.document.v1.Key" href="#nitric.proto.nitric.document.v1.Key">Key</a> = &lt;object object&gt;, content: betterproto_lib_google_protobuf.Struct = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>DocumentSetRequest(key: 'Key' = <object object at 0x1016c89d0>, content: 'betterproto_lib_google_protobuf.Struct' = <object object at 0x1016c89d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class DocumentSetRequest(betterproto.Message):
+    key: &#34;Key&#34; = betterproto.message_field(1)
+    &#34;&#34;&#34;Key of the document to set&#34;&#34;&#34;
+
+    content: &#34;betterproto_lib_google_protobuf.Struct&#34; = betterproto.message_field(3)
+    &#34;&#34;&#34;The document content to store (JSON object)&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.document.v1.DocumentSetRequest.content"><code class="name">var <span class="ident">content</span> : betterproto.lib.google.protobuf.Struct</code></dt>
+<dd>
+<div class="desc"><p>The document content to store (JSON object)</p></div>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentSetRequest.key"><code class="name">var <span class="ident">key</span> : <a title="nitric.proto.nitric.document.v1.Key" href="#nitric.proto.nitric.document.v1.Key">Key</a></code></dt>
+<dd>
+<div class="desc"><p>Key of the document to set</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.DocumentSetResponse"><code class="flex name class">
+<span>class <span class="ident">DocumentSetResponse</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>DocumentSetResponse()</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class DocumentSetResponse(betterproto.Message):
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.Expression"><code class="flex name class">
+<span>class <span class="ident">Expression</span></span>
+<span>(</span><span>operand: str = &lt;object object&gt;, operator: str = &lt;object object&gt;, value: <a title="nitric.proto.nitric.document.v1.ExpressionValue" href="#nitric.proto.nitric.document.v1.ExpressionValue">ExpressionValue</a> = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Provides a query expression type</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class Expression(betterproto.Message):
+    &#34;&#34;&#34;Provides a query expression type&#34;&#34;&#34;
+
+    operand: str = betterproto.string_field(1)
+    &#34;&#34;&#34;The query operand or attribute&#34;&#34;&#34;
+
+    operator: str = betterproto.string_field(2)
+    &#34;&#34;&#34;The query operator [ == | &lt; | &lt;= | &gt; | &gt;= | startsWith ]&#34;&#34;&#34;
+
+    value: &#34;ExpressionValue&#34; = betterproto.message_field(3)
+    &#34;&#34;&#34;The query expression value&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.document.v1.Expression.operand"><code class="name">var <span class="ident">operand</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The query operand or attribute</p></div>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.Expression.operator"><code class="name">var <span class="ident">operator</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The query operator [ == | &lt; | &lt;= | &gt; | &gt;= | startsWith ]</p></div>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.Expression.value"><code class="name">var <span class="ident">value</span> : <a title="nitric.proto.nitric.document.v1.ExpressionValue" href="#nitric.proto.nitric.document.v1.ExpressionValue">ExpressionValue</a></code></dt>
+<dd>
+<div class="desc"><p>The query expression value</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.ExpressionValue"><code class="flex name class">
+<span>class <span class="ident">ExpressionValue</span></span>
+<span>(</span><span>int_value: int = &lt;object object&gt;, double_value: float = &lt;object object&gt;, string_value: str = &lt;object object&gt;, bool_value: bool = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ExpressionValue(int_value: int = <object object at 0x1016c89d0>, double_value: float = <object object at 0x1016c89d0>, string_value: str = <object object at 0x1016c89d0>, bool_value: bool = <object object at 0x1016c89d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class ExpressionValue(betterproto.Message):
+    int_value: int = betterproto.int64_field(1, group=&#34;kind&#34;)
+    &#34;&#34;&#34;Represents an integer value.&#34;&#34;&#34;
+
+    double_value: float = betterproto.double_field(2, group=&#34;kind&#34;)
+    &#34;&#34;&#34;Represents a double value.&#34;&#34;&#34;
+
+    string_value: str = betterproto.string_field(3, group=&#34;kind&#34;)
+    &#34;&#34;&#34;Represents a string value.&#34;&#34;&#34;
+
+    bool_value: bool = betterproto.bool_field(4, group=&#34;kind&#34;)
+    &#34;&#34;&#34;Represents a boolean value.&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.document.v1.ExpressionValue.bool_value"><code class="name">var <span class="ident">bool_value</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>Represents a boolean value.</p></div>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.ExpressionValue.double_value"><code class="name">var <span class="ident">double_value</span> : float</code></dt>
+<dd>
+<div class="desc"><p>Represents a double value.</p></div>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.ExpressionValue.int_value"><code class="name">var <span class="ident">int_value</span> : int</code></dt>
+<dd>
+<div class="desc"><p>Represents an integer value.</p></div>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.ExpressionValue.string_value"><code class="name">var <span class="ident">string_value</span> : str</code></dt>
+<dd>
+<div class="desc"><p>Represents a string value.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.Key"><code class="flex name class">
+<span>class <span class="ident">Key</span></span>
+<span>(</span><span>collection: <a title="nitric.proto.nitric.document.v1.Collection" href="#nitric.proto.nitric.document.v1.Collection">Collection</a> = &lt;object object&gt;, id: str = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Provides a document identifying key type</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class Key(betterproto.Message):
+    &#34;&#34;&#34;Provides a document identifying key type&#34;&#34;&#34;
+
+    collection: &#34;Collection&#34; = betterproto.message_field(1)
+    &#34;&#34;&#34;The item collection&#34;&#34;&#34;
+
+    id: str = betterproto.string_field(2)
+    &#34;&#34;&#34;The items unique id&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.document.v1.Key.collection"><code class="name">var <span class="ident">collection</span> : <a title="nitric.proto.nitric.document.v1.Collection" href="#nitric.proto.nitric.document.v1.Collection">Collection</a></code></dt>
+<dd>
+<div class="desc"><p>The item collection</p></div>
+</dd>
+<dt id="nitric.proto.nitric.document.v1.Key.id"><code class="name">var <span class="ident">id</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The items unique id</p></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="nitric.proto.nitric.document" href="../index.html">nitric.proto.nitric.document</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="nitric.proto.nitric.document.v1.Collection" href="#nitric.proto.nitric.document.v1.Collection">Collection</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.document.v1.Collection.name" href="#nitric.proto.nitric.document.v1.Collection.name">name</a></code></li>
+<li><code><a title="nitric.proto.nitric.document.v1.Collection.parent" href="#nitric.proto.nitric.document.v1.Collection.parent">parent</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.document.v1.Document" href="#nitric.proto.nitric.document.v1.Document">Document</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.document.v1.Document.content" href="#nitric.proto.nitric.document.v1.Document.content">content</a></code></li>
+<li><code><a title="nitric.proto.nitric.document.v1.Document.key" href="#nitric.proto.nitric.document.v1.Document.key">key</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.document.v1.DocumentDeleteRequest" href="#nitric.proto.nitric.document.v1.DocumentDeleteRequest">DocumentDeleteRequest</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentDeleteRequest.key" href="#nitric.proto.nitric.document.v1.DocumentDeleteRequest.key">key</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.document.v1.DocumentDeleteResponse" href="#nitric.proto.nitric.document.v1.DocumentDeleteResponse">DocumentDeleteResponse</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.document.v1.DocumentGetRequest" href="#nitric.proto.nitric.document.v1.DocumentGetRequest">DocumentGetRequest</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentGetRequest.key" href="#nitric.proto.nitric.document.v1.DocumentGetRequest.key">key</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.document.v1.DocumentGetResponse" href="#nitric.proto.nitric.document.v1.DocumentGetResponse">DocumentGetResponse</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentGetResponse.document" href="#nitric.proto.nitric.document.v1.DocumentGetResponse.document">document</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.document.v1.DocumentQueryRequest" href="#nitric.proto.nitric.document.v1.DocumentQueryRequest">DocumentQueryRequest</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentQueryRequest.collection" href="#nitric.proto.nitric.document.v1.DocumentQueryRequest.collection">collection</a></code></li>
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentQueryRequest.expressions" href="#nitric.proto.nitric.document.v1.DocumentQueryRequest.expressions">expressions</a></code></li>
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentQueryRequest.limit" href="#nitric.proto.nitric.document.v1.DocumentQueryRequest.limit">limit</a></code></li>
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentQueryRequest.paging_token" href="#nitric.proto.nitric.document.v1.DocumentQueryRequest.paging_token">paging_token</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.document.v1.DocumentQueryResponse" href="#nitric.proto.nitric.document.v1.DocumentQueryResponse">DocumentQueryResponse</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentQueryResponse.documents" href="#nitric.proto.nitric.document.v1.DocumentQueryResponse.documents">documents</a></code></li>
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentQueryResponse.paging_token" href="#nitric.proto.nitric.document.v1.DocumentQueryResponse.paging_token">paging_token</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.document.v1.DocumentQueryStreamRequest" href="#nitric.proto.nitric.document.v1.DocumentQueryStreamRequest">DocumentQueryStreamRequest</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentQueryStreamRequest.collection" href="#nitric.proto.nitric.document.v1.DocumentQueryStreamRequest.collection">collection</a></code></li>
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentQueryStreamRequest.expressions" href="#nitric.proto.nitric.document.v1.DocumentQueryStreamRequest.expressions">expressions</a></code></li>
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentQueryStreamRequest.limit" href="#nitric.proto.nitric.document.v1.DocumentQueryStreamRequest.limit">limit</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.document.v1.DocumentQueryStreamResponse" href="#nitric.proto.nitric.document.v1.DocumentQueryStreamResponse">DocumentQueryStreamResponse</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentQueryStreamResponse.document" href="#nitric.proto.nitric.document.v1.DocumentQueryStreamResponse.document">document</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.document.v1.DocumentServiceBase" href="#nitric.proto.nitric.document.v1.DocumentServiceBase">DocumentServiceBase</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentServiceBase.delete" href="#nitric.proto.nitric.document.v1.DocumentServiceBase.delete">delete</a></code></li>
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentServiceBase.get" href="#nitric.proto.nitric.document.v1.DocumentServiceBase.get">get</a></code></li>
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentServiceBase.query" href="#nitric.proto.nitric.document.v1.DocumentServiceBase.query">query</a></code></li>
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentServiceBase.query_stream" href="#nitric.proto.nitric.document.v1.DocumentServiceBase.query_stream">query_stream</a></code></li>
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentServiceBase.set" href="#nitric.proto.nitric.document.v1.DocumentServiceBase.set">set</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.document.v1.DocumentServiceStub" href="#nitric.proto.nitric.document.v1.DocumentServiceStub">DocumentServiceStub</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentServiceStub.delete" href="#nitric.proto.nitric.document.v1.DocumentServiceStub.delete">delete</a></code></li>
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentServiceStub.get" href="#nitric.proto.nitric.document.v1.DocumentServiceStub.get">get</a></code></li>
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentServiceStub.query" href="#nitric.proto.nitric.document.v1.DocumentServiceStub.query">query</a></code></li>
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentServiceStub.query_stream" href="#nitric.proto.nitric.document.v1.DocumentServiceStub.query_stream">query_stream</a></code></li>
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentServiceStub.set" href="#nitric.proto.nitric.document.v1.DocumentServiceStub.set">set</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.document.v1.DocumentSetRequest" href="#nitric.proto.nitric.document.v1.DocumentSetRequest">DocumentSetRequest</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentSetRequest.content" href="#nitric.proto.nitric.document.v1.DocumentSetRequest.content">content</a></code></li>
+<li><code><a title="nitric.proto.nitric.document.v1.DocumentSetRequest.key" href="#nitric.proto.nitric.document.v1.DocumentSetRequest.key">key</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.document.v1.DocumentSetResponse" href="#nitric.proto.nitric.document.v1.DocumentSetResponse">DocumentSetResponse</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.document.v1.Expression" href="#nitric.proto.nitric.document.v1.Expression">Expression</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.document.v1.Expression.operand" href="#nitric.proto.nitric.document.v1.Expression.operand">operand</a></code></li>
+<li><code><a title="nitric.proto.nitric.document.v1.Expression.operator" href="#nitric.proto.nitric.document.v1.Expression.operator">operator</a></code></li>
+<li><code><a title="nitric.proto.nitric.document.v1.Expression.value" href="#nitric.proto.nitric.document.v1.Expression.value">value</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.document.v1.ExpressionValue" href="#nitric.proto.nitric.document.v1.ExpressionValue">ExpressionValue</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.document.v1.ExpressionValue.bool_value" href="#nitric.proto.nitric.document.v1.ExpressionValue.bool_value">bool_value</a></code></li>
+<li><code><a title="nitric.proto.nitric.document.v1.ExpressionValue.double_value" href="#nitric.proto.nitric.document.v1.ExpressionValue.double_value">double_value</a></code></li>
+<li><code><a title="nitric.proto.nitric.document.v1.ExpressionValue.int_value" href="#nitric.proto.nitric.document.v1.ExpressionValue.int_value">int_value</a></code></li>
+<li><code><a title="nitric.proto.nitric.document.v1.ExpressionValue.string_value" href="#nitric.proto.nitric.document.v1.ExpressionValue.string_value">string_value</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.document.v1.Key" href="#nitric.proto.nitric.document.v1.Key">Key</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.document.v1.Key.collection" href="#nitric.proto.nitric.document.v1.Key.collection">collection</a></code></li>
+<li><code><a title="nitric.proto.nitric.document.v1.Key.id" href="#nitric.proto.nitric.document.v1.Key.id">id</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>
