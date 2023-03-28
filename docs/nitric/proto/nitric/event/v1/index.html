@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>nitric.proto.nitric.event.v1 API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>nitric.proto.nitric.event.v1</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#
+# Copyright (c) 2021 Nitric Technologies Pty Ltd.
+#
+# This file is part of Nitric Python 3 SDK.
+# See https://github.com/nitrictech/python-sdk for further info.
+#
+# Licensed under the Apache License, Version 2.0 (the &#34;License&#34;);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an &#34;AS IS&#34; BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Generated by the protocol buffer compiler.  DO NOT EDIT!
+# sources: proto/event/v1/event.proto
+# plugin: python-betterproto
+from dataclasses import dataclass
+from typing import (
+    TYPE_CHECKING,
+    Dict,
+    List,
+    Optional,
+)
+
+import betterproto
+import betterproto.lib.google.protobuf as betterproto_lib_google_protobuf
+import grpclib
+from betterproto.grpc.grpclib_server import ServiceBase
+
+
+if TYPE_CHECKING:
+    import grpclib.server
+    from betterproto.grpc.grpclib_client import MetadataLike
+    from grpclib.metadata import Deadline
+
+
+@dataclass(eq=False, repr=False)
+class EventPublishRequest(betterproto.Message):
+    &#34;&#34;&#34;Request to publish an event to a topic&#34;&#34;&#34;
+
+    topic: str = betterproto.string_field(1)
+    &#34;&#34;&#34;The name of the topic to publish the event to&#34;&#34;&#34;
+
+    event: &#34;NitricEvent&#34; = betterproto.message_field(2)
+    &#34;&#34;&#34;The event to be published&#34;&#34;&#34;
+
+    delay: int = betterproto.uint32_field(3)
+    &#34;&#34;&#34;An optional delay specified in seconds (minimum 10 seconds)&#34;&#34;&#34;
+
+
+@dataclass(eq=False, repr=False)
+class EventPublishResponse(betterproto.Message):
+    &#34;&#34;&#34;Result of publishing an event&#34;&#34;&#34;
+
+    id: str = betterproto.string_field(1)
+    &#34;&#34;&#34;
+    The id of the published message When an id was not supplied one should be
+    automatically generated
+    &#34;&#34;&#34;
+
+
+@dataclass(eq=False, repr=False)
+class TopicListRequest(betterproto.Message):
+    &#34;&#34;&#34;Request for the Topic List method&#34;&#34;&#34;
+
+    pass
+
+
+@dataclass(eq=False, repr=False)
+class TopicListResponse(betterproto.Message):
+    &#34;&#34;&#34;Topic List Response&#34;&#34;&#34;
+
+    topics: List[&#34;NitricTopic&#34;] = betterproto.message_field(1)
+    &#34;&#34;&#34;The list of found topics&#34;&#34;&#34;
+
+
+@dataclass(eq=False, repr=False)
+class NitricTopic(betterproto.Message):
+    &#34;&#34;&#34;Represents an event topic&#34;&#34;&#34;
+
+    name: str = betterproto.string_field(1)
+    &#34;&#34;&#34;The Nitric name for the topic&#34;&#34;&#34;
+
+
+@dataclass(eq=False, repr=False)
+class NitricEvent(betterproto.Message):
+    &#34;&#34;&#34;Nitric Event Model&#34;&#34;&#34;
+
+    id: str = betterproto.string_field(1)
+    &#34;&#34;&#34;A Unique ID for the Nitric Event&#34;&#34;&#34;
+
+    payload_type: str = betterproto.string_field(2)
+    &#34;&#34;&#34;A content hint for the events payload&#34;&#34;&#34;
+
+    payload: &#34;betterproto_lib_google_protobuf.Struct&#34; = betterproto.message_field(3)
+    &#34;&#34;&#34;The payload of the event&#34;&#34;&#34;
+
+
+class EventServiceStub(betterproto.ServiceStub):
+    async def publish(
+        self,
+        event_publish_request: &#34;EventPublishRequest&#34;,
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional[&#34;Deadline&#34;] = None,
+        metadata: Optional[&#34;MetadataLike&#34;] = None
+    ) -&gt; &#34;EventPublishResponse&#34;:
+        return await self._unary_unary(
+            &#34;/nitric.event.v1.EventService/Publish&#34;,
+            event_publish_request,
+            EventPublishResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
+
+
+class TopicServiceStub(betterproto.ServiceStub):
+    async def list(
+        self,
+        topic_list_request: &#34;TopicListRequest&#34;,
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional[&#34;Deadline&#34;] = None,
+        metadata: Optional[&#34;MetadataLike&#34;] = None
+    ) -&gt; &#34;TopicListResponse&#34;:
+        return await self._unary_unary(
+            &#34;/nitric.event.v1.TopicService/List&#34;,
+            topic_list_request,
+            TopicListResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
+
+
+class EventServiceBase(ServiceBase):
+    async def publish(
+        self, event_publish_request: &#34;EventPublishRequest&#34;
+    ) -&gt; &#34;EventPublishResponse&#34;:
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def __rpc_publish(
+        self, stream: &#34;grpclib.server.Stream[EventPublishRequest, EventPublishResponse]&#34;
+    ) -&gt; None:
+        request = await stream.recv_message()
+        response = await self.publish(request)
+        await stream.send_message(response)
+
+    def __mapping__(self) -&gt; Dict[str, grpclib.const.Handler]:
+        return {
+            &#34;/nitric.event.v1.EventService/Publish&#34;: grpclib.const.Handler(
+                self.__rpc_publish,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                EventPublishRequest,
+                EventPublishResponse,
+            ),
+        }
+
+
+class TopicServiceBase(ServiceBase):
+    async def list(self, topic_list_request: &#34;TopicListRequest&#34;) -&gt; &#34;TopicListResponse&#34;:
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def __rpc_list(
+        self, stream: &#34;grpclib.server.Stream[TopicListRequest, TopicListResponse]&#34;
+    ) -&gt; None:
+        request = await stream.recv_message()
+        response = await self.list(request)
+        await stream.send_message(response)
+
+    def __mapping__(self) -&gt; Dict[str, grpclib.const.Handler]:
+        return {
+            &#34;/nitric.event.v1.TopicService/List&#34;: grpclib.const.Handler(
+                self.__rpc_list,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                TopicListRequest,
+                TopicListResponse,
+            ),
+        }</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="nitric.proto.nitric.event.v1.EventPublishRequest"><code class="flex name class">
+<span>class <span class="ident">EventPublishRequest</span></span>
+<span>(</span><span>topic: str = &lt;object object&gt;, event: <a title="nitric.proto.nitric.event.v1.NitricEvent" href="#nitric.proto.nitric.event.v1.NitricEvent">NitricEvent</a> = &lt;object object&gt;, delay: int = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Request to publish an event to a topic</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class EventPublishRequest(betterproto.Message):
+    &#34;&#34;&#34;Request to publish an event to a topic&#34;&#34;&#34;
+
+    topic: str = betterproto.string_field(1)
+    &#34;&#34;&#34;The name of the topic to publish the event to&#34;&#34;&#34;
+
+    event: &#34;NitricEvent&#34; = betterproto.message_field(2)
+    &#34;&#34;&#34;The event to be published&#34;&#34;&#34;
+
+    delay: int = betterproto.uint32_field(3)
+    &#34;&#34;&#34;An optional delay specified in seconds (minimum 10 seconds)&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.event.v1.EventPublishRequest.delay"><code class="name">var <span class="ident">delay</span> : int</code></dt>
+<dd>
+<div class="desc"><p>An optional delay specified in seconds (minimum 10 seconds)</p></div>
+</dd>
+<dt id="nitric.proto.nitric.event.v1.EventPublishRequest.event"><code class="name">var <span class="ident">event</span> : <a title="nitric.proto.nitric.event.v1.NitricEvent" href="#nitric.proto.nitric.event.v1.NitricEvent">NitricEvent</a></code></dt>
+<dd>
+<div class="desc"><p>The event to be published</p></div>
+</dd>
+<dt id="nitric.proto.nitric.event.v1.EventPublishRequest.topic"><code class="name">var <span class="ident">topic</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The name of the topic to publish the event to</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.event.v1.EventPublishResponse"><code class="flex name class">
+<span>class <span class="ident">EventPublishResponse</span></span>
+<span>(</span><span>id: str = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Result of publishing an event</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class EventPublishResponse(betterproto.Message):
+    &#34;&#34;&#34;Result of publishing an event&#34;&#34;&#34;
+
+    id: str = betterproto.string_field(1)
+    &#34;&#34;&#34;
+    The id of the published message When an id was not supplied one should be
+    automatically generated
+    &#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.event.v1.EventPublishResponse.id"><code class="name">var <span class="ident">id</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The id of the published message When an id was not supplied one should be
+automatically generated</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.event.v1.EventServiceBase"><code class="flex name class">
+<span>class <span class="ident">EventServiceBase</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for async gRPC servers.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class EventServiceBase(ServiceBase):
+    async def publish(
+        self, event_publish_request: &#34;EventPublishRequest&#34;
+    ) -&gt; &#34;EventPublishResponse&#34;:
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def __rpc_publish(
+        self, stream: &#34;grpclib.server.Stream[EventPublishRequest, EventPublishResponse]&#34;
+    ) -&gt; None:
+        request = await stream.recv_message()
+        response = await self.publish(request)
+        await stream.send_message(response)
+
+    def __mapping__(self) -&gt; Dict[str, grpclib.const.Handler]:
+        return {
+            &#34;/nitric.event.v1.EventService/Publish&#34;: grpclib.const.Handler(
+                self.__rpc_publish,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                EventPublishRequest,
+                EventPublishResponse,
+            ),
+        }</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.grpc.grpclib_server.ServiceBase</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.proto.nitric.event.v1.EventServiceBase.publish"><code class="name flex">
+<span>async def <span class="ident">publish</span></span>(<span>self, event_publish_request: <a title="nitric.proto.nitric.event.v1.EventPublishRequest" href="#nitric.proto.nitric.event.v1.EventPublishRequest">EventPublishRequest</a>) ‑> <a title="nitric.proto.nitric.event.v1.EventPublishResponse" href="#nitric.proto.nitric.event.v1.EventPublishResponse">EventPublishResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def publish(
+    self, event_publish_request: &#34;EventPublishRequest&#34;
+) -&gt; &#34;EventPublishResponse&#34;:
+    raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.event.v1.EventServiceStub"><code class="flex name class">
+<span>class <span class="ident">EventServiceStub</span></span>
+<span>(</span><span>channel: Channel, *, timeout: Optional[float] = None, deadline: Optional[ForwardRef('Deadline')] = None, metadata: Union[Mapping[str, Union[str, bytes]], Collection[Tuple[str, Union[str, bytes]]], NoneType] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for async gRPC clients.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class EventServiceStub(betterproto.ServiceStub):
+    async def publish(
+        self,
+        event_publish_request: &#34;EventPublishRequest&#34;,
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional[&#34;Deadline&#34;] = None,
+        metadata: Optional[&#34;MetadataLike&#34;] = None
+    ) -&gt; &#34;EventPublishResponse&#34;:
+        return await self._unary_unary(
+            &#34;/nitric.event.v1.EventService/Publish&#34;,
+            event_publish_request,
+            EventPublishResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.grpc.grpclib_client.ServiceStub</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.proto.nitric.event.v1.EventServiceStub.publish"><code class="name flex">
+<span>async def <span class="ident">publish</span></span>(<span>self, event_publish_request: <a title="nitric.proto.nitric.event.v1.EventPublishRequest" href="#nitric.proto.nitric.event.v1.EventPublishRequest">EventPublishRequest</a>, *, timeout: Optional[float] = None, deadline: Optional[ForwardRef('Deadline')] = None, metadata: Optional[ForwardRef('MetadataLike')] = None) ‑> <a title="nitric.proto.nitric.event.v1.EventPublishResponse" href="#nitric.proto.nitric.event.v1.EventPublishResponse">EventPublishResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def publish(
+    self,
+    event_publish_request: &#34;EventPublishRequest&#34;,
+    *,
+    timeout: Optional[float] = None,
+    deadline: Optional[&#34;Deadline&#34;] = None,
+    metadata: Optional[&#34;MetadataLike&#34;] = None
+) -&gt; &#34;EventPublishResponse&#34;:
+    return await self._unary_unary(
+        &#34;/nitric.event.v1.EventService/Publish&#34;,
+        event_publish_request,
+        EventPublishResponse,
+        timeout=timeout,
+        deadline=deadline,
+        metadata=metadata,
+    )</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.event.v1.NitricEvent"><code class="flex name class">
+<span>class <span class="ident">NitricEvent</span></span>
+<span>(</span><span>id: str = &lt;object object&gt;, payload_type: str = &lt;object object&gt;, payload: betterproto_lib_google_protobuf.Struct = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Nitric Event Model</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class NitricEvent(betterproto.Message):
+    &#34;&#34;&#34;Nitric Event Model&#34;&#34;&#34;
+
+    id: str = betterproto.string_field(1)
+    &#34;&#34;&#34;A Unique ID for the Nitric Event&#34;&#34;&#34;
+
+    payload_type: str = betterproto.string_field(2)
+    &#34;&#34;&#34;A content hint for the events payload&#34;&#34;&#34;
+
+    payload: &#34;betterproto_lib_google_protobuf.Struct&#34; = betterproto.message_field(3)
+    &#34;&#34;&#34;The payload of the event&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.event.v1.NitricEvent.id"><code class="name">var <span class="ident">id</span> : str</code></dt>
+<dd>
+<div class="desc"><p>A Unique ID for the Nitric Event</p></div>
+</dd>
+<dt id="nitric.proto.nitric.event.v1.NitricEvent.payload"><code class="name">var <span class="ident">payload</span> : betterproto.lib.google.protobuf.Struct</code></dt>
+<dd>
+<div class="desc"><p>The payload of the event</p></div>
+</dd>
+<dt id="nitric.proto.nitric.event.v1.NitricEvent.payload_type"><code class="name">var <span class="ident">payload_type</span> : str</code></dt>
+<dd>
+<div class="desc"><p>A content hint for the events payload</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.event.v1.NitricTopic"><code class="flex name class">
+<span>class <span class="ident">NitricTopic</span></span>
+<span>(</span><span>name: str = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents an event topic</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class NitricTopic(betterproto.Message):
+    &#34;&#34;&#34;Represents an event topic&#34;&#34;&#34;
+
+    name: str = betterproto.string_field(1)
+    &#34;&#34;&#34;The Nitric name for the topic&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.event.v1.NitricTopic.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The Nitric name for the topic</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.event.v1.TopicListRequest"><code class="flex name class">
+<span>class <span class="ident">TopicListRequest</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Request for the Topic List method</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class TopicListRequest(betterproto.Message):
+    &#34;&#34;&#34;Request for the Topic List method&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+</dd>
+<dt id="nitric.proto.nitric.event.v1.TopicListResponse"><code class="flex name class">
+<span>class <span class="ident">TopicListResponse</span></span>
+<span>(</span><span>topics: List[ForwardRef('<a title="nitric.proto.nitric.event.v1.NitricTopic" href="#nitric.proto.nitric.event.v1.NitricTopic">NitricTopic</a>')] = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Topic List Response</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class TopicListResponse(betterproto.Message):
+    &#34;&#34;&#34;Topic List Response&#34;&#34;&#34;
+
+    topics: List[&#34;NitricTopic&#34;] = betterproto.message_field(1)
+    &#34;&#34;&#34;The list of found topics&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.event.v1.TopicListResponse.topics"><code class="name">var <span class="ident">topics</span> : List[<a title="nitric.proto.nitric.event.v1.NitricTopic" href="#nitric.proto.nitric.event.v1.NitricTopic">NitricTopic</a>]</code></dt>
+<dd>
+<div class="desc"><p>The list of found topics</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.event.v1.TopicServiceBase"><code class="flex name class">
+<span>class <span class="ident">TopicServiceBase</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for async gRPC servers.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TopicServiceBase(ServiceBase):
+    async def list(self, topic_list_request: &#34;TopicListRequest&#34;) -&gt; &#34;TopicListResponse&#34;:
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def __rpc_list(
+        self, stream: &#34;grpclib.server.Stream[TopicListRequest, TopicListResponse]&#34;
+    ) -&gt; None:
+        request = await stream.recv_message()
+        response = await self.list(request)
+        await stream.send_message(response)
+
+    def __mapping__(self) -&gt; Dict[str, grpclib.const.Handler]:
+        return {
+            &#34;/nitric.event.v1.TopicService/List&#34;: grpclib.const.Handler(
+                self.__rpc_list,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                TopicListRequest,
+                TopicListResponse,
+            ),
+        }</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.grpc.grpclib_server.ServiceBase</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.proto.nitric.event.v1.TopicServiceBase.list"><code class="name flex">
+<span>async def <span class="ident">list</span></span>(<span>self, topic_list_request: <a title="nitric.proto.nitric.event.v1.TopicListRequest" href="#nitric.proto.nitric.event.v1.TopicListRequest">TopicListRequest</a>) ‑> <a title="nitric.proto.nitric.event.v1.TopicListResponse" href="#nitric.proto.nitric.event.v1.TopicListResponse">TopicListResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def list(self, topic_list_request: &#34;TopicListRequest&#34;) -&gt; &#34;TopicListResponse&#34;:
+    raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.event.v1.TopicServiceStub"><code class="flex name class">
+<span>class <span class="ident">TopicServiceStub</span></span>
+<span>(</span><span>channel: Channel, *, timeout: Optional[float] = None, deadline: Optional[ForwardRef('Deadline')] = None, metadata: Union[Mapping[str, Union[str, bytes]], Collection[Tuple[str, Union[str, bytes]]], NoneType] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for async gRPC clients.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TopicServiceStub(betterproto.ServiceStub):
+    async def list(
+        self,
+        topic_list_request: &#34;TopicListRequest&#34;,
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional[&#34;Deadline&#34;] = None,
+        metadata: Optional[&#34;MetadataLike&#34;] = None
+    ) -&gt; &#34;TopicListResponse&#34;:
+        return await self._unary_unary(
+            &#34;/nitric.event.v1.TopicService/List&#34;,
+            topic_list_request,
+            TopicListResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.grpc.grpclib_client.ServiceStub</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.proto.nitric.event.v1.TopicServiceStub.list"><code class="name flex">
+<span>async def <span class="ident">list</span></span>(<span>self, topic_list_request: <a title="nitric.proto.nitric.event.v1.TopicListRequest" href="#nitric.proto.nitric.event.v1.TopicListRequest">TopicListRequest</a>, *, timeout: Optional[float] = None, deadline: Optional[ForwardRef('Deadline')] = None, metadata: Optional[ForwardRef('MetadataLike')] = None) ‑> <a title="nitric.proto.nitric.event.v1.TopicListResponse" href="#nitric.proto.nitric.event.v1.TopicListResponse">TopicListResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def list(
+    self,
+    topic_list_request: &#34;TopicListRequest&#34;,
+    *,
+    timeout: Optional[float] = None,
+    deadline: Optional[&#34;Deadline&#34;] = None,
+    metadata: Optional[&#34;MetadataLike&#34;] = None
+) -&gt; &#34;TopicListResponse&#34;:
+    return await self._unary_unary(
+        &#34;/nitric.event.v1.TopicService/List&#34;,
+        topic_list_request,
+        TopicListResponse,
+        timeout=timeout,
+        deadline=deadline,
+        metadata=metadata,
+    )</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="nitric.proto.nitric.event" href="../index.html">nitric.proto.nitric.event</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="nitric.proto.nitric.event.v1.EventPublishRequest" href="#nitric.proto.nitric.event.v1.EventPublishRequest">EventPublishRequest</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.event.v1.EventPublishRequest.delay" href="#nitric.proto.nitric.event.v1.EventPublishRequest.delay">delay</a></code></li>
+<li><code><a title="nitric.proto.nitric.event.v1.EventPublishRequest.event" href="#nitric.proto.nitric.event.v1.EventPublishRequest.event">event</a></code></li>
+<li><code><a title="nitric.proto.nitric.event.v1.EventPublishRequest.topic" href="#nitric.proto.nitric.event.v1.EventPublishRequest.topic">topic</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.event.v1.EventPublishResponse" href="#nitric.proto.nitric.event.v1.EventPublishResponse">EventPublishResponse</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.event.v1.EventPublishResponse.id" href="#nitric.proto.nitric.event.v1.EventPublishResponse.id">id</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.event.v1.EventServiceBase" href="#nitric.proto.nitric.event.v1.EventServiceBase">EventServiceBase</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.event.v1.EventServiceBase.publish" href="#nitric.proto.nitric.event.v1.EventServiceBase.publish">publish</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.event.v1.EventServiceStub" href="#nitric.proto.nitric.event.v1.EventServiceStub">EventServiceStub</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.event.v1.EventServiceStub.publish" href="#nitric.proto.nitric.event.v1.EventServiceStub.publish">publish</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.event.v1.NitricEvent" href="#nitric.proto.nitric.event.v1.NitricEvent">NitricEvent</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.event.v1.NitricEvent.id" href="#nitric.proto.nitric.event.v1.NitricEvent.id">id</a></code></li>
+<li><code><a title="nitric.proto.nitric.event.v1.NitricEvent.payload" href="#nitric.proto.nitric.event.v1.NitricEvent.payload">payload</a></code></li>
+<li><code><a title="nitric.proto.nitric.event.v1.NitricEvent.payload_type" href="#nitric.proto.nitric.event.v1.NitricEvent.payload_type">payload_type</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.event.v1.NitricTopic" href="#nitric.proto.nitric.event.v1.NitricTopic">NitricTopic</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.event.v1.NitricTopic.name" href="#nitric.proto.nitric.event.v1.NitricTopic.name">name</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.event.v1.TopicListRequest" href="#nitric.proto.nitric.event.v1.TopicListRequest">TopicListRequest</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.event.v1.TopicListResponse" href="#nitric.proto.nitric.event.v1.TopicListResponse">TopicListResponse</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.event.v1.TopicListResponse.topics" href="#nitric.proto.nitric.event.v1.TopicListResponse.topics">topics</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.event.v1.TopicServiceBase" href="#nitric.proto.nitric.event.v1.TopicServiceBase">TopicServiceBase</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.event.v1.TopicServiceBase.list" href="#nitric.proto.nitric.event.v1.TopicServiceBase.list">list</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.event.v1.TopicServiceStub" href="#nitric.proto.nitric.event.v1.TopicServiceStub">TopicServiceStub</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.event.v1.TopicServiceStub.list" href="#nitric.proto.nitric.event.v1.TopicServiceStub.list">list</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>
