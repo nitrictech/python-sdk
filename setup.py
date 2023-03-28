@@ -42,8 +42,6 @@ setuptools.setup(
     ],
     setup_requires=["wheel"],
     install_requires=[
-        "nitric-api==0.21.0-rc.2",
-        "protobuf==3.19.4",
         "asyncio",
         "opentelemetry-api",
         "opentelemetry-sdk",
