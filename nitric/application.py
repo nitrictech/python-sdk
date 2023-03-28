@@ -21,7 +21,7 @@ import os
 
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider, sampling
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.grpc import GrpcInstrumentorClient
 
@@ -67,26 +67,35 @@ class Nitric:
             )
 
     @classmethod
+    def _create_tracer(cls) -> TracerProvider:
+        local_run = os.environ.OTELCOL_BIN is not None
+        samplePercent = os.environ.NITRIC_TRACE_SAMPLE_PERCENT
+
+        # If its a local run use a console exporter, otherwise export using OTEL Protocol
+        exporter = OTLPSpanExporter(endpoint="http://localhost:4317", insecure=True)
+        if local_run:
+            exporter = ConsoleSpanExporter()
+
+        provider = TracerProvider(
+            active_span_processor=BatchSpanProcessor(exporter),
+            sampler=sampling.TraceIdRatioBased(samplePercent / 100 if samplePercent is not None else 100),
+        )
+        trace.set_tracer_provider(provider)
+
+        grpc_client_instrumentor = GrpcInstrumentorClient()
+        grpc_client_instrumentor.instrument()
+
+        return provider
+
+    @classmethod
     def run(cls):
         """
         Start the nitric application.
 
         This will execute in an existing event loop if there is one, otherwise it will attempt to create its own.
         """
-        provider = None
+        provider = cls._create_tracer()
         try:
-            if os.environ.get("OTELCOL_BIN"):
-                otlp_exporter = OTLPSpanExporter(endpoint="http://localhost:4317", insecure=True)
-
-                provider = TracerProvider(
-                    active_span_processor=BatchSpanProcessor(otlp_exporter),
-                    sampler=sampling.ParentBased(),
-                )
-                trace.set_tracer_provider(provider)
-
-                grpc_client_instrumentor = GrpcInstrumentorClient()
-                grpc_client_instrumentor.instrument()
-
             try:
                 loop = asyncio.get_running_loop()
             except RuntimeError:

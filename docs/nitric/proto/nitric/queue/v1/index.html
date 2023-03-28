@@ -338,7 +338,7 @@ class QueueServiceBase(ServiceBase):
 <span>(</span><span>task: <a title="nitric.proto.nitric.queue.v1.NitricTask" href="#nitric.proto.nitric.queue.v1.NitricTask">NitricTask</a> = &lt;object object&gt;, message: str = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>FailedTask(task: 'NitricTask' = <object object at 0x1016c89d0>, message: str = <object object at 0x1016c89d0>)</p></div>
+<div class="desc"><p>FailedTask(task: 'NitricTask' = <object object at 0x103a229d0>, message: str = <object object at 0x103a229d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -428,7 +428,7 @@ extend the lease or release the task.</p></div>
 <span>(</span><span>queue: str = &lt;object object&gt;, lease_id: str = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>QueueCompleteRequest(queue: str = <object object at 0x1016c89d0>, lease_id: str = <object object at 0x1016c89d0>)</p></div>
+<div class="desc"><p>QueueCompleteRequest(queue: str = <object object at 0x103a229d0>, lease_id: str = <object object at 0x103a229d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -487,7 +487,7 @@ class QueueCompleteResponse(betterproto.Message):
 <span>(</span><span>queue: str = &lt;object object&gt;, depth: int = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>QueueReceiveRequest(queue: str = <object object at 0x1016c89d0>, depth: int = <object object at 0x1016c89d0>)</p></div>
+<div class="desc"><p>QueueReceiveRequest(queue: str = <object object at 0x103a229d0>, depth: int = <object object at 0x103a229d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -530,7 +530,7 @@ provider specific queue identifier.</p></div>
 <span>(</span><span>tasks: List[ForwardRef('<a title="nitric.proto.nitric.queue.v1.NitricTask" href="#nitric.proto.nitric.queue.v1.NitricTask">NitricTask</a>')] = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>QueueReceiveResponse(tasks: List[ForwardRef('NitricTask')] = <object object at 0x1016c89d0>)</p></div>
+<div class="desc"><p>QueueReceiveResponse(tasks: List[ForwardRef('NitricTask')] = <object object at 0x103a229d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -558,7 +558,7 @@ class QueueReceiveResponse(betterproto.Message):
 <span>(</span><span>queue: str = &lt;object object&gt;, tasks: List[ForwardRef('<a title="nitric.proto.nitric.queue.v1.NitricTask" href="#nitric.proto.nitric.queue.v1.NitricTask">NitricTask</a>')] = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>QueueSendBatchRequest(queue: str = <object object at 0x1016c89d0>, tasks: List[ForwardRef('NitricTask')] = <object object at 0x1016c89d0>)</p></div>
+<div class="desc"><p>QueueSendBatchRequest(queue: str = <object object at 0x103a229d0>, tasks: List[ForwardRef('NitricTask')] = <object object at 0x103a229d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>

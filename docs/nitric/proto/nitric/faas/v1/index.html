@@ -373,7 +373,7 @@ class FaasServiceBase(ServiceBase):
 <span>(</span><span>api: str = &lt;object object&gt;, path: str = &lt;object object&gt;, methods: List[str] = &lt;object object&gt;, options: <a title="nitric.proto.nitric.faas.v1.ApiWorkerOptions" href="#nitric.proto.nitric.faas.v1.ApiWorkerOptions">ApiWorkerOptions</a> = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ApiWorker(api: str = <object object at 0x1016c89d0>, path: str = <object object at 0x1016c89d0>, methods: List[str] = <object object at 0x1016c89d0>, options: 'ApiWorkerOptions' = <object object at 0x1016c89d0>)</p></div>
+<div class="desc"><p>ApiWorker(api: str = <object object at 0x103a229d0>, path: str = <object object at 0x103a229d0>, methods: List[str] = <object object at 0x103a229d0>, options: 'ApiWorkerOptions' = <object object at 0x103a229d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -415,7 +415,7 @@ class ApiWorker(betterproto.Message):
 <span>(</span><span>security: Dict[str, ForwardRef('<a title="nitric.proto.nitric.faas.v1.ApiWorkerScopes" href="#nitric.proto.nitric.faas.v1.ApiWorkerScopes">ApiWorkerScopes</a>')] = &lt;object object&gt;, security_disabled: bool = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ApiWorkerOptions(security: Dict[str, ForwardRef('ApiWorkerScopes')] = <object object at 0x1016c89d0>, security_disabled: bool = <object object at 0x1016c89d0>)</p></div>
+<div class="desc"><p>ApiWorkerOptions(security: Dict[str, ForwardRef('ApiWorkerScopes')] = <object object at 0x103a229d0>, security_disabled: bool = <object object at 0x103a229d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -458,7 +458,7 @@ knowing if security is explicitly disabled</p></div>
 <span>(</span><span>scopes: List[str] = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ApiWorkerScopes(scopes: List[str] = <object object at 0x1016c89d0>)</p></div>
+<div class="desc"><p>ApiWorkerScopes(scopes: List[str] = <object object at 0x103a229d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -664,7 +664,7 @@ until it has identified itself</p></div>
 <span>(</span><span>value: List[str] = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>HeaderValue(value: List[str] = <object object at 0x1016c89d0>)</p></div>
+<div class="desc"><p>HeaderValue(value: List[str] = <object object at 0x103a229d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -750,7 +750,7 @@ class HttpResponseContext(betterproto.Message):
 <span>(</span><span>method: str = &lt;object object&gt;, path: str = &lt;object object&gt;, headers_old: Dict[str, str] = &lt;object object&gt;, query_params_old: Dict[str, str] = &lt;object object&gt;, headers: Dict[str, ForwardRef('<a title="nitric.proto.nitric.faas.v1.HeaderValue" href="#nitric.proto.nitric.faas.v1.HeaderValue">HeaderValue</a>')] = &lt;object object&gt;, query_params: Dict[str, ForwardRef('<a title="nitric.proto.nitric.faas.v1.QueryValue" href="#nitric.proto.nitric.faas.v1.QueryValue">QueryValue</a>')] = &lt;object object&gt;, path_params: Dict[str, str] = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>HttpTriggerContext(method: str = <object object at 0x1016c89d0>, path: str = <object object at 0x1016c89d0>, headers_old: Dict[str, str] = <object object at 0x1016c89d0>, query_params_old: Dict[str, str] = <object object at 0x1016c89d0>, headers: Dict[str, ForwardRef('HeaderValue')] = <object object at 0x1016c89d0>, query_params: Dict[str, ForwardRef('QueryValue')] = <object object at 0x1016c89d0>, path_params: Dict[str, str] = <object object at 0x1016c89d0>)</p></div>
+<div class="desc"><p>HttpTriggerContext(method: str = <object object at 0x103a229d0>, path: str = <object object at 0x103a229d0>, headers_old: Dict[str, str] = <object object at 0x103a229d0>, query_params_old: Dict[str, str] = <object object at 0x103a229d0>, headers: Dict[str, ForwardRef('HeaderValue')] = <object object at 0x103a229d0>, query_params: Dict[str, ForwardRef('QueryValue')] = <object object at 0x103a229d0>, path_params: Dict[str, str] = <object object at 0x103a229d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -915,7 +915,7 @@ class InitResponse(betterproto.Message):
 <span>(</span><span>value: List[str] = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>QueryValue(value: List[str] = <object object at 0x1016c89d0>)</p></div>
+<div class="desc"><p>QueryValue(value: List[str] = <object object at 0x103a229d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -942,7 +942,7 @@ class QueryValue(betterproto.Message):
 <span>(</span><span>cron: str = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ScheduleCron(cron: str = <object object at 0x1016c89d0>)</p></div>
+<div class="desc"><p>ScheduleCron(cron: str = <object object at 0x103a229d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -969,7 +969,7 @@ class ScheduleCron(betterproto.Message):
 <span>(</span><span>rate: str = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ScheduleRate(rate: str = <object object at 0x1016c89d0>)</p></div>
+<div class="desc"><p>ScheduleRate(rate: str = <object object at 0x103a229d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -996,7 +996,7 @@ class ScheduleRate(betterproto.Message):
 <span>(</span><span>key: str = &lt;object object&gt;, rate: <a title="nitric.proto.nitric.faas.v1.ScheduleRate" href="#nitric.proto.nitric.faas.v1.ScheduleRate">ScheduleRate</a> = &lt;object object&gt;, cron: <a title="nitric.proto.nitric.faas.v1.ScheduleCron" href="#nitric.proto.nitric.faas.v1.ScheduleCron">ScheduleCron</a> = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ScheduleWorker(key: str = <object object at 0x1016c89d0>, rate: 'ScheduleRate' = <object object at 0x1016c89d0>, cron: 'ScheduleCron' = <object object at 0x1016c89d0>)</p></div>
+<div class="desc"><p>ScheduleWorker(key: str = <object object at 0x103a229d0>, rate: 'ScheduleRate' = <object object at 0x103a229d0>, cron: 'ScheduleCron' = <object object at 0x103a229d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1079,7 +1079,7 @@ class ServerMessage(betterproto.Message):
 <span>(</span><span>topic: str = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>SubscriptionWorker(topic: str = <object object at 0x1016c89d0>)</p></div>
+<div class="desc"><p>SubscriptionWorker(topic: str = <object object at 0x103a229d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1140,7 +1140,7 @@ class TopicResponseContext(betterproto.Message):
 <span>(</span><span>topic: str = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>TopicTriggerContext(topic: str = <object object at 0x1016c89d0>)</p></div>
+<div class="desc"><p>TopicTriggerContext(topic: str = <object object at 0x103a229d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
