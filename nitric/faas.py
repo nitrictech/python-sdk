@@ -230,7 +230,7 @@ class HttpContext(TriggerContext):
                 path=trigger_request.http.path,
                 params={k: v for (k, v) in trigger_request.http.path_params.items()},
                 headers=headers,
-                trace_context=trigger_request.trace_context,
+                trace_context=trigger_request.trace_context.values,
             )
         )
 
@@ -278,7 +278,7 @@ class EventContext(TriggerContext):
             request=EventRequest(
                 data=trigger_request.data,
                 topic=trigger_request.topic.topic,
-                trace_context=trigger_request.trace_context,
+                trace_context=trigger_request.trace_context.values,
             )
         )
 
