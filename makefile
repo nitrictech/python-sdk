@@ -39,7 +39,7 @@ license:
 	@licenseheaders -t tools/apache-2.tmpl -o "Nitric Technologies Pty Ltd" -y 2021 -n "Nitric Python 3 SDK" -u "https://github.com/nitrictech/python-sdk" -d tests
 	@licenseheaders -t tools/apache-2.tmpl -o "Nitric Technologies Pty Ltd" -y 2021 -n "Nitric Python 3 SDK" -u "https://github.com/nitrictech/python-sdk" -d tools
 
-build: clean install license docs
+build: clean grpc-client license docs
 	@echo Building sdist and wheel
 	@python3 setup.py sdist bdist_wheel
 
