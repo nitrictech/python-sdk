@@ -18,6 +18,7 @@
 #
 from __future__ import annotations
 from typing import List, Union
+from dataclasses import dataclass
 from nitric.faas import ApiWorkerOptions, FunctionServer, HttpMiddleware, Middleware, MethodOptions, HttpMethod
 from nitric.application import Nitric
 from nitric.resources.base import BaseResource
@@ -29,11 +30,27 @@ from nitric.proto.nitric.resource.v1 import (
     ApiSecurityDefinition,
     ApiSecurityDefinitionJwt,
     ResourceDeclareRequest,
+    ResourceDetailsRequest,
 )
 from grpclib import GRPCError
 from nitric.api.exception import exception_from_grpc_error
 
 
+@dataclass
+class ApiDetails:
+    """Represents the APIs deployment details."""
+
+    # the identifier of the resource
+    id: str
+    # The provider this resource is deployed with (e.g. aws)
+    provider: str
+    # The service this resource is deployed on (e.g. ApiGateway)
+    service: str
+    # The url of the API
+    url: str
+
+
+@dataclass
 class JwtSecurityDefinition:
     """Represents the JWT security definition for an API."""
 
@@ -58,7 +75,7 @@ class ApiOptions:
     def __init__(
         self,
         path: str = "",
-        middleware: List[Middleware] = None,
+        middleware: List[Middleware] = [],
         security_definitions: dict[str, SecurityDefinition] = None,
         security: dict[str, List[str]] = None,
     ):
@@ -74,7 +91,7 @@ class RouteOptions:
 
     middleware: Union[None, List[Middleware]]
 
-    def __init__(self, middleware: List[Middleware] = None):
+    def __init__(self, middleware: List[Middleware] = []):
         """Construct a new route options object."""
         self.middleware = middleware
 
@@ -118,7 +135,7 @@ class Api(BaseResource):
             opts = ApiOptions()
 
         self.name = name
-        self.middleware = opts.middleware
+        self.middleware = opts.middleware if opts.middleware is not None else []
         self.path = opts.path
         self.routes = []
         self.security_definitions = opts.security_definitions
@@ -246,6 +263,23 @@ class Api(BaseResource):
 
         return decorator
 
+    async def _details(self) -> ApiDetails:
+        """Get the API deployment details."""
+        try:
+            res = await self._resources_stub.details(
+                resource_details_request=ResourceDetailsRequest(
+                    resource=_to_resource(self),
+                )
+            )
+            return ApiDetails(res.id, res.provider, res.service, res.api.url)
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
+
+    async def URL(self) -> str:
+        """Get the APIs live URL."""
+        details = await self._details()
+        return details.url
+
 
 class Route:
     """An HTTP route."""
@@ -257,8 +291,8 @@ class Route:
     def __init__(self, api: Api, path: str, opts: RouteOptions):
         """Define a route to be handled by the provided API."""
         self.api = api
-        self.path = path
-        self.middleware = opts.middleware
+        self.path = api.path.join(path)
+        self.middleware = opts.middleware if opts.middleware is not None else []
 
     def method(self, methods: List[HttpMethod], *middleware: HttpMiddleware, opts: MethodOptions = None):
         """Register middleware for multiple HTTP Methods."""
@@ -304,7 +338,7 @@ class Method:
         self.route = route
         self.methods = methods
         self.server = FunctionServer(ApiWorkerOptions(route.api.name, route.path, methods, opts))
-        self.server.http(*middleware)
+        self.server.http(*route.api.middleware, *route.middleware, *middleware)
 
     def start(self):
         """Start the server which will respond to incoming requests."""

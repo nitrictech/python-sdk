@@ -141,8 +141,18 @@ class UnknownException(NitricServiceException):
 
     pass
 
+
 class NitricResourceException(Exception):
+    """Illegal nitric resource creation."""
+
     pass
+
+
+class NitricUnavailableException(Exception):
+    """Unable to connect to a nitric server."""
+
+    pass
+
 
 def exception_from_grpc_error(error: GRPCError):
     """Translate a gRPC error to a nitric api exception."""
