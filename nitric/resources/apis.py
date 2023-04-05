@@ -57,6 +57,15 @@ class JwtSecurityDefinition:
     issuer: str
     audiences: List[str]
 
+    def __init__(
+        self,
+        issuer: str = "",
+        audiences: List[str] = [],
+    ):
+        """Construct a new JwtSecurityDefinition object."""
+        self.issuer = issuer
+        self.audiences = audiences
+
 
 # TODO: Union type for multiple security definition mappings
 # type SecurityDefinition = JwtSecurityDefinition;
