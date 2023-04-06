@@ -30,6 +30,9 @@ grpc-client: install download
 	@echo Generating Proto Sources
 	@echo $(OUTPUT)
 	@mkdir -p $(OUTPUT)
+    # protoc doesn't create the __init__.py for the nitric module, so we need to create it.
+	@mkdir -p $(OUTPUT)/nitric/
+	@touch $(OUTPUT)/nitric/__init__.py
 	@python3 -m grpc_tools.protoc -I $(CONTRACTS) --python_betterproto_out=$(OUTPUT) ./contracts/proto/*/*/*.proto
 
 
@@ -39,7 +42,7 @@ license:
 	@licenseheaders -t tools/apache-2.tmpl -o "Nitric Technologies Pty Ltd" -y 2021 -n "Nitric Python 3 SDK" -u "https://github.com/nitrictech/python-sdk" -d tests
 	@licenseheaders -t tools/apache-2.tmpl -o "Nitric Technologies Pty Ltd" -y 2021 -n "Nitric Python 3 SDK" -u "https://github.com/nitrictech/python-sdk" -d tools
 
-build: clean install license docs
+build: clean grpc-client license docs
 	@echo Building sdist and wheel
 	@python3 setup.py sdist bdist_wheel
 
