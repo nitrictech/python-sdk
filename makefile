@@ -32,7 +32,7 @@ grpc-client: install download
 	@mkdir -p $(OUTPUT)
     # protoc doesn't create the __init__.py for the nitric module, so we need to create it.
 	@mkdir -p $(OUTPUT)/nitric/
-	@touch $(OUTPUT)/nitric/__init.py__
+	@touch $(OUTPUT)/nitric/__init__.py
 	@python3 -m grpc_tools.protoc -I $(CONTRACTS) --python_betterproto_out=$(OUTPUT) ./contracts/proto/*/*/*.proto
 
 
