@@ -176,6 +176,13 @@ class InitResponse(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class TraceContext(betterproto.Message):
+    values: Dict[str, str] = betterproto.map_field(
+        1, betterproto.TYPE_STRING, betterproto.TYPE_STRING
+    )
+
+
+@dataclass(eq=False, repr=False)
 class TriggerRequest(betterproto.Message):
     &#34;&#34;&#34;The server has a trigger for the client to handle&#34;&#34;&#34;
 
@@ -184,6 +191,14 @@ class TriggerRequest(betterproto.Message):
 
     mime_type: str = betterproto.string_field(2)
     &#34;&#34;&#34;Should we supply a mime type for the data? Or rely on context?&#34;&#34;&#34;
+
+    trace_context: &#34;TraceContext&#34; = betterproto.message_field(10)
+    &#34;&#34;&#34;
+    TraceInformation from the membrane Allows tying traces from external
+    triggers (e.g. HttpRequests) into each event request/response pair of the
+    Bidirectional stream. which cannot be facilitated by OOTB stream
+    interceptors from OTEL.
+    &#34;&#34;&#34;
 
     http: &#34;HttpTriggerContext&#34; = betterproto.message_field(3, group=&#34;context&#34;)
     topic: &#34;TopicTriggerContext&#34; = betterproto.message_field(4, group=&#34;context&#34;)
@@ -373,7 +388,7 @@ class FaasServiceBase(ServiceBase):
 <span>(</span><span>api: str = &lt;object object&gt;, path: str = &lt;object object&gt;, methods: List[str] = &lt;object object&gt;, options: <a title="nitric.proto.nitric.faas.v1.ApiWorkerOptions" href="#nitric.proto.nitric.faas.v1.ApiWorkerOptions">ApiWorkerOptions</a> = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ApiWorker(api: str = <object object at 0x103a229d0>, path: str = <object object at 0x103a229d0>, methods: List[str] = <object object at 0x103a229d0>, options: 'ApiWorkerOptions' = <object object at 0x103a229d0>)</p></div>
+<div class="desc"><p>ApiWorker(api: str = <object object at 0x1016f39d0>, path: str = <object object at 0x1016f39d0>, methods: List[str] = <object object at 0x1016f39d0>, options: 'ApiWorkerOptions' = <object object at 0x1016f39d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -415,7 +430,7 @@ class ApiWorker(betterproto.Message):
 <span>(</span><span>security: Dict[str, ForwardRef('<a title="nitric.proto.nitric.faas.v1.ApiWorkerScopes" href="#nitric.proto.nitric.faas.v1.ApiWorkerScopes">ApiWorkerScopes</a>')] = &lt;object object&gt;, security_disabled: bool = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ApiWorkerOptions(security: Dict[str, ForwardRef('ApiWorkerScopes')] = <object object at 0x103a229d0>, security_disabled: bool = <object object at 0x103a229d0>)</p></div>
+<div class="desc"><p>ApiWorkerOptions(security: Dict[str, ForwardRef('ApiWorkerScopes')] = <object object at 0x1016f39d0>, security_disabled: bool = <object object at 0x1016f39d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -458,7 +473,7 @@ knowing if security is explicitly disabled</p></div>
 <span>(</span><span>scopes: List[str] = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ApiWorkerScopes(scopes: List[str] = <object object at 0x103a229d0>)</p></div>
+<div class="desc"><p>ApiWorkerScopes(scopes: List[str] = <object object at 0x1016f39d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -664,7 +679,7 @@ until it has identified itself</p></div>
 <span>(</span><span>value: List[str] = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>HeaderValue(value: List[str] = <object object at 0x103a229d0>)</p></div>
+<div class="desc"><p>HeaderValue(value: List[str] = <object object at 0x1016f39d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -750,7 +765,7 @@ class HttpResponseContext(betterproto.Message):
 <span>(</span><span>method: str = &lt;object object&gt;, path: str = &lt;object object&gt;, headers_old: Dict[str, str] = &lt;object object&gt;, query_params_old: Dict[str, str] = &lt;object object&gt;, headers: Dict[str, ForwardRef('<a title="nitric.proto.nitric.faas.v1.HeaderValue" href="#nitric.proto.nitric.faas.v1.HeaderValue">HeaderValue</a>')] = &lt;object object&gt;, query_params: Dict[str, ForwardRef('<a title="nitric.proto.nitric.faas.v1.QueryValue" href="#nitric.proto.nitric.faas.v1.QueryValue">QueryValue</a>')] = &lt;object object&gt;, path_params: Dict[str, str] = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>HttpTriggerContext(method: str = <object object at 0x103a229d0>, path: str = <object object at 0x103a229d0>, headers_old: Dict[str, str] = <object object at 0x103a229d0>, query_params_old: Dict[str, str] = <object object at 0x103a229d0>, headers: Dict[str, ForwardRef('HeaderValue')] = <object object at 0x103a229d0>, query_params: Dict[str, ForwardRef('QueryValue')] = <object object at 0x103a229d0>, path_params: Dict[str, str] = <object object at 0x103a229d0>)</p></div>
+<div class="desc"><p>HttpTriggerContext(method: str = <object object at 0x1016f39d0>, path: str = <object object at 0x1016f39d0>, headers_old: Dict[str, str] = <object object at 0x1016f39d0>, query_params_old: Dict[str, str] = <object object at 0x1016f39d0>, headers: Dict[str, ForwardRef('HeaderValue')] = <object object at 0x1016f39d0>, query_params: Dict[str, ForwardRef('QueryValue')] = <object object at 0x1016f39d0>, path_params: Dict[str, str] = <object object at 0x1016f39d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -915,7 +930,7 @@ class InitResponse(betterproto.Message):
 <span>(</span><span>value: List[str] = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>QueryValue(value: List[str] = <object object at 0x103a229d0>)</p></div>
+<div class="desc"><p>QueryValue(value: List[str] = <object object at 0x1016f39d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -942,7 +957,7 @@ class QueryValue(betterproto.Message):
 <span>(</span><span>cron: str = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ScheduleCron(cron: str = <object object at 0x103a229d0>)</p></div>
+<div class="desc"><p>ScheduleCron(cron: str = <object object at 0x1016f39d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -969,7 +984,7 @@ class ScheduleCron(betterproto.Message):
 <span>(</span><span>rate: str = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ScheduleRate(rate: str = <object object at 0x103a229d0>)</p></div>
+<div class="desc"><p>ScheduleRate(rate: str = <object object at 0x1016f39d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -996,7 +1011,7 @@ class ScheduleRate(betterproto.Message):
 <span>(</span><span>key: str = &lt;object object&gt;, rate: <a title="nitric.proto.nitric.faas.v1.ScheduleRate" href="#nitric.proto.nitric.faas.v1.ScheduleRate">ScheduleRate</a> = &lt;object object&gt;, cron: <a title="nitric.proto.nitric.faas.v1.ScheduleCron" href="#nitric.proto.nitric.faas.v1.ScheduleCron">ScheduleCron</a> = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ScheduleWorker(key: str = <object object at 0x103a229d0>, rate: 'ScheduleRate' = <object object at 0x103a229d0>, cron: 'ScheduleCron' = <object object at 0x103a229d0>)</p></div>
+<div class="desc"><p>ScheduleWorker(key: str = <object object at 0x1016f39d0>, rate: 'ScheduleRate' = <object object at 0x1016f39d0>, cron: 'ScheduleCron' = <object object at 0x1016f39d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1079,7 +1094,7 @@ class ServerMessage(betterproto.Message):
 <span>(</span><span>topic: str = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>SubscriptionWorker(topic: str = <object object at 0x103a229d0>)</p></div>
+<div class="desc"><p>SubscriptionWorker(topic: str = <object object at 0x1016f39d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1140,7 +1155,7 @@ class TopicResponseContext(betterproto.Message):
 <span>(</span><span>topic: str = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>TopicTriggerContext(topic: str = <object object at 0x103a229d0>)</p></div>
+<div class="desc"><p>TopicTriggerContext(topic: str = <object object at 0x1016f39d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1163,9 +1178,38 @@ class TopicTriggerContext(betterproto.Message):
 </dd>
 </dl>
 </dd>
+<dt id="nitric.proto.nitric.faas.v1.TraceContext"><code class="flex name class">
+<span>class <span class="ident">TraceContext</span></span>
+<span>(</span><span>values: Dict[str, str] = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>TraceContext(values: Dict[str, str] = <object object at 0x1016f39d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class TraceContext(betterproto.Message):
+    values: Dict[str, str] = betterproto.map_field(
+        1, betterproto.TYPE_STRING, betterproto.TYPE_STRING
+    )</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.TraceContext.values"><code class="name">var <span class="ident">values</span> : Dict[str, str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
 <dt id="nitric.proto.nitric.faas.v1.TriggerRequest"><code class="flex name class">
 <span>class <span class="ident">TriggerRequest</span></span>
-<span>(</span><span>data: bytes = &lt;object object&gt;, mime_type: str = &lt;object object&gt;, http: <a title="nitric.proto.nitric.faas.v1.HttpTriggerContext" href="#nitric.proto.nitric.faas.v1.HttpTriggerContext">HttpTriggerContext</a> = &lt;object object&gt;, topic: <a title="nitric.proto.nitric.faas.v1.TopicTriggerContext" href="#nitric.proto.nitric.faas.v1.TopicTriggerContext">TopicTriggerContext</a> = &lt;object object&gt;)</span>
+<span>(</span><span>data: bytes = &lt;object object&gt;, mime_type: str = &lt;object object&gt;, trace_context: <a title="nitric.proto.nitric.faas.v1.TraceContext" href="#nitric.proto.nitric.faas.v1.TraceContext">TraceContext</a> = &lt;object object&gt;, http: <a title="nitric.proto.nitric.faas.v1.HttpTriggerContext" href="#nitric.proto.nitric.faas.v1.HttpTriggerContext">HttpTriggerContext</a> = &lt;object object&gt;, topic: <a title="nitric.proto.nitric.faas.v1.TopicTriggerContext" href="#nitric.proto.nitric.faas.v1.TopicTriggerContext">TopicTriggerContext</a> = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The server has a trigger for the client to handle</p></div>
@@ -1182,6 +1226,14 @@ class TriggerRequest(betterproto.Message):
 
     mime_type: str = betterproto.string_field(2)
     &#34;&#34;&#34;Should we supply a mime type for the data? Or rely on context?&#34;&#34;&#34;
+
+    trace_context: &#34;TraceContext&#34; = betterproto.message_field(10)
+    &#34;&#34;&#34;
+    TraceInformation from the membrane Allows tying traces from external
+    triggers (e.g. HttpRequests) into each event request/response pair of the
+    Bidirectional stream. which cannot be facilitated by OOTB stream
+    interceptors from OTEL.
+    &#34;&#34;&#34;
 
     http: &#34;HttpTriggerContext&#34; = betterproto.message_field(3, group=&#34;context&#34;)
     topic: &#34;TopicTriggerContext&#34; = betterproto.message_field(4, group=&#34;context&#34;)</code></pre>
@@ -1208,6 +1260,13 @@ class TriggerRequest(betterproto.Message):
 <dt id="nitric.proto.nitric.faas.v1.TriggerRequest.topic"><code class="name">var <span class="ident">topic</span> : <a title="nitric.proto.nitric.faas.v1.TopicTriggerContext" href="#nitric.proto.nitric.faas.v1.TopicTriggerContext">TopicTriggerContext</a></code></dt>
 <dd>
 <div class="desc"></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.TriggerRequest.trace_context"><code class="name">var <span class="ident">trace_context</span> : <a title="nitric.proto.nitric.faas.v1.TraceContext" href="#nitric.proto.nitric.faas.v1.TraceContext">TraceContext</a></code></dt>
+<dd>
+<div class="desc"><p>TraceInformation from the membrane Allows tying traces from external
+triggers (e.g. HttpRequests) into each event request/response pair of the
+Bidirectional stream. which cannot be facilitated by OOTB stream
+interceptors from OTEL.</p></div>
 </dd>
 </dl>
 </dd>
@@ -1403,12 +1462,19 @@ class TriggerResponse(betterproto.Message):
 </ul>
 </li>
 <li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.TraceContext" href="#nitric.proto.nitric.faas.v1.TraceContext">TraceContext</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.TraceContext.values" href="#nitric.proto.nitric.faas.v1.TraceContext.values">values</a></code></li>
+</ul>
+</li>
+<li>
 <h4><code><a title="nitric.proto.nitric.faas.v1.TriggerRequest" href="#nitric.proto.nitric.faas.v1.TriggerRequest">TriggerRequest</a></code></h4>
 <ul class="">
 <li><code><a title="nitric.proto.nitric.faas.v1.TriggerRequest.data" href="#nitric.proto.nitric.faas.v1.TriggerRequest.data">data</a></code></li>
 <li><code><a title="nitric.proto.nitric.faas.v1.TriggerRequest.http" href="#nitric.proto.nitric.faas.v1.TriggerRequest.http">http</a></code></li>
 <li><code><a title="nitric.proto.nitric.faas.v1.TriggerRequest.mime_type" href="#nitric.proto.nitric.faas.v1.TriggerRequest.mime_type">mime_type</a></code></li>
 <li><code><a title="nitric.proto.nitric.faas.v1.TriggerRequest.topic" href="#nitric.proto.nitric.faas.v1.TriggerRequest.topic">topic</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.TriggerRequest.trace_context" href="#nitric.proto.nitric.faas.v1.TriggerRequest.trace_context">trace_context</a></code></li>
 </ul>
 </li>
 <li>

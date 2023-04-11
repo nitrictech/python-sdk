@@ -45,7 +45,7 @@
 # limitations under the License.
 #
 import asyncio
-import os
+from os import getenv, environ
 
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider, sampling
@@ -96,17 +96,17 @@ class Nitric:
 
     @classmethod
     def _create_tracer(cls) -&gt; TracerProvider:
-        local_run = os.environ.OTELCOL_BIN is not None
-        samplePercent = os.environ.NITRIC_TRACE_SAMPLE_PERCENT        
+        local_run = &#34;OTELCOL_BIN&#34; not in environ
+        samplePercent = int(getenv(&#34;NITRIC_TRACE_SAMPLE_PERCENT&#34;, &#34;100&#34;)) / 100.0
 
         # If its a local run use a console exporter, otherwise export using OTEL Protocol
         exporter = OTLPSpanExporter(endpoint=&#34;http://localhost:4317&#34;, insecure=True)
         if local_run:
             exporter = ConsoleSpanExporter()
-        
+
         provider = TracerProvider(
             active_span_processor=BatchSpanProcessor(exporter),
-            sampler=sampling.TraceIdRatioBased(samplePercent/100 if samplePercent is not None else 100)
+            sampler=sampling.TraceIdRatioBased(samplePercent),
         )
         trace.set_tracer_provider(provider)
 
@@ -123,7 +123,7 @@ class Nitric:
         This will execute in an existing event loop if there is one, otherwise it will attempt to create its own.
         &#34;&#34;&#34;
         provider = cls._create_tracer()
-        try:            
+        try:
             try:
                 loop = asyncio.get_running_loop()
             except RuntimeError:
@@ -192,17 +192,17 @@ class Nitric:
 
     @classmethod
     def _create_tracer(cls) -&gt; TracerProvider:
-        local_run = os.environ.OTELCOL_BIN is not None
-        samplePercent = os.environ.NITRIC_TRACE_SAMPLE_PERCENT        
+        local_run = &#34;OTELCOL_BIN&#34; not in environ
+        samplePercent = int(getenv(&#34;NITRIC_TRACE_SAMPLE_PERCENT&#34;, &#34;100&#34;)) / 100.0
 
         # If its a local run use a console exporter, otherwise export using OTEL Protocol
         exporter = OTLPSpanExporter(endpoint=&#34;http://localhost:4317&#34;, insecure=True)
         if local_run:
             exporter = ConsoleSpanExporter()
-        
+
         provider = TracerProvider(
             active_span_processor=BatchSpanProcessor(exporter),
-            sampler=sampling.TraceIdRatioBased(samplePercent/100 if samplePercent is not None else 100)
+            sampler=sampling.TraceIdRatioBased(samplePercent),
         )
         trace.set_tracer_provider(provider)
 
@@ -219,7 +219,7 @@ class Nitric:
         This will execute in an existing event loop if there is one, otherwise it will attempt to create its own.
         &#34;&#34;&#34;
         provider = cls._create_tracer()
-        try:            
+        try:
             try:
                 loop = asyncio.get_running_loop()
             except RuntimeError:
@@ -256,7 +256,7 @@ def run(cls):
     This will execute in an existing event loop if there is one, otherwise it will attempt to create its own.
     &#34;&#34;&#34;
     provider = cls._create_tracer()
-    try:            
+    try:
         try:
             loop = asyncio.get_running_loop()
         except RuntimeError:

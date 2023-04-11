@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 import asyncio
-import os
+from os import getenv, environ
 
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider, sampling
@@ -68,8 +68,8 @@ class Nitric:
 
     @classmethod
     def _create_tracer(cls) -> TracerProvider:
-        local_run = os.environ.OTELCOL_BIN is not None
-        samplePercent = os.environ.NITRIC_TRACE_SAMPLE_PERCENT
+        local_run = "OTELCOL_BIN" not in environ
+        samplePercent = int(getenv("NITRIC_TRACE_SAMPLE_PERCENT", "100")) / 100.0
 
         # If its a local run use a console exporter, otherwise export using OTEL Protocol
         exporter = OTLPSpanExporter(endpoint="http://localhost:4317", insecure=True)
@@ -78,7 +78,7 @@ class Nitric:
 
         provider = TracerProvider(
             active_span_processor=BatchSpanProcessor(exporter),
-            sampler=sampling.TraceIdRatioBased(samplePercent / 100 if samplePercent is not None else 100),
+            sampler=sampling.TraceIdRatioBased(samplePercent),
         )
         trace.set_tracer_provider(provider)
 
