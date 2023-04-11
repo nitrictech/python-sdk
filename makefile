@@ -16,7 +16,7 @@ clean:
 	@rm -rf ./build
 	@rm -rf ./dist
 
-NITRIC_VERSION="v0.20.0-rc.2"
+NITRIC_VERSION="v0.24.0-rc.7"
 
 download:
 	@curl -L https://github.com/nitrictech/nitric/releases/download/${NITRIC_VERSION}/contracts.tgz -o contracts.tgz

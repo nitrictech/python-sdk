@@ -42,10 +42,11 @@ setuptools.setup(
     ],
     setup_requires=["wheel"],
     install_requires=[
-        # "nitric-api==0.18.0",
-        "protobuf==3.19.5",
-        "betterproto==2.0.0b5",
         "asyncio",
+        "opentelemetry-api",
+        "opentelemetry-sdk",
+        "opentelemetry-exporter-otlp-proto-grpc",
+        "opentelemetry-instrumentation-grpc",
     ],
     extras_require={
         "dev": [

@@ -170,6 +170,18 @@ class UnknownException(NitricServiceException):
     pass
 
 
+class NitricResourceException(Exception):
+    &#34;&#34;&#34;Illegal nitric resource creation.&#34;&#34;&#34;
+
+    pass
+
+
+class NitricUnavailableException(Exception):
+    &#34;&#34;&#34;Unable to connect to a nitric server.&#34;&#34;&#34;
+
+    pass
+
+
 def exception_from_grpc_error(error: GRPCError):
     &#34;&#34;&#34;Translate a gRPC error to a nitric api exception.&#34;&#34;&#34;
     return exception_from_grpc_code(error.status.value, error.message)
@@ -445,6 +457,27 @@ regardless of the state of the system (e.g., a malformed file name).</p></div>
 <li>builtins.BaseException</li>
 </ul>
 </dd>
+<dt id="nitric.api.exception.NitricResourceException"><code class="flex name class">
+<span>class <span class="ident">NitricResourceException</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Illegal nitric resource creation.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class NitricResourceException(Exception):
+    &#34;&#34;&#34;Illegal nitric resource creation.&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
 <dt id="nitric.api.exception.NitricServiceException"><code class="flex name class">
 <span>class <span class="ident">NitricServiceException</span></span>
 <span>(</span><span>*args, **kwargs)</span>
@@ -483,6 +516,27 @@ regardless of the state of the system (e.g., a malformed file name).</p></div>
 <li><a title="nitric.api.exception.UnavailableException" href="#nitric.api.exception.UnavailableException">UnavailableException</a></li>
 <li><a title="nitric.api.exception.UnimplementedException" href="#nitric.api.exception.UnimplementedException">UnimplementedException</a></li>
 <li><a title="nitric.api.exception.UnknownException" href="#nitric.api.exception.UnknownException">UnknownException</a></li>
+</ul>
+</dd>
+<dt id="nitric.api.exception.NitricUnavailableException"><code class="flex name class">
+<span>class <span class="ident">NitricUnavailableException</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Unable to connect to a nitric server.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class NitricUnavailableException(Exception):
+    &#34;&#34;&#34;Unable to connect to a nitric server.&#34;&#34;&#34;
+
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
 </ul>
 </dd>
 <dt id="nitric.api.exception.NotFoundException"><code class="flex name class">
@@ -723,7 +777,13 @@ regardless of the state of the system (e.g., a malformed file name).</p></div>
 <h4><code><a title="nitric.api.exception.InvalidArgumentException" href="#nitric.api.exception.InvalidArgumentException">InvalidArgumentException</a></code></h4>
 </li>
 <li>
+<h4><code><a title="nitric.api.exception.NitricResourceException" href="#nitric.api.exception.NitricResourceException">NitricResourceException</a></code></h4>
+</li>
+<li>
 <h4><code><a title="nitric.api.exception.NitricServiceException" href="#nitric.api.exception.NitricServiceException">NitricServiceException</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.api.exception.NitricUnavailableException" href="#nitric.api.exception.NitricUnavailableException">NitricUnavailableException</a></code></h4>
 </li>
 <li>
 <h4><code><a title="nitric.api.exception.NotFoundException" href="#nitric.api.exception.NotFoundException">NotFoundException</a></code></h4>

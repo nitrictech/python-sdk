@@ -54,13 +54,18 @@ from grpclib import GRPCError
 
 from nitric.api.const import MAX_SUB_COLLECTION_DEPTH
 from nitric.api.exception import exception_from_grpc_error
-from proto.nitric.document.v1 import (
+from nitric.proto.nitric.document.v1 import (
     DocumentServiceStub,
     Collection as CollectionMessage,
     Key as KeyMessage,
     Expression as ExpressionMessage,
     ExpressionValue,
     Document as DocumentMessage,
+    DocumentSetRequest,
+    DocumentGetRequest,
+    DocumentDeleteRequest,
+    DocumentQueryStreamRequest,
+    DocumentQueryRequest,
 )
 
 from nitric.utils import new_default_channel, _dict_from_struct, _struct_from_dict
@@ -102,7 +107,9 @@ class DocumentRef:
     async def get(self) -&gt; Document:
         &#34;&#34;&#34;Retrieve the contents of this document, if it exists.&#34;&#34;&#34;
         try:
-            response = await self._documents._stub.get(key=_doc_ref_to_wire(self))
+            response = await self._documents._stub.get(
+                document_get_request=DocumentGetRequest(key=_doc_ref_to_wire(self))
+            )
             return _document_from_wire(documents=self._documents, message=response.document)
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
@@ -115,8 +122,10 @@ class DocumentRef:
         &#34;&#34;&#34;
         try:
             await self._documents._stub.set(
-                key=_doc_ref_to_wire(self),
-                content=_struct_from_dict(content),
+                document_set_request=DocumentSetRequest(
+                    key=_doc_ref_to_wire(self),
+                    content=_struct_from_dict(content),
+                )
             )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
@@ -125,7 +134,9 @@ class DocumentRef:
         &#34;&#34;&#34;Delete this document, if it exists.&#34;&#34;&#34;
         try:
             await self._documents._stub.delete(
-                key=_doc_ref_to_wire(self),
+                document_delete_request=DocumentDeleteRequest(
+                    key=_doc_ref_to_wire(self),
+                )
             )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
@@ -525,9 +536,11 @@ class QueryBuilder:
 
         try:
             async for result in self._documents._stub.query_stream(
-                collection=_collection_to_wire(self._collection),
-                expressions=self._expressions_to_wire(),
-                limit=self._limit,
+                document_query_stream_request=DocumentQueryStreamRequest(
+                    collection=_collection_to_wire(self._collection),
+                    expressions=self._expressions_to_wire(),
+                    limit=self._limit,
+                )
             ):
                 yield _document_from_wire(documents=self._documents, message=result.document)
         except GRPCError as grpc_err:
@@ -541,10 +554,12 @@ class QueryBuilder:
         &#34;&#34;&#34;
         try:
             results = await self._documents._stub.query(
-                collection=_collection_to_wire(self._collection),
-                expressions=self._expressions_to_wire(),
-                limit=self._limit,
-                paging_token=self._paging_token,
+                document_query_request=DocumentQueryRequest(
+                    collection=_collection_to_wire(self._collection),
+                    expressions=self._expressions_to_wire(),
+                    limit=self._limit,
+                    paging_token=self._paging_token,
+                )
             )
 
             return QueryResultsPage(
@@ -674,7 +689,8 @@ class Documents(object):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class CollectionGroupRef:
+<pre><code class="python">@dataclass(frozen=True, order=True)
+class CollectionGroupRef:
     &#34;&#34;&#34;A reference to a collection group.&#34;&#34;&#34;
 
     _documents: Documents
@@ -738,7 +754,7 @@ class Documents(object):
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="nitric.api.documents.CollectionGroupRef.parent"><code class="name">var <span class="ident">parent</span> : Union[<a title="nitric.api.documents.CollectionRef" href="#nitric.api.documents.CollectionRef">CollectionRef</a>, NoneType]</code></dt>
+<dt id="nitric.api.documents.CollectionGroupRef.parent"><code class="name">var <span class="ident">parent</span> : Optional[<a title="nitric.api.documents.CollectionRef" href="#nitric.api.documents.CollectionRef">CollectionRef</a>]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -861,7 +877,8 @@ def from_collection_ref(collectionRef: CollectionRef, documents: Documents) -&gt
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class CollectionRef:
+<pre><code class="python">@dataclass(frozen=True, order=True)
+class CollectionRef:
     &#34;&#34;&#34;A reference to a collection of documents.&#34;&#34;&#34;
 
     _documents: Documents
@@ -921,7 +938,7 @@ def from_collection_ref(collectionRef: CollectionRef, documents: Documents) -&gt
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="nitric.api.documents.CollectionRef.parent"><code class="name">var <span class="ident">parent</span> : Union[<a title="nitric.api.documents.DocumentRef" href="#nitric.api.documents.DocumentRef">DocumentRef</a>, NoneType]</code></dt>
+<dt id="nitric.api.documents.CollectionRef.parent"><code class="name">var <span class="ident">parent</span> : Optional[<a title="nitric.api.documents.DocumentRef" href="#nitric.api.documents.DocumentRef">DocumentRef</a>]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1040,7 +1057,8 @@ Documents().collection('a').doc('b').collection('c').collection('d') is invalid 
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Document:
+<pre><code class="python">@dataclass(frozen=True, order=True)
+class Document:
     &#34;&#34;&#34;Represents a document and any associated metadata.&#34;&#34;&#34;
 
     _ref: DocumentRef
@@ -1121,7 +1139,8 @@ def ref(self):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class DocumentRef:
+<pre><code class="python">@dataclass(frozen=True, order=True)
+class DocumentRef:
     &#34;&#34;&#34;A reference to a document in a collection.&#34;&#34;&#34;
 
     _documents: Documents
@@ -1148,7 +1167,9 @@ def ref(self):
     async def get(self) -&gt; Document:
         &#34;&#34;&#34;Retrieve the contents of this document, if it exists.&#34;&#34;&#34;
         try:
-            response = await self._documents._stub.get(key=_doc_ref_to_wire(self))
+            response = await self._documents._stub.get(
+                document_get_request=DocumentGetRequest(key=_doc_ref_to_wire(self))
+            )
             return _document_from_wire(documents=self._documents, message=response.document)
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
@@ -1161,8 +1182,10 @@ def ref(self):
         &#34;&#34;&#34;
         try:
             await self._documents._stub.set(
-                key=_doc_ref_to_wire(self),
-                content=_struct_from_dict(content),
+                document_set_request=DocumentSetRequest(
+                    key=_doc_ref_to_wire(self),
+                    content=_struct_from_dict(content),
+                )
             )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
@@ -1171,7 +1194,9 @@ def ref(self):
         &#34;&#34;&#34;Delete this document, if it exists.&#34;&#34;&#34;
         try:
             await self._documents._stub.delete(
-                key=_doc_ref_to_wire(self),
+                document_delete_request=DocumentDeleteRequest(
+                    key=_doc_ref_to_wire(self),
+                )
             )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)</code></pre>
@@ -1232,7 +1257,9 @@ Documents().collection('a').doc('b').collection('c').doc('d').collection('e') is
     &#34;&#34;&#34;Delete this document, if it exists.&#34;&#34;&#34;
     try:
         await self._documents._stub.delete(
-            key=_doc_ref_to_wire(self),
+            document_delete_request=DocumentDeleteRequest(
+                key=_doc_ref_to_wire(self),
+            )
         )
     except GRPCError as grpc_err:
         raise exception_from_grpc_error(grpc_err)</code></pre>
@@ -1250,7 +1277,9 @@ Documents().collection('a').doc('b').collection('c').doc('d').collection('e') is
 <pre><code class="python">async def get(self) -&gt; Document:
     &#34;&#34;&#34;Retrieve the contents of this document, if it exists.&#34;&#34;&#34;
     try:
-        response = await self._documents._stub.get(key=_doc_ref_to_wire(self))
+        response = await self._documents._stub.get(
+            document_get_request=DocumentGetRequest(key=_doc_ref_to_wire(self))
+        )
         return _document_from_wire(documents=self._documents, message=response.document)
     except GRPCError as grpc_err:
         raise exception_from_grpc_error(grpc_err)</code></pre>
@@ -1274,8 +1303,10 @@ Documents().collection('a').doc('b').collection('c').doc('d').collection('e') is
     &#34;&#34;&#34;
     try:
         await self._documents._stub.set(
-            key=_doc_ref_to_wire(self),
-            content=_struct_from_dict(content),
+            document_set_request=DocumentSetRequest(
+                key=_doc_ref_to_wire(self),
+                content=_struct_from_dict(content),
+            )
         )
     except GRPCError as grpc_err:
         raise exception_from_grpc_error(grpc_err)</code></pre>
@@ -1345,7 +1376,8 @@ Documents().collection('a').doc('b').collection('c').doc('d').collection('e') is
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Expression:
+<pre><code class="python">@dataclass(order=True)
+class Expression:
     &#34;&#34;&#34;Query expressions, representing a boolean operation used for query filters.&#34;&#34;&#34;
 
     operand: str
@@ -1566,9 +1598,11 @@ Documents().collection('a').doc('b').collection('c').doc('d').collection('e') is
 
         try:
             async for result in self._documents._stub.query_stream(
-                collection=_collection_to_wire(self._collection),
-                expressions=self._expressions_to_wire(),
-                limit=self._limit,
+                document_query_stream_request=DocumentQueryStreamRequest(
+                    collection=_collection_to_wire(self._collection),
+                    expressions=self._expressions_to_wire(),
+                    limit=self._limit,
+                )
             ):
                 yield _document_from_wire(documents=self._documents, message=result.document)
         except GRPCError as grpc_err:
@@ -1582,10 +1616,12 @@ Documents().collection('a').doc('b').collection('c').doc('d').collection('e') is
         &#34;&#34;&#34;
         try:
             results = await self._documents._stub.query(
-                collection=_collection_to_wire(self._collection),
-                expressions=self._expressions_to_wire(),
-                limit=self._limit,
-                paging_token=self._paging_token,
+                document_query_request=DocumentQueryRequest(
+                    collection=_collection_to_wire(self._collection),
+                    expressions=self._expressions_to_wire(),
+                    limit=self._limit,
+                    paging_token=self._paging_token,
+                )
             )
 
             return QueryResultsPage(
@@ -1642,10 +1678,12 @@ Documents().collection('a').doc('b').collection('c').doc('d').collection('e') is
     &#34;&#34;&#34;
     try:
         results = await self._documents._stub.query(
-            collection=_collection_to_wire(self._collection),
-            expressions=self._expressions_to_wire(),
-            limit=self._limit,
-            paging_token=self._paging_token,
+            document_query_request=DocumentQueryRequest(
+                collection=_collection_to_wire(self._collection),
+                expressions=self._expressions_to_wire(),
+                limit=self._limit,
+                paging_token=self._paging_token,
+            )
         )
 
         return QueryResultsPage(
@@ -1712,9 +1750,11 @@ Documents().collection('a').doc('b').collection('c').doc('d').collection('e') is
 
     try:
         async for result in self._documents._stub.query_stream(
-            collection=_collection_to_wire(self._collection),
-            expressions=self._expressions_to_wire(),
-            limit=self._limit,
+            document_query_stream_request=DocumentQueryStreamRequest(
+                collection=_collection_to_wire(self._collection),
+                expressions=self._expressions_to_wire(),
+                limit=self._limit,
+            )
         ):
             yield _document_from_wire(documents=self._documents, message=result.document)
     except GRPCError as grpc_err:
@@ -1799,7 +1839,8 @@ Documents().collection('a').doc('b').collection('c').doc('d').collection('e') is
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class QueryResultsPage:
+<pre><code class="python">@dataclass(frozen=True, order=True)
+class QueryResultsPage:
     &#34;&#34;&#34;Represents a page of results from a query.&#34;&#34;&#34;
 
     paging_token: any = field(default_factory=lambda: None)
