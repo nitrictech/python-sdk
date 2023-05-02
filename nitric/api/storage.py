@@ -132,11 +132,11 @@ class File(object):
 
     async def upload_url(self, expiry: int = 600):
         """Get a temporary writable URL to this file."""
-        await self.sign_url(mode=FileMode.WRITE, expiry=expiry)
+        return await self.sign_url(mode=FileMode.WRITE, expiry=expiry)
 
     async def download_url(self, expiry: int = 600):
         """Get a temporary readable URL to this file."""
-        await self.sign_url(mode=FileMode.READ, expiry=expiry)
+        return await self.sign_url(mode=FileMode.READ, expiry=expiry)
 
     async def sign_url(self, mode: FileMode = FileMode.READ, expiry: int = 3600):
         """Generate a signed URL for reading or writing to a file."""
