@@ -23,6 +23,7 @@ import functools
 import json
 import traceback
 from typing import Dict, Union, List, TypeVar, Callable, Coroutine, Any, Optional
+from opentelemetry import context, propagate
 
 import betterproto
 from betterproto.grpc.util.async_channel import AsyncChannel
@@ -46,6 +47,7 @@ import asyncio
 from abc import ABC
 
 Record = Dict[str, Union[str, List[str]]]
+PROPAGATOR = propagate.get_global_textmap()
 
 
 class HttpMethod(Enum):
@@ -134,7 +136,16 @@ def _grpc_response_from_ctx(ctx: TriggerContext) -> TriggerResponse:
 class HttpRequest(Request):
     """Represents a translated Http Request forwarded from the Nitric Membrane."""
 
-    def __init__(self, data: bytes, method: str, path: str, params: Dict[str, str], query: Record, headers: Record):
+    def __init__(
+        self,
+        data: bytes,
+        method: str,
+        path: str,
+        params: Dict[str, str],
+        query: Record,
+        headers: Record,
+        trace_context: Dict[str, str],
+    ):
         """Construct a new HttpRequest."""
         super().__init__(data)
         self.method = method
@@ -142,6 +153,7 @@ class HttpRequest(Request):
         self.params = params
         self.query = query
         self.headers = headers
+        self.trace_context = trace_context
 
     @property
     def json(self) -> Optional[Any]:
@@ -218,20 +230,19 @@ class HttpContext(TriggerContext):
                 path=trigger_request.http.path,
                 params={k: v for (k, v) in trigger_request.http.path_params.items()},
                 headers=headers,
+                trace_context=trigger_request.trace_context.values,
             )
         )
-
-
-# ====== Events ======
 
 
 class EventRequest(Request):
     """Represents a translated Event, from a Subscribed Topic, forwarded from the Nitric Membrane."""
 
-    def __init__(self, data: bytes, topic: str):
+    def __init__(self, data: bytes, topic: str, trace_context: Dict[str, str]):
         """Construct a new EventRequest."""
         super().__init__(data)
         self.topic = topic
+        self.trace_context = trace_context
 
     @property
     def payload(self) -> bytes:
@@ -263,7 +274,13 @@ class EventContext(TriggerContext):
     @staticmethod
     def from_grpc_trigger_request(trigger_request: TriggerRequest):
         """Construct a new EventContext from an Event trigger from the Nitric Membrane."""
-        return EventContext(request=EventRequest(data=trigger_request.data, topic=trigger_request.topic.topic))
+        return EventContext(
+            request=EventRequest(
+                data=trigger_request.data,
+                topic=trigger_request.topic.topic,
+                trace_context=trigger_request.trace_context.values,
+            )
+        )
 
 
 # async def face(inpp: int) -> str:
@@ -487,12 +504,16 @@ class FunctionServer:
                     ctx = _ctx_from_grpc_trigger_request(srv_msg.trigger_request)
 
                     try:
+                        if len(ctx.req.trace_context) > 0:
+                            context.attach(PROPAGATOR().extract(ctx.req.trace_context))
+
                         if ctx.http():
                             func = self._http_handler
                         elif ctx.event():
                             func = self._event_handler
                         else:
                             func = self._any_handler
+
                         response_ctx = (await func(ctx)) if asyncio.iscoroutinefunction(func) else func(ctx)
 
                         if response_ctx is None:

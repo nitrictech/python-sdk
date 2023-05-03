@@ -52,7 +52,13 @@ from grpclib import GRPCError
 
 from nitric.api.exception import exception_from_grpc_error
 from nitric.utils import new_default_channel, _struct_from_dict
-from proto.nitric.event.v1 import EventServiceStub, NitricEvent, TopicServiceStub
+from nitric.proto.nitric.event.v1 import (
+    EventServiceStub,
+    NitricEvent,
+    TopicServiceStub,
+    EventPublishRequest,
+    TopicListRequest,
+)
 from dataclasses import dataclass, field
 
 
@@ -74,7 +80,7 @@ def _event_to_wire(event: Event) -&gt; NitricEvent:
 
 
 @dataclass(frozen=True, order=True)
-class Topic(object):
+class TopicRef(object):
     &#34;&#34;&#34;A reference to a topic on an event service, used to perform operations on that topic.&#34;&#34;&#34;
 
     _events: Events
@@ -94,11 +100,12 @@ class Topic(object):
             event = Event()
 
         if isinstance(event, dict):
-            # TODO: handle events that are just a payload
-            event = Event(**event)
+            event = Event(payload=event)
 
         try:
-            response = await self._events._stub.publish(topic=self.name, event=_event_to_wire(event))
+            response = await self._events._stub.publish(
+                event_publish_request=EventPublishRequest(topic=self.name, event=_event_to_wire(event))
+            )
             return Event(**{**event.__dict__.copy(), **{&#34;id&#34;: response.id}})
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
@@ -122,17 +129,17 @@ class Events(object):
         if self.channel is not None:
             self.channel.close()
 
-    async def topics(self) -&gt; List[Topic]:
+    async def topics(self) -&gt; List[TopicRef]:
         &#34;&#34;&#34;Get a list of topics available for publishing or subscription.&#34;&#34;&#34;
         try:
-            response = await self._topic_stub.list()
+            response = await self._topic_stub.list(topic_list_request=TopicListRequest())
             return [self.topic(topic.name) for topic in response.topics]
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    def topic(self, name: str) -&gt; Topic:
+    def topic(self, name: str) -&gt; TopicRef:
         &#34;&#34;&#34;Return a reference to a topic.&#34;&#34;&#34;
-        return Topic(_events=self, name=name)</code></pre>
+        return TopicRef(_events=self, name=name)</code></pre>
 </details>
 </section>
 <section>
@@ -154,7 +161,8 @@ class Events(object):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Event(object):
+<pre><code class="python">@dataclass(frozen=True, order=True)
+class Event(object):
     &#34;&#34;&#34;Eventing client, providing access to Topic and Event references and operations on those entities.&#34;&#34;&#34;
 
     payload: dict = field(default_factory=dict)
@@ -206,22 +214,22 @@ class Events(object):
         if self.channel is not None:
             self.channel.close()
 
-    async def topics(self) -&gt; List[Topic]:
+    async def topics(self) -&gt; List[TopicRef]:
         &#34;&#34;&#34;Get a list of topics available for publishing or subscription.&#34;&#34;&#34;
         try:
-            response = await self._topic_stub.list()
+            response = await self._topic_stub.list(topic_list_request=TopicListRequest())
             return [self.topic(topic.name) for topic in response.topics]
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    def topic(self, name: str) -&gt; Topic:
+    def topic(self, name: str) -&gt; TopicRef:
         &#34;&#34;&#34;Return a reference to a topic.&#34;&#34;&#34;
-        return Topic(_events=self, name=name)</code></pre>
+        return TopicRef(_events=self, name=name)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
 <dt id="nitric.api.events.Events.topic"><code class="name flex">
-<span>def <span class="ident">topic</span></span>(<span>self, name: str) ‑> <a title="nitric.api.events.Topic" href="#nitric.api.events.Topic">Topic</a></span>
+<span>def <span class="ident">topic</span></span>(<span>self, name: str) ‑> <a title="nitric.api.events.TopicRef" href="#nitric.api.events.TopicRef">TopicRef</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Return a reference to a topic.</p></div>
@@ -229,13 +237,13 @@ class Events(object):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def topic(self, name: str) -&gt; Topic:
+<pre><code class="python">def topic(self, name: str) -&gt; TopicRef:
     &#34;&#34;&#34;Return a reference to a topic.&#34;&#34;&#34;
-    return Topic(_events=self, name=name)</code></pre>
+    return TopicRef(_events=self, name=name)</code></pre>
 </details>
 </dd>
 <dt id="nitric.api.events.Events.topics"><code class="name flex">
-<span>async def <span class="ident">topics</span></span>(<span>self) ‑> List[<a title="nitric.api.events.Topic" href="#nitric.api.events.Topic">Topic</a>]</span>
+<span>async def <span class="ident">topics</span></span>(<span>self) ‑> List[<a title="nitric.api.events.TopicRef" href="#nitric.api.events.TopicRef">TopicRef</a>]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get a list of topics available for publishing or subscription.</p></div>
@@ -243,10 +251,10 @@ class Events(object):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">async def topics(self) -&gt; List[Topic]:
+<pre><code class="python">async def topics(self) -&gt; List[TopicRef]:
     &#34;&#34;&#34;Get a list of topics available for publishing or subscription.&#34;&#34;&#34;
     try:
-        response = await self._topic_stub.list()
+        response = await self._topic_stub.list(topic_list_request=TopicListRequest())
         return [self.topic(topic.name) for topic in response.topics]
     except GRPCError as grpc_err:
         raise exception_from_grpc_error(grpc_err)</code></pre>
@@ -254,8 +262,8 @@ class Events(object):
 </dd>
 </dl>
 </dd>
-<dt id="nitric.api.events.Topic"><code class="flex name class">
-<span>class <span class="ident">Topic</span></span>
+<dt id="nitric.api.events.TopicRef"><code class="flex name class">
+<span>class <span class="ident">TopicRef</span></span>
 <span>(</span><span>_events: <a title="nitric.api.events.Events" href="#nitric.api.events.Events">Events</a>, name: str)</span>
 </code></dt>
 <dd>
@@ -264,7 +272,8 @@ class Events(object):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Topic(object):
+<pre><code class="python">@dataclass(frozen=True, order=True)
+class TopicRef(object):
     &#34;&#34;&#34;A reference to a topic on an event service, used to perform operations on that topic.&#34;&#34;&#34;
 
     _events: Events
@@ -284,25 +293,26 @@ class Events(object):
             event = Event()
 
         if isinstance(event, dict):
-            # TODO: handle events that are just a payload
-            event = Event(**event)
+            event = Event(payload=event)
 
         try:
-            response = await self._events._stub.publish(topic=self.name, event=_event_to_wire(event))
+            response = await self._events._stub.publish(
+                event_publish_request=EventPublishRequest(topic=self.name, event=_event_to_wire(event))
+            )
             return Event(**{**event.__dict__.copy(), **{&#34;id&#34;: response.id}})
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
-<dt id="nitric.api.events.Topic.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dt id="nitric.api.events.TopicRef.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="nitric.api.events.Topic.publish"><code class="name flex">
+<dt id="nitric.api.events.TopicRef.publish"><code class="name flex">
 <span>async def <span class="ident">publish</span></span>(<span>self, event: Union[<a title="nitric.api.events.Event" href="#nitric.api.events.Event">Event</a>, dict] = None) ‑> <a title="nitric.api.events.Event" href="#nitric.api.events.Event">Event</a></span>
 </code></dt>
 <dd>
@@ -327,11 +337,12 @@ class Events(object):
         event = Event()
 
     if isinstance(event, dict):
-        # TODO: handle events that are just a payload
-        event = Event(**event)
+        event = Event(payload=event)
 
     try:
-        response = await self._events._stub.publish(topic=self.name, event=_event_to_wire(event))
+        response = await self._events._stub.publish(
+            event_publish_request=EventPublishRequest(topic=self.name, event=_event_to_wire(event))
+        )
         return Event(**{**event.__dict__.copy(), **{&#34;id&#34;: response.id}})
     except GRPCError as grpc_err:
         raise exception_from_grpc_error(grpc_err)</code></pre>
@@ -371,10 +382,10 @@ class Events(object):
 </ul>
 </li>
 <li>
-<h4><code><a title="nitric.api.events.Topic" href="#nitric.api.events.Topic">Topic</a></code></h4>
+<h4><code><a title="nitric.api.events.TopicRef" href="#nitric.api.events.TopicRef">TopicRef</a></code></h4>
 <ul class="">
-<li><code><a title="nitric.api.events.Topic.name" href="#nitric.api.events.Topic.name">name</a></code></li>
-<li><code><a title="nitric.api.events.Topic.publish" href="#nitric.api.events.Topic.publish">publish</a></code></li>
+<li><code><a title="nitric.api.events.TopicRef.name" href="#nitric.api.events.TopicRef.name">name</a></code></li>
+<li><code><a title="nitric.api.events.TopicRef.publish" href="#nitric.api.events.TopicRef.publish">publish</a></code></li>
 </ul>
 </li>
 </ul>

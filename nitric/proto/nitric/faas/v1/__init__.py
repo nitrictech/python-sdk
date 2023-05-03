@@ -129,6 +129,13 @@ class InitResponse(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class TraceContext(betterproto.Message):
+    values: Dict[str, str] = betterproto.map_field(
+        1, betterproto.TYPE_STRING, betterproto.TYPE_STRING
+    )
+
+
+@dataclass(eq=False, repr=False)
 class TriggerRequest(betterproto.Message):
     """The server has a trigger for the client to handle"""
 
@@ -137,6 +144,14 @@ class TriggerRequest(betterproto.Message):
 
     mime_type: str = betterproto.string_field(2)
     """Should we supply a mime type for the data? Or rely on context?"""
+
+    trace_context: "TraceContext" = betterproto.message_field(10)
+    """
+    TraceInformation from the membrane Allows tying traces from external
+    triggers (e.g. HttpRequests) into each event request/response pair of the
+    Bidirectional stream. which cannot be facilitated by OOTB stream
+    interceptors from OTEL.
+    """
 
     http: "HttpTriggerContext" = betterproto.message_field(3, group="context")
     topic: "TopicTriggerContext" = betterproto.message_field(4, group="context")

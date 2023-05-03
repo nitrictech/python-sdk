@@ -1,0 +1,1600 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.9.2" />
+<title>nitric.resources API documentation</title>
+<meta name="description" content="Nitric Python SDK API Documentation. See: https://nitric.io/docs?lang=python for full framework documentation." />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>nitric.resources</code></h1>
+</header>
+<section id="section-intro">
+<p>Nitric Python SDK API Documentation. See: <a href="https://nitric.io/docs?lang=python">https://nitric.io/docs?lang=python</a> for full framework documentation.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#
+# Copyright (c) 2021 Nitric Technologies Pty Ltd.
+#
+# This file is part of Nitric Python 3 SDK.
+# See https://github.com/nitrictech/python-sdk for further info.
+#
+# Licensed under the Apache License, Version 2.0 (the &#34;License&#34;);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an &#34;AS IS&#34; BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+&#34;&#34;&#34;Nitric Python SDK API Documentation. See: https://nitric.io/docs?lang=python for full framework documentation.&#34;&#34;&#34;
+
+from nitric.resources.apis import Api, api, MethodOptions, ApiOptions, ApiDetails, JwtSecurityDefinition
+from nitric.resources.buckets import Bucket, bucket
+from nitric.resources.collections import Collection, collection
+from nitric.resources.queues import Queue, queue
+from nitric.resources.schedules import Schedule, schedule
+from nitric.resources.secrets import Secret, secret
+from nitric.resources.topics import Topic, topic
+
+__all__ = [
+    &#34;api&#34;,
+    &#34;Api&#34;,
+    &#34;ApiOptions&#34;,
+    &#34;ApiDetails&#34;,
+    &#34;JwtSecurityDefinition&#34;,
+    &#34;MethodOptions&#34;,
+    &#34;bucket&#34;,
+    &#34;Bucket&#34;,
+    &#34;collection&#34;,
+    &#34;Collection&#34;,
+    &#34;queue&#34;,
+    &#34;Queue&#34;,
+    &#34;Schedule&#34;,
+    &#34;schedule&#34;,
+    &#34;secret&#34;,
+    &#34;Secret&#34;,
+    &#34;topic&#34;,
+    &#34;Topic&#34;,
+]</code></pre>
+</details>
+</section>
+<section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="nitric.resources.apis" href="apis.html">nitric.resources.apis</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="nitric.resources.base" href="base.html">nitric.resources.base</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="nitric.resources.buckets" href="buckets.html">nitric.resources.buckets</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="nitric.resources.collections" href="collections.html">nitric.resources.collections</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="nitric.resources.queues" href="queues.html">nitric.resources.queues</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="nitric.resources.schedules" href="schedules.html">nitric.resources.schedules</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="nitric.resources.secrets" href="secrets.html">nitric.resources.secrets</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="nitric.resources.topics" href="topics.html">nitric.resources.topics</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="nitric.resources.api"><code class="name flex">
+<span>def <span class="ident">api</span></span>(<span>name: str, opts: <a title="nitric.resources.ApiOptions" href="#nitric.resources.ApiOptions">ApiOptions</a> = None) ‑> <a title="nitric.resources.apis.Api" href="apis.html#nitric.resources.apis.Api">Api</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a new API resource.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def api(name: str, opts: ApiOptions = None) -&gt; Api:
+    &#34;&#34;&#34;Create a new API resource.&#34;&#34;&#34;
+    return Nitric._create_resource(Api, name, opts=opts)</code></pre>
+</details>
+</dd>
+<dt id="nitric.resources.bucket"><code class="name flex">
+<span>def <span class="ident">bucket</span></span>(<span>name: str) ‑> <a title="nitric.resources.buckets.Bucket" href="buckets.html#nitric.resources.buckets.Bucket">Bucket</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create and register a bucket.</p>
+<p>If a bucket has already been registered with the same name, the original reference will be reused.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def bucket(name: str) -&gt; Bucket:
+    &#34;&#34;&#34;
+    Create and register a bucket.
+
+    If a bucket has already been registered with the same name, the original reference will be reused.
+    &#34;&#34;&#34;
+    return Nitric._create_resource(Bucket, name)</code></pre>
+</details>
+</dd>
+<dt id="nitric.resources.collection"><code class="name flex">
+<span>def <span class="ident">collection</span></span>(<span>name: str) ‑> <a title="nitric.resources.collections.Collection" href="collections.html#nitric.resources.collections.Collection">Collection</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create and register a collection.</p>
+<p>If a collection has already been registered with the same name, the original reference will be reused.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def collection(name: str) -&gt; Collection:
+    &#34;&#34;&#34;
+    Create and register a collection.
+
+    If a collection has already been registered with the same name, the original reference will be reused.
+    &#34;&#34;&#34;
+    return Nitric._create_resource(Collection, name)</code></pre>
+</details>
+</dd>
+<dt id="nitric.resources.queue"><code class="name flex">
+<span>def <span class="ident">queue</span></span>(<span>name: str) ‑> <a title="nitric.resources.queues.Queue" href="queues.html#nitric.resources.queues.Queue">Queue</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create and register a queue.</p>
+<p>If a queue has already been registered with the same name, the original reference will be reused.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def queue(name: str) -&gt; Queue:
+    &#34;&#34;&#34;
+    Create and register a queue.
+
+    If a queue has already been registered with the same name, the original reference will be reused.
+    &#34;&#34;&#34;
+    return Nitric._create_resource(Queue, name)</code></pre>
+</details>
+</dd>
+<dt id="nitric.resources.schedule"><code class="name flex">
+<span>def <span class="ident">schedule</span></span>(<span>description: str, every: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a schedule decorator.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def schedule(description: str, every: str):
+    &#34;&#34;&#34;Return a schedule decorator.&#34;&#34;&#34;
+
+    def decorator(func: EventMiddleware):
+        r = Schedule(description)
+        r.every(every, func)
+        return r
+
+    return decorator</code></pre>
+</details>
+</dd>
+<dt id="nitric.resources.secret"><code class="name flex">
+<span>def <span class="ident">secret</span></span>(<span>name: str) ‑> <a title="nitric.resources.secrets.Secret" href="secrets.html#nitric.resources.secrets.Secret">Secret</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create and registers a secret.</p>
+<p>If a secret has already been registered with the same name, the original reference will be reused.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def secret(name: str) -&gt; Secret:
+    &#34;&#34;&#34;
+    Create and registers a secret.
+
+    If a secret has already been registered with the same name, the original reference will be reused.
+    &#34;&#34;&#34;
+    return Nitric._create_resource(Secret, name)</code></pre>
+</details>
+</dd>
+<dt id="nitric.resources.topic"><code class="name flex">
+<span>def <span class="ident">topic</span></span>(<span>name: str) ‑> <a title="nitric.resources.topics.Topic" href="topics.html#nitric.resources.topics.Topic">Topic</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create and register a topic.</p>
+<p>If a topic has already been registered with the same name, the original reference will be reused.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def topic(name: str) -&gt; Topic:
+    &#34;&#34;&#34;
+    Create and register a topic.
+
+    If a topic has already been registered with the same name, the original reference will be reused.
+    &#34;&#34;&#34;
+    return Nitric._create_resource(Topic, name)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="nitric.resources.Api"><code class="flex name class">
+<span>class <span class="ident">Api</span></span>
+<span>(</span><span>name: str, opts: <a title="nitric.resources.ApiOptions" href="#nitric.resources.ApiOptions">ApiOptions</a> = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>An HTTP API.</p>
+<p>Construct a new HTTP API.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Api(BaseResource):
+    &#34;&#34;&#34;An HTTP API.&#34;&#34;&#34;
+
+    app: Nitric
+    name: str
+    path: str
+    middleware: List[HttpMiddleware]
+    routes: List[Route]
+    security_definitions: dict[str, SecurityDefinition]
+    security: dict[str, List[str]]
+
+    def __init__(self, name: str, opts: ApiOptions = None):
+        &#34;&#34;&#34;Construct a new HTTP API.&#34;&#34;&#34;
+        super().__init__()
+        if opts is None:
+            opts = ApiOptions()
+
+        self.name = name
+        self.middleware = opts.middleware if opts.middleware is not None else []
+        self.path = opts.path
+        self.routes = []
+        self.security_definitions = opts.security_definitions
+        self.security = opts.security
+
+    async def _register(self):
+        try:
+            await self._resources_stub.declare(
+                resource_declare_request=ResourceDeclareRequest(
+                    resource=_to_resource(self),
+                    api=ApiResource(
+                        security_definitions=_security_definition_to_grpc_declaration(self.security_definitions),
+                        security=_security_to_grpc_declaration(self.security),
+                    ),
+                )
+            )
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
+
+    def _route(self, match: str, opts: RouteOptions = None) -&gt; Route:
+        &#34;&#34;&#34;Define an HTTP route to be handled by this API.&#34;&#34;&#34;
+        if opts is None:
+            opts = RouteOptions()
+
+        r = Route(self, match, opts)
+        self.routes.append(r)
+        return r
+
+    def all(self, match: str, opts: MethodOptions = None):
+        &#34;&#34;&#34;Define an HTTP route which will respond to HTTP GET requests.&#34;&#34;&#34;
+        if opts is None:
+            opts = MethodOptions()
+
+        def decorator(function: HttpMiddleware):
+            r = self._route(match)
+            r.method(
+                [
+                    HttpMethod.GET,
+                    HttpMethod.POST,
+                    HttpMethod.PATCH,
+                    HttpMethod.PUT,
+                    HttpMethod.DELETE,
+                    HttpMethod.OPTIONS,
+                ],
+                function,
+                opts=opts,
+            )
+
+        return decorator
+
+    def methods(self, methods: List[HttpMethod], match: str, opts: MethodOptions = None):
+        &#34;&#34;&#34;Define an HTTP route which will respond to HTTP GET requests.&#34;&#34;&#34;
+        if opts is None:
+            opts = MethodOptions()
+
+        def decorator(function: HttpMiddleware):
+            r = self._route(match)
+            r.method(methods, function, opts=opts)
+
+        return decorator
+
+    def get(self, match: str, opts: MethodOptions = None):
+        &#34;&#34;&#34;Define an HTTP route which will respond to HTTP GET requests.&#34;&#34;&#34;
+        if opts is None:
+            opts = MethodOptions()
+
+        def decorator(function: HttpMiddleware):
+            r = self._route(match)
+            r.get(function, opts=opts)
+
+        return decorator
+
+    def post(self, match: str, opts: MethodOptions = None):
+        &#34;&#34;&#34;Define an HTTP route which will respond to HTTP POST requests.&#34;&#34;&#34;
+        if opts is None:
+            opts = MethodOptions()
+
+        def decorator(function: HttpMiddleware):
+            r = self._route(match)
+            r.post(function, opts=opts)
+
+        return decorator
+
+    def delete(self, match: str, opts: MethodOptions = None):
+        &#34;&#34;&#34;Define an HTTP route which will respond to HTTP DELETE requests.&#34;&#34;&#34;
+        if opts is None:
+            opts = MethodOptions()
+
+        def decorator(function: HttpMiddleware):
+            r = self._route(match)
+            r.delete(function, opts=opts)
+
+        return decorator
+
+    def options(self, match: str, opts: MethodOptions = None):
+        &#34;&#34;&#34;Define an HTTP route which will respond to HTTP OPTIONS requests.&#34;&#34;&#34;
+        if opts is None:
+            opts = MethodOptions()
+
+        def decorator(function: HttpMiddleware):
+            r = self._route(match)
+            r.options(function, opts=opts)
+
+        return decorator
+
+    def patch(self, match: str, opts: MethodOptions = None):
+        &#34;&#34;&#34;Define an HTTP route which will respond to HTTP PATCH requests.&#34;&#34;&#34;
+        if opts is None:
+            opts = MethodOptions()
+
+        def decorator(function: HttpMiddleware):
+            r = self._route(match)
+            r.patch(function, opts=opts)
+
+        return decorator
+
+    def put(self, match: str, opts: MethodOptions = None):
+        &#34;&#34;&#34;Define an HTTP route which will respond to HTTP PUT requests.&#34;&#34;&#34;
+        if opts is None:
+            opts = MethodOptions()
+
+        def decorator(function: HttpMiddleware):
+            r = self._route(match)
+            r.put(function, opts=opts)
+
+        return decorator
+
+    async def _details(self) -&gt; ApiDetails:
+        &#34;&#34;&#34;Get the API deployment details.&#34;&#34;&#34;
+        try:
+            res = await self._resources_stub.details(
+                resource_details_request=ResourceDetailsRequest(
+                    resource=_to_resource(self),
+                )
+            )
+            return ApiDetails(res.id, res.provider, res.service, res.api.url)
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
+
+    async def URL(self) -&gt; str:
+        &#34;&#34;&#34;Get the APIs live URL.&#34;&#34;&#34;
+        details = await self._details()
+        return details.url</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.resources.base.BaseResource" href="base.html#nitric.resources.base.BaseResource">BaseResource</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.resources.Api.app"><code class="name">var <span class="ident">app</span> : <a title="nitric.application.Nitric" href="../application.html#nitric.application.Nitric">Nitric</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.resources.Api.middleware"><code class="name">var <span class="ident">middleware</span> : List[Callable[[<a title="nitric.faas.HttpContext" href="../faas.html#nitric.faas.HttpContext">HttpContext</a>, Coroutine[Any, Any, Optional[<a title="nitric.faas.HttpContext" href="../faas.html#nitric.faas.HttpContext">HttpContext</a>]]], Coroutine[Any, Any, Optional[<a title="nitric.faas.HttpContext" href="../faas.html#nitric.faas.HttpContext">HttpContext</a>]]]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.resources.Api.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.resources.Api.path"><code class="name">var <span class="ident">path</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.resources.Api.routes"><code class="name">var <span class="ident">routes</span> : List[<a title="nitric.resources.apis.Route" href="apis.html#nitric.resources.apis.Route">Route</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.resources.Api.security"><code class="name">var <span class="ident">security</span> : dict[str, typing.List[str]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.resources.Api.security_definitions"><code class="name">var <span class="ident">security_definitions</span> : dict[str, <a title="nitric.resources.apis.JwtSecurityDefinition" href="apis.html#nitric.resources.apis.JwtSecurityDefinition">JwtSecurityDefinition</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.resources.Api.URL"><code class="name flex">
+<span>async def <span class="ident">URL</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the APIs live URL.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def URL(self) -&gt; str:
+    &#34;&#34;&#34;Get the APIs live URL.&#34;&#34;&#34;
+    details = await self._details()
+    return details.url</code></pre>
+</details>
+</dd>
+<dt id="nitric.resources.Api.all"><code class="name flex">
+<span>def <span class="ident">all</span></span>(<span>self, match: str, opts: <a title="nitric.resources.MethodOptions" href="#nitric.resources.MethodOptions">MethodOptions</a> = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define an HTTP route which will respond to HTTP GET requests.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def all(self, match: str, opts: MethodOptions = None):
+    &#34;&#34;&#34;Define an HTTP route which will respond to HTTP GET requests.&#34;&#34;&#34;
+    if opts is None:
+        opts = MethodOptions()
+
+    def decorator(function: HttpMiddleware):
+        r = self._route(match)
+        r.method(
+            [
+                HttpMethod.GET,
+                HttpMethod.POST,
+                HttpMethod.PATCH,
+                HttpMethod.PUT,
+                HttpMethod.DELETE,
+                HttpMethod.OPTIONS,
+            ],
+            function,
+            opts=opts,
+        )
+
+    return decorator</code></pre>
+</details>
+</dd>
+<dt id="nitric.resources.Api.delete"><code class="name flex">
+<span>def <span class="ident">delete</span></span>(<span>self, match: str, opts: <a title="nitric.resources.MethodOptions" href="#nitric.resources.MethodOptions">MethodOptions</a> = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define an HTTP route which will respond to HTTP DELETE requests.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def delete(self, match: str, opts: MethodOptions = None):
+    &#34;&#34;&#34;Define an HTTP route which will respond to HTTP DELETE requests.&#34;&#34;&#34;
+    if opts is None:
+        opts = MethodOptions()
+
+    def decorator(function: HttpMiddleware):
+        r = self._route(match)
+        r.delete(function, opts=opts)
+
+    return decorator</code></pre>
+</details>
+</dd>
+<dt id="nitric.resources.Api.get"><code class="name flex">
+<span>def <span class="ident">get</span></span>(<span>self, match: str, opts: <a title="nitric.resources.MethodOptions" href="#nitric.resources.MethodOptions">MethodOptions</a> = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define an HTTP route which will respond to HTTP GET requests.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get(self, match: str, opts: MethodOptions = None):
+    &#34;&#34;&#34;Define an HTTP route which will respond to HTTP GET requests.&#34;&#34;&#34;
+    if opts is None:
+        opts = MethodOptions()
+
+    def decorator(function: HttpMiddleware):
+        r = self._route(match)
+        r.get(function, opts=opts)
+
+    return decorator</code></pre>
+</details>
+</dd>
+<dt id="nitric.resources.Api.methods"><code class="name flex">
+<span>def <span class="ident">methods</span></span>(<span>self, methods: List[HttpMethod], match: str, opts: <a title="nitric.resources.MethodOptions" href="#nitric.resources.MethodOptions">MethodOptions</a> = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define an HTTP route which will respond to HTTP GET requests.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def methods(self, methods: List[HttpMethod], match: str, opts: MethodOptions = None):
+    &#34;&#34;&#34;Define an HTTP route which will respond to HTTP GET requests.&#34;&#34;&#34;
+    if opts is None:
+        opts = MethodOptions()
+
+    def decorator(function: HttpMiddleware):
+        r = self._route(match)
+        r.method(methods, function, opts=opts)
+
+    return decorator</code></pre>
+</details>
+</dd>
+<dt id="nitric.resources.Api.options"><code class="name flex">
+<span>def <span class="ident">options</span></span>(<span>self, match: str, opts: <a title="nitric.resources.MethodOptions" href="#nitric.resources.MethodOptions">MethodOptions</a> = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define an HTTP route which will respond to HTTP OPTIONS requests.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def options(self, match: str, opts: MethodOptions = None):
+    &#34;&#34;&#34;Define an HTTP route which will respond to HTTP OPTIONS requests.&#34;&#34;&#34;
+    if opts is None:
+        opts = MethodOptions()
+
+    def decorator(function: HttpMiddleware):
+        r = self._route(match)
+        r.options(function, opts=opts)
+
+    return decorator</code></pre>
+</details>
+</dd>
+<dt id="nitric.resources.Api.patch"><code class="name flex">
+<span>def <span class="ident">patch</span></span>(<span>self, match: str, opts: <a title="nitric.resources.MethodOptions" href="#nitric.resources.MethodOptions">MethodOptions</a> = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define an HTTP route which will respond to HTTP PATCH requests.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def patch(self, match: str, opts: MethodOptions = None):
+    &#34;&#34;&#34;Define an HTTP route which will respond to HTTP PATCH requests.&#34;&#34;&#34;
+    if opts is None:
+        opts = MethodOptions()
+
+    def decorator(function: HttpMiddleware):
+        r = self._route(match)
+        r.patch(function, opts=opts)
+
+    return decorator</code></pre>
+</details>
+</dd>
+<dt id="nitric.resources.Api.post"><code class="name flex">
+<span>def <span class="ident">post</span></span>(<span>self, match: str, opts: <a title="nitric.resources.MethodOptions" href="#nitric.resources.MethodOptions">MethodOptions</a> = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define an HTTP route which will respond to HTTP POST requests.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def post(self, match: str, opts: MethodOptions = None):
+    &#34;&#34;&#34;Define an HTTP route which will respond to HTTP POST requests.&#34;&#34;&#34;
+    if opts is None:
+        opts = MethodOptions()
+
+    def decorator(function: HttpMiddleware):
+        r = self._route(match)
+        r.post(function, opts=opts)
+
+    return decorator</code></pre>
+</details>
+</dd>
+<dt id="nitric.resources.Api.put"><code class="name flex">
+<span>def <span class="ident">put</span></span>(<span>self, match: str, opts: <a title="nitric.resources.MethodOptions" href="#nitric.resources.MethodOptions">MethodOptions</a> = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define an HTTP route which will respond to HTTP PUT requests.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def put(self, match: str, opts: MethodOptions = None):
+    &#34;&#34;&#34;Define an HTTP route which will respond to HTTP PUT requests.&#34;&#34;&#34;
+    if opts is None:
+        opts = MethodOptions()
+
+    def decorator(function: HttpMiddleware):
+        r = self._route(match)
+        r.put(function, opts=opts)
+
+    return decorator</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="nitric.resources.base.BaseResource" href="base.html#nitric.resources.base.BaseResource">BaseResource</a></b></code>:
+<ul class="hlist">
+<li><code><a title="nitric.resources.base.BaseResource.make" href="base.html#nitric.resources.base.BaseResource.make">make</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="nitric.resources.ApiDetails"><code class="flex name class">
+<span>class <span class="ident">ApiDetails</span></span>
+<span>(</span><span>id: str, provider: str, service: str, url: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents the APIs deployment details.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class ApiDetails:
+    &#34;&#34;&#34;Represents the APIs deployment details.&#34;&#34;&#34;
+
+    # the identifier of the resource
+    id: str
+    # The provider this resource is deployed with (e.g. aws)
+    provider: str
+    # The service this resource is deployed on (e.g. ApiGateway)
+    service: str
+    # The url of the API
+    url: str</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.resources.ApiDetails.id"><code class="name">var <span class="ident">id</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.resources.ApiDetails.provider"><code class="name">var <span class="ident">provider</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.resources.ApiDetails.service"><code class="name">var <span class="ident">service</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.resources.ApiDetails.url"><code class="name">var <span class="ident">url</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.resources.ApiOptions"><code class="flex name class">
+<span>class <span class="ident">ApiOptions</span></span>
+<span>(</span><span>path: str = '', middleware: List[Middleware] = [], security_definitions: dict[str, SecurityDefinition] = None, security: dict[str, List[str]] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents options when creating an API, such as middleware to be applied to all HTTP request to the API.</p>
+<p>Construct a new API options object.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ApiOptions:
+    &#34;&#34;&#34;Represents options when creating an API, such as middleware to be applied to all HTTP request to the API.&#34;&#34;&#34;
+
+    path: str
+    middleware: Union[HttpMiddleware, List[HttpMiddleware], None]
+    security_definitions: Union[dict[str, SecurityDefinition], None]
+    security: Union[dict[str, List[str]], None]
+
+    def __init__(
+        self,
+        path: str = &#34;&#34;,
+        middleware: List[Middleware] = [],
+        security_definitions: dict[str, SecurityDefinition] = None,
+        security: dict[str, List[str]] = None,
+    ):
+        &#34;&#34;&#34;Construct a new API options object.&#34;&#34;&#34;
+        self.middleware = middleware
+        self.security_definitions = security_definitions
+        self.security = security
+        self.path = path</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.resources.ApiOptions.middleware"><code class="name">var <span class="ident">middleware</span> : Union[Callable[[<a title="nitric.faas.HttpContext" href="../faas.html#nitric.faas.HttpContext">HttpContext</a>, Coroutine[Any, Any, Optional[<a title="nitric.faas.HttpContext" href="../faas.html#nitric.faas.HttpContext">HttpContext</a>]]], Coroutine[Any, Any, Optional[<a title="nitric.faas.HttpContext" href="../faas.html#nitric.faas.HttpContext">HttpContext</a>]]], List[Callable[[<a title="nitric.faas.HttpContext" href="../faas.html#nitric.faas.HttpContext">HttpContext</a>, Coroutine[Any, Any, Optional[<a title="nitric.faas.HttpContext" href="../faas.html#nitric.faas.HttpContext">HttpContext</a>]]], Coroutine[Any, Any, Optional[<a title="nitric.faas.HttpContext" href="../faas.html#nitric.faas.HttpContext">HttpContext</a>]]]], NoneType]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.resources.ApiOptions.path"><code class="name">var <span class="ident">path</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.resources.ApiOptions.security"><code class="name">var <span class="ident">security</span> : Optional[dict[str, List[str]]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.resources.ApiOptions.security_definitions"><code class="name">var <span class="ident">security_definitions</span> : Optional[dict[str, <a title="nitric.resources.apis.JwtSecurityDefinition" href="apis.html#nitric.resources.apis.JwtSecurityDefinition">JwtSecurityDefinition</a>]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.resources.Bucket"><code class="flex name class">
+<span>class <span class="ident">Bucket</span></span>
+<span>(</span><span>name: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A bucket resource, used for storage and retrieval of blob/binary data.</p>
+<p>Create a bucket with the name provided or references it if it already exists.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Bucket(SecureResource):
+    &#34;&#34;&#34;A bucket resource, used for storage and retrieval of blob/binary data.&#34;&#34;&#34;
+
+    name: str
+    actions: List[Action]
+
+    def __init__(self, name: str):
+        &#34;&#34;&#34;Create a bucket with the name provided or references it if it already exists.&#34;&#34;&#34;
+        super().__init__()
+        self.name = name
+
+    async def _register(self):
+        try:
+            await self._resources_stub.declare(
+                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
+            )
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
+
+    def _perms_to_actions(self, *args: [Union[BucketPermission, str]]) -&gt; List[Action]:
+        permission_actions_map = {
+            BucketPermission.reading: [Action.BucketFileGet, Action.BucketFileList],
+            BucketPermission.writing: [Action.BucketFilePut],
+            BucketPermission.deleting: [Action.BucketFileDelete],
+        }
+        # convert strings to the enum value where needed
+        perms = [
+            permission if isinstance(permission, BucketPermission) else BucketPermission[permission.lower()]
+            for permission in args
+        ]
+        return [action for perm in perms for action in permission_actions_map[perm]]
+
+    def _to_resource(self) -&gt; Resource:
+        return Resource(name=self.name, type=ResourceType.Bucket)
+
+    def allow(self, *args: Union[BucketPermission, str]) -&gt; BucketRef:
+        &#34;&#34;&#34;Request the required permissions for this resource.&#34;&#34;&#34;
+        self._register_policy(*args)
+
+        return Storage().bucket(self.name)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.resources.base.SecureResource" href="base.html#nitric.resources.base.SecureResource">SecureResource</a></li>
+<li><a title="nitric.resources.base.BaseResource" href="base.html#nitric.resources.base.BaseResource">BaseResource</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.resources.Bucket.actions"><code class="name">var <span class="ident">actions</span> : List[<a title="nitric.proto.nitric.resource.v1.Action" href="../proto/nitric/resource/v1/index.html#nitric.proto.nitric.resource.v1.Action">Action</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.resources.Bucket.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.resources.Bucket.allow"><code class="name flex">
+<span>def <span class="ident">allow</span></span>(<span>self, *args: Union[BucketPermission, str]) ‑> <a title="nitric.api.storage.BucketRef" href="../api/storage.html#nitric.api.storage.BucketRef">BucketRef</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Request the required permissions for this resource.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def allow(self, *args: Union[BucketPermission, str]) -&gt; BucketRef:
+    &#34;&#34;&#34;Request the required permissions for this resource.&#34;&#34;&#34;
+    self._register_policy(*args)
+
+    return Storage().bucket(self.name)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="nitric.resources.base.SecureResource" href="base.html#nitric.resources.base.SecureResource">SecureResource</a></b></code>:
+<ul class="hlist">
+<li><code><a title="nitric.resources.base.SecureResource.make" href="base.html#nitric.resources.base.BaseResource.make">make</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="nitric.resources.Collection"><code class="flex name class">
+<span>class <span class="ident">Collection</span></span>
+<span>(</span><span>name: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A document collection resource.</p>
+<p>Construct a new document collection.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Collection(SecureResource):
+    &#34;&#34;&#34;A document collection resource.&#34;&#34;&#34;
+
+    def __init__(self, name: str):
+        &#34;&#34;&#34;Construct a new document collection.&#34;&#34;&#34;
+        super().__init__()
+        self.name = name
+
+    async def _register(self):
+        try:
+            await self._resources_stub.declare(
+                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
+            )
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
+
+    def _to_resource(self) -&gt; Resource:
+        return Resource(name=self.name, type=ResourceType.Collection)
+
+    def _perms_to_actions(self, *args: Union[CollectionPermission, str]) -&gt; List[Action]:
+        permission_actions_map = {
+            CollectionPermission.reading: [
+                Action.CollectionDocumentRead,
+                Action.CollectionQuery,
+                Action.CollectionList,
+            ],
+            CollectionPermission.writing: [Action.CollectionDocumentWrite, Action.CollectionList],
+            CollectionPermission.deleting: [Action.CollectionDocumentDelete, Action.CollectionList],
+        }
+        # convert strings to the enum value where needed
+        perms = [
+            permission if isinstance(permission, CollectionPermission) else CollectionPermission[permission.lower()]
+            for permission in args
+        ]
+
+        return [action for perm in perms for action in permission_actions_map[perm]]
+
+    def allow(self, *args: Union[CollectionPermission, str]) -&gt; CollectionRef:
+        &#34;&#34;&#34;Request the required permissions for this collection.&#34;&#34;&#34;
+        # Ensure registration of the resource is complete before requesting permissions.
+        self._register_policy(*args)
+
+        return Documents().collection(self.name)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.resources.base.SecureResource" href="base.html#nitric.resources.base.SecureResource">SecureResource</a></li>
+<li><a title="nitric.resources.base.BaseResource" href="base.html#nitric.resources.base.BaseResource">BaseResource</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.resources.Collection.allow"><code class="name flex">
+<span>def <span class="ident">allow</span></span>(<span>self, *args: Union[CollectionPermission, str]) ‑> <a title="nitric.api.documents.CollectionRef" href="../api/documents.html#nitric.api.documents.CollectionRef">CollectionRef</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Request the required permissions for this collection.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def allow(self, *args: Union[CollectionPermission, str]) -&gt; CollectionRef:
+    &#34;&#34;&#34;Request the required permissions for this collection.&#34;&#34;&#34;
+    # Ensure registration of the resource is complete before requesting permissions.
+    self._register_policy(*args)
+
+    return Documents().collection(self.name)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="nitric.resources.base.SecureResource" href="base.html#nitric.resources.base.SecureResource">SecureResource</a></b></code>:
+<ul class="hlist">
+<li><code><a title="nitric.resources.base.SecureResource.make" href="base.html#nitric.resources.base.BaseResource.make">make</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="nitric.resources.JwtSecurityDefinition"><code class="flex name class">
+<span>class <span class="ident">JwtSecurityDefinition</span></span>
+<span>(</span><span>issuer: str, audiences: List[str])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents the JWT security definition for an API.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class JwtSecurityDefinition:
+    &#34;&#34;&#34;Represents the JWT security definition for an API.&#34;&#34;&#34;
+
+    issuer: str
+    audiences: List[str]</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.resources.JwtSecurityDefinition.audiences"><code class="name">var <span class="ident">audiences</span> : List[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.resources.JwtSecurityDefinition.issuer"><code class="name">var <span class="ident">issuer</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.resources.MethodOptions"><code class="flex name class">
+<span>class <span class="ident">MethodOptions</span></span>
+<span>(</span><span>security: dict[str, List[str]] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents options when defining a method handler.</p>
+<p>Construct a new HTTP method options object.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MethodOptions:
+    &#34;&#34;&#34;Represents options when defining a method handler.&#34;&#34;&#34;
+
+    security: dict[str, List[str]]
+
+    def __init__(self, security: dict[str, List[str]] = None):
+        &#34;&#34;&#34;Construct a new HTTP method options object.&#34;&#34;&#34;
+        self.security = security</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.resources.MethodOptions.security"><code class="name">var <span class="ident">security</span> : dict[str, typing.List[str]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.resources.Queue"><code class="flex name class">
+<span>class <span class="ident">Queue</span></span>
+<span>(</span><span>name: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A queue resource.</p>
+<p>Construct a new queue resource.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Queue(SecureResource):
+    &#34;&#34;&#34;A queue resource.&#34;&#34;&#34;
+
+    name: str
+    actions: List[Action]
+
+    def __init__(self, name: str):
+        &#34;&#34;&#34;Construct a new queue resource.&#34;&#34;&#34;
+        super().__init__()
+        self.name = name
+
+    def _to_resource(self) -&gt; Resource:
+        return Resource(name=self.name, type=ResourceType.Queue)
+
+    def _perms_to_actions(self, *args: Union[QueuePermission, str]) -&gt; List[Action]:
+        permission_actions_map = {
+            QueuePermission.sending: [Action.QueueSend, Action.QueueList, Action.QueueDetail],
+            QueuePermission.receiving: [Action.QueueReceive, Action.QueueList, Action.QueueDetail],
+        }
+        # convert strings to the enum value where needed
+        perms = [
+            permission if isinstance(permission, QueuePermission) else QueuePermission[permission.lower()]
+            for permission in args
+        ]
+
+        return [action for perm in perms for action in permission_actions_map[perm]]
+
+    async def _register(self):
+        try:
+            await self._resources_stub.declare(
+                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
+            )
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
+
+    def allow(self, *args: Union[QueuePermission, str]) -&gt; QueueRef:
+        &#34;&#34;&#34;Request the required permissions for this queue.&#34;&#34;&#34;
+        # Ensure registration of the resource is complete before requesting permissions.
+        self._register_policy(*args)
+
+        return Queues().queue(self.name)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.resources.base.SecureResource" href="base.html#nitric.resources.base.SecureResource">SecureResource</a></li>
+<li><a title="nitric.resources.base.BaseResource" href="base.html#nitric.resources.base.BaseResource">BaseResource</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.resources.Queue.actions"><code class="name">var <span class="ident">actions</span> : List[<a title="nitric.proto.nitric.resource.v1.Action" href="../proto/nitric/resource/v1/index.html#nitric.proto.nitric.resource.v1.Action">Action</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.resources.Queue.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.resources.Queue.allow"><code class="name flex">
+<span>def <span class="ident">allow</span></span>(<span>self, *args: Union[QueuePermission, str]) ‑> <a title="nitric.api.queues.QueueRef" href="../api/queues.html#nitric.api.queues.QueueRef">QueueRef</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Request the required permissions for this queue.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def allow(self, *args: Union[QueuePermission, str]) -&gt; QueueRef:
+    &#34;&#34;&#34;Request the required permissions for this queue.&#34;&#34;&#34;
+    # Ensure registration of the resource is complete before requesting permissions.
+    self._register_policy(*args)
+
+    return Queues().queue(self.name)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="nitric.resources.base.SecureResource" href="base.html#nitric.resources.base.SecureResource">SecureResource</a></b></code>:
+<ul class="hlist">
+<li><code><a title="nitric.resources.base.SecureResource.make" href="base.html#nitric.resources.base.BaseResource.make">make</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="nitric.resources.Schedule"><code class="flex name class">
+<span>class <span class="ident">Schedule</span></span>
+<span>(</span><span>description: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A schedule for running functions on a cadence.</p>
+<p>Construct a new schedule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Schedule:
+    &#34;&#34;&#34;A schedule for running functions on a cadence.&#34;&#34;&#34;
+
+    description: str
+    server: FunctionServer
+
+    def start(self):
+        &#34;&#34;&#34;Start the function server that executes the scheduled middleware.&#34;&#34;&#34;
+        return self.server.start()
+
+    def __init__(self, description: str):
+        &#34;&#34;&#34;Construct a new schedule.&#34;&#34;&#34;
+        self.description = description
+
+    def every(self, rate_description: str, *middleware: EventMiddleware):
+        &#34;&#34;&#34;
+        Register middleware to be run at the specified rate.
+
+        E.g. every(&#34;3 hours&#34;)
+        &#34;&#34;&#34;
+        rate_description = rate_description.lower()
+
+        if not any([frequency in rate_description for frequency in Frequency.as_str_list()]):
+            # handle singular frequencies. e.g. every(&#39;day&#39;)
+            rate_description = f&#34;1 {rate_description}s&#34;  # &#39;day&#39; becomes &#39;1 days&#39;
+
+        rate, freq_str = rate_description.split(&#34; &#34;)
+        freq = Frequency.from_str(freq_str)
+
+        if not rate.isdigit():
+            raise Exception(&#34;invalid rate expression, expression must begin with a positive integer&#34;)
+
+        if not freq:
+            raise Exception(
+                f&#34;invalid rate expression, frequency must be one of ${Frequency.as_str_list()}, received ${freq_str}&#34;
+            )
+
+        opts = RateWorkerOptions(self.description, int(rate), freq)
+
+        self.server = FunctionServer(opts)
+        self.server.event(*middleware)
+        return Nitric._register_worker(self.server)</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.resources.Schedule.description"><code class="name">var <span class="ident">description</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.resources.Schedule.server"><code class="name">var <span class="ident">server</span> : <a title="nitric.faas.FunctionServer" href="../faas.html#nitric.faas.FunctionServer">FunctionServer</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.resources.Schedule.every"><code class="name flex">
+<span>def <span class="ident">every</span></span>(<span>self, rate_description: str, *middleware: EventMiddleware)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Register middleware to be run at the specified rate.</p>
+<p>E.g. every("3 hours")</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def every(self, rate_description: str, *middleware: EventMiddleware):
+    &#34;&#34;&#34;
+    Register middleware to be run at the specified rate.
+
+    E.g. every(&#34;3 hours&#34;)
+    &#34;&#34;&#34;
+    rate_description = rate_description.lower()
+
+    if not any([frequency in rate_description for frequency in Frequency.as_str_list()]):
+        # handle singular frequencies. e.g. every(&#39;day&#39;)
+        rate_description = f&#34;1 {rate_description}s&#34;  # &#39;day&#39; becomes &#39;1 days&#39;
+
+    rate, freq_str = rate_description.split(&#34; &#34;)
+    freq = Frequency.from_str(freq_str)
+
+    if not rate.isdigit():
+        raise Exception(&#34;invalid rate expression, expression must begin with a positive integer&#34;)
+
+    if not freq:
+        raise Exception(
+            f&#34;invalid rate expression, frequency must be one of ${Frequency.as_str_list()}, received ${freq_str}&#34;
+        )
+
+    opts = RateWorkerOptions(self.description, int(rate), freq)
+
+    self.server = FunctionServer(opts)
+    self.server.event(*middleware)
+    return Nitric._register_worker(self.server)</code></pre>
+</details>
+</dd>
+<dt id="nitric.resources.Schedule.start"><code class="name flex">
+<span>def <span class="ident">start</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Start the function server that executes the scheduled middleware.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def start(self):
+    &#34;&#34;&#34;Start the function server that executes the scheduled middleware.&#34;&#34;&#34;
+    return self.server.start()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.resources.Secret"><code class="flex name class">
+<span>class <span class="ident">Secret</span></span>
+<span>(</span><span>name: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A secret resource, used for storing and retrieving secret versions and values.</p>
+<p>Construct a new secret resource reference.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Secret(SecureResource):
+    &#34;&#34;&#34;A secret resource, used for storing and retrieving secret versions and values.&#34;&#34;&#34;
+
+    name: str
+    actions: List[Action]
+
+    def __init__(self, name: str):
+        &#34;&#34;&#34;Construct a new secret resource reference.&#34;&#34;&#34;
+        super().__init__()
+        self.name = name
+
+    def _to_resource(self) -&gt; Resource:
+        return Resource(name=self.name, type=ResourceType.Secret)
+
+    async def _register(self):
+        try:
+            await self._resources_stub.declare(
+                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
+            )
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
+
+    def _perms_to_actions(self, *args: Union[SecretPermission, str]) -&gt; List[Action]:
+        permissions_actions_map = {
+            SecretPermission.accessing: [Action.SecretAccess],
+            SecretPermission.putting: [Action.SecretPut],
+        }
+        # convert strings to the enum value where needed
+        perms = [
+            permission if isinstance(permission, SecretPermission) else SecretPermission[permission.lower()]
+            for permission in args
+        ]
+
+        return [action for perm in perms for action in permissions_actions_map[perm]]
+
+    def allow(self, *args: Union[SecretPermission, str]) -&gt; SecretContainerRef:
+        &#34;&#34;&#34;Request the specified permissions to this resource.&#34;&#34;&#34;
+        self._register_policy(*args)
+
+        return Secrets().secret(self.name)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.resources.base.SecureResource" href="base.html#nitric.resources.base.SecureResource">SecureResource</a></li>
+<li><a title="nitric.resources.base.BaseResource" href="base.html#nitric.resources.base.BaseResource">BaseResource</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.resources.Secret.actions"><code class="name">var <span class="ident">actions</span> : List[<a title="nitric.proto.nitric.resource.v1.Action" href="../proto/nitric/resource/v1/index.html#nitric.proto.nitric.resource.v1.Action">Action</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.resources.Secret.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.resources.Secret.allow"><code class="name flex">
+<span>def <span class="ident">allow</span></span>(<span>self, *args: Union[SecretPermission, str]) ‑> <a title="nitric.api.secrets.SecretContainerRef" href="../api/secrets.html#nitric.api.secrets.SecretContainerRef">SecretContainerRef</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Request the specified permissions to this resource.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def allow(self, *args: Union[SecretPermission, str]) -&gt; SecretContainerRef:
+    &#34;&#34;&#34;Request the specified permissions to this resource.&#34;&#34;&#34;
+    self._register_policy(*args)
+
+    return Secrets().secret(self.name)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="nitric.resources.base.SecureResource" href="base.html#nitric.resources.base.SecureResource">SecureResource</a></b></code>:
+<ul class="hlist">
+<li><code><a title="nitric.resources.base.SecureResource.make" href="base.html#nitric.resources.base.BaseResource.make">make</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="nitric.resources.Topic"><code class="flex name class">
+<span>class <span class="ident">Topic</span></span>
+<span>(</span><span>name: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A topic resource, used for asynchronous messaging between functions.</p>
+<p>Construct a new topic.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Topic(SecureResource):
+    &#34;&#34;&#34;A topic resource, used for asynchronous messaging between functions.&#34;&#34;&#34;
+
+    name: str
+    actions: List[Action]
+    server: FunctionServer
+
+    def __init__(self, name: str):
+        &#34;&#34;&#34;Construct a new topic.&#34;&#34;&#34;
+        super().__init__()
+        self.name = name
+
+    async def _register(self):
+        try:
+            await self._resources_stub.declare(
+                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
+            )
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
+
+    def _to_resource(self) -&gt; Resource:
+        return Resource(name=self.name, type=ResourceType.Topic)
+
+    def _perms_to_actions(self, *args: Union[TopicPermission, str]) -&gt; List[Action]:
+        _permMap = {TopicPermission.publishing: [Action.TopicEventPublish]}
+        # convert strings to the enum value where needed
+        perms = [
+            permission if isinstance(permission, TopicPermission) else TopicPermission[permission.lower()]
+            for permission in args
+        ]
+
+        return [action for perm in perms for action in _permMap[perm]]
+
+    def allow(self, *args: Union[TopicPermission, str]) -&gt; TopicRef:
+        &#34;&#34;&#34;Request the specified permissions to this resource.&#34;&#34;&#34;
+        self._register_policy(*args)
+
+        return Events().topic(self.name)
+
+    def subscribe(self, func: EventMiddleware):
+        &#34;&#34;&#34;Create and return a subscription decorator for this topic.&#34;&#34;&#34;
+        self.server = FunctionServer(SubscriptionWorkerOptions(topic=self.name))
+        self.server.event(func)
+        Nitric._register_worker(self.server)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.resources.base.SecureResource" href="base.html#nitric.resources.base.SecureResource">SecureResource</a></li>
+<li><a title="nitric.resources.base.BaseResource" href="base.html#nitric.resources.base.BaseResource">BaseResource</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.resources.Topic.actions"><code class="name">var <span class="ident">actions</span> : List[<a title="nitric.proto.nitric.resource.v1.Action" href="../proto/nitric/resource/v1/index.html#nitric.proto.nitric.resource.v1.Action">Action</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.resources.Topic.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.resources.Topic.server"><code class="name">var <span class="ident">server</span> : <a title="nitric.faas.FunctionServer" href="../faas.html#nitric.faas.FunctionServer">FunctionServer</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.resources.Topic.allow"><code class="name flex">
+<span>def <span class="ident">allow</span></span>(<span>self, *args: Union[TopicPermission, str]) ‑> <a title="nitric.api.events.TopicRef" href="../api/events.html#nitric.api.events.TopicRef">TopicRef</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Request the specified permissions to this resource.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def allow(self, *args: Union[TopicPermission, str]) -&gt; TopicRef:
+    &#34;&#34;&#34;Request the specified permissions to this resource.&#34;&#34;&#34;
+    self._register_policy(*args)
+
+    return Events().topic(self.name)</code></pre>
+</details>
+</dd>
+<dt id="nitric.resources.Topic.subscribe"><code class="name flex">
+<span>def <span class="ident">subscribe</span></span>(<span>self, func: EventMiddleware)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create and return a subscription decorator for this topic.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def subscribe(self, func: EventMiddleware):
+    &#34;&#34;&#34;Create and return a subscription decorator for this topic.&#34;&#34;&#34;
+    self.server = FunctionServer(SubscriptionWorkerOptions(topic=self.name))
+    self.server.event(func)
+    Nitric._register_worker(self.server)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="nitric.resources.base.SecureResource" href="base.html#nitric.resources.base.SecureResource">SecureResource</a></b></code>:
+<ul class="hlist">
+<li><code><a title="nitric.resources.base.SecureResource.make" href="base.html#nitric.resources.base.BaseResource.make">make</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="nitric" href="../index.html">nitric</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="nitric.resources.apis" href="apis.html">nitric.resources.apis</a></code></li>
+<li><code><a title="nitric.resources.base" href="base.html">nitric.resources.base</a></code></li>
+<li><code><a title="nitric.resources.buckets" href="buckets.html">nitric.resources.buckets</a></code></li>
+<li><code><a title="nitric.resources.collections" href="collections.html">nitric.resources.collections</a></code></li>
+<li><code><a title="nitric.resources.queues" href="queues.html">nitric.resources.queues</a></code></li>
+<li><code><a title="nitric.resources.schedules" href="schedules.html">nitric.resources.schedules</a></code></li>
+<li><code><a title="nitric.resources.secrets" href="secrets.html">nitric.resources.secrets</a></code></li>
+<li><code><a title="nitric.resources.topics" href="topics.html">nitric.resources.topics</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="two-column">
+<li><code><a title="nitric.resources.api" href="#nitric.resources.api">api</a></code></li>
+<li><code><a title="nitric.resources.bucket" href="#nitric.resources.bucket">bucket</a></code></li>
+<li><code><a title="nitric.resources.collection" href="#nitric.resources.collection">collection</a></code></li>
+<li><code><a title="nitric.resources.queue" href="#nitric.resources.queue">queue</a></code></li>
+<li><code><a title="nitric.resources.schedule" href="#nitric.resources.schedule">schedule</a></code></li>
+<li><code><a title="nitric.resources.secret" href="#nitric.resources.secret">secret</a></code></li>
+<li><code><a title="nitric.resources.topic" href="#nitric.resources.topic">topic</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="nitric.resources.Api" href="#nitric.resources.Api">Api</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.resources.Api.URL" href="#nitric.resources.Api.URL">URL</a></code></li>
+<li><code><a title="nitric.resources.Api.all" href="#nitric.resources.Api.all">all</a></code></li>
+<li><code><a title="nitric.resources.Api.app" href="#nitric.resources.Api.app">app</a></code></li>
+<li><code><a title="nitric.resources.Api.delete" href="#nitric.resources.Api.delete">delete</a></code></li>
+<li><code><a title="nitric.resources.Api.get" href="#nitric.resources.Api.get">get</a></code></li>
+<li><code><a title="nitric.resources.Api.methods" href="#nitric.resources.Api.methods">methods</a></code></li>
+<li><code><a title="nitric.resources.Api.middleware" href="#nitric.resources.Api.middleware">middleware</a></code></li>
+<li><code><a title="nitric.resources.Api.name" href="#nitric.resources.Api.name">name</a></code></li>
+<li><code><a title="nitric.resources.Api.options" href="#nitric.resources.Api.options">options</a></code></li>
+<li><code><a title="nitric.resources.Api.patch" href="#nitric.resources.Api.patch">patch</a></code></li>
+<li><code><a title="nitric.resources.Api.path" href="#nitric.resources.Api.path">path</a></code></li>
+<li><code><a title="nitric.resources.Api.post" href="#nitric.resources.Api.post">post</a></code></li>
+<li><code><a title="nitric.resources.Api.put" href="#nitric.resources.Api.put">put</a></code></li>
+<li><code><a title="nitric.resources.Api.routes" href="#nitric.resources.Api.routes">routes</a></code></li>
+<li><code><a title="nitric.resources.Api.security" href="#nitric.resources.Api.security">security</a></code></li>
+<li><code><a title="nitric.resources.Api.security_definitions" href="#nitric.resources.Api.security_definitions">security_definitions</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.resources.ApiDetails" href="#nitric.resources.ApiDetails">ApiDetails</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.resources.ApiDetails.id" href="#nitric.resources.ApiDetails.id">id</a></code></li>
+<li><code><a title="nitric.resources.ApiDetails.provider" href="#nitric.resources.ApiDetails.provider">provider</a></code></li>
+<li><code><a title="nitric.resources.ApiDetails.service" href="#nitric.resources.ApiDetails.service">service</a></code></li>
+<li><code><a title="nitric.resources.ApiDetails.url" href="#nitric.resources.ApiDetails.url">url</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.resources.ApiOptions" href="#nitric.resources.ApiOptions">ApiOptions</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.resources.ApiOptions.middleware" href="#nitric.resources.ApiOptions.middleware">middleware</a></code></li>
+<li><code><a title="nitric.resources.ApiOptions.path" href="#nitric.resources.ApiOptions.path">path</a></code></li>
+<li><code><a title="nitric.resources.ApiOptions.security" href="#nitric.resources.ApiOptions.security">security</a></code></li>
+<li><code><a title="nitric.resources.ApiOptions.security_definitions" href="#nitric.resources.ApiOptions.security_definitions">security_definitions</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.resources.Bucket" href="#nitric.resources.Bucket">Bucket</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.resources.Bucket.actions" href="#nitric.resources.Bucket.actions">actions</a></code></li>
+<li><code><a title="nitric.resources.Bucket.allow" href="#nitric.resources.Bucket.allow">allow</a></code></li>
+<li><code><a title="nitric.resources.Bucket.name" href="#nitric.resources.Bucket.name">name</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.resources.Collection" href="#nitric.resources.Collection">Collection</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.resources.Collection.allow" href="#nitric.resources.Collection.allow">allow</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.resources.JwtSecurityDefinition" href="#nitric.resources.JwtSecurityDefinition">JwtSecurityDefinition</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.resources.JwtSecurityDefinition.audiences" href="#nitric.resources.JwtSecurityDefinition.audiences">audiences</a></code></li>
+<li><code><a title="nitric.resources.JwtSecurityDefinition.issuer" href="#nitric.resources.JwtSecurityDefinition.issuer">issuer</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.resources.MethodOptions" href="#nitric.resources.MethodOptions">MethodOptions</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.resources.MethodOptions.security" href="#nitric.resources.MethodOptions.security">security</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.resources.Queue" href="#nitric.resources.Queue">Queue</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.resources.Queue.actions" href="#nitric.resources.Queue.actions">actions</a></code></li>
+<li><code><a title="nitric.resources.Queue.allow" href="#nitric.resources.Queue.allow">allow</a></code></li>
+<li><code><a title="nitric.resources.Queue.name" href="#nitric.resources.Queue.name">name</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.resources.Schedule" href="#nitric.resources.Schedule">Schedule</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.resources.Schedule.description" href="#nitric.resources.Schedule.description">description</a></code></li>
+<li><code><a title="nitric.resources.Schedule.every" href="#nitric.resources.Schedule.every">every</a></code></li>
+<li><code><a title="nitric.resources.Schedule.server" href="#nitric.resources.Schedule.server">server</a></code></li>
+<li><code><a title="nitric.resources.Schedule.start" href="#nitric.resources.Schedule.start">start</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.resources.Secret" href="#nitric.resources.Secret">Secret</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.resources.Secret.actions" href="#nitric.resources.Secret.actions">actions</a></code></li>
+<li><code><a title="nitric.resources.Secret.allow" href="#nitric.resources.Secret.allow">allow</a></code></li>
+<li><code><a title="nitric.resources.Secret.name" href="#nitric.resources.Secret.name">name</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.resources.Topic" href="#nitric.resources.Topic">Topic</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.resources.Topic.actions" href="#nitric.resources.Topic.actions">actions</a></code></li>
+<li><code><a title="nitric.resources.Topic.allow" href="#nitric.resources.Topic.allow">allow</a></code></li>
+<li><code><a title="nitric.resources.Topic.name" href="#nitric.resources.Topic.name">name</a></code></li>
+<li><code><a title="nitric.resources.Topic.server" href="#nitric.resources.Topic.server">server</a></code></li>
+<li><code><a title="nitric.resources.Topic.subscribe" href="#nitric.resources.Topic.subscribe">subscribe</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.9.2</a>.</p>
+</footer>
+</body>
+</html>
