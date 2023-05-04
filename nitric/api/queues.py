@@ -155,7 +155,9 @@ class QueueRef(object):
             task = Task()
 
         if isinstance(task, dict):
-            # TODO: handle tasks that are just a payload
+            # Handle if its just a payload
+            if task.get("payload") is None:
+                task = {"payload": task}
             task = Task(**task)
 
         try:
