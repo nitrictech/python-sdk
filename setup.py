@@ -43,6 +43,8 @@ setuptools.setup(
     setup_requires=["wheel"],
     install_requires=[
         "asyncio",
+        "protobuf==3.19.5",
+        "betterproto==2.0.0b5",
         "opentelemetry-api",
         "opentelemetry-sdk",
         "opentelemetry-exporter-otlp-proto-grpc",
