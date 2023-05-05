@@ -45,7 +45,7 @@ class MockAsyncChannel:
         self.done = Mock()
 
 
-class EventClientTest(IsolatedAsyncioTestCase):
+class FaasClientTest(IsolatedAsyncioTestCase):
     async def test_compose_middleware(self):
         async def middleware(ctx: HttpContext, next) -> HttpContext:
             ctx.res.status = 401

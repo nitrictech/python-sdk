@@ -31,6 +31,7 @@ from nitric.proto.nitric.storage.v1 import (
     StorageListFilesRequest,
 )
 from enum import Enum
+from warnings import warn
 
 
 class Storage(object):
@@ -140,6 +141,7 @@ class File(object):
 
     async def sign_url(self, mode: FileMode = FileMode.READ, expiry: int = 3600):
         """Generate a signed URL for reading or writing to a file."""
+        warn("File.sign_url() is deprecated, use upload_url() or download_url() instead", DeprecationWarning)
         try:
             response = await self._storage._storage_stub.pre_sign_url(
                 storage_pre_sign_url_request=StoragePreSignUrlRequest(

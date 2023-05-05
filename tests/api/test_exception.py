@@ -66,7 +66,7 @@ expectedMapping = [
 
 
 class TestException:
-    @pytest.yield_fixture(autouse=True)
+    @pytest.fixture(autouse=True)
     def init_exceptions(self):
         # Status codes that can be automatically converted to exceptions
         self.accepted_status_codes = set(_exception_code_map.keys())
