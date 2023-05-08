@@ -50,7 +50,6 @@ from nitric.proto.nitric.document.v1 import (
     DocumentQueryStreamRequest,
 )
 from nitric.proto.nitric.event.v1 import TopicListResponse, NitricTopic
-from nitric.utils import _struct_from_dict
 
 
 class Object(object):

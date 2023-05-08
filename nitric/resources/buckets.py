@@ -62,7 +62,7 @@ class Bucket(SecureResource):
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    def _perms_to_actions(self, *args: [Union[BucketPermission, str]]) -> List[Action]:
+    def _perms_to_actions(self, *args: List[Union[BucketPermission, str]]) -> List[Action]:
         permission_actions_map = {
             BucketPermission.reading: [Action.BucketFileGet, Action.BucketFileList],
             BucketPermission.writing: [Action.BucketFilePut],

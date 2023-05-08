@@ -395,7 +395,10 @@ class Frequency(Enum):
     @staticmethod
     def from_str(value: str) -> Frequency:
         """Convert a string frequency value to a Frequency."""
-        return Frequency[value.strip().lower()]
+        try:
+            return Frequency[value.strip().lower()]
+        except Exception:
+            raise ValueError(f"{value} is not valid frequency")
 
     @staticmethod
     def as_str_list() -> List[str]:

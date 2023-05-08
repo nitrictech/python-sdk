@@ -52,7 +52,12 @@ class ApiDetails:
 
 @dataclass
 class JwtSecurityDefinition:
-    """Represents the JWT security definition for an API."""
+    """
+    Represents the JWT security definition for an API.
+
+    issuer (str): the JWT issuer
+    audiences (List[str]): a list of the allowed audiences for the API
+    """
 
     issuer: str
     audiences: List[str]
@@ -68,16 +73,16 @@ class ApiOptions:
     """Represents options when creating an API, such as middleware to be applied to all HTTP request to the API."""
 
     path: str
-    middleware: Union[HttpMiddleware, List[HttpMiddleware], None]
-    security_definitions: Union[dict[str, SecurityDefinition], None]
-    security: Union[dict[str, List[str]], None]
+    middleware: Union[HttpMiddleware, List[HttpMiddleware]]
+    security_definitions: dict[str, SecurityDefinition]
+    security: dict[str, List[str]]
 
     def __init__(
         self,
         path: str = "",
         middleware: List[Middleware] = [],
-        security_definitions: dict[str, SecurityDefinition] = None,
-        security: dict[str, List[str]] = None,
+        security_definitions: dict[str, SecurityDefinition] = {},
+        security: dict[str, List[str]] = {},
     ):
         """Construct a new API options object."""
         self.middleware = middleware
@@ -102,18 +107,18 @@ def _to_resource(b: Api) -> Resource:
 
 def _security_definition_to_grpc_declaration(
     security_definitions: dict[str, SecurityDefinition]
-) -> Union[dict[str, ApiSecurityDefinition], None]:
+) -> dict[str, ApiSecurityDefinition]:
     if security_definitions is None or len(security_definitions) == 0:
-        return None
+        return {}
     return {
         k: ApiSecurityDefinition(jwt=ApiSecurityDefinitionJwt(issuer=v.issuer, audiences=v.audiences))
         for k, v in security_definitions.items()
     }
 
 
-def _security_to_grpc_declaration(security: dict[str, List[str]]) -> dict[str, ApiScopes] | None:
+def _security_to_grpc_declaration(security: dict[str, List[str]]) -> dict[str, ApiScopes]:
     if security is None or len(security) == 0:
-        return None
+        return {}
     return {k: ApiScopes(v) for k, v in security.items()}
 
 
@@ -187,7 +192,7 @@ class Api(BaseResource):
         return decorator
 
     def methods(self, methods: List[HttpMethod], match: str, opts: MethodOptions = None):
-        """Define an HTTP route which will respond to HTTP GET requests."""
+        """Define an HTTP route which will respond to specific HTTP requests defined by a list of verbs."""
         if opts is None:
             opts = MethodOptions()
 
@@ -275,7 +280,7 @@ class Api(BaseResource):
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    async def URL(self) -> str:
+    async def url(self) -> str:
         """Get the APIs live URL."""
         details = await self._details()
         return details.url
@@ -291,7 +296,7 @@ class Route:
     def __init__(self, api: Api, path: str, opts: RouteOptions):
         """Define a route to be handled by the provided API."""
         self.api = api
-        self.path = api.path.join(path)
+        self.path = (api.path + path).replace("//", "/")
         self.middleware = opts.middleware if opts.middleware is not None else []
 
     def method(self, methods: List[HttpMethod], *middleware: HttpMiddleware, opts: MethodOptions = None):
