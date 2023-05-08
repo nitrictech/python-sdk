@@ -1,23 +1,23 @@
-#
-# Copyright (c) 2021 Nitric Technologies Pty Ltd.
-#
-# This file is part of Nitric Python 3 SDK.
-# See https://github.com/nitrictech/python-sdk for further info.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+# #
+# # Copyright (c) 2021 Nitric Technologies Pty Ltd.
+# #
+# # This file is part of Nitric Python 3 SDK.
+# # See https://github.com/nitrictech/python-sdk for further info.
+# #
+# # Licensed under the Apache License, Version 2.0 (the "License");
+# # you may not use this file except in compliance with the License.
+# # You may obtain a copy of the License at
+# #
+# #     http://www.apache.org/licenses/LICENSE-2.0
+# #
+# # Unless required by applicable law or agreed to in writing, software
+# # distributed under the License is distributed on an "AS IS" BASIS,
+# # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# # See the License for the specific language governing permissions and
+# # limitations under the License.
+# #
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import patch, AsyncMock, Mock, call
+from unittest.mock import patch, AsyncMock, Mock
 
 from grpclib import GRPCError, Status
 from opentelemetry.sdk.trace import TracerProvider, sampling
@@ -66,11 +66,12 @@ class ApplicationTest(IsolatedAsyncioTestCase):
         mock_running_loop = Mock()
         mock_event_loop = Mock()
 
-        with (patch("asyncio.get_event_loop", mock_event_loop), patch("asyncio.get_running_loop", mock_running_loop)):
-            application.run()
+        with patch("asyncio.get_event_loop", mock_event_loop):
+            with patch("asyncio.get_running_loop", mock_running_loop):
+                application.run()
 
-            mock_running_loop.assert_called_once()
-            mock_event_loop.assert_not_called()
+                mock_running_loop.assert_called_once()
+                mock_event_loop.assert_not_called()
 
     def test_run_with_no_active_event_loop(self):
         application = Nitric()
@@ -80,11 +81,12 @@ class ApplicationTest(IsolatedAsyncioTestCase):
 
         mock_event_loop = Mock()
 
-        with (patch("asyncio.get_event_loop", mock_event_loop), patch("asyncio.get_running_loop", mock_running_loop)):
-            application.run()
+        with patch("asyncio.get_event_loop", mock_event_loop):
+            with patch("asyncio.get_running_loop", mock_running_loop):
+                application.run()
 
-            mock_running_loop.assert_called_once()
-            mock_event_loop.assert_called_once()
+                mock_running_loop.assert_called_once()
+                mock_event_loop.assert_called_once()
 
     def test_run_with_keyboard_interrupt(self):
         application = Nitric()
@@ -94,11 +96,12 @@ class ApplicationTest(IsolatedAsyncioTestCase):
 
         mock_event_loop = Mock()
 
-        with (patch("asyncio.get_event_loop", mock_event_loop), patch("asyncio.get_running_loop", mock_running_loop)):
-            application.run()
+        with patch("asyncio.get_event_loop", mock_event_loop):
+            with patch("asyncio.get_running_loop", mock_running_loop):
+                application.run()
 
-            mock_running_loop.assert_called_once()
-            mock_event_loop.assert_not_called()
+                mock_running_loop.assert_called_once()
+                mock_event_loop.assert_not_called()
 
     def test_run_with_connection_refused(self):
         application = Nitric()
@@ -108,12 +111,13 @@ class ApplicationTest(IsolatedAsyncioTestCase):
 
         mock_event_loop = Mock()
 
-        with (patch("asyncio.get_event_loop", mock_event_loop), patch("asyncio.get_running_loop", mock_running_loop)):
-            try:
-                application.run()
-                pytest.fail()
-            except NitricUnavailableException as e:
-                assert str(e).startswith("Unable to connect to a nitric server!")
+        with patch("asyncio.get_event_loop", mock_event_loop):
+            with patch("asyncio.get_running_loop", mock_running_loop):
+                try:
+                    application.run()
+                    pytest.fail()
+                except NitricUnavailableException as e:
+                    assert str(e).startswith("Unable to connect to a nitric server!")
 
-            mock_running_loop.assert_called_once()
-            mock_event_loop.assert_not_called()
+                mock_running_loop.assert_called_once()
+                mock_event_loop.assert_not_called()
