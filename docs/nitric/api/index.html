@@ -80,10 +80,6 @@ __all__ = [
 <dd>
 <div class="desc"></div>
 </dd>
-<dt><code class="name"><a title="nitric.api.exception" href="exception.html">nitric.api.exception</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 <dt><code class="name"><a title="nitric.api.queues" href="queues.html">nitric.api.queues</a></code></dt>
 <dd>
 <div class="desc"></div>
@@ -421,7 +417,7 @@ class FailedTask(Task):
 
     def bucket(self, name: str):
         &#34;&#34;&#34;Return a reference to a bucket from the connected storage service.&#34;&#34;&#34;
-        return BucketRef(_storage=self, name=name)</code></pre>
+        return BucketRef(_storage=self, name=name, _server=None)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
@@ -436,7 +432,7 @@ class FailedTask(Task):
 </summary>
 <pre><code class="python">def bucket(self, name: str):
     &#34;&#34;&#34;Return a reference to a bucket from the connected storage service.&#34;&#34;&#34;
-    return BucketRef(_storage=self, name=name)</code></pre>
+    return BucketRef(_storage=self, name=name, _server=None)</code></pre>
 </details>
 </dd>
 </dl>
@@ -586,7 +582,6 @@ class TopicRef(object):
 <li><code><a title="nitric.api.const" href="const.html">nitric.api.const</a></code></li>
 <li><code><a title="nitric.api.documents" href="documents.html">nitric.api.documents</a></code></li>
 <li><code><a title="nitric.api.events" href="events.html">nitric.api.events</a></code></li>
-<li><code><a title="nitric.api.exception" href="exception.html">nitric.api.exception</a></code></li>
 <li><code><a title="nitric.api.queues" href="queues.html">nitric.api.queues</a></code></li>
 <li><code><a title="nitric.api.secrets" href="secrets.html">nitric.api.secrets</a></code></li>
 <li><code><a title="nitric.api.storage" href="storage.html">nitric.api.storage</a></code></li>

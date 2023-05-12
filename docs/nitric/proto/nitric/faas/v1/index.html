@@ -72,6 +72,14 @@ if TYPE_CHECKING:
     from grpclib.metadata import Deadline
 
 
+class BucketNotificationType(betterproto.Enum):
+    &#34;&#34;&#34;Notification Workers&#34;&#34;&#34;
+
+    All = 0
+    Created = 1
+    Deleted = 2
+
+
 @dataclass(eq=False, repr=False)
 class ClientMessage(betterproto.Message):
     &#34;&#34;&#34;Messages the client is able to send to the server&#34;&#34;&#34;
@@ -156,6 +164,24 @@ class ScheduleCron(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class BucketNotificationWorker(betterproto.Message):
+    bucket: str = betterproto.string_field(1)
+    config: &#34;BucketNotificationConfig&#34; = betterproto.message_field(2)
+
+
+@dataclass(eq=False, repr=False)
+class BucketNotificationConfig(betterproto.Message):
+    notification_type: &#34;BucketNotificationType&#34; = betterproto.enum_field(1)
+    notification_prefix_filter: str = betterproto.string_field(2)
+    &#34;&#34;&#34;
+    A notification filter is a prefix for a bucket object in which creations or
+    deletions should trigger a notification: e.g. Notification filter:
+    /images/cat and Event Type: created, would trigger on creating
+    /images/cat.png and /images/cat.jpg but not creating /cat.png
+    &#34;&#34;&#34;
+
+
+@dataclass(eq=False, repr=False)
 class InitRequest(betterproto.Message):
     &#34;&#34;&#34;
     InitRequest - Identifies a worker as ready to recieve triggers This message
@@ -166,6 +192,9 @@ class InitRequest(betterproto.Message):
     api: &#34;ApiWorker&#34; = betterproto.message_field(10, group=&#34;Worker&#34;)
     subscription: &#34;SubscriptionWorker&#34; = betterproto.message_field(11, group=&#34;Worker&#34;)
     schedule: &#34;ScheduleWorker&#34; = betterproto.message_field(12, group=&#34;Worker&#34;)
+    bucket_notification: &#34;BucketNotificationWorker&#34; = betterproto.message_field(
+        13, group=&#34;Worker&#34;
+    )
 
 
 @dataclass(eq=False, repr=False)
@@ -202,6 +231,9 @@ class TriggerRequest(betterproto.Message):
 
     http: &#34;HttpTriggerContext&#34; = betterproto.message_field(3, group=&#34;context&#34;)
     topic: &#34;TopicTriggerContext&#34; = betterproto.message_field(4, group=&#34;context&#34;)
+    notification: &#34;NotificationTriggerContext&#34; = betterproto.message_field(
+        5, group=&#34;context&#34;
+    )
 
 
 @dataclass(eq=False, repr=False)
@@ -272,6 +304,18 @@ class TopicTriggerContext(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class BucketNotification(betterproto.Message):
+    key: str = betterproto.string_field(1)
+    type: &#34;BucketNotificationType&#34; = betterproto.enum_field(2)
+
+
+@dataclass(eq=False, repr=False)
+class NotificationTriggerContext(betterproto.Message):
+    source: str = betterproto.string_field(1)
+    bucket: &#34;BucketNotification&#34; = betterproto.message_field(10, group=&#34;notification&#34;)
+
+
+@dataclass(eq=False, repr=False)
 class TriggerResponse(betterproto.Message):
     &#34;&#34;&#34;The worker has successfully processed a trigger&#34;&#34;&#34;
 
@@ -283,6 +327,11 @@ class TriggerResponse(betterproto.Message):
 
     topic: &#34;TopicResponseContext&#34; = betterproto.message_field(11, group=&#34;context&#34;)
     &#34;&#34;&#34;response to a topic trigger&#34;&#34;&#34;
+
+    notification: &#34;NotificationResponseContext&#34; = betterproto.message_field(
+        12, group=&#34;context&#34;
+    )
+    &#34;&#34;&#34;response to a notification trigger&#34;&#34;&#34;
 
 
 @dataclass(eq=False, repr=False)
@@ -322,6 +371,11 @@ class TopicResponseContext(betterproto.Message):
 
     success: bool = betterproto.bool_field(1)
     &#34;&#34;&#34;Success status of the handled event&#34;&#34;&#34;
+
+
+@dataclass(eq=False, repr=False)
+class NotificationResponseContext(betterproto.Message):
+    success: bool = betterproto.bool_field(1)
 
 
 class FaasServiceStub(betterproto.ServiceStub):
@@ -388,7 +442,7 @@ class FaasServiceBase(ServiceBase):
 <span>(</span><span>api: str = &lt;object object&gt;, path: str = &lt;object object&gt;, methods: List[str] = &lt;object object&gt;, options: <a title="nitric.proto.nitric.faas.v1.ApiWorkerOptions" href="#nitric.proto.nitric.faas.v1.ApiWorkerOptions">ApiWorkerOptions</a> = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ApiWorker(api: str = <object object at 0x1016f39d0>, path: str = <object object at 0x1016f39d0>, methods: List[str] = <object object at 0x1016f39d0>, options: 'ApiWorkerOptions' = <object object at 0x1016f39d0>)</p></div>
+<div class="desc"><p>ApiWorker(api: str = <object object at 0x103e049d0>, path: str = <object object at 0x103e049d0>, methods: List[str] = <object object at 0x103e049d0>, options: 'ApiWorkerOptions' = <object object at 0x103e049d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -430,7 +484,7 @@ class ApiWorker(betterproto.Message):
 <span>(</span><span>security: Dict[str, ForwardRef('<a title="nitric.proto.nitric.faas.v1.ApiWorkerScopes" href="#nitric.proto.nitric.faas.v1.ApiWorkerScopes">ApiWorkerScopes</a>')] = &lt;object object&gt;, security_disabled: bool = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ApiWorkerOptions(security: Dict[str, ForwardRef('ApiWorkerScopes')] = <object object at 0x1016f39d0>, security_disabled: bool = <object object at 0x1016f39d0>)</p></div>
+<div class="desc"><p>ApiWorkerOptions(security: Dict[str, ForwardRef('ApiWorkerScopes')] = <object object at 0x103e049d0>, security_disabled: bool = <object object at 0x103e049d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -473,7 +527,7 @@ knowing if security is explicitly disabled</p></div>
 <span>(</span><span>scopes: List[str] = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ApiWorkerScopes(scopes: List[str] = <object object at 0x1016f39d0>)</p></div>
+<div class="desc"><p>ApiWorkerScopes(scopes: List[str] = <object object at 0x103e049d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -490,6 +544,151 @@ class ApiWorkerScopes(betterproto.Message):
 <h3>Class variables</h3>
 <dl>
 <dt id="nitric.proto.nitric.faas.v1.ApiWorkerScopes.scopes"><code class="name">var <span class="ident">scopes</span> : List[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.BucketNotification"><code class="flex name class">
+<span>class <span class="ident">BucketNotification</span></span>
+<span>(</span><span>key: str = &lt;object object&gt;, type: <a title="nitric.proto.nitric.faas.v1.BucketNotificationType" href="#nitric.proto.nitric.faas.v1.BucketNotificationType">BucketNotificationType</a> = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>BucketNotification(key: str = <object object at 0x103e049d0>, type: 'BucketNotificationType' = <object object at 0x103e049d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class BucketNotification(betterproto.Message):
+    key: str = betterproto.string_field(1)
+    type: &#34;BucketNotificationType&#34; = betterproto.enum_field(2)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.BucketNotification.key"><code class="name">var <span class="ident">key</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.BucketNotification.type"><code class="name">var <span class="ident">type</span> : <a title="nitric.proto.nitric.faas.v1.BucketNotificationType" href="#nitric.proto.nitric.faas.v1.BucketNotificationType">BucketNotificationType</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.BucketNotificationConfig"><code class="flex name class">
+<span>class <span class="ident">BucketNotificationConfig</span></span>
+<span>(</span><span>notification_type: <a title="nitric.proto.nitric.faas.v1.BucketNotificationType" href="#nitric.proto.nitric.faas.v1.BucketNotificationType">BucketNotificationType</a> = &lt;object object&gt;, notification_prefix_filter: str = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>BucketNotificationConfig(notification_type: 'BucketNotificationType' = <object object at 0x103e049d0>, notification_prefix_filter: str = <object object at 0x103e049d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class BucketNotificationConfig(betterproto.Message):
+    notification_type: &#34;BucketNotificationType&#34; = betterproto.enum_field(1)
+    notification_prefix_filter: str = betterproto.string_field(2)
+    &#34;&#34;&#34;
+    A notification filter is a prefix for a bucket object in which creations or
+    deletions should trigger a notification: e.g. Notification filter:
+    /images/cat and Event Type: created, would trigger on creating
+    /images/cat.png and /images/cat.jpg but not creating /cat.png
+    &#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.BucketNotificationConfig.notification_prefix_filter"><code class="name">var <span class="ident">notification_prefix_filter</span> : str</code></dt>
+<dd>
+<div class="desc"><p>A notification filter is a prefix for a bucket object in which creations or
+deletions should trigger a notification: e.g. Notification filter:
+/images/cat and Event Type: created, would trigger on creating
+/images/cat.png and /images/cat.jpg but not creating /cat.png</p></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.BucketNotificationConfig.notification_type"><code class="name">var <span class="ident">notification_type</span> : <a title="nitric.proto.nitric.faas.v1.BucketNotificationType" href="#nitric.proto.nitric.faas.v1.BucketNotificationType">BucketNotificationType</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.BucketNotificationType"><code class="flex name class">
+<span>class <span class="ident">BucketNotificationType</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Notification Workers</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BucketNotificationType(betterproto.Enum):
+    &#34;&#34;&#34;Notification Workers&#34;&#34;&#34;
+
+    All = 0
+    Created = 1
+    Deleted = 2</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Enum</li>
+<li>enum.IntEnum</li>
+<li>builtins.int</li>
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.BucketNotificationType.All"><code class="name">var <span class="ident">All</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.BucketNotificationType.Created"><code class="name">var <span class="ident">Created</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.BucketNotificationType.Deleted"><code class="name">var <span class="ident">Deleted</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.BucketNotificationWorker"><code class="flex name class">
+<span>class <span class="ident">BucketNotificationWorker</span></span>
+<span>(</span><span>bucket: str = &lt;object object&gt;, config: <a title="nitric.proto.nitric.faas.v1.BucketNotificationConfig" href="#nitric.proto.nitric.faas.v1.BucketNotificationConfig">BucketNotificationConfig</a> = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>BucketNotificationWorker(bucket: str = <object object at 0x103e049d0>, config: 'BucketNotificationConfig' = <object object at 0x103e049d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class BucketNotificationWorker(betterproto.Message):
+    bucket: str = betterproto.string_field(1)
+    config: &#34;BucketNotificationConfig&#34; = betterproto.message_field(2)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.BucketNotificationWorker.bucket"><code class="name">var <span class="ident">bucket</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.BucketNotificationWorker.config"><code class="name">var <span class="ident">config</span> : <a title="nitric.proto.nitric.faas.v1.BucketNotificationConfig" href="#nitric.proto.nitric.faas.v1.BucketNotificationConfig">BucketNotificationConfig</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -679,7 +878,7 @@ until it has identified itself</p></div>
 <span>(</span><span>value: List[str] = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>HeaderValue(value: List[str] = <object object at 0x1016f39d0>)</p></div>
+<div class="desc"><p>HeaderValue(value: List[str] = <object object at 0x103e049d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -765,7 +964,7 @@ class HttpResponseContext(betterproto.Message):
 <span>(</span><span>method: str = &lt;object object&gt;, path: str = &lt;object object&gt;, headers_old: Dict[str, str] = &lt;object object&gt;, query_params_old: Dict[str, str] = &lt;object object&gt;, headers: Dict[str, ForwardRef('<a title="nitric.proto.nitric.faas.v1.HeaderValue" href="#nitric.proto.nitric.faas.v1.HeaderValue">HeaderValue</a>')] = &lt;object object&gt;, query_params: Dict[str, ForwardRef('<a title="nitric.proto.nitric.faas.v1.QueryValue" href="#nitric.proto.nitric.faas.v1.QueryValue">QueryValue</a>')] = &lt;object object&gt;, path_params: Dict[str, str] = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>HttpTriggerContext(method: str = <object object at 0x1016f39d0>, path: str = <object object at 0x1016f39d0>, headers_old: Dict[str, str] = <object object at 0x1016f39d0>, query_params_old: Dict[str, str] = <object object at 0x1016f39d0>, headers: Dict[str, ForwardRef('HeaderValue')] = <object object at 0x1016f39d0>, query_params: Dict[str, ForwardRef('QueryValue')] = <object object at 0x1016f39d0>, path_params: Dict[str, str] = <object object at 0x1016f39d0>)</p></div>
+<div class="desc"><p>HttpTriggerContext(method: str = <object object at 0x103e049d0>, path: str = <object object at 0x103e049d0>, headers_old: Dict[str, str] = <object object at 0x103e049d0>, query_params_old: Dict[str, str] = <object object at 0x103e049d0>, headers: Dict[str, ForwardRef('HeaderValue')] = <object object at 0x103e049d0>, query_params: Dict[str, ForwardRef('QueryValue')] = <object object at 0x103e049d0>, path_params: Dict[str, str] = <object object at 0x103e049d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -861,7 +1060,7 @@ in 1.0</p></div>
 </dd>
 <dt id="nitric.proto.nitric.faas.v1.InitRequest"><code class="flex name class">
 <span>class <span class="ident">InitRequest</span></span>
-<span>(</span><span>api: <a title="nitric.proto.nitric.faas.v1.ApiWorker" href="#nitric.proto.nitric.faas.v1.ApiWorker">ApiWorker</a> = &lt;object object&gt;, subscription: <a title="nitric.proto.nitric.faas.v1.SubscriptionWorker" href="#nitric.proto.nitric.faas.v1.SubscriptionWorker">SubscriptionWorker</a> = &lt;object object&gt;, schedule: <a title="nitric.proto.nitric.faas.v1.ScheduleWorker" href="#nitric.proto.nitric.faas.v1.ScheduleWorker">ScheduleWorker</a> = &lt;object object&gt;)</span>
+<span>(</span><span>api: <a title="nitric.proto.nitric.faas.v1.ApiWorker" href="#nitric.proto.nitric.faas.v1.ApiWorker">ApiWorker</a> = &lt;object object&gt;, subscription: <a title="nitric.proto.nitric.faas.v1.SubscriptionWorker" href="#nitric.proto.nitric.faas.v1.SubscriptionWorker">SubscriptionWorker</a> = &lt;object object&gt;, schedule: <a title="nitric.proto.nitric.faas.v1.ScheduleWorker" href="#nitric.proto.nitric.faas.v1.ScheduleWorker">ScheduleWorker</a> = &lt;object object&gt;, bucket_notification: <a title="nitric.proto.nitric.faas.v1.BucketNotificationWorker" href="#nitric.proto.nitric.faas.v1.BucketNotificationWorker">BucketNotificationWorker</a> = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>InitRequest - Identifies a worker as ready to recieve triggers This message
@@ -881,7 +1080,10 @@ class InitRequest(betterproto.Message):
 
     api: &#34;ApiWorker&#34; = betterproto.message_field(10, group=&#34;Worker&#34;)
     subscription: &#34;SubscriptionWorker&#34; = betterproto.message_field(11, group=&#34;Worker&#34;)
-    schedule: &#34;ScheduleWorker&#34; = betterproto.message_field(12, group=&#34;Worker&#34;)</code></pre>
+    schedule: &#34;ScheduleWorker&#34; = betterproto.message_field(12, group=&#34;Worker&#34;)
+    bucket_notification: &#34;BucketNotificationWorker&#34; = betterproto.message_field(
+        13, group=&#34;Worker&#34;
+    )</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -891,6 +1093,10 @@ class InitRequest(betterproto.Message):
 <h3>Class variables</h3>
 <dl>
 <dt id="nitric.proto.nitric.faas.v1.InitRequest.api"><code class="name">var <span class="ident">api</span> : <a title="nitric.proto.nitric.faas.v1.ApiWorker" href="#nitric.proto.nitric.faas.v1.ApiWorker">ApiWorker</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.InitRequest.bucket_notification"><code class="name">var <span class="ident">bucket_notification</span> : <a title="nitric.proto.nitric.faas.v1.BucketNotificationWorker" href="#nitric.proto.nitric.faas.v1.BucketNotificationWorker">BucketNotificationWorker</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -925,12 +1131,71 @@ class InitResponse(betterproto.Message):
 <li>abc.ABC</li>
 </ul>
 </dd>
+<dt id="nitric.proto.nitric.faas.v1.NotificationResponseContext"><code class="flex name class">
+<span>class <span class="ident">NotificationResponseContext</span></span>
+<span>(</span><span>success: bool = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>NotificationResponseContext(success: bool = <object object at 0x103e049d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class NotificationResponseContext(betterproto.Message):
+    success: bool = betterproto.bool_field(1)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.NotificationResponseContext.success"><code class="name">var <span class="ident">success</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.NotificationTriggerContext"><code class="flex name class">
+<span>class <span class="ident">NotificationTriggerContext</span></span>
+<span>(</span><span>source: str = &lt;object object&gt;, bucket: <a title="nitric.proto.nitric.faas.v1.BucketNotification" href="#nitric.proto.nitric.faas.v1.BucketNotification">BucketNotification</a> = &lt;object object&gt;)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>NotificationTriggerContext(source: str = <object object at 0x103e049d0>, bucket: 'BucketNotification' = <object object at 0x103e049d0>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass(eq=False, repr=False)
+class NotificationTriggerContext(betterproto.Message):
+    source: str = betterproto.string_field(1)
+    bucket: &#34;BucketNotification&#34; = betterproto.message_field(10, group=&#34;notification&#34;)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>betterproto.Message</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="nitric.proto.nitric.faas.v1.NotificationTriggerContext.bucket"><code class="name">var <span class="ident">bucket</span> : <a title="nitric.proto.nitric.faas.v1.BucketNotification" href="#nitric.proto.nitric.faas.v1.BucketNotification">BucketNotification</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.NotificationTriggerContext.source"><code class="name">var <span class="ident">source</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
 <dt id="nitric.proto.nitric.faas.v1.QueryValue"><code class="flex name class">
 <span>class <span class="ident">QueryValue</span></span>
 <span>(</span><span>value: List[str] = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>QueryValue(value: List[str] = <object object at 0x1016f39d0>)</p></div>
+<div class="desc"><p>QueryValue(value: List[str] = <object object at 0x103e049d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -957,7 +1222,7 @@ class QueryValue(betterproto.Message):
 <span>(</span><span>cron: str = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ScheduleCron(cron: str = <object object at 0x1016f39d0>)</p></div>
+<div class="desc"><p>ScheduleCron(cron: str = <object object at 0x103e049d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -984,7 +1249,7 @@ class ScheduleCron(betterproto.Message):
 <span>(</span><span>rate: str = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ScheduleRate(rate: str = <object object at 0x1016f39d0>)</p></div>
+<div class="desc"><p>ScheduleRate(rate: str = <object object at 0x103e049d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1011,7 +1276,7 @@ class ScheduleRate(betterproto.Message):
 <span>(</span><span>key: str = &lt;object object&gt;, rate: <a title="nitric.proto.nitric.faas.v1.ScheduleRate" href="#nitric.proto.nitric.faas.v1.ScheduleRate">ScheduleRate</a> = &lt;object object&gt;, cron: <a title="nitric.proto.nitric.faas.v1.ScheduleCron" href="#nitric.proto.nitric.faas.v1.ScheduleCron">ScheduleCron</a> = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ScheduleWorker(key: str = <object object at 0x1016f39d0>, rate: 'ScheduleRate' = <object object at 0x1016f39d0>, cron: 'ScheduleCron' = <object object at 0x1016f39d0>)</p></div>
+<div class="desc"><p>ScheduleWorker(key: str = <object object at 0x103e049d0>, rate: 'ScheduleRate' = <object object at 0x103e049d0>, cron: 'ScheduleCron' = <object object at 0x103e049d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1094,7 +1359,7 @@ class ServerMessage(betterproto.Message):
 <span>(</span><span>topic: str = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>SubscriptionWorker(topic: str = <object object at 0x1016f39d0>)</p></div>
+<div class="desc"><p>SubscriptionWorker(topic: str = <object object at 0x103e049d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1155,7 +1420,7 @@ class TopicResponseContext(betterproto.Message):
 <span>(</span><span>topic: str = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>TopicTriggerContext(topic: str = <object object at 0x1016f39d0>)</p></div>
+<div class="desc"><p>TopicTriggerContext(topic: str = <object object at 0x103e049d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1183,7 +1448,7 @@ class TopicTriggerContext(betterproto.Message):
 <span>(</span><span>values: Dict[str, str] = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>TraceContext(values: Dict[str, str] = <object object at 0x1016f39d0>)</p></div>
+<div class="desc"><p>TraceContext(values: Dict[str, str] = <object object at 0x103e049d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1209,7 +1474,7 @@ class TraceContext(betterproto.Message):
 </dd>
 <dt id="nitric.proto.nitric.faas.v1.TriggerRequest"><code class="flex name class">
 <span>class <span class="ident">TriggerRequest</span></span>
-<span>(</span><span>data: bytes = &lt;object object&gt;, mime_type: str = &lt;object object&gt;, trace_context: <a title="nitric.proto.nitric.faas.v1.TraceContext" href="#nitric.proto.nitric.faas.v1.TraceContext">TraceContext</a> = &lt;object object&gt;, http: <a title="nitric.proto.nitric.faas.v1.HttpTriggerContext" href="#nitric.proto.nitric.faas.v1.HttpTriggerContext">HttpTriggerContext</a> = &lt;object object&gt;, topic: <a title="nitric.proto.nitric.faas.v1.TopicTriggerContext" href="#nitric.proto.nitric.faas.v1.TopicTriggerContext">TopicTriggerContext</a> = &lt;object object&gt;)</span>
+<span>(</span><span>data: bytes = &lt;object object&gt;, mime_type: str = &lt;object object&gt;, trace_context: <a title="nitric.proto.nitric.faas.v1.TraceContext" href="#nitric.proto.nitric.faas.v1.TraceContext">TraceContext</a> = &lt;object object&gt;, http: <a title="nitric.proto.nitric.faas.v1.HttpTriggerContext" href="#nitric.proto.nitric.faas.v1.HttpTriggerContext">HttpTriggerContext</a> = &lt;object object&gt;, topic: <a title="nitric.proto.nitric.faas.v1.TopicTriggerContext" href="#nitric.proto.nitric.faas.v1.TopicTriggerContext">TopicTriggerContext</a> = &lt;object object&gt;, notification: <a title="nitric.proto.nitric.faas.v1.NotificationTriggerContext" href="#nitric.proto.nitric.faas.v1.NotificationTriggerContext">NotificationTriggerContext</a> = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The server has a trigger for the client to handle</p></div>
@@ -1236,7 +1501,10 @@ class TriggerRequest(betterproto.Message):
     &#34;&#34;&#34;
 
     http: &#34;HttpTriggerContext&#34; = betterproto.message_field(3, group=&#34;context&#34;)
-    topic: &#34;TopicTriggerContext&#34; = betterproto.message_field(4, group=&#34;context&#34;)</code></pre>
+    topic: &#34;TopicTriggerContext&#34; = betterproto.message_field(4, group=&#34;context&#34;)
+    notification: &#34;NotificationTriggerContext&#34; = betterproto.message_field(
+        5, group=&#34;context&#34;
+    )</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1257,6 +1525,10 @@ class TriggerRequest(betterproto.Message):
 <dd>
 <div class="desc"><p>Should we supply a mime type for the data? Or rely on context?</p></div>
 </dd>
+<dt id="nitric.proto.nitric.faas.v1.TriggerRequest.notification"><code class="name">var <span class="ident">notification</span> : <a title="nitric.proto.nitric.faas.v1.NotificationTriggerContext" href="#nitric.proto.nitric.faas.v1.NotificationTriggerContext">NotificationTriggerContext</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="nitric.proto.nitric.faas.v1.TriggerRequest.topic"><code class="name">var <span class="ident">topic</span> : <a title="nitric.proto.nitric.faas.v1.TopicTriggerContext" href="#nitric.proto.nitric.faas.v1.TopicTriggerContext">TopicTriggerContext</a></code></dt>
 <dd>
 <div class="desc"></div>
@@ -1272,7 +1544,7 @@ interceptors from OTEL.</p></div>
 </dd>
 <dt id="nitric.proto.nitric.faas.v1.TriggerResponse"><code class="flex name class">
 <span>class <span class="ident">TriggerResponse</span></span>
-<span>(</span><span>data: bytes = &lt;object object&gt;, http: <a title="nitric.proto.nitric.faas.v1.HttpResponseContext" href="#nitric.proto.nitric.faas.v1.HttpResponseContext">HttpResponseContext</a> = &lt;object object&gt;, topic: <a title="nitric.proto.nitric.faas.v1.TopicResponseContext" href="#nitric.proto.nitric.faas.v1.TopicResponseContext">TopicResponseContext</a> = &lt;object object&gt;)</span>
+<span>(</span><span>data: bytes = &lt;object object&gt;, http: <a title="nitric.proto.nitric.faas.v1.HttpResponseContext" href="#nitric.proto.nitric.faas.v1.HttpResponseContext">HttpResponseContext</a> = &lt;object object&gt;, topic: <a title="nitric.proto.nitric.faas.v1.TopicResponseContext" href="#nitric.proto.nitric.faas.v1.TopicResponseContext">TopicResponseContext</a> = &lt;object object&gt;, notification: <a title="nitric.proto.nitric.faas.v1.NotificationResponseContext" href="#nitric.proto.nitric.faas.v1.NotificationResponseContext">NotificationResponseContext</a> = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The worker has successfully processed a trigger</p></div>
@@ -1291,7 +1563,12 @@ class TriggerResponse(betterproto.Message):
     &#34;&#34;&#34;response to a http request&#34;&#34;&#34;
 
     topic: &#34;TopicResponseContext&#34; = betterproto.message_field(11, group=&#34;context&#34;)
-    &#34;&#34;&#34;response to a topic trigger&#34;&#34;&#34;</code></pre>
+    &#34;&#34;&#34;response to a topic trigger&#34;&#34;&#34;
+
+    notification: &#34;NotificationResponseContext&#34; = betterproto.message_field(
+        12, group=&#34;context&#34;
+    )
+    &#34;&#34;&#34;response to a notification trigger&#34;&#34;&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1307,6 +1584,10 @@ class TriggerResponse(betterproto.Message):
 <dt id="nitric.proto.nitric.faas.v1.TriggerResponse.http"><code class="name">var <span class="ident">http</span> : <a title="nitric.proto.nitric.faas.v1.HttpResponseContext" href="#nitric.proto.nitric.faas.v1.HttpResponseContext">HttpResponseContext</a></code></dt>
 <dd>
 <div class="desc"><p>response to a http request</p></div>
+</dd>
+<dt id="nitric.proto.nitric.faas.v1.TriggerResponse.notification"><code class="name">var <span class="ident">notification</span> : <a title="nitric.proto.nitric.faas.v1.NotificationResponseContext" href="#nitric.proto.nitric.faas.v1.NotificationResponseContext">NotificationResponseContext</a></code></dt>
+<dd>
+<div class="desc"><p>response to a notification trigger</p></div>
 </dd>
 <dt id="nitric.proto.nitric.faas.v1.TriggerResponse.topic"><code class="name">var <span class="ident">topic</span> : <a title="nitric.proto.nitric.faas.v1.TopicResponseContext" href="#nitric.proto.nitric.faas.v1.TopicResponseContext">TopicResponseContext</a></code></dt>
 <dd>
@@ -1350,6 +1631,35 @@ class TriggerResponse(betterproto.Message):
 <h4><code><a title="nitric.proto.nitric.faas.v1.ApiWorkerScopes" href="#nitric.proto.nitric.faas.v1.ApiWorkerScopes">ApiWorkerScopes</a></code></h4>
 <ul class="">
 <li><code><a title="nitric.proto.nitric.faas.v1.ApiWorkerScopes.scopes" href="#nitric.proto.nitric.faas.v1.ApiWorkerScopes.scopes">scopes</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.BucketNotification" href="#nitric.proto.nitric.faas.v1.BucketNotification">BucketNotification</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.BucketNotification.key" href="#nitric.proto.nitric.faas.v1.BucketNotification.key">key</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.BucketNotification.type" href="#nitric.proto.nitric.faas.v1.BucketNotification.type">type</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.BucketNotificationConfig" href="#nitric.proto.nitric.faas.v1.BucketNotificationConfig">BucketNotificationConfig</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.BucketNotificationConfig.notification_prefix_filter" href="#nitric.proto.nitric.faas.v1.BucketNotificationConfig.notification_prefix_filter">notification_prefix_filter</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.BucketNotificationConfig.notification_type" href="#nitric.proto.nitric.faas.v1.BucketNotificationConfig.notification_type">notification_type</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.BucketNotificationType" href="#nitric.proto.nitric.faas.v1.BucketNotificationType">BucketNotificationType</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.BucketNotificationType.All" href="#nitric.proto.nitric.faas.v1.BucketNotificationType.All">All</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.BucketNotificationType.Created" href="#nitric.proto.nitric.faas.v1.BucketNotificationType.Created">Created</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.BucketNotificationType.Deleted" href="#nitric.proto.nitric.faas.v1.BucketNotificationType.Deleted">Deleted</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.BucketNotificationWorker" href="#nitric.proto.nitric.faas.v1.BucketNotificationWorker">BucketNotificationWorker</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.BucketNotificationWorker.bucket" href="#nitric.proto.nitric.faas.v1.BucketNotificationWorker.bucket">bucket</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.BucketNotificationWorker.config" href="#nitric.proto.nitric.faas.v1.BucketNotificationWorker.config">config</a></code></li>
 </ul>
 </li>
 <li>
@@ -1402,12 +1712,26 @@ class TriggerResponse(betterproto.Message):
 <h4><code><a title="nitric.proto.nitric.faas.v1.InitRequest" href="#nitric.proto.nitric.faas.v1.InitRequest">InitRequest</a></code></h4>
 <ul class="">
 <li><code><a title="nitric.proto.nitric.faas.v1.InitRequest.api" href="#nitric.proto.nitric.faas.v1.InitRequest.api">api</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.InitRequest.bucket_notification" href="#nitric.proto.nitric.faas.v1.InitRequest.bucket_notification">bucket_notification</a></code></li>
 <li><code><a title="nitric.proto.nitric.faas.v1.InitRequest.schedule" href="#nitric.proto.nitric.faas.v1.InitRequest.schedule">schedule</a></code></li>
 <li><code><a title="nitric.proto.nitric.faas.v1.InitRequest.subscription" href="#nitric.proto.nitric.faas.v1.InitRequest.subscription">subscription</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="nitric.proto.nitric.faas.v1.InitResponse" href="#nitric.proto.nitric.faas.v1.InitResponse">InitResponse</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.NotificationResponseContext" href="#nitric.proto.nitric.faas.v1.NotificationResponseContext">NotificationResponseContext</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.NotificationResponseContext.success" href="#nitric.proto.nitric.faas.v1.NotificationResponseContext.success">success</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.proto.nitric.faas.v1.NotificationTriggerContext" href="#nitric.proto.nitric.faas.v1.NotificationTriggerContext">NotificationTriggerContext</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.proto.nitric.faas.v1.NotificationTriggerContext.bucket" href="#nitric.proto.nitric.faas.v1.NotificationTriggerContext.bucket">bucket</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.NotificationTriggerContext.source" href="#nitric.proto.nitric.faas.v1.NotificationTriggerContext.source">source</a></code></li>
+</ul>
 </li>
 <li>
 <h4><code><a title="nitric.proto.nitric.faas.v1.QueryValue" href="#nitric.proto.nitric.faas.v1.QueryValue">QueryValue</a></code></h4>
@@ -1469,10 +1793,11 @@ class TriggerResponse(betterproto.Message):
 </li>
 <li>
 <h4><code><a title="nitric.proto.nitric.faas.v1.TriggerRequest" href="#nitric.proto.nitric.faas.v1.TriggerRequest">TriggerRequest</a></code></h4>
-<ul class="">
+<ul class="two-column">
 <li><code><a title="nitric.proto.nitric.faas.v1.TriggerRequest.data" href="#nitric.proto.nitric.faas.v1.TriggerRequest.data">data</a></code></li>
 <li><code><a title="nitric.proto.nitric.faas.v1.TriggerRequest.http" href="#nitric.proto.nitric.faas.v1.TriggerRequest.http">http</a></code></li>
 <li><code><a title="nitric.proto.nitric.faas.v1.TriggerRequest.mime_type" href="#nitric.proto.nitric.faas.v1.TriggerRequest.mime_type">mime_type</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.TriggerRequest.notification" href="#nitric.proto.nitric.faas.v1.TriggerRequest.notification">notification</a></code></li>
 <li><code><a title="nitric.proto.nitric.faas.v1.TriggerRequest.topic" href="#nitric.proto.nitric.faas.v1.TriggerRequest.topic">topic</a></code></li>
 <li><code><a title="nitric.proto.nitric.faas.v1.TriggerRequest.trace_context" href="#nitric.proto.nitric.faas.v1.TriggerRequest.trace_context">trace_context</a></code></li>
 </ul>
@@ -1482,6 +1807,7 @@ class TriggerResponse(betterproto.Message):
 <ul class="">
 <li><code><a title="nitric.proto.nitric.faas.v1.TriggerResponse.data" href="#nitric.proto.nitric.faas.v1.TriggerResponse.data">data</a></code></li>
 <li><code><a title="nitric.proto.nitric.faas.v1.TriggerResponse.http" href="#nitric.proto.nitric.faas.v1.TriggerResponse.http">http</a></code></li>
+<li><code><a title="nitric.proto.nitric.faas.v1.TriggerResponse.notification" href="#nitric.proto.nitric.faas.v1.TriggerResponse.notification">notification</a></code></li>
 <li><code><a title="nitric.proto.nitric.faas.v1.TriggerResponse.topic" href="#nitric.proto.nitric.faas.v1.TriggerResponse.topic">topic</a></code></li>
 </ul>
 </li>

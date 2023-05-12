@@ -1,29 +1,28 @@
-# #
-# # Copyright (c) 2021 Nitric Technologies Pty Ltd.
-# #
-# # This file is part of Nitric Python 3 SDK.
-# # See https://github.com/nitrictech/python-sdk for further info.
-# #
-# # Licensed under the Apache License, Version 2.0 (the "License");
-# # you may not use this file except in compliance with the License.
-# # You may obtain a copy of the License at
-# #
-# #     http://www.apache.org/licenses/LICENSE-2.0
-# #
-# # Unless required by applicable law or agreed to in writing, software
-# # distributed under the License is distributed on an "AS IS" BASIS,
-# # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# # See the License for the specific language governing permissions and
-# # limitations under the License.
-# #
+#
+# Copyright (c) 2021 Nitric Technologies Pty Ltd.
+#
+# This file is part of Nitric Python 3 SDK.
+# See https://github.com/nitrictech/python-sdk for further info.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import patch, AsyncMock, Mock
 
-from grpclib import GRPCError, Status
-from opentelemetry.sdk.trace import TracerProvider, sampling
+from opentelemetry.sdk.trace import sampling
 
 
-from nitric.api.exception import NitricUnavailableException
+from nitric.exception import NitricUnavailableException
 from nitric.resources import Bucket
 from nitric.application import Nitric
 
@@ -60,7 +59,6 @@ class ApplicationTest(IsolatedAsyncioTestCase):
         assert isinstance(tracer.sampler, sampling.TraceIdRatioBased)
         assert tracer.sampler.rate == 0.8
 
-    def test_run(self):
         application = Nitric()
 
         mock_running_loop = Mock()

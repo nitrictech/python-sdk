@@ -26,7 +26,7 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 from opentelemetry.instrumentation.grpc import GrpcInstrumentorClient
 
 from nitric.faas import FunctionServer
-from nitric.api.exception import NitricUnavailableException
+from nitric.exception import NitricUnavailableException
 
 # from nitric.resources.base import BaseResource
 from typing import Dict, List, Type, Any, TypeVar
@@ -95,6 +95,7 @@ class Nitric:
         This will execute in an existing event loop if there is one, otherwise it will attempt to create its own.
         """
         provider = cls._create_tracer()
+        print(cls._workers)
         try:
             try:
                 loop = asyncio.get_running_loop()

@@ -24,7 +24,7 @@ from betterproto.lib.google.protobuf import Struct
 from grpclib import GRPCError, Status
 
 from nitric.api import Queues, Task
-from nitric.api.exception import UnknownException
+from nitric.exception import UnknownException
 from nitric.api.queues import ReceivedTask
 from nitric.proto.nitric.queue.v1 import (
     QueueReceiveResponse,

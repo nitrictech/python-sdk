@@ -78,6 +78,7 @@ class ResourceType(betterproto.Enum):
     Collection = 7
     Policy = 8
     Secret = 9
+    Notification = 10
 
 
 class Action(betterproto.Enum):
@@ -441,7 +442,7 @@ class ResourceServiceBase(ServiceBase):
 <span>(</span><span>security_definitions: Dict[str, ForwardRef('<a title="nitric.proto.nitric.resource.v1.ApiSecurityDefinition" href="#nitric.proto.nitric.resource.v1.ApiSecurityDefinition">ApiSecurityDefinition</a>')] = &lt;object object&gt;, security: Dict[str, ForwardRef('<a title="nitric.proto.nitric.resource.v1.ApiScopes" href="#nitric.proto.nitric.resource.v1.ApiScopes">ApiScopes</a>')] = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ApiResource(security_definitions: Dict[str, ForwardRef('ApiSecurityDefinition')] = <object object at 0x1016f39d0>, security: Dict[str, ForwardRef('ApiScopes')] = <object object at 0x1016f39d0>)</p></div>
+<div class="desc"><p>ApiResource(security_definitions: Dict[str, ForwardRef('ApiSecurityDefinition')] = <object object at 0x103e049d0>, security: Dict[str, ForwardRef('ApiScopes')] = <object object at 0x103e049d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -484,7 +485,7 @@ operations on the API</p></div>
 <span>(</span><span>url: str = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ApiResourceDetails(url: str = <object object at 0x1016f39d0>)</p></div>
+<div class="desc"><p>ApiResourceDetails(url: str = <object object at 0x103e049d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -511,7 +512,7 @@ class ApiResourceDetails(betterproto.Message):
 <span>(</span><span>scopes: List[str] = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ApiScopes(scopes: List[str] = <object object at 0x1016f39d0>)</p></div>
+<div class="desc"><p>ApiScopes(scopes: List[str] = <object object at 0x103e049d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -538,7 +539,7 @@ class ApiScopes(betterproto.Message):
 <span>(</span><span>jwt: <a title="nitric.proto.nitric.resource.v1.ApiSecurityDefinitionJwt" href="#nitric.proto.nitric.resource.v1.ApiSecurityDefinitionJwt">ApiSecurityDefinitionJwt</a> = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ApiSecurityDefinition(jwt: 'ApiSecurityDefinitionJwt' = <object object at 0x1016f39d0>)</p></div>
+<div class="desc"><p>ApiSecurityDefinition(jwt: 'ApiSecurityDefinitionJwt' = <object object at 0x103e049d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -637,7 +638,7 @@ class CollectionResource(betterproto.Message):
 <span>(</span><span>principals: List[ForwardRef('<a title="nitric.proto.nitric.resource.v1.Resource" href="#nitric.proto.nitric.resource.v1.Resource">Resource</a>')] = &lt;object object&gt;, actions: List[ForwardRef('<a title="nitric.proto.nitric.resource.v1.Action" href="#nitric.proto.nitric.resource.v1.Action">Action</a>')] = &lt;object object&gt;, resources: List[ForwardRef('<a title="nitric.proto.nitric.resource.v1.Resource" href="#nitric.proto.nitric.resource.v1.Resource">Resource</a>')] = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>PolicyResource(principals: List[ForwardRef('Resource')] = <object object at 0x1016f39d0>, actions: List[ForwardRef('Action')] = <object object at 0x1016f39d0>, resources: List[ForwardRef('Resource')] = <object object at 0x1016f39d0>)</p></div>
+<div class="desc"><p>PolicyResource(principals: List[ForwardRef('Resource')] = <object object at 0x103e049d0>, actions: List[ForwardRef('Action')] = <object object at 0x103e049d0>, resources: List[ForwardRef('Resource')] = <object object at 0x103e049d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -693,7 +694,7 @@ class QueueResource(betterproto.Message):
 <span>(</span><span>type: <a title="nitric.proto.nitric.resource.v1.ResourceType" href="#nitric.proto.nitric.resource.v1.ResourceType">ResourceType</a> = &lt;object object&gt;, name: str = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Resource(type: 'ResourceType' = <object object at 0x1016f39d0>, name: str = <object object at 0x1016f39d0>)</p></div>
+<div class="desc"><p>Resource(type: 'ResourceType' = <object object at 0x103e049d0>, name: str = <object object at 0x103e049d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -725,7 +726,7 @@ class Resource(betterproto.Message):
 <span>(</span><span>resource: <a title="nitric.proto.nitric.resource.v1.Resource" href="#nitric.proto.nitric.resource.v1.Resource">Resource</a> = &lt;object object&gt;, policy: <a title="nitric.proto.nitric.resource.v1.PolicyResource" href="#nitric.proto.nitric.resource.v1.PolicyResource">PolicyResource</a> = &lt;object object&gt;, bucket: <a title="nitric.proto.nitric.resource.v1.BucketResource" href="#nitric.proto.nitric.resource.v1.BucketResource">BucketResource</a> = &lt;object object&gt;, queue: <a title="nitric.proto.nitric.resource.v1.QueueResource" href="#nitric.proto.nitric.resource.v1.QueueResource">QueueResource</a> = &lt;object object&gt;, topic: <a title="nitric.proto.nitric.resource.v1.TopicResource" href="#nitric.proto.nitric.resource.v1.TopicResource">TopicResource</a> = &lt;object object&gt;, collection: <a title="nitric.proto.nitric.resource.v1.CollectionResource" href="#nitric.proto.nitric.resource.v1.CollectionResource">CollectionResource</a> = &lt;object object&gt;, secret: <a title="nitric.proto.nitric.resource.v1.SecretResource" href="#nitric.proto.nitric.resource.v1.SecretResource">SecretResource</a> = &lt;object object&gt;, api: <a title="nitric.proto.nitric.resource.v1.ApiResource" href="#nitric.proto.nitric.resource.v1.ApiResource">ApiResource</a> = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ResourceDeclareRequest(resource: 'Resource' = <object object at 0x1016f39d0>, policy: 'PolicyResource' = <object object at 0x1016f39d0>, bucket: 'BucketResource' = <object object at 0x1016f39d0>, queue: 'QueueResource' = <object object at 0x1016f39d0>, topic: 'TopicResource' = <object object at 0x1016f39d0>, collection: 'CollectionResource' = <object object at 0x1016f39d0>, secret: 'SecretResource' = <object object at 0x1016f39d0>, api: 'ApiResource' = <object object at 0x1016f39d0>)</p></div>
+<div class="desc"><p>ResourceDeclareRequest(resource: 'Resource' = <object object at 0x103e049d0>, policy: 'PolicyResource' = <object object at 0x103e049d0>, bucket: 'BucketResource' = <object object at 0x103e049d0>, queue: 'QueueResource' = <object object at 0x103e049d0>, topic: 'TopicResource' = <object object at 0x103e049d0>, collection: 'CollectionResource' = <object object at 0x103e049d0>, secret: 'SecretResource' = <object object at 0x103e049d0>, api: 'ApiResource' = <object object at 0x103e049d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -806,7 +807,7 @@ class ResourceDeclareResponse(betterproto.Message):
 <span>(</span><span>resource: <a title="nitric.proto.nitric.resource.v1.Resource" href="#nitric.proto.nitric.resource.v1.Resource">Resource</a> = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ResourceDetailsRequest(resource: 'Resource' = <object object at 0x1016f39d0>)</p></div>
+<div class="desc"><p>ResourceDetailsRequest(resource: 'Resource' = <object object at 0x103e049d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -833,7 +834,7 @@ class ResourceDetailsRequest(betterproto.Message):
 <span>(</span><span>id: str = &lt;object object&gt;, provider: str = &lt;object object&gt;, service: str = &lt;object object&gt;, api: <a title="nitric.proto.nitric.resource.v1.ApiResourceDetails" href="#nitric.proto.nitric.resource.v1.ApiResourceDetails">ApiResourceDetails</a> = &lt;object object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>ResourceDetailsResponse(id: str = <object object at 0x1016f39d0>, provider: str = <object object at 0x1016f39d0>, service: str = <object object at 0x1016f39d0>, api: 'ApiResourceDetails' = <object object at 0x1016f39d0>)</p></div>
+<div class="desc"><p>ResourceDetailsResponse(id: str = <object object at 0x103e049d0>, provider: str = <object object at 0x103e049d0>, service: str = <object object at 0x103e049d0>, api: 'ApiResourceDetails' = <object object at 0x103e049d0>)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1095,7 +1096,8 @@ class ResourceDetailsResponse(betterproto.Message):
     Subscription = 6
     Collection = 7
     Policy = 8
-    Secret = 9</code></pre>
+    Secret = 9
+    Notification = 10</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1119,6 +1121,10 @@ class ResourceDetailsResponse(betterproto.Message):
 <div class="desc"></div>
 </dd>
 <dt id="nitric.proto.nitric.resource.v1.ResourceType.Function"><code class="name">var <span class="ident">Function</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="nitric.proto.nitric.resource.v1.ResourceType.Notification"><code class="name">var <span class="ident">Notification</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -1333,6 +1339,7 @@ class TopicResource(betterproto.Message):
 <li><code><a title="nitric.proto.nitric.resource.v1.ResourceType.Bucket" href="#nitric.proto.nitric.resource.v1.ResourceType.Bucket">Bucket</a></code></li>
 <li><code><a title="nitric.proto.nitric.resource.v1.ResourceType.Collection" href="#nitric.proto.nitric.resource.v1.ResourceType.Collection">Collection</a></code></li>
 <li><code><a title="nitric.proto.nitric.resource.v1.ResourceType.Function" href="#nitric.proto.nitric.resource.v1.ResourceType.Function">Function</a></code></li>
+<li><code><a title="nitric.proto.nitric.resource.v1.ResourceType.Notification" href="#nitric.proto.nitric.resource.v1.ResourceType.Notification">Notification</a></code></li>
 <li><code><a title="nitric.proto.nitric.resource.v1.ResourceType.Policy" href="#nitric.proto.nitric.resource.v1.ResourceType.Policy">Policy</a></code></li>
 <li><code><a title="nitric.proto.nitric.resource.v1.ResourceType.Queue" href="#nitric.proto.nitric.resource.v1.ResourceType.Queue">Queue</a></code></li>
 <li><code><a title="nitric.proto.nitric.resource.v1.ResourceType.Schedule" href="#nitric.proto.nitric.resource.v1.ResourceType.Schedule">Schedule</a></code></li>

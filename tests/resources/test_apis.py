@@ -17,13 +17,13 @@
 # limitations under the License.
 #
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import patch, AsyncMock, Mock
+from unittest.mock import patch, AsyncMock
 
 import pytest
 from grpclib import GRPCError, Status
 
-from nitric.api.exception import InternalException
-from nitric.faas import HttpMethod, MethodOptions, ApiWorkerOptions, HttpContext, HttpRequest
+from nitric.exception import InternalException
+from nitric.faas import HttpMethod, MethodOptions, ApiWorkerOptions
 from nitric.proto.nitric.resource.v1 import (
     ResourceDeclareRequest,
     ApiResource,
