@@ -31,7 +31,7 @@ from nitric.proto.nitric.storage.v1 import (
 )
 
 from nitric.api import Storage
-from nitric.api.exception import UnknownException
+from nitric.exception import UnknownException
 
 
 class Object(object):

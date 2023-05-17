@@ -23,7 +23,7 @@ import pytest
 from grpclib import GRPCError, Status
 
 from nitric.api import Secrets
-from nitric.api.exception import UnknownException
+from nitric.exception import UnknownException
 from nitric.api.secrets import SecretValue
 from nitric.proto.nitric.secret.v1 import (
     SecretPutResponse,

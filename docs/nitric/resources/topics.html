@@ -47,7 +47,7 @@
 from __future__ import annotations
 
 from nitric.api.events import Events, TopicRef
-from nitric.api.exception import exception_from_grpc_error
+from nitric.exception import exception_from_grpc_error
 from typing import List, Union
 from enum import Enum
 from grpclib import GRPCError
@@ -74,7 +74,6 @@ class Topic(SecureResource):
 
     name: str
     actions: List[Action]
-    server: FunctionServer
 
     def __init__(self, name: str):
         &#34;&#34;&#34;Construct a new topic.&#34;&#34;&#34;
@@ -108,11 +107,15 @@ class Topic(SecureResource):
 
         return Events().topic(self.name)
 
-    def subscribe(self, func: EventMiddleware):
+    def subscribe(self):
         &#34;&#34;&#34;Create and return a subscription decorator for this topic.&#34;&#34;&#34;
-        self.server = FunctionServer(SubscriptionWorkerOptions(topic=self.name))
-        self.server.event(func)
-        Nitric._register_worker(self.server)
+
+        def decorator(func: EventMiddleware):
+            self.server = FunctionServer(SubscriptionWorkerOptions(topic=self.name))
+            self.server.event(func)
+            Nitric._register_worker(self.server)
+
+        return decorator
 
 
 def topic(name: str) -&gt; Topic:
@@ -171,7 +174,6 @@ def topic(name: str) -&gt; Topic:
 
     name: str
     actions: List[Action]
-    server: FunctionServer
 
     def __init__(self, name: str):
         &#34;&#34;&#34;Construct a new topic.&#34;&#34;&#34;
@@ -205,11 +207,15 @@ def topic(name: str) -&gt; Topic:
 
         return Events().topic(self.name)
 
-    def subscribe(self, func: EventMiddleware):
+    def subscribe(self):
         &#34;&#34;&#34;Create and return a subscription decorator for this topic.&#34;&#34;&#34;
-        self.server = FunctionServer(SubscriptionWorkerOptions(topic=self.name))
-        self.server.event(func)
-        Nitric._register_worker(self.server)</code></pre>
+
+        def decorator(func: EventMiddleware):
+            self.server = FunctionServer(SubscriptionWorkerOptions(topic=self.name))
+            self.server.event(func)
+            Nitric._register_worker(self.server)
+
+        return decorator</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -224,10 +230,6 @@ def topic(name: str) -&gt; Topic:
 <div class="desc"></div>
 </dd>
 <dt id="nitric.resources.topics.Topic.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="nitric.resources.topics.Topic.server"><code class="name">var <span class="ident">server</span> : <a title="nitric.faas.FunctionServer" href="../faas.html#nitric.faas.FunctionServer">FunctionServer</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -251,7 +253,7 @@ def topic(name: str) -&gt; Topic:
 </details>
 </dd>
 <dt id="nitric.resources.topics.Topic.subscribe"><code class="name flex">
-<span>def <span class="ident">subscribe</span></span>(<span>self, func: EventMiddleware)</span>
+<span>def <span class="ident">subscribe</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create and return a subscription decorator for this topic.</p></div>
@@ -259,11 +261,15 @@ def topic(name: str) -&gt; Topic:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def subscribe(self, func: EventMiddleware):
+<pre><code class="python">def subscribe(self):
     &#34;&#34;&#34;Create and return a subscription decorator for this topic.&#34;&#34;&#34;
-    self.server = FunctionServer(SubscriptionWorkerOptions(topic=self.name))
-    self.server.event(func)
-    Nitric._register_worker(self.server)</code></pre>
+
+    def decorator(func: EventMiddleware):
+        self.server = FunctionServer(SubscriptionWorkerOptions(topic=self.name))
+        self.server.event(func)
+        Nitric._register_worker(self.server)
+
+    return decorator</code></pre>
 </details>
 </dd>
 </dl>
@@ -330,7 +336,6 @@ def topic(name: str) -&gt; Topic:
 <li><code><a title="nitric.resources.topics.Topic.actions" href="#nitric.resources.topics.Topic.actions">actions</a></code></li>
 <li><code><a title="nitric.resources.topics.Topic.allow" href="#nitric.resources.topics.Topic.allow">allow</a></code></li>
 <li><code><a title="nitric.resources.topics.Topic.name" href="#nitric.resources.topics.Topic.name">name</a></code></li>
-<li><code><a title="nitric.resources.topics.Topic.server" href="#nitric.resources.topics.Topic.server">server</a></code></li>
 <li><code><a title="nitric.resources.topics.Topic.subscribe" href="#nitric.resources.topics.Topic.subscribe">subscribe</a></code></li>
 </ul>
 </li>

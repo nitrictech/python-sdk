@@ -16,12 +16,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from unittest import TestCase
 
 import pytest
 from grpclib import GRPCError, Status
 
-from nitric.api.exception import (
+from nitric.exception import (
     CancelledException,
     exception_from_grpc_error,
     _exception_code_map,

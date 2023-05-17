@@ -18,13 +18,14 @@
 #
 from __future__ import annotations
 
-from nitric.api.exception import exception_from_grpc_error
+from nitric.exception import exception_from_grpc_error
 from nitric.api.storage import BucketRef, Storage
 from typing import List, Union
 from enum import Enum
 from grpclib import GRPCError
 
 from nitric.application import Nitric
+from nitric.faas import FunctionServer, BucketNotificationWorkerOptions, BucketNotificationMiddleware
 from nitric.proto.nitric.resource.v1 import (
     Resource,
     ResourceType,
@@ -48,6 +49,7 @@ class Bucket(SecureResource):
 
     name: str
     actions: List[Action]
+    _server: FunctionServer
 
     def __init__(self, name: str):
         """Create a bucket with the name provided or references it if it already exists."""
@@ -83,6 +85,24 @@ class Bucket(SecureResource):
         self._register_policy(*args)
 
         return Storage().bucket(self.name)
+
+    def on(self, notification_type: str, notification_prefix_filter: str):
+        """Create and return a bucket notification decorator for this bucket."""
+        print("this has been called")
+
+        def decorator(func: BucketNotificationMiddleware):
+            print("this has been called")
+            self._server = FunctionServer(
+                BucketNotificationWorkerOptions(
+                    bucket_name=self.name,
+                    notification_type=notification_type,
+                    notification_prefix_filter=notification_prefix_filter,
+                )
+            )
+            self._server.bucket_notification(func)
+            return Nitric._register_worker(self._server)
+
+        return decorator
 
 
 def bucket(name: str) -> Bucket:

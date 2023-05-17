@@ -53,7 +53,7 @@ from typing import List, AsyncIterator, Union, Any, Tuple
 from grpclib import GRPCError
 
 from nitric.api.const import MAX_SUB_COLLECTION_DEPTH
-from nitric.api.exception import exception_from_grpc_error
+from nitric.exception import exception_from_grpc_error
 from nitric.proto.nitric.document.v1 import (
     DocumentServiceStub,
     Collection as CollectionMessage,

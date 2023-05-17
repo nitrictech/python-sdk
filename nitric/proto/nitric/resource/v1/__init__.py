@@ -31,6 +31,7 @@ class ResourceType(betterproto.Enum):
     Collection = 7
     Policy = 8
     Secret = 9
+    Notification = 10
 
 
 class Action(betterproto.Enum):

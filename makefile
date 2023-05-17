@@ -1,6 +1,6 @@
 install:
 	@echo Installing Project Dependencies
-	@pip3 install -e .[dev]
+	@python3 -m pip install -e .[dev]
 	@pre-commit install
 
 .PHONY: docs clean license
@@ -16,7 +16,11 @@ clean:
 	@rm -rf ./build
 	@rm -rf ./dist
 
-NITRIC_VERSION="v0.24.0-rc.7"
+test:
+	@echo Running Tox tests
+	@tox -e py
+
+NITRIC_VERSION="v0.27.0"
 
 download:
 	@curl -L https://github.com/nitrictech/nitric/releases/download/${NITRIC_VERSION}/contracts.tgz -o contracts.tgz

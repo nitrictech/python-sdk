@@ -17,11 +17,20 @@
 # limitations under the License.
 #
 from unittest import IsolatedAsyncioTestCase
-from unittest.mock import patch, AsyncMock, Mock, call
+from unittest.mock import patch, AsyncMock, Mock, call, MagicMock
 
 import pytest
 
-from nitric.faas import start, FunctionServer, HttpContext, compose_middleware, HttpResponse, FaasWorkerOptions
+from nitric.faas import (
+    start,
+    FunctionServer,
+    HttpContext,
+    compose_middleware,
+    HttpResponse,
+    FaasWorkerOptions,
+    BucketNotificationWorkerOptions,
+    FileNotificationWorkerOptions,
+)
 
 from nitric.proto.nitric.faas.v1 import (
     ServerMessage,
@@ -31,6 +40,7 @@ from nitric.proto.nitric.faas.v1 import (
     TriggerRequest,
     TopicTriggerContext,
     HttpTriggerContext,
+    BucketNotificationType,
 )
 
 
@@ -151,6 +161,7 @@ class FaasClientTest(IsolatedAsyncioTestCase):
     async def test_trigger_sync_event_handler(self):
         mock_http_handler = Mock()
         mock_event_handler = Mock()
+        mock_bucket_notification_handler = Mock()
         mock_grpc_channel = Mock()
         mock_async_channel_init = Mock()
         mock_async_chan = MockAsyncChannel()
@@ -176,16 +187,24 @@ class FaasClientTest(IsolatedAsyncioTestCase):
         with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
             "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
-            await FunctionServer(opts=FaasWorkerOptions()).http(mock_http_handler).event(mock_event_handler)._run()
+            await (
+                FunctionServer(opts=FaasWorkerOptions())
+                .http(mock_http_handler)
+                .event(mock_event_handler)
+                .bucket_notification(mock_bucket_notification_handler)
+                ._run()
+            )
 
         # accept the init response from server
         assert 1 == stream_calls
         mock_event_handler.assert_called_once()
         mock_http_handler.assert_not_called()
+        mock_bucket_notification_handler.assert_not_called()
 
     async def test_trigger_sync_http_handler(self):
         mock_http_handler = Mock()
         mock_event_handler = Mock()
+        mock_bucket_notification_handler = Mock()
         mock_grpc_channel = Mock()
         mock_async_channel_init = Mock()
         mock_async_chan = MockAsyncChannel()
@@ -211,16 +230,24 @@ class FaasClientTest(IsolatedAsyncioTestCase):
         with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
             "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
-            await FunctionServer(opts=FaasWorkerOptions()).http(mock_http_handler).event(mock_event_handler)._run()
+            await (
+                FunctionServer(opts=FaasWorkerOptions())
+                .http(mock_http_handler)
+                .event(mock_event_handler)
+                .bucket_notification(mock_bucket_notification_handler)
+                ._run()
+            )
 
         # accept the init response from server
         assert 1 == stream_calls
         mock_http_handler.assert_called_once()
         mock_event_handler.assert_not_called()
+        mock_bucket_notification_handler.assert_not_called()
 
     async def test_trigger_async_event_handler(self):
         mock_http_handler = AsyncMock()
         mock_event_handler = AsyncMock()
+        mock_bucket_notification_handler = AsyncMock()
         mock_grpc_channel = Mock()
         mock_async_channel_init = Mock()
         mock_async_chan = MockAsyncChannel()
@@ -246,16 +273,24 @@ class FaasClientTest(IsolatedAsyncioTestCase):
         with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
             "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
-            await FunctionServer(opts=FaasWorkerOptions()).http(mock_http_handler).event(mock_event_handler)._run()
+            await (
+                FunctionServer(opts=FaasWorkerOptions())
+                .http(mock_http_handler)
+                .event(mock_event_handler)
+                .bucket_notification(mock_bucket_notification_handler)
+                ._run()
+            )
 
         # accept the init response from server
         assert 1 == stream_calls
         mock_event_handler.assert_called_once()
         mock_http_handler.assert_not_called()
+        mock_bucket_notification_handler.assert_not_called()
 
     async def test_trigger_async_http_handler(self):
         mock_http_handler = AsyncMock()
         mock_event_handler = AsyncMock()
+        mock_bucket_notification_handler = AsyncMock()
         mock_grpc_channel = Mock()
         mock_async_channel_init = Mock()
         mock_async_chan = MockAsyncChannel()
@@ -281,16 +316,24 @@ class FaasClientTest(IsolatedAsyncioTestCase):
         with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
             "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
-            await FunctionServer(opts=FaasWorkerOptions()).http(mock_http_handler).event(mock_event_handler)._run()
+            await (
+                FunctionServer(opts=FaasWorkerOptions())
+                .http(mock_http_handler)
+                .event(mock_event_handler)
+                .bucket_notification(mock_bucket_notification_handler)
+                ._run()
+            )
 
         # accept the init response from server
         assert 1 == stream_calls
         mock_http_handler.assert_called_once()
         mock_event_handler.assert_not_called()
+        mock_bucket_notification_handler.assert_not_called()
 
     async def test_failing_async_http_handler(self):
         mock_http_handler = AsyncMock()
         mock_event_handler = AsyncMock()
+        mock_bucket_notification_handler = AsyncMock()
         mock_grpc_channel = Mock()
         mock_async_channel_init = Mock()
         mock_async_chan = MockAsyncChannel()
@@ -316,12 +359,19 @@ class FaasClientTest(IsolatedAsyncioTestCase):
         with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
             "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
         ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
-            await FunctionServer(opts=FaasWorkerOptions()).http(mock_http_handler).event(mock_event_handler)._run()
+            await (
+                FunctionServer(opts=FaasWorkerOptions())
+                .http(mock_http_handler)
+                .event(mock_event_handler)
+                .bucket_notification(mock_bucket_notification_handler)
+                ._run()
+            )
 
         # accept the init response from server
         assert 1 == stream_calls
         mock_http_handler.assert_called_once()
         mock_event_handler.assert_not_called()
+        mock_bucket_notification_handler.assert_not_called()
 
     async def test_failing_topic_handler(self):
         mock_handler = Mock()
@@ -437,6 +487,66 @@ class FaasClientTest(IsolatedAsyncioTestCase):
             (message,) = args
             # Response bytes should be unmodified.
             self.assertEqual(b"some bytes", message.trigger_response.data)
+
+    def test_construct_bucket_notification_worker_options_create(self):
+        opts = BucketNotificationWorkerOptions(
+            bucket_name="test-bucket", notification_type="write", notification_prefix_filter="test.png"
+        )
+
+        assert opts.bucket_name == "test-bucket"
+        assert opts.notification_type == BucketNotificationType.Created
+        assert opts.notification_prefix_filter == "test.png"
+
+    def test_construct_bucket_notification_worker_options_delete(self):
+        opts = BucketNotificationWorkerOptions(
+            bucket_name="test-bucket", notification_type="delete", notification_prefix_filter="test.png"
+        )
+
+        assert opts.bucket_name == "test-bucket"
+        assert opts.notification_type == BucketNotificationType.Deleted
+        assert opts.notification_prefix_filter == "test.png"
+
+    def test_construct_bucket_notification_worker_options_error(self):
+        with pytest.raises(ValueError) as e:
+            opts = BucketNotificationWorkerOptions(
+                bucket_name="test-bucket", notification_type="created", notification_prefix_filter="test.png"
+            )
+
+            assert str(e) == "Event type created is unsupported"
+
+    def test_construct_file_notification_worker_options_create(self):
+        mock_bucket = Mock()
+        mock_bucket.name = "test-bucket"
+        opts = FileNotificationWorkerOptions(
+            bucket=mock_bucket, notification_type="write", notification_prefix_filter="test.png"
+        )
+
+        assert opts.bucket_name == "test-bucket"
+        assert opts.bucket_ref == mock_bucket
+        assert opts.notification_type == BucketNotificationType.Created
+        assert opts.notification_prefix_filter == "test.png"
+
+    def test_construct_file_notification_worker_options_delete(self):
+        mock_bucket = Mock()
+        mock_bucket.name = "test-bucket"
+        opts = FileNotificationWorkerOptions(
+            bucket=mock_bucket, notification_type="delete", notification_prefix_filter="test.png"
+        )
+
+        assert opts.bucket_name == "test-bucket"
+        assert opts.bucket_ref == mock_bucket
+        assert opts.notification_type == BucketNotificationType.Deleted
+        assert opts.notification_prefix_filter == "test.png"
+
+    def test_construct_file_notification_worker_options_error(self):
+        mock_bucket = Mock()
+        mock_bucket.name = "test-bucket"
+        with pytest.raises(ValueError) as e:
+            opts = FileNotificationWorkerOptions(
+                bucket=mock_bucket, notification_type="created", notification_prefix_filter="test.png"
+            )
+
+            assert str(e) == "Event type created is unsupported"
 
     # async def test_handler_dict_response(self):
     #     mock_handler = Mock()

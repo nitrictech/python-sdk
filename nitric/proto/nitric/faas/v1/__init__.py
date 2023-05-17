@@ -25,6 +25,14 @@ if TYPE_CHECKING:
     from grpclib.metadata import Deadline
 
 
+class BucketNotificationType(betterproto.Enum):
+    """Notification Workers"""
+
+    All = 0
+    Created = 1
+    Deleted = 2
+
+
 @dataclass(eq=False, repr=False)
 class ClientMessage(betterproto.Message):
     """Messages the client is able to send to the server"""
@@ -109,6 +117,24 @@ class ScheduleCron(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class BucketNotificationWorker(betterproto.Message):
+    bucket: str = betterproto.string_field(1)
+    config: "BucketNotificationConfig" = betterproto.message_field(2)
+
+
+@dataclass(eq=False, repr=False)
+class BucketNotificationConfig(betterproto.Message):
+    notification_type: "BucketNotificationType" = betterproto.enum_field(1)
+    notification_prefix_filter: str = betterproto.string_field(2)
+    """
+    A notification filter is a prefix for a bucket object in which creations or
+    deletions should trigger a notification: e.g. Notification filter:
+    /images/cat and Event Type: created, would trigger on creating
+    /images/cat.png and /images/cat.jpg but not creating /cat.png
+    """
+
+
+@dataclass(eq=False, repr=False)
 class InitRequest(betterproto.Message):
     """
     InitRequest - Identifies a worker as ready to recieve triggers This message
@@ -119,6 +145,9 @@ class InitRequest(betterproto.Message):
     api: "ApiWorker" = betterproto.message_field(10, group="Worker")
     subscription: "SubscriptionWorker" = betterproto.message_field(11, group="Worker")
     schedule: "ScheduleWorker" = betterproto.message_field(12, group="Worker")
+    bucket_notification: "BucketNotificationWorker" = betterproto.message_field(
+        13, group="Worker"
+    )
 
 
 @dataclass(eq=False, repr=False)
@@ -155,6 +184,9 @@ class TriggerRequest(betterproto.Message):
 
     http: "HttpTriggerContext" = betterproto.message_field(3, group="context")
     topic: "TopicTriggerContext" = betterproto.message_field(4, group="context")
+    notification: "NotificationTriggerContext" = betterproto.message_field(
+        5, group="context"
+    )
 
 
 @dataclass(eq=False, repr=False)
@@ -225,6 +257,18 @@ class TopicTriggerContext(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class BucketNotification(betterproto.Message):
+    key: str = betterproto.string_field(1)
+    type: "BucketNotificationType" = betterproto.enum_field(2)
+
+
+@dataclass(eq=False, repr=False)
+class NotificationTriggerContext(betterproto.Message):
+    source: str = betterproto.string_field(1)
+    bucket: "BucketNotification" = betterproto.message_field(10, group="notification")
+
+
+@dataclass(eq=False, repr=False)
 class TriggerResponse(betterproto.Message):
     """The worker has successfully processed a trigger"""
 
@@ -236,6 +280,11 @@ class TriggerResponse(betterproto.Message):
 
     topic: "TopicResponseContext" = betterproto.message_field(11, group="context")
     """response to a topic trigger"""
+
+    notification: "NotificationResponseContext" = betterproto.message_field(
+        12, group="context"
+    )
+    """response to a notification trigger"""
 
 
 @dataclass(eq=False, repr=False)
@@ -275,6 +324,11 @@ class TopicResponseContext(betterproto.Message):
 
     success: bool = betterproto.bool_field(1)
     """Success status of the handled event"""
+
+
+@dataclass(eq=False, repr=False)
+class NotificationResponseContext(betterproto.Message):
+    success: bool = betterproto.bool_field(1)
 
 
 class FaasServiceStub(betterproto.ServiceStub):

@@ -33,7 +33,7 @@ from nitric.proto.nitric.resource.v1 import (
     ResourceDetailsRequest,
 )
 from grpclib import GRPCError
-from nitric.api.exception import exception_from_grpc_error
+from nitric.exception import exception_from_grpc_error
 
 
 @dataclass
