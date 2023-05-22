@@ -69,6 +69,10 @@ from nitric.proto.nitric.faas.v1 import (
     ApiWorker,
     SubscriptionWorker,
     ScheduleRate,
+    BucketNotificationWorker,
+    BucketNotificationConfig,
+    BucketNotificationType,
+    NotificationResponseContext,
 )
 import grpclib
 import asyncio
@@ -95,9 +99,10 @@ class HttpMethod(Enum):
 class Request(ABC):
     &#34;&#34;&#34;Represents an abstract trigger request.&#34;&#34;&#34;
 
-    def __init__(self, data: bytes):
+    def __init__(self, data: bytes, trace_context: Dict[str, str]):
         &#34;&#34;&#34;Construct a new Request.&#34;&#34;&#34;
         self.data = data
+        self.trace_context = trace_context
 
 
 class Response(ABC):
@@ -117,14 +122,23 @@ class TriggerContext(ABC):
         &#34;&#34;&#34;Return this context as an EventContext if it is one, otherwise returns None.&#34;&#34;&#34;
         return None
 
+    def bucket_notification(self) -&gt; Union[BucketNotificationContext, None]:
+        &#34;&#34;&#34;Return this context as a BucketNotificationContext if it is one, otherwise returns None.&#34;&#34;&#34;
+        return None
 
-def _ctx_from_grpc_trigger_request(trigger_request: TriggerRequest):
+
+def _ctx_from_grpc_trigger_request(trigger_request: TriggerRequest, options: FaasWorkerOptions = None):
     &#34;&#34;&#34;Return a TriggerContext from a TriggerRequest.&#34;&#34;&#34;
-    context_type, context = betterproto.which_one_of(trigger_request, &#34;context&#34;)
+    context_type, _ = betterproto.which_one_of(trigger_request, &#34;context&#34;)
     if context_type == &#34;http&#34;:
         return HttpContext.from_grpc_trigger_request(trigger_request)
     elif context_type == &#34;topic&#34;:
         return EventContext.from_grpc_trigger_request(trigger_request)
+    elif context_type == &#34;notification&#34;:
+        if isinstance(options, FileNotificationWorkerOptions):
+            return FileNotificationContext.from_grpc_trigger_request(trigger_request, options)
+        else:
+            return BucketNotificationContext.from_grpc_trigger_request(trigger_request)
     else:
         print(f&#34;Trigger with unknown context received, context type: {context_type}&#34;)
         raise Exception(f&#34;Unknown trigger context, type: {context_type}&#34;)
@@ -154,6 +168,9 @@ def _grpc_response_from_ctx(ctx: TriggerContext) -&gt; TriggerResponse:
                 success=ctx.res.success,
             ),
         )
+    elif ctx.bucket_notification():
+        ctx = ctx.bucket_notification()
+        return TriggerResponse(notification=NotificationResponseContext(success=ctx.res.success))
     else:
         raise Exception(&#34;Unknown Trigger Context type, unable to return valid response&#34;)
 
@@ -175,13 +192,12 @@ class HttpRequest(Request):
         trace_context: Dict[str, str],
     ):
         &#34;&#34;&#34;Construct a new HttpRequest.&#34;&#34;&#34;
-        super().__init__(data)
+        super().__init__(data, trace_context)
         self.method = method
         self.path = path
         self.params = params
         self.query = query
         self.headers = headers
-        self.trace_context = trace_context
 
     @property
     def json(self) -&gt; Optional[Any]:
@@ -268,9 +284,8 @@ class EventRequest(Request):
 
     def __init__(self, data: bytes, topic: str, trace_context: Dict[str, str]):
         &#34;&#34;&#34;Construct a new EventRequest.&#34;&#34;&#34;
-        super().__init__(data)
+        super().__init__(data, trace_context)
         self.topic = topic
-        self.trace_context = trace_context
 
     @property
     def payload(self) -&gt; bytes:
@@ -311,83 +326,91 @@ class EventContext(TriggerContext):
         )
 
 
-# async def face(inpp: int) -&gt; str:
-#     return &#34;thing&#34;
+class BucketNotificationRequest(Request):
+    &#34;&#34;&#34;Represents a translated Event, from a Subscribed Topic, forwarded from the Nitric Membrane.&#34;&#34;&#34;
+
+    def __init__(self, data: bytes, key: str, notification_type: BucketNotificationType, trace_context: Dict[str, str]):
+        &#34;&#34;&#34;Construct a new EventRequest.&#34;&#34;&#34;
+        super().__init__(data, trace_context)
+
+        self.key = key
+        self.notification_type = notification_type
 
 
-# ====== Function Handlers ======
+class BucketNotificationResponse(Response):
+    &#34;&#34;&#34;Represents the response to a trigger from a Bucket&#34;&#34;&#34;
 
-C = TypeVar(&#34;C&#34;, TriggerContext, HttpContext, EventContext)
-Middleware = Callable
-Handler = Coroutine[Any, Any, C]
-HttpHandler = Coroutine[Any, Any, Optional[HttpContext]]
-EventHandler = Coroutine[Any, Any, Optional[EventContext]]
-Middleware = Callable[[C, Middleware], Handler]
-HttpMiddleware = Callable[[HttpContext, HttpHandler], HttpHandler]
-EventMiddleware = Callable[[EventContext, EventHandler], EventHandler]
+    def __init__(self, success: bool = True):
+        &#34;&#34;&#34;Construct a new BucketNotificationResponse.&#34;&#34;&#34;
+        self.success = success
 
 
-def compose_middleware(*middlewares: Union[Middleware, List[Middleware]]) -&gt; Middleware:
-    &#34;&#34;&#34;
-    Compose multiple middleware functions into a single middleware function.
+class BucketNotificationContext(TriggerContext):
+    &#34;&#34;&#34;Represents the full request/response context for a bucket notification trigger.&#34;&#34;&#34;
 
-    The resulting middleware will effectively be a chain of the provided middleware,
-    where each calls the next in the chain when they&#39;re successful.
-    &#34;&#34;&#34;
-    middlewares = list(middlewares)
-    if len(middlewares) == 1 and not isinstance(middlewares[0], list):
-        return middlewares[0]
+    def __init__(self, request: BucketNotificationRequest, response: BucketNotificationResponse = None):
+        &#34;&#34;&#34;Construct a new BucketNotificationContext.&#34;&#34;&#34;
+        super().__init__()
+        self.req = request
+        self.res = response if response else BucketNotificationResponse()
 
-    middlewares = [compose_middleware(m) if isinstance(m, list) else m for m in middlewares]
+    def bucket_notification(self) -&gt; BucketNotificationContext:
+        &#34;&#34;&#34;Return this BucketNotificationContext, used when determining the context type of a trigger.&#34;&#34;&#34;
+        return self
 
-    async def handler(ctx, next_middleware=lambda ctx: ctx):
-        def reduce_chain(acc_next, cur):
-            async def chained_middleware(context):
-                # Count the positional arguments to determine if the function is a handler or middleware.
-                all_args = cur.__code__.co_argcount
-                kwargs = len(cur.__defaults__) if cur.__defaults__ is not None else 0
-                pos_args = all_args - kwargs
-                if pos_args == 2:
-                    # Call the middleware with next and return the result
-                    return (
-                        (await cur(context, acc_next)) if asyncio.iscoroutinefunction(cur) else cur(context, acc_next)
-                    )
-                else:
-                    # Call the handler with ctx only, then call the remainder of the middleware chain
-                    result = (await cur(context)) if asyncio.iscoroutinefunction(cur) else cur(context)
-                    return (await acc_next(result)) if asyncio.iscoroutinefunction(acc_next) else acc_next(result)
-
-            return chained_middleware
-
-        middleware_chain = functools.reduce(reduce_chain, reversed(middlewares + [next_middleware]))
-        return await middleware_chain(ctx)
-
-    return handler
+    @staticmethod
+    def from_grpc_trigger_request(trigger_request: TriggerRequest) -&gt; BucketNotificationContext:
+        &#34;&#34;&#34;Construct a new BucketNotificationContext from a Bucket Notification trigger from the Nitric Membrane.&#34;&#34;&#34;
+        return BucketNotificationContext(
+            request=BucketNotificationRequest(
+                data=trigger_request.data,
+                key=trigger_request.notification.bucket.key,
+                notification_type=trigger_request.notification.bucket.type,
+                trace_context=trigger_request.trace_context.values,
+            )
+        )
 
 
-# ====== Function Server ======
+class FileNotificationRequest(BucketNotificationRequest):
+    def __init__(
+        self,
+        data: bytes,
+        bucket_ref: Any,  # can&#39;t import BucketRef due to circular dependency problems
+        key: str,
+        notification_type: BucketNotificationType,
+        trace_context: Dict[str, str],
+    ):
+        super().__init__(data=data, key=key, notification_type=notification_type, trace_context=trace_context)
+        self.file = bucket_ref.file(key)
 
 
-def _create_internal_error_response(req: TriggerRequest) -&gt; TriggerResponse:
-    &#34;&#34;&#34;Create a general error response based on the trigger request type.&#34;&#34;&#34;
-    context_type, context = betterproto.which_one_of(req, &#34;context&#34;)
-    if context_type == &#34;http&#34;:
-        return TriggerResponse(data=bytes(), http=HttpResponseContext(status=500))
-    elif context_type == &#34;topic&#34;:
-        return TriggerResponse(data=bytes(), topic=TopicResponseContext(success=False))
-    else:
-        raise Exception(f&#34;Unknown trigger type: {context_type}, unable to generate expected response&#34;)
+class FileNotificationContext(TriggerContext):
+    &#34;&#34;&#34;Represents the full request/response context for an Http based trigger.&#34;&#34;&#34;
 
+    def __init__(self, request: FileNotificationRequest, response: BucketNotificationResponse = None):
+        &#34;&#34;&#34;Construct a new FileNotificationContext.&#34;&#34;&#34;
+        super().__init__()
+        self.req = request
+        self.res = response if response else BucketNotificationResponse()
 
-class ApiWorkerOptions:
-    &#34;&#34;&#34;Options for API workers.&#34;&#34;&#34;
+    def bucket_notification(self) -&gt; FileNotificationContext:
+        &#34;&#34;&#34;Return this FileNotificationContext, used when determining the context type of a trigger.&#34;&#34;&#34;
+        return self
 
-    def __init__(self, api: str, route: str, methods: List[Union[str, HttpMethod]], opts: MethodOptions):
-        &#34;&#34;&#34;Construct a new options object.&#34;&#34;&#34;
-        self.api = api
-        self.route = route
-        self.methods = [str(method) for method in methods]
-        self.opts = opts
+    @staticmethod
+    def from_grpc_trigger_request(
+        trigger_request: TriggerRequest, options: FileNotificationWorkerOptions
+    ) -&gt; FileNotificationContext:
+        &#34;&#34;&#34;Construct a new FileNotificationTrigger from a Bucket Notification trigger from the Nitric Membrane.&#34;&#34;&#34;
+        return FileNotificationContext(
+            request=FileNotificationRequest(
+                data=trigger_request.data,
+                key=trigger_request.notification.bucket.key,
+                bucket_ref=options.bucket_ref,
+                notification_type=trigger_request.notification.bucket.type,
+                trace_context=trigger_request.trace_context.values,
+            )
+        )
 
 
 class RateWorkerOptions:
@@ -402,6 +425,55 @@ class RateWorkerOptions:
         self.description = description
         self.rate = rate
         self.frequency = frequency
+
+
+class BucketNotificationWorkerOptions:
+    &#34;&#34;&#34;Options for bucket notification workers.&#34;&#34;&#34;
+
+    def __init__(self, bucket_name: str, notification_type: str, notification_prefix_filter: str):
+        &#34;&#34;&#34;Construct a new options object.&#34;&#34;&#34;
+        self.bucket_name = bucket_name
+        self.notification_type = BucketNotificationWorkerOptions._to_grpc_event_type(notification_type.lower())
+        self.notification_prefix_filter = notification_prefix_filter
+
+    @staticmethod
+    def _to_grpc_event_type(event_type: str) -&gt; BucketNotificationType:
+        if event_type == &#34;write&#34;:
+            return BucketNotificationType.Created
+        elif event_type == &#34;delete&#34;:
+            return BucketNotificationType.Deleted
+        else:
+            raise ValueError(f&#34;Event type {event_type} is unsupported&#34;)
+
+
+class FileNotificationWorkerOptions(BucketNotificationWorkerOptions):
+    &#34;&#34;&#34;Options for bucket notification workers with file references.&#34;&#34;&#34;
+
+    def __init__(self, bucket, notification_type: str, notification_prefix_filter: str):
+        super().__init__(bucket.name, notification_type, notification_prefix_filter)
+
+        self.bucket_ref = bucket
+
+
+class ApiWorkerOptions:
+    &#34;&#34;&#34;Options for API workers.&#34;&#34;&#34;
+
+    def __init__(self, api: str, route: str, methods: List[Union[str, HttpMethod]], opts: MethodOptions):
+        &#34;&#34;&#34;Construct a new options object.&#34;&#34;&#34;
+        self.api = api
+        self.route = route
+        self.methods = [str(method) for method in methods]
+        self.opts = opts
+
+
+class MethodOptions:
+    &#34;&#34;&#34;Represents options when defining a method handler.&#34;&#34;&#34;
+
+    security: dict[str, List[str]]
+
+    def __init__(self, security: dict[str, List[str]] = None):
+        &#34;&#34;&#34;Construct a new HTTP method options object.&#34;&#34;&#34;
+        self.security = security
 
 
 class SubscriptionWorkerOptions:
@@ -423,22 +495,15 @@ class Frequency(Enum):
     @staticmethod
     def from_str(value: str) -&gt; Frequency:
         &#34;&#34;&#34;Convert a string frequency value to a Frequency.&#34;&#34;&#34;
-        return Frequency[value.strip().lower()]
+        try:
+            return Frequency[value.strip().lower()]
+        except Exception:
+            raise ValueError(f&#34;{value} is not valid frequency&#34;)
 
     @staticmethod
     def as_str_list() -&gt; List[str]:
         &#34;&#34;&#34;Return all frequency values as a list of strings.&#34;&#34;&#34;
         return [str(frequency.value) for frequency in Frequency]
-
-
-class MethodOptions:
-    &#34;&#34;&#34;Represents options when defining a method handler.&#34;&#34;&#34;
-
-    security: dict[str, List[str]]
-
-    def __init__(self, security: dict[str, List[str]] = None):
-        &#34;&#34;&#34;Construct a new HTTP method options object.&#34;&#34;&#34;
-        self.security = security
 
 
 class FaasWorkerOptions:
@@ -447,7 +512,82 @@ class FaasWorkerOptions:
     pass
 
 
-FaasClientOptions = Union[ApiWorkerOptions, RateWorkerOptions, SubscriptionWorkerOptions, FaasWorkerOptions]
+FaasClientOptions = Union[
+    ApiWorkerOptions,
+    RateWorkerOptions,
+    SubscriptionWorkerOptions,
+    BucketNotificationWorkerOptions,
+    FileNotificationWorkerOptions,
+    FaasWorkerOptions,
+]
+
+
+# Defining Function Handlers and Middleware
+C = TypeVar(&#34;C&#34;, TriggerContext, HttpContext, EventContext)
+Middleware = Callable
+Handler = Coroutine[Any, Any, C]
+HttpHandler = Coroutine[Any, Any, Optional[HttpContext]]
+EventHandler = Coroutine[Any, Any, Optional[EventContext]]
+BucketNotificationHandler = Coroutine[Any, Any, Optional[BucketNotificationContext]]
+FileNotificationHandler = Coroutine[Any, Any, Optional[FileNotificationContext]]
+
+Middleware = Callable[[C, Middleware], Handler]
+HttpMiddleware = Callable[[HttpContext, HttpHandler], HttpHandler]
+EventMiddleware = Callable[[EventContext, EventHandler], EventHandler]
+BucketNotificationMiddleware = Callable[
+    [BucketNotificationContext, BucketNotificationHandler], BucketNotificationHandler
+]
+FileNotificationMiddleware = Callable[[FileNotificationContext, FileNotificationHandler], FileNotificationHandler]
+
+
+def compose_middleware(*middlewares: Union[Middleware, List[Middleware]]) -&gt; Middleware:
+    &#34;&#34;&#34;
+    Compose multiple middleware functions into a single middleware function.
+
+    The resulting middleware will effectively be a chain of the provided middleware,
+    where each calls the next in the chain when they&#39;re successful.
+    &#34;&#34;&#34;
+    middlewares = list(middlewares)
+    if len(middlewares) == 1 and not isinstance(middlewares[0], list):
+        return middlewares[0]
+
+    middlewares = [compose_middleware(m) if isinstance(m, list) else m for m in middlewares]
+
+    async def handler(ctx, next_middleware=lambda ctx: ctx):
+        def reduce_chain(acc_next, cur):
+            async def chained_middleware(mw_ctx):
+                # Count the positional arguments to determine if the function is a handler or middleware.
+                all_args = cur.__code__.co_argcount
+                kwargs = len(cur.__defaults__) if cur.__defaults__ is not None else 0
+                pos_args = all_args - kwargs
+                if pos_args == 2:
+                    # Call the middleware with next and return the result
+                    return (await cur(mw_ctx, acc_next)) if asyncio.iscoroutinefunction(cur) else cur(mw_ctx, acc_next)
+                else:
+                    # Call the handler with ctx only, then call the remainder of the middleware chain
+                    result = (await cur(mw_ctx)) if asyncio.iscoroutinefunction(cur) else cur(mw_ctx)
+                    return (await acc_next(result)) if asyncio.iscoroutinefunction(acc_next) else acc_next(result)
+
+            return chained_middleware
+
+        middleware_chain = functools.reduce(reduce_chain, reversed(middlewares + [next_middleware]))
+        return await middleware_chain(ctx)
+
+    return handler
+
+
+# ====== Function Server ======
+
+
+def _create_internal_error_response(req: TriggerRequest) -&gt; TriggerResponse:
+    &#34;&#34;&#34;Create a general error response based on the trigger request type.&#34;&#34;&#34;
+    context_type, ctx = betterproto.which_one_of(req, &#34;context&#34;)
+    if context_type == &#34;http&#34;:
+        return TriggerResponse(data=bytes(), http=HttpResponseContext(status=500))
+    elif context_type == &#34;topic&#34;:
+        return TriggerResponse(data=bytes(), topic=TopicResponseContext(success=False))
+    else:
+        raise Exception(f&#34;Unknown trigger type: {context_type}, unable to generate expected response&#34;)
 
 
 class FunctionServer:
@@ -457,6 +597,7 @@ class FunctionServer:
         &#34;&#34;&#34;Construct a new function server.&#34;&#34;&#34;
         self.__http_handler = None
         self.__event_handler = None
+        self.__bucket_notification_handler = None
         self._any_handler = None
         self._opts = opts
 
@@ -478,10 +619,24 @@ class FunctionServer:
         self.__event_handler = compose_middleware(*handlers)
         return self
 
+    def bucket_notification(self, *handlers: Union[Middleware, List[Middleware]]) -&gt; FunctionServer:
+        &#34;&#34;&#34;
+        Register one or more Bucket Notification Trigger Handlers or Middleware.
+
+        When multiple handlers are provided, they will be called in order.
+        &#34;&#34;&#34;
+        self.__bucket_notification_handler = compose_middleware(*handlers)
+        return self
+
     async def start(self, *handlers: Union[Middleware, List[Middleware]]):
         &#34;&#34;&#34;Start the function server using the provided trigger handlers.&#34;&#34;&#34;
         self._any_handler = compose_middleware(*handlers) if len(handlers) &gt; 0 else None
-        if not self._any_handler and not self._http_handler and not self._event_handler:
+        if (
+            not self._any_handler
+            and not self._http_handler
+            and not self._event_handler
+            and not self.__bucket_notification_handler
+        ):
             raise Exception(&#34;At least one handler function must be provided.&#34;)
 
         await self._run()
@@ -493,6 +648,10 @@ class FunctionServer:
     @property
     def _event_handler(self):
         return self.__event_handler if self.__event_handler else self._any_handler
+
+    @property
+    def _bucket_notification_handler(self):
+        return self.__bucket_notification_handler if self.__bucket_notification_handler else self._any_handler
 
     async def _run(self):
         &#34;&#34;&#34;Register a new FaaS worker with the Membrane, using the provided function as the handler.&#34;&#34;&#34;
@@ -516,6 +675,16 @@ class FunctionServer:
                 )
             elif isinstance(self._opts, SubscriptionWorkerOptions):
                 init_request = InitRequest(subscription=SubscriptionWorker(topic=self._opts.topic))
+            elif isinstance(self._opts, BucketNotificationWorkerOptions) or isinstance(
+                self._opts, FileNotificationWorkerOptions
+            ):
+                config = BucketNotificationConfig(
+                    notification_type=self._opts.notification_type,
+                    notification_prefix_filter=self._opts.notification_prefix_filter,
+                )
+                init_request = InitRequest(
+                    bucket_notification=BucketNotificationWorker(bucket=self._opts.bucket_name, config=config)
+                )
 
             # let the membrane server know we&#39;re ready to start
             await request_channel.send(ClientMessage(init_request=init_request))
@@ -529,7 +698,7 @@ class FunctionServer:
                     # proceed to the next available message
                     continue
                 if msg_type == &#34;trigger_request&#34;:
-                    ctx = _ctx_from_grpc_trigger_request(srv_msg.trigger_request)
+                    ctx = _ctx_from_grpc_trigger_request(srv_msg.trigger_request, self._opts)
 
                     try:
                         if len(ctx.req.trace_context) &gt; 0:
@@ -539,6 +708,8 @@ class FunctionServer:
                             func = self._http_handler
                         elif ctx.event():
                             func = self._event_handler
+                        elif ctx.bucket_notification():
+                            func = self._bucket_notification_handler
                         else:
                             func = self._any_handler
 
@@ -604,6 +775,15 @@ def event(*handlers: Union[Middleware, List[Middleware]]) -&gt; FunctionServer:
     return FunctionServer(opts=[]).event(*handlers)
 
 
+def bucket_notification(*handlers: Union[Middleware, List[Middleware]]) -&gt; FunctionServer:
+    &#34;&#34;&#34;
+    Create a new Function Server and Register one or more Bucket Notification Handlers or Middleware.
+
+    When multiple handlers are provided, they will be called in order.
+    &#34;&#34;&#34;
+    return FunctionServer(opts=[]).bucket_notification(*handlers)
+
+
 def start(*handlers: Union[Middleware, List[Middleware]]):
     &#34;&#34;&#34;Create a new Function Server and start it using the provided trigger handlers.&#34;&#34;&#34;
     if len(handlers) &lt; 1:
@@ -618,6 +798,25 @@ def start(*handlers: Union[Middleware, List[Middleware]]):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="nitric.faas.bucket_notification"><code class="name flex">
+<span>def <span class="ident">bucket_notification</span></span>(<span>*handlers: Union[Middleware, List[Middleware]]) ‑> <a title="nitric.faas.FunctionServer" href="#nitric.faas.FunctionServer">FunctionServer</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a new Function Server and Register one or more Bucket Notification Handlers or Middleware.</p>
+<p>When multiple handlers are provided, they will be called in order.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def bucket_notification(*handlers: Union[Middleware, List[Middleware]]) -&gt; FunctionServer:
+    &#34;&#34;&#34;
+    Create a new Function Server and Register one or more Bucket Notification Handlers or Middleware.
+
+    When multiple handlers are provided, they will be called in order.
+    &#34;&#34;&#34;
+    return FunctionServer(opts=[]).bucket_notification(*handlers)</code></pre>
+</details>
+</dd>
 <dt id="nitric.faas.compose_middleware"><code class="name flex">
 <span>def <span class="ident">compose_middleware</span></span>(<span>*middlewares: Union[Middleware, List[Middleware]]) ‑> Callable[[~C, Callable], Coroutine[Any, Any, ~C]]</span>
 </code></dt>
@@ -644,19 +843,17 @@ where each calls the next in the chain when they're successful.</p></div>
 
     async def handler(ctx, next_middleware=lambda ctx: ctx):
         def reduce_chain(acc_next, cur):
-            async def chained_middleware(context):
+            async def chained_middleware(mw_ctx):
                 # Count the positional arguments to determine if the function is a handler or middleware.
                 all_args = cur.__code__.co_argcount
                 kwargs = len(cur.__defaults__) if cur.__defaults__ is not None else 0
                 pos_args = all_args - kwargs
                 if pos_args == 2:
                     # Call the middleware with next and return the result
-                    return (
-                        (await cur(context, acc_next)) if asyncio.iscoroutinefunction(cur) else cur(context, acc_next)
-                    )
+                    return (await cur(mw_ctx, acc_next)) if asyncio.iscoroutinefunction(cur) else cur(mw_ctx, acc_next)
                 else:
                     # Call the handler with ctx only, then call the remainder of the middleware chain
-                    result = (await cur(context)) if asyncio.iscoroutinefunction(cur) else cur(context)
+                    result = (await cur(mw_ctx)) if asyncio.iscoroutinefunction(cur) else cur(mw_ctx)
                     return (await acc_next(result)) if asyncio.iscoroutinefunction(acc_next) else acc_next(result)
 
             return chained_middleware
@@ -748,6 +945,188 @@ where each calls the next in the chain when they're successful.</p></div>
         self.opts = opts</code></pre>
 </details>
 </dd>
+<dt id="nitric.faas.BucketNotificationContext"><code class="flex name class">
+<span>class <span class="ident">BucketNotificationContext</span></span>
+<span>(</span><span>request: <a title="nitric.faas.BucketNotificationRequest" href="#nitric.faas.BucketNotificationRequest">BucketNotificationRequest</a>, response: <a title="nitric.faas.BucketNotificationResponse" href="#nitric.faas.BucketNotificationResponse">BucketNotificationResponse</a> = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents the full request/response context for a bucket notification trigger.</p>
+<p>Construct a new BucketNotificationContext.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BucketNotificationContext(TriggerContext):
+    &#34;&#34;&#34;Represents the full request/response context for a bucket notification trigger.&#34;&#34;&#34;
+
+    def __init__(self, request: BucketNotificationRequest, response: BucketNotificationResponse = None):
+        &#34;&#34;&#34;Construct a new BucketNotificationContext.&#34;&#34;&#34;
+        super().__init__()
+        self.req = request
+        self.res = response if response else BucketNotificationResponse()
+
+    def bucket_notification(self) -&gt; BucketNotificationContext:
+        &#34;&#34;&#34;Return this BucketNotificationContext, used when determining the context type of a trigger.&#34;&#34;&#34;
+        return self
+
+    @staticmethod
+    def from_grpc_trigger_request(trigger_request: TriggerRequest) -&gt; BucketNotificationContext:
+        &#34;&#34;&#34;Construct a new BucketNotificationContext from a Bucket Notification trigger from the Nitric Membrane.&#34;&#34;&#34;
+        return BucketNotificationContext(
+            request=BucketNotificationRequest(
+                data=trigger_request.data,
+                key=trigger_request.notification.bucket.key,
+                notification_type=trigger_request.notification.bucket.type,
+                trace_context=trigger_request.trace_context.values,
+            )
+        )</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.faas.TriggerContext" href="#nitric.faas.TriggerContext">TriggerContext</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Static methods</h3>
+<dl>
+<dt id="nitric.faas.BucketNotificationContext.from_grpc_trigger_request"><code class="name flex">
+<span>def <span class="ident">from_grpc_trigger_request</span></span>(<span>trigger_request: TriggerRequest) ‑> <a title="nitric.faas.BucketNotificationContext" href="#nitric.faas.BucketNotificationContext">BucketNotificationContext</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Construct a new BucketNotificationContext from a Bucket Notification trigger from the Nitric Membrane.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def from_grpc_trigger_request(trigger_request: TriggerRequest) -&gt; BucketNotificationContext:
+    &#34;&#34;&#34;Construct a new BucketNotificationContext from a Bucket Notification trigger from the Nitric Membrane.&#34;&#34;&#34;
+    return BucketNotificationContext(
+        request=BucketNotificationRequest(
+            data=trigger_request.data,
+            key=trigger_request.notification.bucket.key,
+            notification_type=trigger_request.notification.bucket.type,
+            trace_context=trigger_request.trace_context.values,
+        )
+    )</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.faas.BucketNotificationContext.bucket_notification"><code class="name flex">
+<span>def <span class="ident">bucket_notification</span></span>(<span>self) ‑> <a title="nitric.faas.BucketNotificationContext" href="#nitric.faas.BucketNotificationContext">BucketNotificationContext</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return this BucketNotificationContext, used when determining the context type of a trigger.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def bucket_notification(self) -&gt; BucketNotificationContext:
+    &#34;&#34;&#34;Return this BucketNotificationContext, used when determining the context type of a trigger.&#34;&#34;&#34;
+    return self</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="nitric.faas.TriggerContext" href="#nitric.faas.TriggerContext">TriggerContext</a></b></code>:
+<ul class="hlist">
+<li><code><a title="nitric.faas.TriggerContext.event" href="#nitric.faas.TriggerContext.event">event</a></code></li>
+<li><code><a title="nitric.faas.TriggerContext.http" href="#nitric.faas.TriggerContext.http">http</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="nitric.faas.BucketNotificationRequest"><code class="flex name class">
+<span>class <span class="ident">BucketNotificationRequest</span></span>
+<span>(</span><span>data: bytes, key: str, notification_type: BucketNotificationType, trace_context: Dict[str, str])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents a translated Event, from a Subscribed Topic, forwarded from the Nitric Membrane.</p>
+<p>Construct a new EventRequest.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BucketNotificationRequest(Request):
+    &#34;&#34;&#34;Represents a translated Event, from a Subscribed Topic, forwarded from the Nitric Membrane.&#34;&#34;&#34;
+
+    def __init__(self, data: bytes, key: str, notification_type: BucketNotificationType, trace_context: Dict[str, str]):
+        &#34;&#34;&#34;Construct a new EventRequest.&#34;&#34;&#34;
+        super().__init__(data, trace_context)
+
+        self.key = key
+        self.notification_type = notification_type</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.faas.Request" href="#nitric.faas.Request">Request</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="nitric.faas.FileNotificationRequest" href="#nitric.faas.FileNotificationRequest">FileNotificationRequest</a></li>
+</ul>
+</dd>
+<dt id="nitric.faas.BucketNotificationResponse"><code class="flex name class">
+<span>class <span class="ident">BucketNotificationResponse</span></span>
+<span>(</span><span>success: bool = True)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents the response to a trigger from a Bucket</p>
+<p>Construct a new BucketNotificationResponse.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BucketNotificationResponse(Response):
+    &#34;&#34;&#34;Represents the response to a trigger from a Bucket&#34;&#34;&#34;
+
+    def __init__(self, success: bool = True):
+        &#34;&#34;&#34;Construct a new BucketNotificationResponse.&#34;&#34;&#34;
+        self.success = success</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.faas.Response" href="#nitric.faas.Response">Response</a></li>
+<li>abc.ABC</li>
+</ul>
+</dd>
+<dt id="nitric.faas.BucketNotificationWorkerOptions"><code class="flex name class">
+<span>class <span class="ident">BucketNotificationWorkerOptions</span></span>
+<span>(</span><span>bucket_name: str, notification_type: str, notification_prefix_filter: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Options for bucket notification workers.</p>
+<p>Construct a new options object.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BucketNotificationWorkerOptions:
+    &#34;&#34;&#34;Options for bucket notification workers.&#34;&#34;&#34;
+
+    def __init__(self, bucket_name: str, notification_type: str, notification_prefix_filter: str):
+        &#34;&#34;&#34;Construct a new options object.&#34;&#34;&#34;
+        self.bucket_name = bucket_name
+        self.notification_type = BucketNotificationWorkerOptions._to_grpc_event_type(notification_type.lower())
+        self.notification_prefix_filter = notification_prefix_filter
+
+    @staticmethod
+    def _to_grpc_event_type(event_type: str) -&gt; BucketNotificationType:
+        if event_type == &#34;write&#34;:
+            return BucketNotificationType.Created
+        elif event_type == &#34;delete&#34;:
+            return BucketNotificationType.Deleted
+        else:
+            raise ValueError(f&#34;Event type {event_type} is unsupported&#34;)</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="nitric.faas.FileNotificationWorkerOptions" href="#nitric.faas.FileNotificationWorkerOptions">FileNotificationWorkerOptions</a></li>
+</ul>
+</dd>
 <dt id="nitric.faas.EventContext"><code class="flex name class">
 <span>class <span class="ident">EventContext</span></span>
 <span>(</span><span>request: <a title="nitric.faas.EventRequest" href="#nitric.faas.EventRequest">EventRequest</a>, response: <a title="nitric.faas.EventResponse" href="#nitric.faas.EventResponse">EventResponse</a> = None)</span>
@@ -833,6 +1212,7 @@ def from_grpc_trigger_request(trigger_request: TriggerRequest):
 <ul class="hlist">
 <li><code><b><a title="nitric.faas.TriggerContext" href="#nitric.faas.TriggerContext">TriggerContext</a></b></code>:
 <ul class="hlist">
+<li><code><a title="nitric.faas.TriggerContext.bucket_notification" href="#nitric.faas.TriggerContext.bucket_notification">bucket_notification</a></code></li>
 <li><code><a title="nitric.faas.TriggerContext.http" href="#nitric.faas.TriggerContext.http">http</a></code></li>
 </ul>
 </li>
@@ -854,9 +1234,8 @@ def from_grpc_trigger_request(trigger_request: TriggerRequest):
 
     def __init__(self, data: bytes, topic: str, trace_context: Dict[str, str]):
         &#34;&#34;&#34;Construct a new EventRequest.&#34;&#34;&#34;
-        super().__init__(data)
+        super().__init__(data, trace_context)
         self.topic = topic
-        self.trace_context = trace_context
 
     @property
     def payload(self) -&gt; bytes:
@@ -924,6 +1303,159 @@ def payload(self) -&gt; bytes:
     pass</code></pre>
 </details>
 </dd>
+<dt id="nitric.faas.FileNotificationContext"><code class="flex name class">
+<span>class <span class="ident">FileNotificationContext</span></span>
+<span>(</span><span>request: <a title="nitric.faas.FileNotificationRequest" href="#nitric.faas.FileNotificationRequest">FileNotificationRequest</a>, response: <a title="nitric.faas.BucketNotificationResponse" href="#nitric.faas.BucketNotificationResponse">BucketNotificationResponse</a> = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents the full request/response context for an Http based trigger.</p>
+<p>Construct a new FileNotificationContext.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FileNotificationContext(TriggerContext):
+    &#34;&#34;&#34;Represents the full request/response context for an Http based trigger.&#34;&#34;&#34;
+
+    def __init__(self, request: FileNotificationRequest, response: BucketNotificationResponse = None):
+        &#34;&#34;&#34;Construct a new FileNotificationContext.&#34;&#34;&#34;
+        super().__init__()
+        self.req = request
+        self.res = response if response else BucketNotificationResponse()
+
+    def bucket_notification(self) -&gt; FileNotificationContext:
+        &#34;&#34;&#34;Return this FileNotificationContext, used when determining the context type of a trigger.&#34;&#34;&#34;
+        return self
+
+    @staticmethod
+    def from_grpc_trigger_request(
+        trigger_request: TriggerRequest, options: FileNotificationWorkerOptions
+    ) -&gt; FileNotificationContext:
+        &#34;&#34;&#34;Construct a new FileNotificationTrigger from a Bucket Notification trigger from the Nitric Membrane.&#34;&#34;&#34;
+        return FileNotificationContext(
+            request=FileNotificationRequest(
+                data=trigger_request.data,
+                key=trigger_request.notification.bucket.key,
+                bucket_ref=options.bucket_ref,
+                notification_type=trigger_request.notification.bucket.type,
+                trace_context=trigger_request.trace_context.values,
+            )
+        )</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.faas.TriggerContext" href="#nitric.faas.TriggerContext">TriggerContext</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Static methods</h3>
+<dl>
+<dt id="nitric.faas.FileNotificationContext.from_grpc_trigger_request"><code class="name flex">
+<span>def <span class="ident">from_grpc_trigger_request</span></span>(<span>trigger_request: TriggerRequest, options: <a title="nitric.faas.FileNotificationWorkerOptions" href="#nitric.faas.FileNotificationWorkerOptions">FileNotificationWorkerOptions</a>) ‑> <a title="nitric.faas.FileNotificationContext" href="#nitric.faas.FileNotificationContext">FileNotificationContext</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Construct a new FileNotificationTrigger from a Bucket Notification trigger from the Nitric Membrane.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def from_grpc_trigger_request(
+    trigger_request: TriggerRequest, options: FileNotificationWorkerOptions
+) -&gt; FileNotificationContext:
+    &#34;&#34;&#34;Construct a new FileNotificationTrigger from a Bucket Notification trigger from the Nitric Membrane.&#34;&#34;&#34;
+    return FileNotificationContext(
+        request=FileNotificationRequest(
+            data=trigger_request.data,
+            key=trigger_request.notification.bucket.key,
+            bucket_ref=options.bucket_ref,
+            notification_type=trigger_request.notification.bucket.type,
+            trace_context=trigger_request.trace_context.values,
+        )
+    )</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="nitric.faas.FileNotificationContext.bucket_notification"><code class="name flex">
+<span>def <span class="ident">bucket_notification</span></span>(<span>self) ‑> <a title="nitric.faas.FileNotificationContext" href="#nitric.faas.FileNotificationContext">FileNotificationContext</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return this FileNotificationContext, used when determining the context type of a trigger.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def bucket_notification(self) -&gt; FileNotificationContext:
+    &#34;&#34;&#34;Return this FileNotificationContext, used when determining the context type of a trigger.&#34;&#34;&#34;
+    return self</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="nitric.faas.TriggerContext" href="#nitric.faas.TriggerContext">TriggerContext</a></b></code>:
+<ul class="hlist">
+<li><code><a title="nitric.faas.TriggerContext.event" href="#nitric.faas.TriggerContext.event">event</a></code></li>
+<li><code><a title="nitric.faas.TriggerContext.http" href="#nitric.faas.TriggerContext.http">http</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="nitric.faas.FileNotificationRequest"><code class="flex name class">
+<span>class <span class="ident">FileNotificationRequest</span></span>
+<span>(</span><span>data: bytes, bucket_ref: Any, key: str, notification_type: BucketNotificationType, trace_context: Dict[str, str])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents a translated Event, from a Subscribed Topic, forwarded from the Nitric Membrane.</p>
+<p>Construct a new EventRequest.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FileNotificationRequest(BucketNotificationRequest):
+    def __init__(
+        self,
+        data: bytes,
+        bucket_ref: Any,  # can&#39;t import BucketRef due to circular dependency problems
+        key: str,
+        notification_type: BucketNotificationType,
+        trace_context: Dict[str, str],
+    ):
+        super().__init__(data=data, key=key, notification_type=notification_type, trace_context=trace_context)
+        self.file = bucket_ref.file(key)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.faas.BucketNotificationRequest" href="#nitric.faas.BucketNotificationRequest">BucketNotificationRequest</a></li>
+<li><a title="nitric.faas.Request" href="#nitric.faas.Request">Request</a></li>
+<li>abc.ABC</li>
+</ul>
+</dd>
+<dt id="nitric.faas.FileNotificationWorkerOptions"><code class="flex name class">
+<span>class <span class="ident">FileNotificationWorkerOptions</span></span>
+<span>(</span><span>bucket, notification_type: str, notification_prefix_filter: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Options for bucket notification workers with file references.</p>
+<p>Construct a new options object.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FileNotificationWorkerOptions(BucketNotificationWorkerOptions):
+    &#34;&#34;&#34;Options for bucket notification workers with file references.&#34;&#34;&#34;
+
+    def __init__(self, bucket, notification_type: str, notification_prefix_filter: str):
+        super().__init__(bucket.name, notification_type, notification_prefix_filter)
+
+        self.bucket_ref = bucket</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="nitric.faas.BucketNotificationWorkerOptions" href="#nitric.faas.BucketNotificationWorkerOptions">BucketNotificationWorkerOptions</a></li>
+</ul>
+</dd>
 <dt id="nitric.faas.Frequency"><code class="flex name class">
 <span>class <span class="ident">Frequency</span></span>
 <span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
@@ -945,7 +1477,10 @@ def payload(self) -&gt; bytes:
     @staticmethod
     def from_str(value: str) -&gt; Frequency:
         &#34;&#34;&#34;Convert a string frequency value to a Frequency.&#34;&#34;&#34;
-        return Frequency[value.strip().lower()]
+        try:
+            return Frequency[value.strip().lower()]
+        except Exception:
+            raise ValueError(f&#34;{value} is not valid frequency&#34;)
 
     @staticmethod
     def as_str_list() -&gt; List[str]:
@@ -1004,7 +1539,10 @@ def as_str_list() -&gt; List[str]:
 <pre><code class="python">@staticmethod
 def from_str(value: str) -&gt; Frequency:
     &#34;&#34;&#34;Convert a string frequency value to a Frequency.&#34;&#34;&#34;
-    return Frequency[value.strip().lower()]</code></pre>
+    try:
+        return Frequency[value.strip().lower()]
+    except Exception:
+        raise ValueError(f&#34;{value} is not valid frequency&#34;)</code></pre>
 </details>
 </dd>
 </dl>
@@ -1027,6 +1565,7 @@ def from_str(value: str) -&gt; Frequency:
         &#34;&#34;&#34;Construct a new function server.&#34;&#34;&#34;
         self.__http_handler = None
         self.__event_handler = None
+        self.__bucket_notification_handler = None
         self._any_handler = None
         self._opts = opts
 
@@ -1048,10 +1587,24 @@ def from_str(value: str) -&gt; Frequency:
         self.__event_handler = compose_middleware(*handlers)
         return self
 
+    def bucket_notification(self, *handlers: Union[Middleware, List[Middleware]]) -&gt; FunctionServer:
+        &#34;&#34;&#34;
+        Register one or more Bucket Notification Trigger Handlers or Middleware.
+
+        When multiple handlers are provided, they will be called in order.
+        &#34;&#34;&#34;
+        self.__bucket_notification_handler = compose_middleware(*handlers)
+        return self
+
     async def start(self, *handlers: Union[Middleware, List[Middleware]]):
         &#34;&#34;&#34;Start the function server using the provided trigger handlers.&#34;&#34;&#34;
         self._any_handler = compose_middleware(*handlers) if len(handlers) &gt; 0 else None
-        if not self._any_handler and not self._http_handler and not self._event_handler:
+        if (
+            not self._any_handler
+            and not self._http_handler
+            and not self._event_handler
+            and not self.__bucket_notification_handler
+        ):
             raise Exception(&#34;At least one handler function must be provided.&#34;)
 
         await self._run()
@@ -1063,6 +1616,10 @@ def from_str(value: str) -&gt; Frequency:
     @property
     def _event_handler(self):
         return self.__event_handler if self.__event_handler else self._any_handler
+
+    @property
+    def _bucket_notification_handler(self):
+        return self.__bucket_notification_handler if self.__bucket_notification_handler else self._any_handler
 
     async def _run(self):
         &#34;&#34;&#34;Register a new FaaS worker with the Membrane, using the provided function as the handler.&#34;&#34;&#34;
@@ -1086,6 +1643,16 @@ def from_str(value: str) -&gt; Frequency:
                 )
             elif isinstance(self._opts, SubscriptionWorkerOptions):
                 init_request = InitRequest(subscription=SubscriptionWorker(topic=self._opts.topic))
+            elif isinstance(self._opts, BucketNotificationWorkerOptions) or isinstance(
+                self._opts, FileNotificationWorkerOptions
+            ):
+                config = BucketNotificationConfig(
+                    notification_type=self._opts.notification_type,
+                    notification_prefix_filter=self._opts.notification_prefix_filter,
+                )
+                init_request = InitRequest(
+                    bucket_notification=BucketNotificationWorker(bucket=self._opts.bucket_name, config=config)
+                )
 
             # let the membrane server know we&#39;re ready to start
             await request_channel.send(ClientMessage(init_request=init_request))
@@ -1099,7 +1666,7 @@ def from_str(value: str) -&gt; Frequency:
                     # proceed to the next available message
                     continue
                 if msg_type == &#34;trigger_request&#34;:
-                    ctx = _ctx_from_grpc_trigger_request(srv_msg.trigger_request)
+                    ctx = _ctx_from_grpc_trigger_request(srv_msg.trigger_request, self._opts)
 
                     try:
                         if len(ctx.req.trace_context) &gt; 0:
@@ -1109,6 +1676,8 @@ def from_str(value: str) -&gt; Frequency:
                             func = self._http_handler
                         elif ctx.event():
                             func = self._event_handler
+                        elif ctx.bucket_notification():
+                            func = self._bucket_notification_handler
                         else:
                             func = self._any_handler
 
@@ -1154,6 +1723,26 @@ def from_str(value: str) -&gt; Frequency:
 </details>
 <h3>Methods</h3>
 <dl>
+<dt id="nitric.faas.FunctionServer.bucket_notification"><code class="name flex">
+<span>def <span class="ident">bucket_notification</span></span>(<span>self, *handlers: Union[Middleware, List[Middleware]]) ‑> <a title="nitric.faas.FunctionServer" href="#nitric.faas.FunctionServer">FunctionServer</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Register one or more Bucket Notification Trigger Handlers or Middleware.</p>
+<p>When multiple handlers are provided, they will be called in order.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def bucket_notification(self, *handlers: Union[Middleware, List[Middleware]]) -&gt; FunctionServer:
+    &#34;&#34;&#34;
+    Register one or more Bucket Notification Trigger Handlers or Middleware.
+
+    When multiple handlers are provided, they will be called in order.
+    &#34;&#34;&#34;
+    self.__bucket_notification_handler = compose_middleware(*handlers)
+    return self</code></pre>
+</details>
+</dd>
 <dt id="nitric.faas.FunctionServer.event"><code class="name flex">
 <span>def <span class="ident">event</span></span>(<span>self, *handlers: Union[Middleware, List[Middleware]]) ‑> <a title="nitric.faas.FunctionServer" href="#nitric.faas.FunctionServer">FunctionServer</a></span>
 </code></dt>
@@ -1206,7 +1795,12 @@ def from_str(value: str) -&gt; Frequency:
 <pre><code class="python">async def start(self, *handlers: Union[Middleware, List[Middleware]]):
     &#34;&#34;&#34;Start the function server using the provided trigger handlers.&#34;&#34;&#34;
     self._any_handler = compose_middleware(*handlers) if len(handlers) &gt; 0 else None
-    if not self._any_handler and not self._http_handler and not self._event_handler:
+    if (
+        not self._any_handler
+        and not self._http_handler
+        and not self._event_handler
+        and not self.__bucket_notification_handler
+    ):
         raise Exception(&#34;At least one handler function must be provided.&#34;)
 
     await self._run()</code></pre>
@@ -1327,6 +1921,7 @@ def from_grpc_trigger_request(trigger_request: TriggerRequest) -&gt; HttpContext
 <ul class="hlist">
 <li><code><b><a title="nitric.faas.TriggerContext" href="#nitric.faas.TriggerContext">TriggerContext</a></b></code>:
 <ul class="hlist">
+<li><code><a title="nitric.faas.TriggerContext.bucket_notification" href="#nitric.faas.TriggerContext.bucket_notification">bucket_notification</a></code></li>
 <li><code><a title="nitric.faas.TriggerContext.event" href="#nitric.faas.TriggerContext.event">event</a></code></li>
 </ul>
 </li>
@@ -1412,13 +2007,12 @@ def from_grpc_trigger_request(trigger_request: TriggerRequest) -&gt; HttpContext
         trace_context: Dict[str, str],
     ):
         &#34;&#34;&#34;Construct a new HttpRequest.&#34;&#34;&#34;
-        super().__init__(data)
+        super().__init__(data, trace_context)
         self.method = method
         self.path = path
         self.params = params
         self.query = query
         self.headers = headers
-        self.trace_context = trace_context
 
     @property
     def json(self) -&gt; Optional[Any]:
@@ -1602,7 +2196,7 @@ def body(self):
 </dd>
 <dt id="nitric.faas.Request"><code class="flex name class">
 <span>class <span class="ident">Request</span></span>
-<span>(</span><span>data: bytes)</span>
+<span>(</span><span>data: bytes, trace_context: Dict[str, str])</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Represents an abstract trigger request.</p>
@@ -1614,9 +2208,10 @@ def body(self):
 <pre><code class="python">class Request(ABC):
     &#34;&#34;&#34;Represents an abstract trigger request.&#34;&#34;&#34;
 
-    def __init__(self, data: bytes):
+    def __init__(self, data: bytes, trace_context: Dict[str, str]):
         &#34;&#34;&#34;Construct a new Request.&#34;&#34;&#34;
-        self.data = data</code></pre>
+        self.data = data
+        self.trace_context = trace_context</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1624,6 +2219,7 @@ def body(self):
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
+<li><a title="nitric.faas.BucketNotificationRequest" href="#nitric.faas.BucketNotificationRequest">BucketNotificationRequest</a></li>
 <li><a title="nitric.faas.EventRequest" href="#nitric.faas.EventRequest">EventRequest</a></li>
 <li><a title="nitric.faas.HttpRequest" href="#nitric.faas.HttpRequest">HttpRequest</a></li>
 </ul>
@@ -1648,6 +2244,7 @@ def body(self):
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
+<li><a title="nitric.faas.BucketNotificationResponse" href="#nitric.faas.BucketNotificationResponse">BucketNotificationResponse</a></li>
 <li><a title="nitric.faas.EventResponse" href="#nitric.faas.EventResponse">EventResponse</a></li>
 <li><a title="nitric.faas.HttpResponse" href="#nitric.faas.HttpResponse">HttpResponse</a></li>
 </ul>
@@ -1689,6 +2286,10 @@ def body(self):
 
     def event(self) -&gt; Union[EventContext, None]:
         &#34;&#34;&#34;Return this context as an EventContext if it is one, otherwise returns None.&#34;&#34;&#34;
+        return None
+
+    def bucket_notification(self) -&gt; Union[BucketNotificationContext, None]:
+        &#34;&#34;&#34;Return this context as a BucketNotificationContext if it is one, otherwise returns None.&#34;&#34;&#34;
         return None</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -1697,11 +2298,27 @@ def body(self):
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
+<li><a title="nitric.faas.BucketNotificationContext" href="#nitric.faas.BucketNotificationContext">BucketNotificationContext</a></li>
 <li><a title="nitric.faas.EventContext" href="#nitric.faas.EventContext">EventContext</a></li>
+<li><a title="nitric.faas.FileNotificationContext" href="#nitric.faas.FileNotificationContext">FileNotificationContext</a></li>
 <li><a title="nitric.faas.HttpContext" href="#nitric.faas.HttpContext">HttpContext</a></li>
 </ul>
 <h3>Methods</h3>
 <dl>
+<dt id="nitric.faas.TriggerContext.bucket_notification"><code class="name flex">
+<span>def <span class="ident">bucket_notification</span></span>(<span>self) ‑> Optional[<a title="nitric.faas.BucketNotificationContext" href="#nitric.faas.BucketNotificationContext">BucketNotificationContext</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return this context as a BucketNotificationContext if it is one, otherwise returns None.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def bucket_notification(self) -&gt; Union[BucketNotificationContext, None]:
+    &#34;&#34;&#34;Return this context as a BucketNotificationContext if it is one, otherwise returns None.&#34;&#34;&#34;
+    return None</code></pre>
+</details>
+</dd>
 <dt id="nitric.faas.TriggerContext.event"><code class="name flex">
 <span>def <span class="ident">event</span></span>(<span>self) ‑> Optional[<a title="nitric.faas.EventContext" href="#nitric.faas.EventContext">EventContext</a>]</span>
 </code></dt>
@@ -1748,6 +2365,7 @@ def body(self):
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="nitric.faas.bucket_notification" href="#nitric.faas.bucket_notification">bucket_notification</a></code></li>
 <li><code><a title="nitric.faas.compose_middleware" href="#nitric.faas.compose_middleware">compose_middleware</a></code></li>
 <li><code><a title="nitric.faas.event" href="#nitric.faas.event">event</a></code></li>
 <li><code><a title="nitric.faas.http" href="#nitric.faas.http">http</a></code></li>
@@ -1758,6 +2376,22 @@ def body(self):
 <ul>
 <li>
 <h4><code><a title="nitric.faas.ApiWorkerOptions" href="#nitric.faas.ApiWorkerOptions">ApiWorkerOptions</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.faas.BucketNotificationContext" href="#nitric.faas.BucketNotificationContext">BucketNotificationContext</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.faas.BucketNotificationContext.bucket_notification" href="#nitric.faas.BucketNotificationContext.bucket_notification">bucket_notification</a></code></li>
+<li><code><a title="nitric.faas.BucketNotificationContext.from_grpc_trigger_request" href="#nitric.faas.BucketNotificationContext.from_grpc_trigger_request">from_grpc_trigger_request</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.faas.BucketNotificationRequest" href="#nitric.faas.BucketNotificationRequest">BucketNotificationRequest</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.faas.BucketNotificationResponse" href="#nitric.faas.BucketNotificationResponse">BucketNotificationResponse</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.faas.BucketNotificationWorkerOptions" href="#nitric.faas.BucketNotificationWorkerOptions">BucketNotificationWorkerOptions</a></code></h4>
 </li>
 <li>
 <h4><code><a title="nitric.faas.EventContext" href="#nitric.faas.EventContext">EventContext</a></code></h4>
@@ -1779,6 +2413,19 @@ def body(self):
 <h4><code><a title="nitric.faas.FaasWorkerOptions" href="#nitric.faas.FaasWorkerOptions">FaasWorkerOptions</a></code></h4>
 </li>
 <li>
+<h4><code><a title="nitric.faas.FileNotificationContext" href="#nitric.faas.FileNotificationContext">FileNotificationContext</a></code></h4>
+<ul class="">
+<li><code><a title="nitric.faas.FileNotificationContext.bucket_notification" href="#nitric.faas.FileNotificationContext.bucket_notification">bucket_notification</a></code></li>
+<li><code><a title="nitric.faas.FileNotificationContext.from_grpc_trigger_request" href="#nitric.faas.FileNotificationContext.from_grpc_trigger_request">from_grpc_trigger_request</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="nitric.faas.FileNotificationRequest" href="#nitric.faas.FileNotificationRequest">FileNotificationRequest</a></code></h4>
+</li>
+<li>
+<h4><code><a title="nitric.faas.FileNotificationWorkerOptions" href="#nitric.faas.FileNotificationWorkerOptions">FileNotificationWorkerOptions</a></code></h4>
+</li>
+<li>
 <h4><code><a title="nitric.faas.Frequency" href="#nitric.faas.Frequency">Frequency</a></code></h4>
 <ul class="two-column">
 <li><code><a title="nitric.faas.Frequency.as_str_list" href="#nitric.faas.Frequency.as_str_list">as_str_list</a></code></li>
@@ -1792,6 +2439,7 @@ def body(self):
 <li>
 <h4><code><a title="nitric.faas.FunctionServer" href="#nitric.faas.FunctionServer">FunctionServer</a></code></h4>
 <ul class="">
+<li><code><a title="nitric.faas.FunctionServer.bucket_notification" href="#nitric.faas.FunctionServer.bucket_notification">bucket_notification</a></code></li>
 <li><code><a title="nitric.faas.FunctionServer.event" href="#nitric.faas.FunctionServer.event">event</a></code></li>
 <li><code><a title="nitric.faas.FunctionServer.http" href="#nitric.faas.FunctionServer.http">http</a></code></li>
 <li><code><a title="nitric.faas.FunctionServer.start" href="#nitric.faas.FunctionServer.start">start</a></code></li>
@@ -1854,6 +2502,7 @@ def body(self):
 <li>
 <h4><code><a title="nitric.faas.TriggerContext" href="#nitric.faas.TriggerContext">TriggerContext</a></code></h4>
 <ul class="">
+<li><code><a title="nitric.faas.TriggerContext.bucket_notification" href="#nitric.faas.TriggerContext.bucket_notification">bucket_notification</a></code></li>
 <li><code><a title="nitric.faas.TriggerContext.event" href="#nitric.faas.TriggerContext.event">event</a></code></li>
 <li><code><a title="nitric.faas.TriggerContext.http" href="#nitric.faas.TriggerContext.http">http</a></code></li>
 </ul>

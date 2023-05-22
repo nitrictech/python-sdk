@@ -22,7 +22,7 @@ from typing import List, Union
 
 from grpclib import GRPCError
 
-from nitric.api.exception import FailedPreconditionException, exception_from_grpc_error, InvalidArgumentException
+from nitric.exception import FailedPreconditionException, exception_from_grpc_error, InvalidArgumentException
 from nitric.utils import new_default_channel, _struct_from_dict, _dict_from_struct
 from nitric.proto.nitric.queue.v1 import (
     QueueServiceStub,

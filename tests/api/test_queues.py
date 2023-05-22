@@ -24,7 +24,7 @@ from betterproto.lib.google.protobuf import Struct
 from grpclib import GRPCError, Status
 
 from nitric.api import Queues, Task
-from nitric.api.exception import UnknownException
+from nitric.exception import UnknownException
 from nitric.api.queues import ReceivedTask
 from nitric.proto.nitric.queue.v1 import (
     QueueReceiveResponse,
@@ -55,6 +55,24 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.send", mock_send):
             queue = Queues().queue("test-queue")
             await queue.send(Task(payload=payload))
+
+        # Check expected values were passed to Stub
+        mock_send.assert_called_once_with(
+            queue_send_request=QueueSendRequest(
+                queue="test-queue", task=NitricTask(id=None, payload_type=None, payload=_struct_from_dict(payload))
+            )
+        )
+
+    async def test_send_with_only_payload(self):
+        mock_send = AsyncMock()
+        mock_response = Object()
+        mock_send.return_value = mock_response
+
+        payload = {"content": "of task"}
+
+        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.send", mock_send):
+            queue = Queues().queue("test-queue")
+            await queue.send(payload)
 
         # Check expected values were passed to Stub
         mock_send.assert_called_once_with(

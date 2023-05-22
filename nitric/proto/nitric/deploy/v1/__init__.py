@@ -16,6 +16,7 @@ import betterproto.lib.google.protobuf as betterproto_lib_google_protobuf
 import grpclib
 from betterproto.grpc.grpclib_server import ServiceBase
 
+from ...faas import v1 as __faas_v1__
 from ...resource import v1 as __resource_v1__
 
 
@@ -141,7 +142,14 @@ class ExecutionUnit(betterproto.Message):
 
 @dataclass(eq=False, repr=False)
 class Bucket(betterproto.Message):
-    pass
+    notifications: List["BucketNotificationTarget"] = betterproto.message_field(1)
+
+
+@dataclass(eq=False, repr=False)
+class BucketNotificationTarget(betterproto.Message):
+    config: "__faas_v1__.BucketNotificationConfig" = betterproto.message_field(1)
+    execution_unit: str = betterproto.string_field(2, group="target")
+    """The name of an execution unit to target"""
 
 
 @dataclass(eq=False, repr=False)

@@ -61,7 +61,7 @@ from nitric.proto.nitric.resource.v1 import (
     ResourceDetailsRequest,
 )
 from grpclib import GRPCError
-from nitric.api.exception import exception_from_grpc_error
+from nitric.exception import exception_from_grpc_error
 
 
 @dataclass
@@ -80,7 +80,12 @@ class ApiDetails:
 
 @dataclass
 class JwtSecurityDefinition:
-    &#34;&#34;&#34;Represents the JWT security definition for an API.&#34;&#34;&#34;
+    &#34;&#34;&#34;
+    Represents the JWT security definition for an API.
+
+    issuer (str): the JWT issuer
+    audiences (List[str]): a list of the allowed audiences for the API
+    &#34;&#34;&#34;
 
     issuer: str
     audiences: List[str]
@@ -96,16 +101,16 @@ class ApiOptions:
     &#34;&#34;&#34;Represents options when creating an API, such as middleware to be applied to all HTTP request to the API.&#34;&#34;&#34;
 
     path: str
-    middleware: Union[HttpMiddleware, List[HttpMiddleware], None]
-    security_definitions: Union[dict[str, SecurityDefinition], None]
-    security: Union[dict[str, List[str]], None]
+    middleware: Union[HttpMiddleware, List[HttpMiddleware]]
+    security_definitions: dict[str, SecurityDefinition]
+    security: dict[str, List[str]]
 
     def __init__(
         self,
         path: str = &#34;&#34;,
         middleware: List[Middleware] = [],
-        security_definitions: dict[str, SecurityDefinition] = None,
-        security: dict[str, List[str]] = None,
+        security_definitions: dict[str, SecurityDefinition] = {},
+        security: dict[str, List[str]] = {},
     ):
         &#34;&#34;&#34;Construct a new API options object.&#34;&#34;&#34;
         self.middleware = middleware
@@ -130,18 +135,18 @@ def _to_resource(b: Api) -&gt; Resource:
 
 def _security_definition_to_grpc_declaration(
     security_definitions: dict[str, SecurityDefinition]
-) -&gt; Union[dict[str, ApiSecurityDefinition], None]:
+) -&gt; dict[str, ApiSecurityDefinition]:
     if security_definitions is None or len(security_definitions) == 0:
-        return None
+        return {}
     return {
         k: ApiSecurityDefinition(jwt=ApiSecurityDefinitionJwt(issuer=v.issuer, audiences=v.audiences))
         for k, v in security_definitions.items()
     }
 
 
-def _security_to_grpc_declaration(security: dict[str, List[str]]) -&gt; dict[str, ApiScopes] | None:
+def _security_to_grpc_declaration(security: dict[str, List[str]]) -&gt; dict[str, ApiScopes]:
     if security is None or len(security) == 0:
-        return None
+        return {}
     return {k: ApiScopes(v) for k, v in security.items()}
 
 
@@ -215,7 +220,7 @@ class Api(BaseResource):
         return decorator
 
     def methods(self, methods: List[HttpMethod], match: str, opts: MethodOptions = None):
-        &#34;&#34;&#34;Define an HTTP route which will respond to HTTP GET requests.&#34;&#34;&#34;
+        &#34;&#34;&#34;Define an HTTP route which will respond to specific HTTP requests defined by a list of verbs.&#34;&#34;&#34;
         if opts is None:
             opts = MethodOptions()
 
@@ -303,7 +308,7 @@ class Api(BaseResource):
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    async def URL(self) -&gt; str:
+    async def url(self) -&gt; str:
         &#34;&#34;&#34;Get the APIs live URL.&#34;&#34;&#34;
         details = await self._details()
         return details.url
@@ -319,7 +324,7 @@ class Route:
     def __init__(self, api: Api, path: str, opts: RouteOptions):
         &#34;&#34;&#34;Define a route to be handled by the provided API.&#34;&#34;&#34;
         self.api = api
-        self.path = api.path.join(path)
+        self.path = (api.path + path).replace(&#34;//&#34;, &#34;/&#34;)
         self.middleware = opts.middleware if opts.middleware is not None else []
 
     def method(self, methods: List[HttpMethod], *middleware: HttpMiddleware, opts: MethodOptions = None):
@@ -485,7 +490,7 @@ def api(name: str, opts: ApiOptions = None) -&gt; Api:
         return decorator
 
     def methods(self, methods: List[HttpMethod], match: str, opts: MethodOptions = None):
-        &#34;&#34;&#34;Define an HTTP route which will respond to HTTP GET requests.&#34;&#34;&#34;
+        &#34;&#34;&#34;Define an HTTP route which will respond to specific HTTP requests defined by a list of verbs.&#34;&#34;&#34;
         if opts is None:
             opts = MethodOptions()
 
@@ -573,7 +578,7 @@ def api(name: str, opts: ApiOptions = None) -&gt; Api:
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    async def URL(self) -&gt; str:
+    async def url(self) -&gt; str:
         &#34;&#34;&#34;Get the APIs live URL.&#34;&#34;&#34;
         details = await self._details()
         return details.url</code></pre>
@@ -616,21 +621,6 @@ def api(name: str, opts: ApiOptions = None) -&gt; Api:
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="nitric.resources.apis.Api.URL"><code class="name flex">
-<span>async def <span class="ident">URL</span></span>(<span>self) ‑> str</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Get the APIs live URL.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">async def URL(self) -&gt; str:
-    &#34;&#34;&#34;Get the APIs live URL.&#34;&#34;&#34;
-    details = await self._details()
-    return details.url</code></pre>
-</details>
-</dd>
 <dt id="nitric.resources.apis.Api.all"><code class="name flex">
 <span>def <span class="ident">all</span></span>(<span>self, match: str, opts: MethodOptions = None)</span>
 </code></dt>
@@ -709,13 +699,13 @@ def api(name: str, opts: ApiOptions = None) -&gt; Api:
 <span>def <span class="ident">methods</span></span>(<span>self, methods: List[HttpMethod], match: str, opts: MethodOptions = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Define an HTTP route which will respond to HTTP GET requests.</p></div>
+<div class="desc"><p>Define an HTTP route which will respond to specific HTTP requests defined by a list of verbs.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def methods(self, methods: List[HttpMethod], match: str, opts: MethodOptions = None):
-    &#34;&#34;&#34;Define an HTTP route which will respond to HTTP GET requests.&#34;&#34;&#34;
+    &#34;&#34;&#34;Define an HTTP route which will respond to specific HTTP requests defined by a list of verbs.&#34;&#34;&#34;
     if opts is None:
         opts = MethodOptions()
 
@@ -810,6 +800,21 @@ def api(name: str, opts: ApiOptions = None) -&gt; Api:
     return decorator</code></pre>
 </details>
 </dd>
+<dt id="nitric.resources.apis.Api.url"><code class="name flex">
+<span>async def <span class="ident">url</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the APIs live URL.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def url(self) -&gt; str:
+    &#34;&#34;&#34;Get the APIs live URL.&#34;&#34;&#34;
+    details = await self._details()
+    return details.url</code></pre>
+</details>
+</dd>
 </dl>
 <h3>Inherited members</h3>
 <ul class="hlist">
@@ -865,7 +870,7 @@ class ApiDetails:
 </dd>
 <dt id="nitric.resources.apis.ApiOptions"><code class="flex name class">
 <span>class <span class="ident">ApiOptions</span></span>
-<span>(</span><span>path: str = '', middleware: List[Middleware] = [], security_definitions: dict[str, <a title="nitric.resources.apis.JwtSecurityDefinition" href="#nitric.resources.apis.JwtSecurityDefinition">JwtSecurityDefinition</a>] = None, security: dict[str, List[str]] = None)</span>
+<span>(</span><span>path: str = '', middleware: List[Middleware] = [], security_definitions: dict[str, <a title="nitric.resources.apis.JwtSecurityDefinition" href="#nitric.resources.apis.JwtSecurityDefinition">JwtSecurityDefinition</a>] = {}, security: dict[str, List[str]] = {})</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Represents options when creating an API, such as middleware to be applied to all HTTP request to the API.</p>
@@ -878,16 +883,16 @@ class ApiDetails:
     &#34;&#34;&#34;Represents options when creating an API, such as middleware to be applied to all HTTP request to the API.&#34;&#34;&#34;
 
     path: str
-    middleware: Union[HttpMiddleware, List[HttpMiddleware], None]
-    security_definitions: Union[dict[str, SecurityDefinition], None]
-    security: Union[dict[str, List[str]], None]
+    middleware: Union[HttpMiddleware, List[HttpMiddleware]]
+    security_definitions: dict[str, SecurityDefinition]
+    security: dict[str, List[str]]
 
     def __init__(
         self,
         path: str = &#34;&#34;,
         middleware: List[Middleware] = [],
-        security_definitions: dict[str, SecurityDefinition] = None,
-        security: dict[str, List[str]] = None,
+        security_definitions: dict[str, SecurityDefinition] = {},
+        security: dict[str, List[str]] = {},
     ):
         &#34;&#34;&#34;Construct a new API options object.&#34;&#34;&#34;
         self.middleware = middleware
@@ -897,7 +902,7 @@ class ApiDetails:
 </details>
 <h3>Class variables</h3>
 <dl>
-<dt id="nitric.resources.apis.ApiOptions.middleware"><code class="name">var <span class="ident">middleware</span> : Union[Callable[[<a title="nitric.faas.HttpContext" href="../faas.html#nitric.faas.HttpContext">HttpContext</a>, Coroutine[Any, Any, Optional[<a title="nitric.faas.HttpContext" href="../faas.html#nitric.faas.HttpContext">HttpContext</a>]]], Coroutine[Any, Any, Optional[<a title="nitric.faas.HttpContext" href="../faas.html#nitric.faas.HttpContext">HttpContext</a>]]], List[Callable[[<a title="nitric.faas.HttpContext" href="../faas.html#nitric.faas.HttpContext">HttpContext</a>, Coroutine[Any, Any, Optional[<a title="nitric.faas.HttpContext" href="../faas.html#nitric.faas.HttpContext">HttpContext</a>]]], Coroutine[Any, Any, Optional[<a title="nitric.faas.HttpContext" href="../faas.html#nitric.faas.HttpContext">HttpContext</a>]]]], NoneType]</code></dt>
+<dt id="nitric.resources.apis.ApiOptions.middleware"><code class="name">var <span class="ident">middleware</span> : Union[Callable[[<a title="nitric.faas.HttpContext" href="../faas.html#nitric.faas.HttpContext">HttpContext</a>, Coroutine[Any, Any, Optional[<a title="nitric.faas.HttpContext" href="../faas.html#nitric.faas.HttpContext">HttpContext</a>]]], Coroutine[Any, Any, Optional[<a title="nitric.faas.HttpContext" href="../faas.html#nitric.faas.HttpContext">HttpContext</a>]]], List[Callable[[<a title="nitric.faas.HttpContext" href="../faas.html#nitric.faas.HttpContext">HttpContext</a>, Coroutine[Any, Any, Optional[<a title="nitric.faas.HttpContext" href="../faas.html#nitric.faas.HttpContext">HttpContext</a>]]], Coroutine[Any, Any, Optional[<a title="nitric.faas.HttpContext" href="../faas.html#nitric.faas.HttpContext">HttpContext</a>]]]]]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -905,11 +910,11 @@ class ApiDetails:
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="nitric.resources.apis.ApiOptions.security"><code class="name">var <span class="ident">security</span> : Optional[dict[str, List[str]]]</code></dt>
+<dt id="nitric.resources.apis.ApiOptions.security"><code class="name">var <span class="ident">security</span> : dict[str, typing.List[str]]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="nitric.resources.apis.ApiOptions.security_definitions"><code class="name">var <span class="ident">security_definitions</span> : Optional[dict[str, <a title="nitric.resources.apis.JwtSecurityDefinition" href="#nitric.resources.apis.JwtSecurityDefinition">JwtSecurityDefinition</a>]]</code></dt>
+<dt id="nitric.resources.apis.ApiOptions.security_definitions"><code class="name">var <span class="ident">security_definitions</span> : dict[str, <a title="nitric.resources.apis.JwtSecurityDefinition" href="#nitric.resources.apis.JwtSecurityDefinition">JwtSecurityDefinition</a>]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -920,14 +925,21 @@ class ApiDetails:
 <span>(</span><span>issuer: str, audiences: List[str])</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Represents the JWT security definition for an API.</p></div>
+<div class="desc"><p>Represents the JWT security definition for an API.</p>
+<p>issuer (str): the JWT issuer
+audiences (List[str]): a list of the allowed audiences for the API</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@dataclass
 class JwtSecurityDefinition:
-    &#34;&#34;&#34;Represents the JWT security definition for an API.&#34;&#34;&#34;
+    &#34;&#34;&#34;
+    Represents the JWT security definition for an API.
+
+    issuer (str): the JWT issuer
+    audiences (List[str]): a list of the allowed audiences for the API
+    &#34;&#34;&#34;
 
     issuer: str
     audiences: List[str]</code></pre>
@@ -949,14 +961,21 @@ class JwtSecurityDefinition:
 <span>(</span><span>issuer: str, audiences: List[str])</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Represents the JWT security definition for an API.</p></div>
+<div class="desc"><p>Represents the JWT security definition for an API.</p>
+<p>issuer (str): the JWT issuer
+audiences (List[str]): a list of the allowed audiences for the API</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@dataclass
 class JwtSecurityDefinition:
-    &#34;&#34;&#34;Represents the JWT security definition for an API.&#34;&#34;&#34;
+    &#34;&#34;&#34;
+    Represents the JWT security definition for an API.
+
+    issuer (str): the JWT issuer
+    audiences (List[str]): a list of the allowed audiences for the API
+    &#34;&#34;&#34;
 
     issuer: str
     audiences: List[str]</code></pre>
@@ -1063,7 +1082,7 @@ class JwtSecurityDefinition:
     def __init__(self, api: Api, path: str, opts: RouteOptions):
         &#34;&#34;&#34;Define a route to be handled by the provided API.&#34;&#34;&#34;
         self.api = api
-        self.path = api.path.join(path)
+        self.path = (api.path + path).replace(&#34;//&#34;, &#34;/&#34;)
         self.middleware = opts.middleware if opts.middleware is not None else []
 
     def method(self, methods: List[HttpMethod], *middleware: HttpMiddleware, opts: MethodOptions = None):
@@ -1263,7 +1282,6 @@ class JwtSecurityDefinition:
 <li>
 <h4><code><a title="nitric.resources.apis.Api" href="#nitric.resources.apis.Api">Api</a></code></h4>
 <ul class="">
-<li><code><a title="nitric.resources.apis.Api.URL" href="#nitric.resources.apis.Api.URL">URL</a></code></li>
 <li><code><a title="nitric.resources.apis.Api.all" href="#nitric.resources.apis.Api.all">all</a></code></li>
 <li><code><a title="nitric.resources.apis.Api.app" href="#nitric.resources.apis.Api.app">app</a></code></li>
 <li><code><a title="nitric.resources.apis.Api.delete" href="#nitric.resources.apis.Api.delete">delete</a></code></li>
@@ -1279,6 +1297,7 @@ class JwtSecurityDefinition:
 <li><code><a title="nitric.resources.apis.Api.routes" href="#nitric.resources.apis.Api.routes">routes</a></code></li>
 <li><code><a title="nitric.resources.apis.Api.security" href="#nitric.resources.apis.Api.security">security</a></code></li>
 <li><code><a title="nitric.resources.apis.Api.security_definitions" href="#nitric.resources.apis.Api.security_definitions">security_definitions</a></code></li>
+<li><code><a title="nitric.resources.apis.Api.url" href="#nitric.resources.apis.Api.url">url</a></code></li>
 </ul>
 </li>
 <li>

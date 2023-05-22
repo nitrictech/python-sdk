@@ -46,13 +46,14 @@
 #
 from __future__ import annotations
 
-from nitric.api.exception import exception_from_grpc_error
+from nitric.exception import exception_from_grpc_error
 from nitric.api.storage import BucketRef, Storage
 from typing import List, Union
 from enum import Enum
 from grpclib import GRPCError
 
 from nitric.application import Nitric
+from nitric.faas import FunctionServer, BucketNotificationWorkerOptions, BucketNotificationMiddleware
 from nitric.proto.nitric.resource.v1 import (
     Resource,
     ResourceType,
@@ -76,6 +77,7 @@ class Bucket(SecureResource):
 
     name: str
     actions: List[Action]
+    _server: FunctionServer
 
     def __init__(self, name: str):
         &#34;&#34;&#34;Create a bucket with the name provided or references it if it already exists.&#34;&#34;&#34;
@@ -90,7 +92,7 @@ class Bucket(SecureResource):
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    def _perms_to_actions(self, *args: [Union[BucketPermission, str]]) -&gt; List[Action]:
+    def _perms_to_actions(self, *args: List[Union[BucketPermission, str]]) -&gt; List[Action]:
         permission_actions_map = {
             BucketPermission.reading: [Action.BucketFileGet, Action.BucketFileList],
             BucketPermission.writing: [Action.BucketFilePut],
@@ -111,6 +113,24 @@ class Bucket(SecureResource):
         self._register_policy(*args)
 
         return Storage().bucket(self.name)
+
+    def on(self, notification_type: str, notification_prefix_filter: str):
+        &#34;&#34;&#34;Create and return a bucket notification decorator for this bucket.&#34;&#34;&#34;
+        print(&#34;this has been called&#34;)
+
+        def decorator(func: BucketNotificationMiddleware):
+            print(&#34;this has been called&#34;)
+            self._server = FunctionServer(
+                BucketNotificationWorkerOptions(
+                    bucket_name=self.name,
+                    notification_type=notification_type,
+                    notification_prefix_filter=notification_prefix_filter,
+                )
+            )
+            self._server.bucket_notification(func)
+            return Nitric._register_worker(self._server)
+
+        return decorator
 
 
 def bucket(name: str) -&gt; Bucket:
@@ -169,6 +189,7 @@ def bucket(name: str) -&gt; Bucket:
 
     name: str
     actions: List[Action]
+    _server: FunctionServer
 
     def __init__(self, name: str):
         &#34;&#34;&#34;Create a bucket with the name provided or references it if it already exists.&#34;&#34;&#34;
@@ -183,7 +204,7 @@ def bucket(name: str) -&gt; Bucket:
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    def _perms_to_actions(self, *args: [Union[BucketPermission, str]]) -&gt; List[Action]:
+    def _perms_to_actions(self, *args: List[Union[BucketPermission, str]]) -&gt; List[Action]:
         permission_actions_map = {
             BucketPermission.reading: [Action.BucketFileGet, Action.BucketFileList],
             BucketPermission.writing: [Action.BucketFilePut],
@@ -203,7 +224,25 @@ def bucket(name: str) -&gt; Bucket:
         &#34;&#34;&#34;Request the required permissions for this resource.&#34;&#34;&#34;
         self._register_policy(*args)
 
-        return Storage().bucket(self.name)</code></pre>
+        return Storage().bucket(self.name)
+
+    def on(self, notification_type: str, notification_prefix_filter: str):
+        &#34;&#34;&#34;Create and return a bucket notification decorator for this bucket.&#34;&#34;&#34;
+        print(&#34;this has been called&#34;)
+
+        def decorator(func: BucketNotificationMiddleware):
+            print(&#34;this has been called&#34;)
+            self._server = FunctionServer(
+                BucketNotificationWorkerOptions(
+                    bucket_name=self.name,
+                    notification_type=notification_type,
+                    notification_prefix_filter=notification_prefix_filter,
+                )
+            )
+            self._server.bucket_notification(func)
+            return Nitric._register_worker(self._server)
+
+        return decorator</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -238,6 +277,34 @@ def bucket(name: str) -&gt; Bucket:
     self._register_policy(*args)
 
     return Storage().bucket(self.name)</code></pre>
+</details>
+</dd>
+<dt id="nitric.resources.buckets.Bucket.on"><code class="name flex">
+<span>def <span class="ident">on</span></span>(<span>self, notification_type: str, notification_prefix_filter: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create and return a bucket notification decorator for this bucket.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on(self, notification_type: str, notification_prefix_filter: str):
+    &#34;&#34;&#34;Create and return a bucket notification decorator for this bucket.&#34;&#34;&#34;
+    print(&#34;this has been called&#34;)
+
+    def decorator(func: BucketNotificationMiddleware):
+        print(&#34;this has been called&#34;)
+        self._server = FunctionServer(
+            BucketNotificationWorkerOptions(
+                bucket_name=self.name,
+                notification_type=notification_type,
+                notification_prefix_filter=notification_prefix_filter,
+            )
+        )
+        self._server.bucket_notification(func)
+        return Nitric._register_worker(self._server)
+
+    return decorator</code></pre>
 </details>
 </dd>
 </dl>
@@ -314,6 +381,7 @@ def bucket(name: str) -&gt; Bucket:
 <li><code><a title="nitric.resources.buckets.Bucket.actions" href="#nitric.resources.buckets.Bucket.actions">actions</a></code></li>
 <li><code><a title="nitric.resources.buckets.Bucket.allow" href="#nitric.resources.buckets.Bucket.allow">allow</a></code></li>
 <li><code><a title="nitric.resources.buckets.Bucket.name" href="#nitric.resources.buckets.Bucket.name">name</a></code></li>
+<li><code><a title="nitric.resources.buckets.Bucket.on" href="#nitric.resources.buckets.Bucket.on">on</a></code></li>
 </ul>
 </li>
 <li>

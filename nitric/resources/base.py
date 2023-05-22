@@ -34,7 +34,7 @@ from nitric.proto.nitric.resource.v1 import (
     ResourceServiceStub,
 )
 
-from nitric.api.exception import exception_from_grpc_error, NitricResourceException
+from nitric.exception import exception_from_grpc_error, NitricResourceException
 from nitric.utils import new_default_channel
 
 T = TypeVar("T", bound="BaseResource")
@@ -42,8 +42,6 @@ T = TypeVar("T", bound="BaseResource")
 
 class BaseResource(ABC):
     """A base resource class with common functionality."""
-
-    cache = {}
 
     def __init__(self):
         """Construct a new resource."""
@@ -62,7 +60,6 @@ class BaseResource(ABC):
 
         The registration process for resources async, so this method should be used instead of __init__.
         """
-        # Todo: store the resource reference in a cache to avoid duplicate registrations
         r = cls(name, *args, **kwargs)
         try:
             loop = asyncio.get_running_loop()

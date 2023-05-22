@@ -24,7 +24,7 @@ from betterproto.lib.google.protobuf import Struct
 from grpclib import GRPCError, Status
 
 from nitric.api import Events, Event
-from nitric.api.exception import UnknownException
+from nitric.exception import UnknownException
 from nitric.proto.nitric.event.v1 import TopicListResponse, NitricTopic, EventPublishRequest, NitricEvent
 from nitric.utils import _struct_from_dict
 

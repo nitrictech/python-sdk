@@ -31,7 +31,7 @@ from nitric.proto.nitric.storage.v1 import (
 )
 
 from nitric.api import Storage
-from nitric.api.exception import UnknownException
+from nitric.exception import UnknownException
 
 
 class Object(object):
@@ -96,14 +96,14 @@ class StorageClientTest(IsolatedAsyncioTestCase):
             )
         )
 
-    async def test_sign_url(self):
+    async def test_download_url_with_default_expiry(self):
         mock_pre_sign_url = AsyncMock()
         mock_pre_sign_url.return_value = StoragePreSignUrlResponse(url="www.example.com")
 
         with patch("nitric.proto.nitric.storage.v1.StorageServiceStub.pre_sign_url", mock_pre_sign_url):
             bucket = Storage().bucket("test-bucket")
             file = bucket.file("test-file")
-            url = await file.sign_url()
+            url = await file.download_url()
 
         # Check expected values were passed to Stub
         mock_pre_sign_url.assert_called_once_with(
@@ -111,7 +111,73 @@ class StorageClientTest(IsolatedAsyncioTestCase):
                 bucket_name="test-bucket",
                 key="test-file",
                 operation=StoragePreSignUrlRequestOperation.READ,
-                expiry=3600,
+                expiry=600,
+            )
+        )
+
+        # check the URL is returned
+        assert url == "www.example.com"
+
+    async def test_download_url_with_provided_expiry(self):
+        mock_pre_sign_url = AsyncMock()
+        mock_pre_sign_url.return_value = StoragePreSignUrlResponse(url="www.example.com")
+
+        with patch("nitric.proto.nitric.storage.v1.StorageServiceStub.pre_sign_url", mock_pre_sign_url):
+            bucket = Storage().bucket("test-bucket")
+            file = bucket.file("test-file")
+            url = await file.download_url(60)
+
+        # Check expected values were passed to Stub
+        mock_pre_sign_url.assert_called_once_with(
+            storage_pre_sign_url_request=StoragePreSignUrlRequest(
+                bucket_name="test-bucket",
+                key="test-file",
+                operation=StoragePreSignUrlRequestOperation.READ,
+                expiry=60,
+            )
+        )
+
+        # check the URL is returned
+        assert url == "www.example.com"
+
+    async def test_upload_url_with_default_expiry(self):
+        mock_pre_sign_url = AsyncMock()
+        mock_pre_sign_url.return_value = StoragePreSignUrlResponse(url="www.example.com")
+
+        with patch("nitric.proto.nitric.storage.v1.StorageServiceStub.pre_sign_url", mock_pre_sign_url):
+            bucket = Storage().bucket("test-bucket")
+            file = bucket.file("test-file")
+            url = await file.upload_url()
+
+        # Check expected values were passed to Stub
+        mock_pre_sign_url.assert_called_once_with(
+            storage_pre_sign_url_request=StoragePreSignUrlRequest(
+                bucket_name="test-bucket",
+                key="test-file",
+                operation=StoragePreSignUrlRequestOperation.WRITE,
+                expiry=600,
+            )
+        )
+
+        # check the URL is returned
+        assert url == "www.example.com"
+
+    async def test_upload_url_with_provided_expiry(self):
+        mock_pre_sign_url = AsyncMock()
+        mock_pre_sign_url.return_value = StoragePreSignUrlResponse(url="www.example.com")
+
+        with patch("nitric.proto.nitric.storage.v1.StorageServiceStub.pre_sign_url", mock_pre_sign_url):
+            bucket = Storage().bucket("test-bucket")
+            file = bucket.file("test-file")
+            url = await file.upload_url(60)
+
+        # Check expected values were passed to Stub
+        mock_pre_sign_url.assert_called_once_with(
+            storage_pre_sign_url_request=StoragePreSignUrlRequest(
+                bucket_name="test-bucket",
+                key="test-file",
+                operation=StoragePreSignUrlRequestOperation.WRITE,
+                expiry=60,
             )
         )
 
@@ -148,4 +214,4 @@ class StorageClientTest(IsolatedAsyncioTestCase):
 
         with patch("nitric.proto.nitric.storage.v1.StorageServiceStub.pre_sign_url", mock_pre_sign_url):
             with pytest.raises(UnknownException) as e:
-                await Storage().bucket("test-bucket").file("test-file").sign_url()
+                await Storage().bucket("test-bucket").file("test-file").upload_url()

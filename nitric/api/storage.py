@@ -17,9 +17,12 @@
 # limitations under the License.
 #
 from dataclasses import dataclass
+from typing import Union
 
 from grpclib import GRPCError
-from nitric.api.exception import exception_from_grpc_error, InvalidArgumentException
+from nitric.exception import exception_from_grpc_error, InvalidArgumentException
+from nitric.application import Nitric
+from nitric.faas import FunctionServer, FileNotificationWorkerOptions, FileNotificationMiddleware
 from nitric.utils import new_default_channel
 from nitric.proto.nitric.storage.v1 import (
     StorageServiceStub,
@@ -31,6 +34,7 @@ from nitric.proto.nitric.storage.v1 import (
     StorageListFilesRequest,
 )
 from enum import Enum
+from warnings import warn
 
 
 class Storage(object):
@@ -52,15 +56,16 @@ class Storage(object):
 
     def bucket(self, name: str):
         """Return a reference to a bucket from the connected storage service."""
-        return BucketRef(_storage=self, name=name)
+        return BucketRef(_storage=self, name=name, _server=None)
 
 
-@dataclass(frozen=True, order=True)
+@dataclass(order=True)
 class BucketRef(object):
     """A reference to a bucket in a storage service, used to the perform operations on that bucket."""
 
     _storage: Storage
     name: str
+    _server: Union[FunctionServer, None]
 
     def file(self, key: str):
         """Return a reference to a file in this bucket."""
@@ -72,6 +77,22 @@ class BucketRef(object):
             storage_list_files_request=StorageListFilesRequest(bucket_name=self.name)
         )
         return [self.file(f.key) for f in resp.files]
+
+    def on(self, notification_type: str, notification_prefix_filter: str):
+        """Create and return a bucket notification decorator for this bucket."""
+
+        def decorator(func: FileNotificationMiddleware):
+            self._server = FunctionServer(
+                FileNotificationWorkerOptions(
+                    bucket=self,
+                    notification_type=notification_type,
+                    notification_prefix_filter=notification_prefix_filter,
+                )
+            )
+            self._server.bucket_notification(func)
+            Nitric._register_worker(self._server)
+
+        return decorator
 
 
 class FileMode(Enum):
@@ -140,6 +161,7 @@ class File(object):
 
     async def sign_url(self, mode: FileMode = FileMode.READ, expiry: int = 3600):
         """Generate a signed URL for reading or writing to a file."""
+        warn("File.sign_url() is deprecated, use upload_url() or download_url() instead", DeprecationWarning)
         try:
             response = await self._storage._storage_stub.pre_sign_url(
                 storage_pre_sign_url_request=StoragePreSignUrlRequest(

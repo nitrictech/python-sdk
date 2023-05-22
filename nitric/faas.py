@@ -41,6 +41,10 @@ from nitric.proto.nitric.faas.v1 import (
     ApiWorker,
     SubscriptionWorker,
     ScheduleRate,
+    BucketNotificationWorker,
+    BucketNotificationConfig,
+    BucketNotificationType,
+    NotificationResponseContext,
 )
 import grpclib
 import asyncio
@@ -67,9 +71,10 @@ class HttpMethod(Enum):
 class Request(ABC):
     """Represents an abstract trigger request."""
 
-    def __init__(self, data: bytes):
+    def __init__(self, data: bytes, trace_context: Dict[str, str]):
         """Construct a new Request."""
         self.data = data
+        self.trace_context = trace_context
 
 
 class Response(ABC):
@@ -89,14 +94,23 @@ class TriggerContext(ABC):
         """Return this context as an EventContext if it is one, otherwise returns None."""
         return None
 
+    def bucket_notification(self) -> Union[BucketNotificationContext, None]:
+        """Return this context as a BucketNotificationContext if it is one, otherwise returns None."""
+        return None
 
-def _ctx_from_grpc_trigger_request(trigger_request: TriggerRequest):
+
+def _ctx_from_grpc_trigger_request(trigger_request: TriggerRequest, options: FaasWorkerOptions = None):
     """Return a TriggerContext from a TriggerRequest."""
-    context_type, context = betterproto.which_one_of(trigger_request, "context")
+    context_type, _ = betterproto.which_one_of(trigger_request, "context")
     if context_type == "http":
         return HttpContext.from_grpc_trigger_request(trigger_request)
     elif context_type == "topic":
         return EventContext.from_grpc_trigger_request(trigger_request)
+    elif context_type == "notification":
+        if isinstance(options, FileNotificationWorkerOptions):
+            return FileNotificationContext.from_grpc_trigger_request(trigger_request, options)
+        else:
+            return BucketNotificationContext.from_grpc_trigger_request(trigger_request)
     else:
         print(f"Trigger with unknown context received, context type: {context_type}")
         raise Exception(f"Unknown trigger context, type: {context_type}")
@@ -126,6 +140,9 @@ def _grpc_response_from_ctx(ctx: TriggerContext) -> TriggerResponse:
                 success=ctx.res.success,
             ),
         )
+    elif ctx.bucket_notification():
+        ctx = ctx.bucket_notification()
+        return TriggerResponse(notification=NotificationResponseContext(success=ctx.res.success))
     else:
         raise Exception("Unknown Trigger Context type, unable to return valid response")
 
@@ -147,13 +164,12 @@ class HttpRequest(Request):
         trace_context: Dict[str, str],
     ):
         """Construct a new HttpRequest."""
-        super().__init__(data)
+        super().__init__(data, trace_context)
         self.method = method
         self.path = path
         self.params = params
         self.query = query
         self.headers = headers
-        self.trace_context = trace_context
 
     @property
     def json(self) -> Optional[Any]:
@@ -240,9 +256,8 @@ class EventRequest(Request):
 
     def __init__(self, data: bytes, topic: str, trace_context: Dict[str, str]):
         """Construct a new EventRequest."""
-        super().__init__(data)
+        super().__init__(data, trace_context)
         self.topic = topic
-        self.trace_context = trace_context
 
     @property
     def payload(self) -> bytes:
@@ -283,83 +298,94 @@ class EventContext(TriggerContext):
         )
 
 
-# async def face(inpp: int) -> str:
-#     return "thing"
+class BucketNotificationRequest(Request):
+    """Represents a translated Event, from a subscribed bucket notification, forwarded from the Nitric Membrane."""
+
+    def __init__(self, data: bytes, key: str, notification_type: BucketNotificationType, trace_context: Dict[str, str]):
+        """Construct a new EventRequest."""
+        super().__init__(data, trace_context)
+
+        self.key = key
+        self.notification_type = notification_type
 
 
-# ====== Function Handlers ======
+class BucketNotificationResponse(Response):
+    """Represents the response to a trigger from a Bucket."""
 
-C = TypeVar("C", TriggerContext, HttpContext, EventContext)
-Middleware = Callable
-Handler = Coroutine[Any, Any, C]
-HttpHandler = Coroutine[Any, Any, Optional[HttpContext]]
-EventHandler = Coroutine[Any, Any, Optional[EventContext]]
-Middleware = Callable[[C, Middleware], Handler]
-HttpMiddleware = Callable[[HttpContext, HttpHandler], HttpHandler]
-EventMiddleware = Callable[[EventContext, EventHandler], EventHandler]
+    def __init__(self, success: bool = True):
+        """Construct a new BucketNotificationResponse."""
+        self.success = success
 
 
-def compose_middleware(*middlewares: Union[Middleware, List[Middleware]]) -> Middleware:
-    """
-    Compose multiple middleware functions into a single middleware function.
+class BucketNotificationContext(TriggerContext):
+    """Represents the full request/response context for a bucket notification trigger."""
 
-    The resulting middleware will effectively be a chain of the provided middleware,
-    where each calls the next in the chain when they're successful.
-    """
-    middlewares = list(middlewares)
-    if len(middlewares) == 1 and not isinstance(middlewares[0], list):
-        return middlewares[0]
+    def __init__(self, request: BucketNotificationRequest, response: BucketNotificationResponse = None):
+        """Construct a new BucketNotificationContext."""
+        super().__init__()
+        self.req = request
+        self.res = response if response else BucketNotificationResponse()
 
-    middlewares = [compose_middleware(m) if isinstance(m, list) else m for m in middlewares]
+    def bucket_notification(self) -> BucketNotificationContext:
+        """Return this BucketNotificationContext, used when determining the context type of a trigger."""
+        return self
 
-    async def handler(ctx, next_middleware=lambda ctx: ctx):
-        def reduce_chain(acc_next, cur):
-            async def chained_middleware(context):
-                # Count the positional arguments to determine if the function is a handler or middleware.
-                all_args = cur.__code__.co_argcount
-                kwargs = len(cur.__defaults__) if cur.__defaults__ is not None else 0
-                pos_args = all_args - kwargs
-                if pos_args == 2:
-                    # Call the middleware with next and return the result
-                    return (
-                        (await cur(context, acc_next)) if asyncio.iscoroutinefunction(cur) else cur(context, acc_next)
-                    )
-                else:
-                    # Call the handler with ctx only, then call the remainder of the middleware chain
-                    result = (await cur(context)) if asyncio.iscoroutinefunction(cur) else cur(context)
-                    return (await acc_next(result)) if asyncio.iscoroutinefunction(acc_next) else acc_next(result)
-
-            return chained_middleware
-
-        middleware_chain = functools.reduce(reduce_chain, reversed(middlewares + [next_middleware]))
-        return await middleware_chain(ctx)
-
-    return handler
+    @staticmethod
+    def from_grpc_trigger_request(trigger_request: TriggerRequest) -> BucketNotificationContext:
+        """Construct a new BucketNotificationContext from a Bucket Notification trigger from the Nitric Membrane."""
+        return BucketNotificationContext(
+            request=BucketNotificationRequest(
+                data=trigger_request.data,
+                key=trigger_request.notification.bucket.key,
+                notification_type=trigger_request.notification.bucket.type,
+                trace_context=trigger_request.trace_context.values,
+            )
+        )
 
 
-# ====== Function Server ======
+class FileNotificationRequest(BucketNotificationRequest):
+    """Represents a translated Event, from a subscribed bucket notification, forwarded from the Nitric Membrane."""
+
+    def __init__(
+        self,
+        data: bytes,
+        bucket_ref: Any,  # can't import BucketRef due to circular dependency problems
+        key: str,
+        notification_type: BucketNotificationType,
+        trace_context: Dict[str, str],
+    ):
+        """Construct a new FileNotificationRequest."""
+        super().__init__(data=data, key=key, notification_type=notification_type, trace_context=trace_context)
+        self.file = bucket_ref.file(key)
 
 
-def _create_internal_error_response(req: TriggerRequest) -> TriggerResponse:
-    """Create a general error response based on the trigger request type."""
-    context_type, context = betterproto.which_one_of(req, "context")
-    if context_type == "http":
-        return TriggerResponse(data=bytes(), http=HttpResponseContext(status=500))
-    elif context_type == "topic":
-        return TriggerResponse(data=bytes(), topic=TopicResponseContext(success=False))
-    else:
-        raise Exception(f"Unknown trigger type: {context_type}, unable to generate expected response")
+class FileNotificationContext(TriggerContext):
+    """Represents the full request/response context for a bucket notification trigger."""
 
+    def __init__(self, request: FileNotificationRequest, response: BucketNotificationResponse = None):
+        """Construct a new FileNotificationContext."""
+        super().__init__()
+        self.req = request
+        self.res = response if response else BucketNotificationResponse()
 
-class ApiWorkerOptions:
-    """Options for API workers."""
+    def bucket_notification(self) -> FileNotificationContext:
+        """Return this FileNotificationContext, used when determining the context type of a trigger."""
+        return self
 
-    def __init__(self, api: str, route: str, methods: List[Union[str, HttpMethod]], opts: MethodOptions):
-        """Construct a new options object."""
-        self.api = api
-        self.route = route
-        self.methods = [str(method) for method in methods]
-        self.opts = opts
+    @staticmethod
+    def from_grpc_trigger_request(
+        trigger_request: TriggerRequest, options: FileNotificationWorkerOptions
+    ) -> FileNotificationContext:
+        """Construct a new FileNotificationTrigger from a Bucket Notification trigger from the Nitric Membrane."""
+        return FileNotificationContext(
+            request=FileNotificationRequest(
+                data=trigger_request.data,
+                key=trigger_request.notification.bucket.key,
+                bucket_ref=options.bucket_ref,
+                notification_type=trigger_request.notification.bucket.type,
+                trace_context=trigger_request.trace_context.values,
+            )
+        )
 
 
 class RateWorkerOptions:
@@ -374,6 +400,56 @@ class RateWorkerOptions:
         self.description = description
         self.rate = rate
         self.frequency = frequency
+
+
+class BucketNotificationWorkerOptions:
+    """Options for bucket notification workers."""
+
+    def __init__(self, bucket_name: str, notification_type: str, notification_prefix_filter: str):
+        """Construct a new options object."""
+        self.bucket_name = bucket_name
+        self.notification_type = BucketNotificationWorkerOptions._to_grpc_event_type(notification_type.lower())
+        self.notification_prefix_filter = notification_prefix_filter
+
+    @staticmethod
+    def _to_grpc_event_type(event_type: str) -> BucketNotificationType:
+        if event_type == "write":
+            return BucketNotificationType.Created
+        elif event_type == "delete":
+            return BucketNotificationType.Deleted
+        else:
+            raise ValueError(f"Event type {event_type} is unsupported")
+
+
+class FileNotificationWorkerOptions(BucketNotificationWorkerOptions):
+    """Options for bucket notification workers with file references."""
+
+    def __init__(self, bucket, notification_type: str, notification_prefix_filter: str):
+        """Construct a new FileNotificationWorkerOptions."""
+        super().__init__(bucket.name, notification_type, notification_prefix_filter)
+
+        self.bucket_ref = bucket
+
+
+class ApiWorkerOptions:
+    """Options for API workers."""
+
+    def __init__(self, api: str, route: str, methods: List[Union[str, HttpMethod]], opts: MethodOptions):
+        """Construct a new options object."""
+        self.api = api
+        self.route = route
+        self.methods = [str(method) for method in methods]
+        self.opts = opts
+
+
+class MethodOptions:
+    """Represents options when defining a method handler."""
+
+    security: dict[str, List[str]]
+
+    def __init__(self, security: dict[str, List[str]] = None):
+        """Construct a new HTTP method options object."""
+        self.security = security
 
 
 class SubscriptionWorkerOptions:
@@ -395,22 +471,15 @@ class Frequency(Enum):
     @staticmethod
     def from_str(value: str) -> Frequency:
         """Convert a string frequency value to a Frequency."""
-        return Frequency[value.strip().lower()]
+        try:
+            return Frequency[value.strip().lower()]
+        except Exception:
+            raise ValueError(f"{value} is not valid frequency")
 
     @staticmethod
     def as_str_list() -> List[str]:
         """Return all frequency values as a list of strings."""
         return [str(frequency.value) for frequency in Frequency]
-
-
-class MethodOptions:
-    """Represents options when defining a method handler."""
-
-    security: dict[str, List[str]]
-
-    def __init__(self, security: dict[str, List[str]] = None):
-        """Construct a new HTTP method options object."""
-        self.security = security
 
 
 class FaasWorkerOptions:
@@ -419,7 +488,82 @@ class FaasWorkerOptions:
     pass
 
 
-FaasClientOptions = Union[ApiWorkerOptions, RateWorkerOptions, SubscriptionWorkerOptions, FaasWorkerOptions]
+FaasClientOptions = Union[
+    ApiWorkerOptions,
+    RateWorkerOptions,
+    SubscriptionWorkerOptions,
+    BucketNotificationWorkerOptions,
+    FileNotificationWorkerOptions,
+    FaasWorkerOptions,
+]
+
+
+# Defining Function Handlers and Middleware
+C = TypeVar("C", TriggerContext, HttpContext, EventContext)
+Middleware = Callable
+Handler = Coroutine[Any, Any, C]
+HttpHandler = Coroutine[Any, Any, Optional[HttpContext]]
+EventHandler = Coroutine[Any, Any, Optional[EventContext]]
+BucketNotificationHandler = Coroutine[Any, Any, Optional[BucketNotificationContext]]
+FileNotificationHandler = Coroutine[Any, Any, Optional[FileNotificationContext]]
+
+Middleware = Callable[[C, Middleware], Handler]
+HttpMiddleware = Callable[[HttpContext, HttpHandler], HttpHandler]
+EventMiddleware = Callable[[EventContext, EventHandler], EventHandler]
+BucketNotificationMiddleware = Callable[
+    [BucketNotificationContext, BucketNotificationHandler], BucketNotificationHandler
+]
+FileNotificationMiddleware = Callable[[FileNotificationContext, FileNotificationHandler], FileNotificationHandler]
+
+
+def compose_middleware(*middlewares: Union[Middleware, List[Middleware]]) -> Middleware:
+    """
+    Compose multiple middleware functions into a single middleware function.
+
+    The resulting middleware will effectively be a chain of the provided middleware,
+    where each calls the next in the chain when they're successful.
+    """
+    middlewares = list(middlewares)
+    if len(middlewares) == 1 and not isinstance(middlewares[0], list):
+        return middlewares[0]
+
+    middlewares = [compose_middleware(m) if isinstance(m, list) else m for m in middlewares]
+
+    async def handler(ctx, next_middleware=lambda ctx: ctx):
+        def reduce_chain(acc_next, cur):
+            async def chained_middleware(mw_ctx):
+                # Count the positional arguments to determine if the function is a handler or middleware.
+                all_args = cur.__code__.co_argcount
+                kwargs = len(cur.__defaults__) if cur.__defaults__ is not None else 0
+                pos_args = all_args - kwargs
+                if pos_args == 2:
+                    # Call the middleware with next and return the result
+                    return (await cur(mw_ctx, acc_next)) if asyncio.iscoroutinefunction(cur) else cur(mw_ctx, acc_next)
+                else:
+                    # Call the handler with ctx only, then call the remainder of the middleware chain
+                    result = (await cur(mw_ctx)) if asyncio.iscoroutinefunction(cur) else cur(mw_ctx)
+                    return (await acc_next(result)) if asyncio.iscoroutinefunction(acc_next) else acc_next(result)
+
+            return chained_middleware
+
+        middleware_chain = functools.reduce(reduce_chain, reversed(middlewares + [next_middleware]))
+        return await middleware_chain(ctx)
+
+    return handler
+
+
+# ====== Function Server ======
+
+
+def _create_internal_error_response(req: TriggerRequest) -> TriggerResponse:
+    """Create a general error response based on the trigger request type."""
+    context_type, ctx = betterproto.which_one_of(req, "context")
+    if context_type == "http":
+        return TriggerResponse(data=bytes(), http=HttpResponseContext(status=500))
+    elif context_type == "topic":
+        return TriggerResponse(data=bytes(), topic=TopicResponseContext(success=False))
+    else:
+        raise Exception(f"Unknown trigger type: {context_type}, unable to generate expected response")
 
 
 class FunctionServer:
@@ -429,6 +573,7 @@ class FunctionServer:
         """Construct a new function server."""
         self.__http_handler = None
         self.__event_handler = None
+        self.__bucket_notification_handler = None
         self._any_handler = None
         self._opts = opts
 
@@ -450,10 +595,24 @@ class FunctionServer:
         self.__event_handler = compose_middleware(*handlers)
         return self
 
+    def bucket_notification(self, *handlers: Union[Middleware, List[Middleware]]) -> FunctionServer:
+        """
+        Register one or more Bucket Notification Trigger Handlers or Middleware.
+
+        When multiple handlers are provided, they will be called in order.
+        """
+        self.__bucket_notification_handler = compose_middleware(*handlers)
+        return self
+
     async def start(self, *handlers: Union[Middleware, List[Middleware]]):
         """Start the function server using the provided trigger handlers."""
         self._any_handler = compose_middleware(*handlers) if len(handlers) > 0 else None
-        if not self._any_handler and not self._http_handler and not self._event_handler:
+        if (
+            not self._any_handler
+            and not self._http_handler
+            and not self._event_handler
+            and not self.__bucket_notification_handler
+        ):
             raise Exception("At least one handler function must be provided.")
 
         await self._run()
@@ -465,6 +624,10 @@ class FunctionServer:
     @property
     def _event_handler(self):
         return self.__event_handler if self.__event_handler else self._any_handler
+
+    @property
+    def _bucket_notification_handler(self):
+        return self.__bucket_notification_handler if self.__bucket_notification_handler else self._any_handler
 
     async def _run(self):
         """Register a new FaaS worker with the Membrane, using the provided function as the handler."""
@@ -488,6 +651,16 @@ class FunctionServer:
                 )
             elif isinstance(self._opts, SubscriptionWorkerOptions):
                 init_request = InitRequest(subscription=SubscriptionWorker(topic=self._opts.topic))
+            elif isinstance(self._opts, BucketNotificationWorkerOptions) or isinstance(
+                self._opts, FileNotificationWorkerOptions
+            ):
+                config = BucketNotificationConfig(
+                    notification_type=self._opts.notification_type,
+                    notification_prefix_filter=self._opts.notification_prefix_filter,
+                )
+                init_request = InitRequest(
+                    bucket_notification=BucketNotificationWorker(bucket=self._opts.bucket_name, config=config)
+                )
 
             # let the membrane server know we're ready to start
             await request_channel.send(ClientMessage(init_request=init_request))
@@ -501,7 +674,7 @@ class FunctionServer:
                     # proceed to the next available message
                     continue
                 if msg_type == "trigger_request":
-                    ctx = _ctx_from_grpc_trigger_request(srv_msg.trigger_request)
+                    ctx = _ctx_from_grpc_trigger_request(srv_msg.trigger_request, self._opts)
 
                     try:
                         if len(ctx.req.trace_context) > 0:
@@ -511,6 +684,8 @@ class FunctionServer:
                             func = self._http_handler
                         elif ctx.event():
                             func = self._event_handler
+                        elif ctx.bucket_notification():
+                            func = self._bucket_notification_handler
                         else:
                             func = self._any_handler
 
@@ -574,6 +749,15 @@ def event(*handlers: Union[Middleware, List[Middleware]]) -> FunctionServer:
     When multiple handlers are provided, they will be called in order.
     """
     return FunctionServer(opts=[]).event(*handlers)
+
+
+def bucket_notification(*handlers: Union[Middleware, List[Middleware]]) -> FunctionServer:
+    """
+    Create a new Function Server and Register one or more Bucket Notification Handlers or Middleware.
+
+    When multiple handlers are provided, they will be called in order.
+    """
+    return FunctionServer(opts=[]).bucket_notification(*handlers)
 
 
 def start(*handlers: Union[Middleware, List[Middleware]]):

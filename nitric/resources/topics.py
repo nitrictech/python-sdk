@@ -19,7 +19,7 @@
 from __future__ import annotations
 
 from nitric.api.events import Events, TopicRef
-from nitric.api.exception import exception_from_grpc_error
+from nitric.exception import exception_from_grpc_error
 from typing import List, Union
 from enum import Enum
 from grpclib import GRPCError
@@ -46,7 +46,6 @@ class Topic(SecureResource):
 
     name: str
     actions: List[Action]
-    server: FunctionServer
 
     def __init__(self, name: str):
         """Construct a new topic."""
@@ -80,11 +79,15 @@ class Topic(SecureResource):
 
         return Events().topic(self.name)
 
-    def subscribe(self, func: EventMiddleware):
+    def subscribe(self):
         """Create and return a subscription decorator for this topic."""
-        self.server = FunctionServer(SubscriptionWorkerOptions(topic=self.name))
-        self.server.event(func)
-        Nitric._register_worker(self.server)
+
+        def decorator(func: EventMiddleware):
+            self.server = FunctionServer(SubscriptionWorkerOptions(topic=self.name))
+            self.server.event(func)
+            Nitric._register_worker(self.server)
+
+        return decorator
 
 
 def topic(name: str) -> Topic:

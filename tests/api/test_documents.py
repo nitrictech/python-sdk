@@ -23,7 +23,6 @@ import pytest
 from betterproto.lib.google.protobuf import Struct, Value
 from grpclib import GRPCError, Status
 
-from nitric.api import Events, Event
 from nitric.api.documents import (
     QueryBuilder,
     Operator,
@@ -33,7 +32,7 @@ from nitric.api.documents import (
     Document as SdkDocument,
     QueryResultsPage,
 )
-from nitric.api.exception import UnknownException
+from nitric.exception import UnknownException
 from nitric.proto.nitric.document.v1 import (
     Key,
     Collection,
@@ -49,8 +48,6 @@ from nitric.proto.nitric.document.v1 import (
     DocumentQueryRequest,
     DocumentQueryStreamRequest,
 )
-from nitric.proto.nitric.event.v1 import TopicListResponse, NitricTopic
-from nitric.utils import _struct_from_dict
 
 
 class Object(object):

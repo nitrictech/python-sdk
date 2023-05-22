@@ -47,16 +47,14 @@ class Schedule:
             # handle singular frequencies. e.g. every('day')
             rate_description = f"1 {rate_description}s"  # 'day' becomes '1 days'
 
-        rate, freq_str = rate_description.split(" ")
-        freq = Frequency.from_str(freq_str)
+        try:
+            rate, freq_str = rate_description.split(" ")
+            freq = Frequency.from_str(freq_str)
+        except Exception:
+            raise Exception(f"invalid rate expression, frequency must be one of {Frequency.as_str_list()}")
 
         if not rate.isdigit():
             raise Exception("invalid rate expression, expression must begin with a positive integer")
-
-        if not freq:
-            raise Exception(
-                f"invalid rate expression, frequency must be one of ${Frequency.as_str_list()}, received ${freq_str}"
-            )
 
         opts = RateWorkerOptions(self.description, int(rate), freq)
 

@@ -45,9 +45,12 @@
 # limitations under the License.
 #
 from dataclasses import dataclass
+from typing import Union
 
 from grpclib import GRPCError
-from nitric.api.exception import exception_from_grpc_error, InvalidArgumentException
+from nitric.exception import exception_from_grpc_error, InvalidArgumentException
+from nitric.application import Nitric
+from nitric.faas import FunctionServer, FileNotificationWorkerOptions, FileNotificationMiddleware
 from nitric.utils import new_default_channel
 from nitric.proto.nitric.storage.v1 import (
     StorageServiceStub,
@@ -59,6 +62,7 @@ from nitric.proto.nitric.storage.v1 import (
     StorageListFilesRequest,
 )
 from enum import Enum
+from warnings import warn
 
 
 class Storage(object):
@@ -80,15 +84,16 @@ class Storage(object):
 
     def bucket(self, name: str):
         &#34;&#34;&#34;Return a reference to a bucket from the connected storage service.&#34;&#34;&#34;
-        return BucketRef(_storage=self, name=name)
+        return BucketRef(_storage=self, name=name, _server=None)
 
 
-@dataclass(frozen=True, order=True)
+@dataclass(order=True)
 class BucketRef(object):
     &#34;&#34;&#34;A reference to a bucket in a storage service, used to the perform operations on that bucket.&#34;&#34;&#34;
 
     _storage: Storage
     name: str
+    _server: Union[FunctionServer, None]
 
     def file(self, key: str):
         &#34;&#34;&#34;Return a reference to a file in this bucket.&#34;&#34;&#34;
@@ -100,6 +105,22 @@ class BucketRef(object):
             storage_list_files_request=StorageListFilesRequest(bucket_name=self.name)
         )
         return [self.file(f.key) for f in resp.files]
+
+    def on(self, notification_type: str, notification_prefix_filter: str):
+        &#34;&#34;&#34;Create and return a bucket notification decorator for this bucket.&#34;&#34;&#34;
+
+        def decorator(func: FileNotificationMiddleware):
+            self._server = FunctionServer(
+                FileNotificationWorkerOptions(
+                    bucket=self,
+                    notification_type=notification_type,
+                    notification_prefix_filter=notification_prefix_filter,
+                )
+            )
+            self._server.bucket_notification(func)
+            Nitric._register_worker(self._server)
+
+        return decorator
 
 
 class FileMode(Enum):
@@ -160,14 +181,15 @@ class File(object):
 
     async def upload_url(self, expiry: int = 600):
         &#34;&#34;&#34;Get a temporary writable URL to this file.&#34;&#34;&#34;
-        await self.sign_url(mode=FileMode.WRITE, expiry=expiry)
+        return await self.sign_url(mode=FileMode.WRITE, expiry=expiry)
 
     async def download_url(self, expiry: int = 600):
         &#34;&#34;&#34;Get a temporary readable URL to this file.&#34;&#34;&#34;
-        await self.sign_url(mode=FileMode.READ, expiry=expiry)
+        return await self.sign_url(mode=FileMode.READ, expiry=expiry)
 
     async def sign_url(self, mode: FileMode = FileMode.READ, expiry: int = 3600):
         &#34;&#34;&#34;Generate a signed URL for reading or writing to a file.&#34;&#34;&#34;
+        warn(&#34;File.sign_url() is deprecated, use upload_url() or download_url() instead&#34;, DeprecationWarning)
         try:
             response = await self._storage._storage_stub.pre_sign_url(
                 storage_pre_sign_url_request=StoragePreSignUrlRequest(
@@ -190,7 +212,7 @@ class File(object):
 <dl>
 <dt id="nitric.api.storage.BucketRef"><code class="flex name class">
 <span>class <span class="ident">BucketRef</span></span>
-<span>(</span><span>_storage: <a title="nitric.api.storage.Storage" href="#nitric.api.storage.Storage">Storage</a>, name: str)</span>
+<span>(</span><span>_storage: <a title="nitric.api.storage.Storage" href="#nitric.api.storage.Storage">Storage</a>, name: str, _server: Optional[<a title="nitric.faas.FunctionServer" href="../faas.html#nitric.faas.FunctionServer">FunctionServer</a>])</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A reference to a bucket in a storage service, used to the perform operations on that bucket.</p></div>
@@ -198,12 +220,13 @@ class File(object):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@dataclass(frozen=True, order=True)
+<pre><code class="python">@dataclass(order=True)
 class BucketRef(object):
     &#34;&#34;&#34;A reference to a bucket in a storage service, used to the perform operations on that bucket.&#34;&#34;&#34;
 
     _storage: Storage
     name: str
+    _server: Union[FunctionServer, None]
 
     def file(self, key: str):
         &#34;&#34;&#34;Return a reference to a file in this bucket.&#34;&#34;&#34;
@@ -214,7 +237,23 @@ class BucketRef(object):
         resp = await self._storage._storage_stub.list_files(
             storage_list_files_request=StorageListFilesRequest(bucket_name=self.name)
         )
-        return [self.file(f.key) for f in resp.files]</code></pre>
+        return [self.file(f.key) for f in resp.files]
+
+    def on(self, notification_type: str, notification_prefix_filter: str):
+        &#34;&#34;&#34;Create and return a bucket notification decorator for this bucket.&#34;&#34;&#34;
+
+        def decorator(func: FileNotificationMiddleware):
+            self._server = FunctionServer(
+                FileNotificationWorkerOptions(
+                    bucket=self,
+                    notification_type=notification_type,
+                    notification_prefix_filter=notification_prefix_filter,
+                )
+            )
+            self._server.bucket_notification(func)
+            Nitric._register_worker(self._server)
+
+        return decorator</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
@@ -254,6 +293,32 @@ class BucketRef(object):
         storage_list_files_request=StorageListFilesRequest(bucket_name=self.name)
     )
     return [self.file(f.key) for f in resp.files]</code></pre>
+</details>
+</dd>
+<dt id="nitric.api.storage.BucketRef.on"><code class="name flex">
+<span>def <span class="ident">on</span></span>(<span>self, notification_type: str, notification_prefix_filter: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create and return a bucket notification decorator for this bucket.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on(self, notification_type: str, notification_prefix_filter: str):
+    &#34;&#34;&#34;Create and return a bucket notification decorator for this bucket.&#34;&#34;&#34;
+
+    def decorator(func: FileNotificationMiddleware):
+        self._server = FunctionServer(
+            FileNotificationWorkerOptions(
+                bucket=self,
+                notification_type=notification_type,
+                notification_prefix_filter=notification_prefix_filter,
+            )
+        )
+        self._server.bucket_notification(func)
+        Nitric._register_worker(self._server)
+
+    return decorator</code></pre>
 </details>
 </dd>
 </dl>
@@ -310,14 +375,15 @@ class File(object):
 
     async def upload_url(self, expiry: int = 600):
         &#34;&#34;&#34;Get a temporary writable URL to this file.&#34;&#34;&#34;
-        await self.sign_url(mode=FileMode.WRITE, expiry=expiry)
+        return await self.sign_url(mode=FileMode.WRITE, expiry=expiry)
 
     async def download_url(self, expiry: int = 600):
         &#34;&#34;&#34;Get a temporary readable URL to this file.&#34;&#34;&#34;
-        await self.sign_url(mode=FileMode.READ, expiry=expiry)
+        return await self.sign_url(mode=FileMode.READ, expiry=expiry)
 
     async def sign_url(self, mode: FileMode = FileMode.READ, expiry: int = 3600):
         &#34;&#34;&#34;Generate a signed URL for reading or writing to a file.&#34;&#34;&#34;
+        warn(&#34;File.sign_url() is deprecated, use upload_url() or download_url() instead&#34;, DeprecationWarning)
         try:
             response = await self._storage._storage_stub.pre_sign_url(
                 storage_pre_sign_url_request=StoragePreSignUrlRequest(
@@ -367,7 +433,7 @@ class File(object):
 </summary>
 <pre><code class="python">async def download_url(self, expiry: int = 600):
     &#34;&#34;&#34;Get a temporary readable URL to this file.&#34;&#34;&#34;
-    await self.sign_url(mode=FileMode.READ, expiry=expiry)</code></pre>
+    return await self.sign_url(mode=FileMode.READ, expiry=expiry)</code></pre>
 </details>
 </dd>
 <dt id="nitric.api.storage.File.read"><code class="name flex">
@@ -401,6 +467,7 @@ class File(object):
 </summary>
 <pre><code class="python">async def sign_url(self, mode: FileMode = FileMode.READ, expiry: int = 3600):
     &#34;&#34;&#34;Generate a signed URL for reading or writing to a file.&#34;&#34;&#34;
+    warn(&#34;File.sign_url() is deprecated, use upload_url() or download_url() instead&#34;, DeprecationWarning)
     try:
         response = await self._storage._storage_stub.pre_sign_url(
             storage_pre_sign_url_request=StoragePreSignUrlRequest(
@@ -423,7 +490,7 @@ class File(object):
 </summary>
 <pre><code class="python">async def upload_url(self, expiry: int = 600):
     &#34;&#34;&#34;Get a temporary writable URL to this file.&#34;&#34;&#34;
-    await self.sign_url(mode=FileMode.WRITE, expiry=expiry)</code></pre>
+    return await self.sign_url(mode=FileMode.WRITE, expiry=expiry)</code></pre>
 </details>
 </dd>
 <dt id="nitric.api.storage.File.write"><code class="name flex">
@@ -545,7 +612,7 @@ class File(object):
 
     def bucket(self, name: str):
         &#34;&#34;&#34;Return a reference to a bucket from the connected storage service.&#34;&#34;&#34;
-        return BucketRef(_storage=self, name=name)</code></pre>
+        return BucketRef(_storage=self, name=name, _server=None)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
@@ -560,7 +627,7 @@ class File(object):
 </summary>
 <pre><code class="python">def bucket(self, name: str):
     &#34;&#34;&#34;Return a reference to a bucket from the connected storage service.&#34;&#34;&#34;
-    return BucketRef(_storage=self, name=name)</code></pre>
+    return BucketRef(_storage=self, name=name, _server=None)</code></pre>
 </details>
 </dd>
 </dl>
@@ -587,6 +654,7 @@ class File(object):
 <li><code><a title="nitric.api.storage.BucketRef.file" href="#nitric.api.storage.BucketRef.file">file</a></code></li>
 <li><code><a title="nitric.api.storage.BucketRef.files" href="#nitric.api.storage.BucketRef.files">files</a></code></li>
 <li><code><a title="nitric.api.storage.BucketRef.name" href="#nitric.api.storage.BucketRef.name">name</a></code></li>
+<li><code><a title="nitric.api.storage.BucketRef.on" href="#nitric.api.storage.BucketRef.on">on</a></code></li>
 </ul>
 </li>
 <li>
