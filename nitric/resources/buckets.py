@@ -86,7 +86,7 @@ class Bucket(SecureResource):
 
         return Storage().bucket(self.name)
 
-    def on(self, notification_type: str, notification_prefix_filter: str):
+    def on(self, trigger: str, path_match: str):
         """Create and return a bucket notification decorator for this bucket."""
         print("this has been called")
 
@@ -95,8 +95,8 @@ class Bucket(SecureResource):
             self._server = FunctionServer(
                 BucketNotificationWorkerOptions(
                     bucket_name=self.name,
-                    notification_type=notification_type,
-                    notification_prefix_filter=notification_prefix_filter,
+                    notification_type=trigger,
+                    notification_prefix_filter=path_match,
                 )
             )
             self._server.bucket_notification(func)
