@@ -21,6 +21,7 @@ from dataclasses import dataclass
 from typing import Union
 
 from grpclib import GRPCError
+from grpclib.client import Channel
 
 from nitric.exception import exception_from_grpc_error
 from nitric.utils import new_default_channel
@@ -42,8 +43,8 @@ class Secrets(object):
 
     def __init__(self):
         """Construct a Nitric Storage Client."""
-        self._channel = new_default_channel()
-        self._secrets_stub = SecretServiceStub(channel=self._channel)
+        self._channel: Union[Channel, None] = new_default_channel()
+        self.secrets_stub = SecretServiceStub(channel=self._channel)
 
     def __del__(self):
         # close the channel when this client is destroyed
@@ -78,7 +79,7 @@ class SecretContainerRef(object):
         secret_message = _secret_to_wire(self)
 
         try:
-            response = await self._secrets._secrets_stub.put(
+            response = await self._secrets.secrets_stub.put(
                 secret_put_request=SecretPutRequest(secret=secret_message, value=value)
             )
             return self.version(version=response.secret_version.version)
@@ -119,7 +120,7 @@ class SecretVersion(object):
         """Return the value stored against this version of the secret."""
         version_message = _secret_version_to_wire(self)
         try:
-            response = await self._secrets._secrets_stub.access(
+            response = await self._secrets.secrets_stub.access(
                 secret_access_request=SecretAccessRequest(secret_version=version_message)
             )
         except GRPCError as grpc_err:

@@ -18,7 +18,7 @@
 #
 from __future__ import annotations
 from nitric.application import Nitric
-from nitric.faas import FunctionServer, EventMiddleware, RateWorkerOptions, Frequency
+from nitric.faas import FunctionServer, Middleware, RateWorkerOptions, Frequency, EventContext
 
 
 class Schedule:
@@ -35,7 +35,7 @@ class Schedule:
         """Construct a new schedule."""
         self.description = description
 
-    def every(self, rate_description: str, *middleware: EventMiddleware):
+    def every(self, rate_description: str, *middleware: Middleware[EventContext]):
         """
         Register middleware to be run at the specified rate.
 
@@ -60,13 +60,14 @@ class Schedule:
 
         self.server = FunctionServer(opts)
         self.server.event(*middleware)
-        return Nitric._register_worker(self.server)
+        # type ignored because the register call is treated as protected.
+        return Nitric._register_worker(self.server)  # type: ignore
 
 
 def schedule(description: str, every: str):
     """Return a schedule decorator."""
 
-    def decorator(func: EventMiddleware):
+    def decorator(func: Middleware[EventContext]):
         r = Schedule(description)
         r.every(every, func)
         return r

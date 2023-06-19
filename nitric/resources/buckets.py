@@ -25,7 +25,7 @@ from enum import Enum
 from grpclib import GRPCError
 
 from nitric.application import Nitric
-from nitric.faas import FunctionServer, BucketNotificationWorkerOptions, BucketNotificationMiddleware
+from nitric.faas import FunctionServer, BucketNotificationWorkerOptions, Middleware, BucketNotificationContext
 from nitric.proto.nitric.resource.v1 import (
     Resource,
     ResourceType,
@@ -33,7 +33,7 @@ from nitric.proto.nitric.resource.v1 import (
     ResourceDeclareRequest,
 )
 
-from nitric.resources.base import SecureResource
+from nitric.resources.resource import SecureResource
 
 
 class BucketPermission(Enum):
@@ -64,7 +64,7 @@ class Bucket(SecureResource):
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    def _perms_to_actions(self, *args: List[Union[BucketPermission, str]]) -> List[Action]:
+    def _perms_to_actions(self, *args: Union[BucketPermission, str]) -> List[Action]:
         permission_actions_map = {
             BucketPermission.reading: [Action.BucketFileGet, Action.BucketFileList],
             BucketPermission.writing: [Action.BucketFilePut],
@@ -82,7 +82,8 @@ class Bucket(SecureResource):
 
     def allow(self, *args: Union[BucketPermission, str]) -> BucketRef:
         """Request the required permissions for this resource."""
-        self._register_policy(*args)
+        str_args = [str(permission) for permission in args]
+        self._register_policy(*str_args)
 
         return Storage().bucket(self.name)
 
@@ -90,7 +91,7 @@ class Bucket(SecureResource):
         """Create and return a bucket notification decorator for this bucket."""
         print("this has been called")
 
-        def decorator(func: BucketNotificationMiddleware):
+        def decorator(func: Middleware[BucketNotificationContext]):
             print("this has been called")
             self._server = FunctionServer(
                 BucketNotificationWorkerOptions(
@@ -100,7 +101,7 @@ class Bucket(SecureResource):
                 )
             )
             self._server.bucket_notification(func)
-            return Nitric._register_worker(self._server)
+            return Nitric._register_worker(self._server)  # type: ignore
 
         return decorator
 
@@ -111,4 +112,4 @@ def bucket(name: str) -> Bucket:
 
     If a bucket has already been registered with the same name, the original reference will be reused.
     """
-    return Nitric._create_resource(Bucket, name)
+    return Nitric._create_resource(Bucket, name)  # type: ignore

@@ -26,7 +26,7 @@ from grpclib import GRPCError, Status
 from nitric.api import Events, Event
 from nitric.exception import UnknownException
 from nitric.proto.nitric.event.v1 import TopicListResponse, NitricTopic, EventPublishRequest, NitricEvent
-from nitric.utils import _struct_from_dict
+from nitric.utils import struct_from_dict
 
 
 class Object(object):
@@ -53,7 +53,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         # mock_publish.assert_called_once()
         mock_publish.assert_called_once_with(
             event_publish_request=EventPublishRequest(
-                topic="test-topic", event=NitricEvent(id=None, payload_type=None, payload=_struct_from_dict(payload))
+                topic="test-topic", event=NitricEvent(id=None, payload_type=None, payload=struct_from_dict(payload))
             )
         )
 
@@ -71,7 +71,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
 
         mock_publish.assert_called_once_with(
             event_publish_request=EventPublishRequest(
-                topic="test-topic", event=NitricEvent(id="123", payload=_struct_from_dict(payload), payload_type=None)
+                topic="test-topic", event=NitricEvent(id="123", payload=struct_from_dict(payload), payload_type=None)
             )
         )
 

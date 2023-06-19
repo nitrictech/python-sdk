@@ -35,6 +35,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/nitrictech/python-sdk",
     packages=setuptools.find_packages(exclude=["tests", "tests.*"]),
+    # package_data={"nitric", ["py.typed"]},
     license_files=("LICENSE.txt",),
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -55,7 +56,7 @@ setuptools.setup(
             "tox==3.20.1",
             "twine==3.2.0",
             "pytest==7.3.2",
-            "pytest-cov==2.10.1",
+            "pytest-cov==4.1.0",
             "pre-commit==2.12.0",
             "black==22.3",
             "flake8==3.9.1",
@@ -74,5 +75,5 @@ setuptools.setup(
             "twine==3.2.0",
         ]
     },
-    python_requires=">=3.7",
+    python_requires=">=3.10",
 )

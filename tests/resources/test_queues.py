@@ -21,7 +21,7 @@ from unittest.mock import patch, AsyncMock
 from nitric.resources import queue
 
 from nitric.proto.nitric.resource.v1 import Action, ResourceDeclareRequest, Resource, ResourceType, PolicyResource
-from nitric.utils import _struct_from_dict
+from nitric.utils import struct_from_dict
 
 
 class Object(object):

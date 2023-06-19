@@ -2,6 +2,7 @@ install:
 	@echo Installing Project Dependencies
 	@python3 -m pip install -e .[dev]
 	@pre-commit install
+	@rm -rf ./.tox
 
 .PHONY: docs clean license
 
@@ -17,7 +18,6 @@ clean:
 	@rm -rf ./dist
 
 test:
-	@rm -rf .tox
 	@echo Running Tox tests
 	@tox -e py
 

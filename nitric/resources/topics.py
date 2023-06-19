@@ -24,7 +24,7 @@ from typing import List, Union
 from enum import Enum
 from grpclib import GRPCError
 from nitric.application import Nitric
-from nitric.faas import EventMiddleware, FunctionServer, SubscriptionWorkerOptions
+from nitric.faas import Middleware, FunctionServer, SubscriptionWorkerOptions, EventContext
 from nitric.proto.nitric.resource.v1 import (
     Resource,
     ResourceType,
@@ -32,7 +32,7 @@ from nitric.proto.nitric.resource.v1 import (
     ResourceDeclareRequest,
 )
 
-from nitric.resources.base import SecureResource
+from nitric.resources.resource import SecureResource
 
 
 class TopicPermission(Enum):
@@ -75,17 +75,19 @@ class Topic(SecureResource):
 
     def allow(self, *args: Union[TopicPermission, str]) -> TopicRef:
         """Request the specified permissions to this resource."""
-        self._register_policy(*args)
+        str_args = [str(permission) for permission in args]
+        self._register_policy(*str_args)
 
         return Events().topic(self.name)
 
     def subscribe(self):
         """Create and return a subscription decorator for this topic."""
 
-        def decorator(func: EventMiddleware):
-            self.server = FunctionServer(SubscriptionWorkerOptions(topic=self.name))
-            self.server.event(func)
-            Nitric._register_worker(self.server)
+        def decorator(func: Middleware[EventContext]):
+            server = FunctionServer(SubscriptionWorkerOptions(topic=self.name))
+            server.event(func)
+            # type ignored because the register call is treated as protected.
+            Nitric._register_worker(server)  # type: ignore
 
         return decorator
 
@@ -96,4 +98,5 @@ def topic(name: str) -> Topic:
 
     If a topic has already been registered with the same name, the original reference will be reused.
     """
-    return Nitric._create_resource(Topic, name)
+    # type ignored because the create call are treated as protected.
+    return Nitric._create_resource(Topic, name)  # type: ignore

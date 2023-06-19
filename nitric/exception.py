@@ -16,6 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from typing import Callable, Optional, Union
 from grpclib import GRPCError
 
 
@@ -156,10 +157,10 @@ class NitricUnavailableException(Exception):
 
 def exception_from_grpc_error(error: GRPCError):
     """Translate a gRPC error to a nitric api exception."""
-    return exception_from_grpc_code(error.status.value, error.message)
+    return exception_from_grpc_code(error.status.value, error.message or "")
 
 
-def exception_from_grpc_code(code: int, message: str = None):
+def exception_from_grpc_code(code: int, message: Optional[str] = None):
     """
     Return a new instance of the appropriate exception for the given status code.
 
@@ -171,9 +172,13 @@ def exception_from_grpc_code(code: int, message: str = None):
     return _exception_code_map[code](message)
 
 
+_zero_code_exception: Callable[[Union[str, None]], Exception] = lambda message: Exception(
+    "Error returned with status 0, which is a success status"
+)
+
 # Map of gRPC status codes to the appropriate exception class.
 _exception_code_map = {
-    0: lambda message: Exception("Error returned with status 0, which is a success status"),
+    0: _zero_code_exception,
     1: CancelledException,
     2: UnknownException,
     3: InvalidArgumentException,

@@ -32,7 +32,7 @@ from nitric.proto.nitric.resource.v1 import (
     ResourceDeclareRequest,
 )
 
-from nitric.resources.base import SecureResource
+from nitric.resources.resource import SecureResource
 
 
 class SecretPermission(Enum):
@@ -79,7 +79,8 @@ class Secret(SecureResource):
 
     def allow(self, *args: Union[SecretPermission, str]) -> SecretContainerRef:
         """Request the specified permissions to this resource."""
-        self._register_policy(*args)
+        str_args = [str(permission) for permission in args]
+        self._register_policy(*str_args)
 
         return Secrets().secret(self.name)
 
@@ -91,4 +92,4 @@ def secret(name: str) -> Secret:
 
     If a secret has already been registered with the same name, the original reference will be reused.
     """
-    return Nitric._create_resource(Secret, name)
+    return Nitric._create_resource(Secret, name)  # type: ignore
