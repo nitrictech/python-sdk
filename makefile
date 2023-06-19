@@ -17,6 +17,7 @@ clean:
 	@rm -rf ./dist
 
 test:
+	@rm -rf .tox
 	@echo Running Tox tests
 	@tox -e py
 

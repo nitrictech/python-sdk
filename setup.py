@@ -43,7 +43,7 @@ setuptools.setup(
     setup_requires=["wheel"],
     install_requires=[
         "asyncio",
-        "protobuf==3.19.5",
+        "protobuf==4.23.3",
         "betterproto==2.0.0b5",
         "opentelemetry-api",
         "opentelemetry-sdk",
@@ -54,7 +54,7 @@ setuptools.setup(
         "dev": [
             "tox==3.20.1",
             "twine==3.2.0",
-            "pytest==6.0.1",
+            "pytest==7.3.2",
             "pytest-cov==2.10.1",
             "pre-commit==2.12.0",
             "black==22.3",
@@ -70,7 +70,7 @@ setuptools.setup(
             "markupsafe==2.0.1",
             "betterproto[compiler]==2.0.0b5",
             # "grpcio==1.33.2",
-            "grpcio-tools==1.44.0",
+            "grpcio-tools==1.54.2",
             "twine==3.2.0",
         ]
     },
