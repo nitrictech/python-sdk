@@ -345,13 +345,14 @@ class Expression:
 
     operand: str
     operator: Union[Operator, str]
-    _operator: Operator
     value: Union[str, int, float, bool]
+    _operator: Operator = field(init=False)
 
     def __post_init__(self):
         if isinstance(self.operator, str):
             # Convert string operators to their enum values
             self._operator = Operator(self.operator)
+            self.operator = Operator(self.operator)
         else:
             self._operator = self.operator
 
@@ -504,6 +505,8 @@ class QueryBuilder:
 
     def limit(self, limit: int) -> QueryBuilder:
         """Set the maximum number of results returned by this query."""
+        if limit < 0:
+            raise Exception("limit must be a positive integer")
         self._limit = limit
         return self
 

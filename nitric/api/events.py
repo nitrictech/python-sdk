@@ -46,9 +46,9 @@ class Event(object):
 
 def _event_to_wire(event: Event) -> NitricEvent:
     return NitricEvent(
-        id=event.id if event.id else "",
+        id=event.id if event.id else None,
         payload=struct_from_dict(event.payload),
-        payload_type=event.payload_type if event.payload_type else "",
+        payload_type=event.payload_type if event.payload_type else None,
     )
 
 

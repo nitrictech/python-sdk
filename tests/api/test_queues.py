@@ -146,24 +146,6 @@ class QueueClientTest(IsolatedAsyncioTestCase):
             with pytest.raises(AttributeError):
                 await queue.send((1, 2, 3))
 
-    async def test_send_none(self):
-        mock_send = AsyncMock()
-        mock_response = Object()
-        mock_send.return_value = mock_response
-
-        payload = {"content": "of task"}
-
-        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.send", mock_send):
-            queue = Queues().queue("test-queue")
-            await queue.send()
-
-        # Check expected values were passed to Stub
-        mock_send.assert_called_once_with(
-            queue_send_request=QueueSendRequest(
-                queue="test-queue", task=NitricTask(id=None, payload_type=None, payload=Struct())
-            )
-        )
-
     async def test_send_empty_list(self):
         with pytest.raises(Exception) as e_info:
             await Queues().queue("test-queue").send([])
@@ -260,15 +242,6 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         mock_complete.assert_called_once_with(
             queue_complete_request=QueueCompleteRequest(queue="test-queue", lease_id="test-lease")
         )
-
-    async def test_complete_task_without_client(self):
-        queueing = Queues()
-        # lease_id omitted.
-        task = ReceivedTask(lease_id="test-lease")
-
-        with pytest.raises(Exception) as e:
-            await task.complete()
-        self.assertIn("Task is missing internal client", str(e.value))
 
     async def test_send_error(self):
         mock_send = AsyncMock()

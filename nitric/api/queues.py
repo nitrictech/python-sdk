@@ -86,8 +86,8 @@ def _task_to_wire(task: Task) -> NitricTask:
     :return: converted task
     """
     return NitricTask(
-        id=task.id if task.id else "",
-        payload_type=task.payload_type if task.payload_type else "",
+        id=task.id if task.id else None,
+        payload_type=task.payload_type if task.payload_type else None,
         payload=struct_from_dict(task.payload),
     )
 
