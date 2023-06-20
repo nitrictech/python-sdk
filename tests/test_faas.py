@@ -35,6 +35,7 @@ from nitric.faas import (
     EventRequest,
     EventResponse,
     HttpRequest,
+    HttpMiddleware,
 )
 
 from nitric.proto.nitric.faas.v1 import (
@@ -62,9 +63,9 @@ class MockAsyncChannel:
 
 class FaasClientTest(IsolatedAsyncioTestCase):
     async def test_compose_middleware(self):
-        async def middleware(ctx: HttpContext, next) -> HttpContext:
+        async def middleware(ctx: HttpContext, nxt: HttpMiddleware) -> HttpContext:
             ctx.res.status = 401
-            return await next(ctx)
+            return await nxt(ctx, None)
 
         async def handler(ctx: HttpContext) -> HttpContext:
             ctx.res.body = "some text"
@@ -75,6 +76,59 @@ class FaasClientTest(IsolatedAsyncioTestCase):
         ctx = HttpContext(response=HttpResponse(), request=None)
         result = await composed(ctx)
         assert result.res.status == 401
+        assert result.res.body == b"some text"
+
+    async def test_compose_middleware_overwrite(self):
+        async def middleware(ctx: HttpContext, nxt: HttpMiddleware) -> HttpContext:
+            ctx.res.status = 401
+            return await nxt(ctx, None)
+
+        async def handler(ctx: HttpContext) -> HttpContext:
+            ctx.res.status = 200
+            return ctx
+
+        composed = compose_middleware(middleware, handler)
+
+        ctx = HttpContext(response=HttpResponse(), request=None)
+        result = await composed(ctx)
+        assert result.res.status == 200
+
+    async def test_compose_middleware_error_catch(self):
+        async def middleware(ctx: HttpContext, nxt: HttpMiddleware) -> HttpContext:
+            ctx.res.status = 401
+            try:
+                return await nxt(ctx, None)
+            except Exception as err:
+                ctx.res.status = 500
+                ctx.res.body = str(err)
+                return ctx
+
+        async def handler(ctx: HttpContext) -> HttpContext:
+            raise Exception("test error")
+            return ctx
+
+        composed = compose_middleware(middleware, handler)
+
+        ctx = HttpContext(response=HttpResponse(), request=None)
+        result = await composed(ctx)
+        assert result.res.status == 500
+        assert result.res.body == b"test error"
+
+    async def test_compose_middleware_return_none(self):
+        async def middleware(ctx: HttpContext, nxt: HttpMiddleware) -> HttpContext:
+            ctx.res.status = 401
+            return await nxt(ctx, None)
+
+        async def handler(ctx: HttpContext) -> None:
+            ctx.res.status = 300
+            ctx.res.body = "test response"
+
+        composed = compose_middleware(middleware, handler)
+
+        ctx = HttpContext(response=HttpResponse(), request=None)
+        result = await composed(ctx)
+        assert result.res.status == 300
+        assert result.res.body == b"test response"
 
     async def test_init(self):
         mock_handler = AsyncMock()
@@ -107,93 +161,6 @@ class FaasClientTest(IsolatedAsyncioTestCase):
         assert 1 == stream_calls
         # mock handler not called
         mock_handler.assert_not_called()
-
-    #
-    # async def test_trigger_sync_event_handler(self):
-    #     mock_http_handler = Mock()
-    #     mock_event_handler = Mock()
-    #     mock_bucket_notification_handler = Mock()
-    #     mock_grpc_channel = Mock()
-    #     mock_async_channel_init = Mock()
-    #     mock_async_chan = MockAsyncChannel()
-    #     mock_async_channel_init.return_value = mock_async_chan
-    #
-    #     stream_calls = 0
-    #
-    #     async def mock_stream(self, request_iterator):
-    #         nonlocal stream_calls
-    #         mock_stream = [
-    #             ServerMessage(
-    #                 # Simulate Event Trigger
-    #                 trigger_request=TriggerRequest(
-    #                     data=b"a byte string",
-    #                     topic=TopicTriggerContext(),
-    #                 )
-    #             )
-    #         ]
-    #         for message in mock_stream:
-    #             stream_calls += 1
-    #             yield message
-    #
-    #     with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
-    #         "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
-    #     ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
-    #         await (
-    #             FunctionServer(opts=FaasWorkerOptions())
-    #             .http(mock_http_handler)
-    #             .event(mock_event_handler)
-    #             .bucket_notification(mock_bucket_notification_handler)
-    #             ._run()
-    #         )
-    #
-    #     # accept the init response from server
-    #     assert 1 == stream_calls
-    #     mock_event_handler.assert_called_once()
-    #     mock_http_handler.assert_not_called()
-    #     mock_bucket_notification_handler.assert_not_called()
-    #
-    # async def test_trigger_sync_http_handler(self):
-    #     mock_http_handler = Mock()
-    #     mock_event_handler = Mock()
-    #     mock_bucket_notification_handler = Mock()
-    #     mock_grpc_channel = Mock()
-    #     mock_async_channel_init = Mock()
-    #     mock_async_chan = MockAsyncChannel()
-    #     mock_async_channel_init.return_value = mock_async_chan
-    #
-    #     stream_calls = 0
-    #
-    #     async def mock_stream(self, request_iterator):
-    #         nonlocal stream_calls
-    #         mock_stream = [
-    #             ServerMessage(
-    #                 # Simulate Http Trigger
-    #                 trigger_request=TriggerRequest(
-    #                     data=b"a byte string",
-    #                     http=HttpTriggerContext(),
-    #                 )
-    #             )
-    #         ]
-    #         for message in mock_stream:
-    #             stream_calls += 1
-    #             yield message
-    #
-    #     with patch("nitric.faas.AsyncChannel", mock_async_channel_init), patch(
-    #         "nitric.proto.nitric.faas.v1.FaasServiceStub.trigger_stream", mock_stream
-    #     ), patch("nitric.faas.new_default_channel", mock_grpc_channel):
-    #         await (
-    #             FunctionServer(opts=FaasWorkerOptions())
-    #             .http(mock_http_handler)
-    #             .event(mock_event_handler)
-    #             .bucket_notification(mock_bucket_notification_handler)
-    #             ._run()
-    #         )
-    #
-    #     # accept the init response from server
-    #     assert 1 == stream_calls
-    #     mock_http_handler.assert_called_once()
-    #     mock_event_handler.assert_not_called()
-    #     mock_bucket_notification_handler.assert_not_called()
 
     async def test_trigger_async_event_handler(self):
         mock_http_handler = AsyncMock()

@@ -19,7 +19,7 @@
 from __future__ import annotations
 from typing import List, Union, Optional, ParamSpec, TypeVar, Callable, Concatenate
 from dataclasses import dataclass
-from nitric.faas import ApiWorkerOptions, FunctionServer, Middleware, MethodOptions, HttpMethod, HttpContext
+from nitric.faas import ApiWorkerOptions, FunctionServer, MethodOptions, HttpMethod, HttpMiddleware, HttpHandler
 from nitric.application import Nitric
 from nitric.resources.resource import Resource as BaseResource
 from nitric.proto.nitric.resource.v1 import (
@@ -34,9 +34,6 @@ from nitric.proto.nitric.resource.v1 import (
 )
 from grpclib import GRPCError
 from nitric.exception import exception_from_grpc_error
-
-
-HttpMiddleware = Middleware[HttpContext]
 
 
 @dataclass
@@ -187,7 +184,7 @@ class Api(BaseResource):
     def all(self, match: str, opts: Optional[MethodOptions] = None):
         """Define an HTTP route which will respond to HTTP GET requests."""
 
-        def decorator(function: HttpMiddleware) -> None:
+        def decorator(function: HttpHandler) -> None:
             r = self._route(match)
             r.method(
                 [
@@ -209,7 +206,7 @@ class Api(BaseResource):
         if opts is None:
             opts = MethodOptions()
 
-        def decorator(function: HttpMiddleware):
+        def decorator(function: HttpHandler):
             r = self._route(match)
             r.method(methods, function, opts=opts)
 
@@ -220,7 +217,7 @@ class Api(BaseResource):
         if opts is None:
             opts = MethodOptions()
 
-        def decorator(function: HttpMiddleware):
+        def decorator(function: HttpHandler):
             r = self._route(match)
             r.get(function, opts=opts)
 
@@ -231,7 +228,7 @@ class Api(BaseResource):
         if opts is None:
             opts = MethodOptions()
 
-        def decorator(function: HttpMiddleware):
+        def decorator(function: HttpHandler):
             r = self._route(match)
             r.post(function, opts=opts)
 
@@ -242,7 +239,7 @@ class Api(BaseResource):
         if opts is None:
             opts = MethodOptions()
 
-        def decorator(function: HttpMiddleware):
+        def decorator(function: HttpHandler):
             r = self._route(match)
             r.delete(function, opts=opts)
 
@@ -253,7 +250,7 @@ class Api(BaseResource):
         if opts is None:
             opts = MethodOptions()
 
-        def decorator(function: HttpMiddleware):
+        def decorator(function: HttpHandler):
             r = self._route(match)
             r.options(function, opts=opts)
 
@@ -264,7 +261,7 @@ class Api(BaseResource):
         if opts is None:
             opts = MethodOptions()
 
-        def decorator(function: HttpMiddleware):
+        def decorator(function: HttpHandler):
             r = self._route(match)
             r.patch(function, opts=opts)
 
@@ -275,7 +272,7 @@ class Api(BaseResource):
         if opts is None:
             opts = MethodOptions()
 
-        def decorator(function: HttpMiddleware):
+        def decorator(function: HttpHandler):
             r = self._route(match)
             r.put(function, opts=opts)
 
@@ -312,31 +309,33 @@ class Route:
         self.path = (api.path + path).replace("//", "/")
         self.middleware = opts.middleware if opts.middleware is not None else []
 
-    def method(self, methods: List[HttpMethod], *middleware: HttpMiddleware, opts: Optional[MethodOptions] = None):
+    def method(
+        self, methods: List[HttpMethod], *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None
+    ):
         """Register middleware for multiple HTTP Methods."""
         return Method(self, methods, *middleware, opts=opts).start()
 
-    def get(self, *middleware: HttpMiddleware, opts: Optional[MethodOptions] = None):
+    def get(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None):
         """Register middleware for HTTP GET requests."""
         return self.method([HttpMethod.GET], *middleware, opts=opts)
 
-    def post(self, *middleware: HttpMiddleware, opts: Optional[MethodOptions] = None):
+    def post(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None):
         """Register middleware for HTTP POST requests."""
         return self.method([HttpMethod.POST], *middleware, opts=opts)
 
-    def put(self, *middleware: HttpMiddleware, opts: Optional[MethodOptions] = None):
+    def put(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None):
         """Register middleware for HTTP PUT requests."""
         return self.method([HttpMethod.PUT], *middleware, opts=opts)
 
-    def patch(self, *middleware: HttpMiddleware, opts: Optional[MethodOptions] = None):
+    def patch(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None):
         """Register middleware for HTTP PATCH requests."""
         return self.method([HttpMethod.PATCH], *middleware, opts=opts)
 
-    def delete(self, *middleware: HttpMiddleware, opts: Optional[MethodOptions] = None):
+    def delete(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None):
         """Register middleware for HTTP DELETE requests."""
         return self.method([HttpMethod.DELETE], *middleware, opts=opts)
 
-    def options(self, *middleware: HttpMiddleware, opts: Optional[MethodOptions] = None):
+    def options(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None):
         """Register middleware for HTTP OPTIONS requests."""
         return self.method([HttpMethod.OPTIONS], *middleware, opts=opts)
 
@@ -350,7 +349,11 @@ class Method:
     opts: Optional[MethodOptions]
 
     def __init__(
-        self, route: Route, methods: List[HttpMethod], *middleware: HttpMiddleware, opts: Optional[MethodOptions] = None
+        self,
+        route: Route,
+        methods: List[HttpMethod],
+        *middleware: HttpMiddleware | HttpHandler,
+        opts: Optional[MethodOptions] = None,
     ):
         """Construct a method handler for the specified route."""
         self.route = route

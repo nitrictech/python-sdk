@@ -17,6 +17,8 @@
 # limitations under the License.
 #
 from __future__ import annotations
+
+import inspect
 from enum import Enum
 
 import functools
@@ -508,8 +510,16 @@ C = TypeVar("C", TriggerContext, HttpContext, EventContext, FileNotificationCont
 class Middleware(Protocol, Generic[C]):
     """A middleware function."""
 
-    async def __call__(self, ctx: C, nxt: Optional[Middleware[C]] = None) -> C:
-        """Middleware implementation."""
+    async def __call__(self, ctx: C, nxt: Optional[Middleware[C]]) -> C:
+        """Process trigger context."""
+        ...
+
+
+class Handler(Protocol, Generic[C]):
+    """A handler function."""
+
+    async def __call__(self, ctx: C) -> C | None:
+        """Process trigger context."""
         ...
 
 
@@ -518,33 +528,62 @@ EventMiddleware = Middleware[EventContext]
 BucketNotificationMiddleware = Middleware[BucketNotificationContext]
 FileNotificationMiddleware = Middleware[FileNotificationContext]
 
+HttpHandler = Handler[HttpContext]
+EventHandler = Handler[EventContext]
+BucketNotificationHandler = Handler[BucketNotificationContext]
+FileNotificationHandler = Handler[FileNotificationContext]
 
-def compose_middleware(*middlewares: Middleware[C]) -> Middleware[C]:
+
+def _convert_to_middleware(handler: Handler[C] | Middleware[C]) -> Middleware[C]:
+    """Convert a handler to a middleware, if it's already a middleware it's returned unchanged."""
+    if not _is_handler(handler):
+        # it's not a middleware, don't convert it.
+        return handler  # type: ignore
+
+    async def middleware(ctx: C, nxt: Middleware[C]) -> C:
+        context = await handler(ctx)  # type: ignore
+        return await nxt(context) if nxt else context  # type: ignore
+
+    return middleware  # type: ignore
+
+
+def _is_handler(unknown: Middleware[C] | Handler[C]) -> bool:
+    """Return True if the provided function is a handler (1 positional arg)."""
+    signature = inspect.signature(unknown)
+    params = signature.parameters
+    positional = [name for name, param in params.items() if param.default == inspect.Parameter.empty]
+    return len(positional) == 1
+
+
+def compose_middleware(*middlewares: Middleware[C] | Handler[C]) -> Middleware[C]:
     """
     Compose multiple middleware functions into a single middleware function.
 
     The resulting middleware will effectively be a chain of the provided middleware,
     where each calls the next in the chain when they're successful.
     """
+    middlewares = [_convert_to_middleware(middleware) for middleware in middlewares]  # type: ignore
 
     async def composed(ctx: C, nxt: Optional[Middleware[C]] = None) -> C:
         last_middleware = nxt
 
         def reduce_chain(acc_next: Middleware[C], cur: Middleware[C]) -> Middleware[C]:
             async def chained_middleware(ctx: C, nxt: Optional[Middleware[C]] = None) -> C:
-                result = (await nxt(ctx)) if nxt is not None else ctx
+                result = (await nxt(ctx)) if nxt is not None else ctx  # type: ignore
                 # type ignored because mypy appears to misidentify the correct return type
                 output_context = await cur(result, acc_next)  # type: ignore
+                if not output_context:
+                    return result  # type: ignore
                 if not isinstance(output_context, TriggerContext):
                     raise Exception(
                         f"middleware {cur} returned unexpected response type, expected a context object, "
                         f"got {output_context}"
                     )
-                return output_context
+                return output_context  # type: ignore
 
             return chained_middleware
 
-        middleware_chain = functools.reduce(reduce_chain, reversed(middlewares))
+        middleware_chain = functools.reduce(reduce_chain, reversed(middlewares))  # type: ignore
         # type ignored because mypy appears to misidentify the correct return type
         return await middleware_chain(ctx, last_middleware)  # type: ignore
 
@@ -577,7 +616,7 @@ class FunctionServer:
         ] = None
         self._opts = opts
 
-    def http(self, *handlers: Middleware[HttpContext]) -> FunctionServer:
+    def http(self, *handlers: HttpMiddleware | HttpHandler) -> FunctionServer:
         """
         Register one or more HTTP Trigger Handlers or Middleware.
 
@@ -586,7 +625,7 @@ class FunctionServer:
         self.__http_handler = compose_middleware(*handlers)
         return self
 
-    def event(self, *handlers: Middleware[EventContext]) -> FunctionServer:
+    def event(self, *handlers: EventMiddleware | EventHandler) -> FunctionServer:
         """
         Register one or more Event Trigger Handlers or Middleware.
 
@@ -595,7 +634,9 @@ class FunctionServer:
         self.__event_handler = compose_middleware(*handlers)
         return self
 
-    def bucket_notification(self, *handlers: Middleware[BucketNotificationContext]) -> FunctionServer:
+    def bucket_notification(
+        self, *handlers: BucketNotificationMiddleware | BucketNotificationHandler
+    ) -> FunctionServer:
         """
         Register one or more Bucket Notification Trigger Handlers or Middleware.
 
@@ -668,7 +709,7 @@ class FunctionServer:
                     # proceed to the next available message
                     continue
                 if msg_type == "trigger_request":
-                    ctx: Any = _ctx_from_grpc_trigger_request(srv_msg.trigger_request, self._opts)
+                    ctx: Any = _ctx_from_grpc_trigger_request(srv_msg.trigger_request, self._opts)  # type: ignore
 
                     try:
                         if len(ctx.req.trace_context) > 0:
@@ -683,7 +724,7 @@ class FunctionServer:
 
                         assert func is not None
 
-                        response_ctx: TriggerContext = await func(ctx)
+                        response_ctx: TriggerContext = await func(ctx)  # type: ignore
 
                         # TODO: should we allow middleware/handlers that return None still?
                         if response_ctx is None:
