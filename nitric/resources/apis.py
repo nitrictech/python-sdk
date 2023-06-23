@@ -181,7 +181,7 @@ class Api(BaseResource):
         self.routes.append(r)
         return r
 
-    def all(self, match: str, opts: Optional[MethodOptions] = None):
+    def all(self, match: str, opts: Optional[MethodOptions] = None) -> Callable[[HttpHandler], None]:
         """Define an HTTP route which will respond to HTTP GET requests."""
 
         def decorator(function: HttpHandler) -> None:
@@ -201,78 +201,80 @@ class Api(BaseResource):
 
         return decorator
 
-    def methods(self, methods: List[HttpMethod], match: str, opts: Optional[MethodOptions] = None):
+    def methods(
+        self, methods: List[HttpMethod], match: str, opts: Optional[MethodOptions] = None
+    ) -> Callable[[HttpHandler], None]:
         """Define an HTTP route which will respond to specific HTTP requests defined by a list of verbs."""
         if opts is None:
             opts = MethodOptions()
 
-        def decorator(function: HttpHandler):
+        def decorator(function: HttpHandler) -> None:
             r = self._route(match)
             r.method(methods, function, opts=opts)
 
         return decorator
 
-    def get(self, match: str, opts: Optional[MethodOptions] = None):
+    def get(self, match: str, opts: Optional[MethodOptions] = None) -> Callable[[HttpHandler], None]:
         """Define an HTTP route which will respond to HTTP GET requests."""
         if opts is None:
             opts = MethodOptions()
 
-        def decorator(function: HttpHandler):
+        def decorator(function: HttpHandler) -> None:
             r = self._route(match)
             r.get(function, opts=opts)
 
         return decorator
 
-    def post(self, match: str, opts: Optional[MethodOptions] = None):
+    def post(self, match: str, opts: Optional[MethodOptions] = None) -> Callable[[HttpHandler], None]:
         """Define an HTTP route which will respond to HTTP POST requests."""
         if opts is None:
             opts = MethodOptions()
 
-        def decorator(function: HttpHandler):
+        def decorator(function: HttpHandler) -> None:
             r = self._route(match)
             r.post(function, opts=opts)
 
         return decorator
 
-    def delete(self, match: str, opts: Optional[MethodOptions] = None):
+    def delete(self, match: str, opts: Optional[MethodOptions] = None) -> Callable[[HttpHandler], None]:
         """Define an HTTP route which will respond to HTTP DELETE requests."""
         if opts is None:
             opts = MethodOptions()
 
-        def decorator(function: HttpHandler):
+        def decorator(function: HttpHandler) -> None:
             r = self._route(match)
             r.delete(function, opts=opts)
 
         return decorator
 
-    def options(self, match: str, opts: Optional[MethodOptions] = None):
+    def options(self, match: str, opts: Optional[MethodOptions] = None) -> Callable[[HttpHandler], None]:
         """Define an HTTP route which will respond to HTTP OPTIONS requests."""
         if opts is None:
             opts = MethodOptions()
 
-        def decorator(function: HttpHandler):
+        def decorator(function: HttpHandler) -> None:
             r = self._route(match)
             r.options(function, opts=opts)
 
         return decorator
 
-    def patch(self, match: str, opts: Optional[MethodOptions] = None):
+    def patch(self, match: str, opts: Optional[MethodOptions] = None) -> Callable[[HttpHandler], None]:
         """Define an HTTP route which will respond to HTTP PATCH requests."""
         if opts is None:
             opts = MethodOptions()
 
-        def decorator(function: HttpHandler):
+        def decorator(function: HttpHandler) -> None:
             r = self._route(match)
             r.patch(function, opts=opts)
 
         return decorator
 
-    def put(self, match: str, opts: Optional[MethodOptions] = None):
+    def put(self, match: str, opts: Optional[MethodOptions] = None) -> Callable[[HttpHandler], None]:
         """Define an HTTP route which will respond to HTTP PUT requests."""
         if opts is None:
             opts = MethodOptions()
 
-        def decorator(function: HttpHandler):
+        def decorator(function: HttpHandler) -> None:
             r = self._route(match)
             r.put(function, opts=opts)
 
@@ -311,31 +313,31 @@ class Route:
 
     def method(
         self, methods: List[HttpMethod], *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None
-    ):
+    ) -> None:
         """Register middleware for multiple HTTP Methods."""
         return Method(self, methods, *middleware, opts=opts).start()
 
-    def get(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None):
+    def get(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None) -> None:
         """Register middleware for HTTP GET requests."""
         return self.method([HttpMethod.GET], *middleware, opts=opts)
 
-    def post(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None):
+    def post(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None) -> None:
         """Register middleware for HTTP POST requests."""
         return self.method([HttpMethod.POST], *middleware, opts=opts)
 
-    def put(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None):
+    def put(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None) -> None:
         """Register middleware for HTTP PUT requests."""
         return self.method([HttpMethod.PUT], *middleware, opts=opts)
 
-    def patch(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None):
+    def patch(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None) -> None:
         """Register middleware for HTTP PATCH requests."""
         return self.method([HttpMethod.PATCH], *middleware, opts=opts)
 
-    def delete(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None):
+    def delete(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None) -> None:
         """Register middleware for HTTP DELETE requests."""
         return self.method([HttpMethod.DELETE], *middleware, opts=opts)
 
-    def options(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None):
+    def options(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None) -> None:
         """Register middleware for HTTP OPTIONS requests."""
         return self.method([HttpMethod.OPTIONS], *middleware, opts=opts)
 
@@ -361,7 +363,7 @@ class Method:
         self.server = FunctionServer(ApiWorkerOptions(route.api.name, route.path, methods, opts))
         self.server.http(*route.api.middleware, *route.middleware, *middleware)
 
-    def start(self):
+    def start(self) -> None:
         """Start the server which will respond to incoming requests."""
         Nitric._register_worker(self.server)  # type: ignore
 

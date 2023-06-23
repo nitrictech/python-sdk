@@ -20,12 +20,12 @@ from __future__ import annotations
 
 from nitric.exception import exception_from_grpc_error
 from nitric.api.storage import BucketRef, Storage
-from typing import List, Union
+from typing import List, Union, Callable
 from enum import Enum
 from grpclib import GRPCError
 
 from nitric.application import Nitric
-from nitric.faas import FunctionServer, BucketNotificationWorkerOptions, Middleware, BucketNotificationContext
+from nitric.faas import FunctionServer, BucketNotificationWorkerOptions, BucketNotificationHandler
 from nitric.proto.nitric.resource.v1 import (
     Resource,
     ResourceType,
@@ -87,11 +87,13 @@ class Bucket(SecureResource):
 
         return Storage().bucket(self.name)
 
-    def on(self, notification_type: str, notification_prefix_filter: str):
+    def on(
+        self, notification_type: str, notification_prefix_filter: str
+    ) -> Callable[[BucketNotificationHandler], None]:
         """Create and return a bucket notification decorator for this bucket."""
         print("this has been called")
 
-        def decorator(func: Middleware[BucketNotificationContext]):
+        def decorator(func: BucketNotificationHandler) -> None:
             print("this has been called")
             self._server = FunctionServer(
                 BucketNotificationWorkerOptions(
