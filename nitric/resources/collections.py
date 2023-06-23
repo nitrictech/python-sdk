@@ -20,8 +20,7 @@ from __future__ import annotations
 
 from nitric.api.documents import CollectionRef, Documents
 from nitric.exception import exception_from_grpc_error
-from typing import List, Union, Literal
-from enum import Enum
+from typing import List, Literal
 from grpclib import GRPCError
 from nitric.application import Nitric
 from nitric.proto.nitric.resource.v1 import (
