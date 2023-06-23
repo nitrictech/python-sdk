@@ -20,8 +20,7 @@ from __future__ import annotations
 
 from nitric.api.events import Events, TopicRef
 from nitric.exception import exception_from_grpc_error
-from typing import List, Union, Callable
-from enum import Enum
+from typing import List, Union, Callable, Literal
 from grpclib import GRPCError
 from nitric.application import Nitric
 from nitric.faas import FunctionServer, SubscriptionWorkerOptions, EventHandler
@@ -34,11 +33,7 @@ from nitric.proto.nitric.resource.v1 import (
 
 from nitric.resources.resource import SecureResource
 
-
-class TopicPermission(Enum):
-    """Valid query expression operators."""
-
-    publishing = "publishing"
+TopicPermission = Literal["publishing"]
 
 
 class Topic(SecureResource):
@@ -61,17 +56,14 @@ class Topic(SecureResource):
             raise exception_from_grpc_error(grpc_err)
 
     def _to_resource(self) -> Resource:
-        return Resource(name=self.name, type=ResourceType.Topic)
+        return Resource(name=self.name, type=ResourceType.Topic) # type:ignore
 
-    def _perms_to_actions(self, *args: Union[TopicPermission, str]) -> List[Action]:
-        _permMap = {TopicPermission.publishing: [Action.TopicEventPublish]}
-        # convert strings to the enum value where needed
-        perms = [
-            permission if isinstance(permission, TopicPermission) else TopicPermission[permission.lower()]
-            for permission in args
-        ]
+    def _perms_to_actions(self, *args: TopicPermission) -> List[int]:
+        _permMap: dict[TopicPermission, List[int]] = {
+            "publishing": [Action.TopicEventPublish]
+        }
 
-        return [action for perm in perms for action in _permMap[perm]]
+        return [action for perm in args for action in _permMap[perm]]
 
     def allow(self, *args: Union[TopicPermission, str]) -> TopicRef:
         """Request the specified permissions to this resource."""

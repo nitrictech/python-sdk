@@ -20,7 +20,7 @@ from __future__ import annotations
 
 from nitric.exception import exception_from_grpc_error
 from nitric.api.storage import BucketRef, Storage
-from typing import List, Union, Callable
+from typing import List, Union, Callable, Literal
 from enum import Enum
 from grpclib import GRPCError
 
@@ -35,13 +35,7 @@ from nitric.proto.nitric.resource.v1 import (
 
 from nitric.resources.resource import SecureResource
 
-
-class BucketPermission(Enum):
-    """Valid query expression operators."""
-
-    reading = "reading"
-    writing = "writing"
-    deleting = "deleting"
+BucketPermission = Literal["reading", "writing", "deleting"]
 
 
 class Bucket(SecureResource):
@@ -64,23 +58,19 @@ class Bucket(SecureResource):
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    def _perms_to_actions(self, *args: Union[BucketPermission, str]) -> List[Action]:
-        permission_actions_map = {
-            BucketPermission.reading: [Action.BucketFileGet, Action.BucketFileList],
-            BucketPermission.writing: [Action.BucketFilePut],
-            BucketPermission.deleting: [Action.BucketFileDelete],
+    def _perms_to_actions(self, *args: BucketPermission) -> List[int]:
+        permission_actions_map: dict[BucketPermission, List[int]] = {
+            "reading": [Action.BucketFileGet, Action.BucketFileList],
+            "writing": [Action.BucketFilePut],
+            "deleting": [Action.BucketFileDelete],
         }
-        # convert strings to the enum value where needed
-        perms = [
-            permission if isinstance(permission, BucketPermission) else BucketPermission[permission.lower()]
-            for permission in args
-        ]
-        return [action for perm in perms for action in permission_actions_map[perm]]
+
+        return [action for perm in args for action in permission_actions_map[perm]]
 
     def _to_resource(self) -> Resource:
-        return Resource(name=self.name, type=ResourceType.Bucket)
+        return Resource(name=self.name, type=ResourceType.Bucket) # type:ignore
 
-    def allow(self, *args: Union[BucketPermission, str]) -> BucketRef:
+    def allow(self, *args: BucketPermission) -> BucketRef:
         """Request the required permissions for this resource."""
         str_args = [str(permission) for permission in args]
         self._register_policy(*str_args)

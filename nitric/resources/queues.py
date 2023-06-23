@@ -19,8 +19,7 @@
 from __future__ import annotations
 
 from nitric.exception import exception_from_grpc_error
-from typing import List, Union
-from enum import Enum
+from typing import List, Union, Literal
 from grpclib import GRPCError
 from nitric.api.queues import QueueRef, Queues
 from nitric.application import Nitric
@@ -33,13 +32,7 @@ from nitric.proto.nitric.resource.v1 import (
 
 from nitric.resources.resource import SecureResource
 
-
-class QueuePermission(Enum):
-    """Valid query expression operators."""
-
-    sending = "sending"
-    receiving = "receiving"
-
+QueuePermission = Literal["sending", "receiving"]
 
 class Queue(SecureResource):
     """A queue resource."""
@@ -53,20 +46,15 @@ class Queue(SecureResource):
         self.name = name
 
     def _to_resource(self) -> Resource:
-        return Resource(name=self.name, type=ResourceType.Queue)
+        return Resource(name=self.name, type=ResourceType.Queue) # type:ignore
 
-    def _perms_to_actions(self, *args: Union[QueuePermission, str]) -> List[Action]:
-        permission_actions_map = {
-            QueuePermission.sending: [Action.QueueSend, Action.QueueList, Action.QueueDetail],
-            QueuePermission.receiving: [Action.QueueReceive, Action.QueueList, Action.QueueDetail],
+    def _perms_to_actions(self, *args: QueuePermission) -> List[int]:
+        permission_actions_map: dict[QueuePermission, List[int]] = {
+            "sending": [Action.QueueSend, Action.QueueList, Action.QueueDetail],
+            "receiving": [Action.QueueReceive, Action.QueueList, Action.QueueDetail],
         }
-        # convert strings to the enum value where needed
-        perms = [
-            permission if isinstance(permission, QueuePermission) else QueuePermission[permission.lower()]
-            for permission in args
-        ]
 
-        return [action for perm in perms for action in permission_actions_map[perm]]
+        return [action for perm in args for action in permission_actions_map[perm]]
 
     async def _register(self):
         try:

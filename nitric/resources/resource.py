@@ -79,7 +79,7 @@ class SecureResource(Resource):
         pass
 
     @abstractmethod
-    def _perms_to_actions(self, *args: str) -> List[Action]:
+    def _perms_to_actions(self, *args: Any) -> List[int]:
         pass
 
     async def _register_policy_async(self, *args: str):

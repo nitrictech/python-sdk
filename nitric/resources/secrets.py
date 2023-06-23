@@ -19,7 +19,7 @@
 from __future__ import annotations
 
 from nitric.exception import exception_from_grpc_error
-from typing import List, Union
+from typing import List, Union, Literal
 from enum import Enum
 from grpclib import GRPCError
 
@@ -34,12 +34,7 @@ from nitric.proto.nitric.resource.v1 import (
 
 from nitric.resources.resource import SecureResource
 
-
-class SecretPermission(Enum):
-    """Available permissions that can be requested for secret resources."""
-
-    accessing = "accessing"
-    putting = "putting"
+SecretPermission = Literal["accessing", "putting"]
 
 
 class Secret(SecureResource):
@@ -54,7 +49,7 @@ class Secret(SecureResource):
         self.name = name
 
     def _to_resource(self) -> Resource:
-        return Resource(name=self.name, type=ResourceType.Secret)
+        return Resource(name=self.name, type=ResourceType.Secret) # type:ignore
 
     async def _register(self):
         try:
@@ -64,18 +59,13 @@ class Secret(SecureResource):
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    def _perms_to_actions(self, *args: Union[SecretPermission, str]) -> List[Action]:
-        permissions_actions_map = {
-            SecretPermission.accessing: [Action.SecretAccess],
-            SecretPermission.putting: [Action.SecretPut],
+    def _perms_to_actions(self, *args: SecretPermission) -> List[int]:
+        permissions_actions_map: dict[SecretPermission, List[int]] = {
+            "accessing": [Action.SecretAccess],
+            "putting": [Action.SecretPut],
         }
-        # convert strings to the enum value where needed
-        perms = [
-            permission if isinstance(permission, SecretPermission) else SecretPermission[permission.lower()]
-            for permission in args
-        ]
 
-        return [action for perm in perms for action in permissions_actions_map[perm]]
+        return [action for perm in args for action in permissions_actions_map[perm]]
 
     def allow(self, *args: Union[SecretPermission, str]) -> SecretContainerRef:
         """Request the specified permissions to this resource."""

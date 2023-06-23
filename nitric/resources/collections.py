@@ -20,10 +20,9 @@ from __future__ import annotations
 
 from nitric.api.documents import CollectionRef, Documents
 from nitric.exception import exception_from_grpc_error
-from typing import List, Union
+from typing import List, Union, Literal
 from enum import Enum
 from grpclib import GRPCError
-
 from nitric.application import Nitric
 from nitric.proto.nitric.resource.v1 import (
     Resource,
@@ -31,16 +30,10 @@ from nitric.proto.nitric.resource.v1 import (
     Action,
     ResourceDeclareRequest,
 )
-
 from nitric.resources.resource import SecureResource
 
 
-class CollectionPermission(Enum):
-    """Valid query expression operators."""
-
-    reading = "reading"
-    writing = "writing"
-    deleting = "deleting"
+CollectionPermission = Literal["reading", "writing", "deleting"]
 
 
 class Collection(SecureResource):
@@ -60,27 +53,22 @@ class Collection(SecureResource):
             raise exception_from_grpc_error(grpc_err)
 
     def _to_resource(self) -> Resource:
-        return Resource(name=self.name, type=ResourceType.Collection)
+        return Resource(name=self.name, type=ResourceType.Collection) # type:ignore
 
-    def _perms_to_actions(self, *args: Union[CollectionPermission, str]) -> List[Action]:
-        permission_actions_map = {
-            CollectionPermission.reading: [
+    def _perms_to_actions(self, *args: CollectionPermission) -> List[int]:
+        permission_actions_map: dict[CollectionPermission, List[int]] = {
+            "reading": [
                 Action.CollectionDocumentRead,
                 Action.CollectionQuery,
                 Action.CollectionList,
             ],
-            CollectionPermission.writing: [Action.CollectionDocumentWrite, Action.CollectionList],
-            CollectionPermission.deleting: [Action.CollectionDocumentDelete, Action.CollectionList],
+            "writing": [Action.CollectionDocumentWrite, Action.CollectionList],
+            "deleting": [Action.CollectionDocumentDelete, Action.CollectionList],
         }
-        # convert strings to the enum value where needed
-        perms = [
-            permission if isinstance(permission, CollectionPermission) else CollectionPermission[permission.lower()]
-            for permission in args
-        ]
 
-        return [action for perm in perms for action in permission_actions_map[perm]]
+        return [action for perm in args for action in permission_actions_map[perm]]
 
-    def allow(self, *args: Union[CollectionPermission, str]) -> CollectionRef:
+    def allow(self, *args: CollectionPermission) -> CollectionRef:
         """Request the required permissions for this collection."""
         # Ensure registration of the resource is complete before requesting permissions.
         str_args = [str(permission) for permission in args]
