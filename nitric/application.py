@@ -88,7 +88,7 @@ class Nitric:
         return provider
 
     @classmethod
-    def run(cls):
+    def run(cls) -> None:
         """
         Start the nitric application.
 
