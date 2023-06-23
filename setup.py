@@ -17,7 +17,7 @@ def get_current_version_tag():
         return version_tags.pop()[1:]
     elif len(rc_tags) == 1:
         base_tag, num_commits = rc_tags.pop().split("-rc.")[:2]
-        return "{}.dev{}".format(base_tag, num_commits)[1:]
+        return "{0}.dev{1}".format(base_tag, num_commits)[1:]
     else:
         return "0.0.0.dev0"
 
@@ -35,7 +35,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/nitrictech/python-sdk",
     packages=setuptools.find_packages(exclude=["tests", "tests.*"]),
-    # package_data={"nitric", ["py.typed"]},
+    package_data={"nitric": ["py.typed"]},
     license_files=("LICENSE.txt",),
     classifiers=[
         "Programming Language :: Python :: 3",
