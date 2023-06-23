@@ -32,7 +32,7 @@ from nitric.proto.nitric.resource.v1 import (
     ResourceDeclareRequest,
 )
 
-from nitric.resources.base import SecureResource
+from nitric.resources.resource import SecureResource
 
 
 class CollectionPermission(Enum):
@@ -83,7 +83,8 @@ class Collection(SecureResource):
     def allow(self, *args: Union[CollectionPermission, str]) -> CollectionRef:
         """Request the required permissions for this collection."""
         # Ensure registration of the resource is complete before requesting permissions.
-        self._register_policy(*args)
+        str_args = [str(permission) for permission in args]
+        self._register_policy(*str_args)
 
         return Documents().collection(self.name)
 
@@ -94,4 +95,5 @@ def collection(name: str) -> Collection:
 
     If a collection has already been registered with the same name, the original reference will be reused.
     """
-    return Nitric._create_resource(Collection, name)
+    # type ignored because the register call is treated as protected.
+    return Nitric._create_resource(Collection, name)  # type: ignore

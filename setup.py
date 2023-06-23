@@ -17,7 +17,7 @@ def get_current_version_tag():
         return version_tags.pop()[1:]
     elif len(rc_tags) == 1:
         base_tag, num_commits = rc_tags.pop().split("-rc.")[:2]
-        return "{}.dev{}".format(base_tag, num_commits)[1:]
+        return "{0}.dev{1}".format(base_tag, num_commits)[1:]
     else:
         return "0.0.0.dev0"
 
@@ -35,6 +35,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/nitrictech/python-sdk",
     packages=setuptools.find_packages(exclude=["tests", "tests.*"]),
+    package_data={"nitric": ["py.typed"]},
     license_files=("LICENSE.txt",),
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -43,7 +44,7 @@ setuptools.setup(
     setup_requires=["wheel"],
     install_requires=[
         "asyncio",
-        "protobuf==3.19.5",
+        "protobuf==4.23.3",
         "betterproto==2.0.0b5",
         "opentelemetry-api",
         "opentelemetry-sdk",
@@ -54,8 +55,8 @@ setuptools.setup(
         "dev": [
             "tox==3.20.1",
             "twine==3.2.0",
-            "pytest==6.0.1",
-            "pytest-cov==2.10.1",
+            "pytest==7.3.2",
+            "pytest-cov==4.1.0",
             "pre-commit==2.12.0",
             "black==22.3",
             "flake8==3.9.1",
@@ -70,9 +71,10 @@ setuptools.setup(
             "markupsafe==2.0.1",
             "betterproto[compiler]==2.0.0b5",
             # "grpcio==1.33.2",
-            "grpcio-tools==1.44.0",
+            "grpcio-tools==1.54.2",
             "twine==3.2.0",
+            "mypy==1.3.0",
         ]
     },
-    python_requires=">=3.7",
+    python_requires=">=3.11",
 )

@@ -28,7 +28,6 @@ from opentelemetry.instrumentation.grpc import GrpcInstrumentorClient
 from nitric.faas import FunctionServer
 from nitric.exception import NitricUnavailableException
 
-# from nitric.resources.base import BaseResource
 from typing import Dict, List, Type, Any, TypeVar
 
 
@@ -54,11 +53,12 @@ class Nitric:
         cls._workers.append(srv)
 
     @classmethod
-    def _create_resource(cls, resource: Type[BT], name: str, *args, **kwargs) -> BT:
+    def _create_resource(cls, resource: Type[BT], name: str, *args: Any, **kwargs: Any) -> BT:
         try:
             resource_type = resource.__name__.lower()
-            if cls._cache.get(resource_type).get(name) is None:
-                cls._cache[resource_type][name] = resource.make(name, *args, **kwargs)
+            cached_resources = cls._cache.get(resource_type)
+            if cached_resources is None or cached_resources.get(name) is None:
+                cls._cache[resource_type][name] = resource.make(name, *args, **kwargs)  # type: ignore
 
             return cls._cache[resource_type][name]
         except ConnectionRefusedError:
@@ -110,5 +110,5 @@ class Nitric:
                 'Unable to connect to a nitric server! If you\'re running locally make sure to run "nitric start"'
             )
         finally:
-            if provider is not None:
+            if provider is not None:  # type: ignore
                 provider.force_flush()

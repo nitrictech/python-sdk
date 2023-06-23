@@ -31,7 +31,7 @@ from nitric.proto.nitric.resource.v1 import (
     ResourceDeclareRequest,
 )
 
-from nitric.resources.base import SecureResource
+from nitric.resources.resource import SecureResource
 
 
 class QueuePermission(Enum):
@@ -79,7 +79,8 @@ class Queue(SecureResource):
     def allow(self, *args: Union[QueuePermission, str]) -> QueueRef:
         """Request the required permissions for this queue."""
         # Ensure registration of the resource is complete before requesting permissions.
-        self._register_policy(*args)
+        str_args = [str(permission) for permission in args]
+        self._register_policy(*str_args)
 
         return Queues().queue(self.name)
 
@@ -90,4 +91,4 @@ def queue(name: str) -> Queue:
 
     If a queue has already been registered with the same name, the original reference will be reused.
     """
-    return Nitric._create_resource(Queue, name)
+    return Nitric._create_resource(Queue, name)  # type: ignore

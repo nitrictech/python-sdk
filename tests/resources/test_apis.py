@@ -35,10 +35,11 @@ from nitric.proto.nitric.resource.v1 import (
     ApiScopes,
     ApiSecurityDefinition,
     ApiSecurityDefinitionJwt,
+    ResourceServiceStub,
 )
 
 from nitric.resources import api, ApiOptions, JwtSecurityDefinition
-from nitric.resources.apis import Method, Route, RouteOptions
+from nitric.resources.apis import Method, Route, RouteOptions, Api
 
 
 class Object(object):
@@ -50,7 +51,6 @@ class ApiTest(IsolatedAsyncioTestCase):
         mock_declare = AsyncMock()
         mock_response = Object()
         mock_declare.return_value = mock_response
-
         with patch("nitric.proto.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
             api("test-api")
 
@@ -157,13 +157,9 @@ class ApiTest(IsolatedAsyncioTestCase):
             )
         )
 
+    @patch.object(Api, "_register", AsyncMock())
     async def test_get_api_url(self):
-        mock_declare = AsyncMock()
-        mock_response = Object()
-        mock_declare.return_value = mock_response
-
-        with patch("nitric.proto.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
-            test_api = api("test-api-get-url")
+        test_api = api("test-api-get-url")
 
         assert test_api is not None
 

@@ -17,9 +17,8 @@
 # limitations under the License.
 #
 """Nitric SDK Configuration Settings."""
-import os
 
-from nitric.config import default_settings
+import os
 
 
 class Settings:
@@ -27,10 +26,7 @@ class Settings:
 
     def __init__(self):
         """Construct a new Nitric settings helper object."""
-        for setting in dir(default_settings):
-            default_value = getattr(default_settings, setting)
-            env_variable = os.environ.get(setting)
-            setattr(self, setting, env_variable or default_value)
+        self.SERVICE_BIND = os.environ.get("SERVICE_ADDRESS", "127.0.0.1:50051")
 
 
 settings = Settings()
