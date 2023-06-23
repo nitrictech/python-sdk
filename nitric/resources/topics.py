@@ -20,11 +20,11 @@ from __future__ import annotations
 
 from nitric.api.events import Events, TopicRef
 from nitric.exception import exception_from_grpc_error
-from typing import List, Union
+from typing import List, Union, Callable
 from enum import Enum
 from grpclib import GRPCError
 from nitric.application import Nitric
-from nitric.faas import Middleware, FunctionServer, SubscriptionWorkerOptions, EventContext
+from nitric.faas import FunctionServer, SubscriptionWorkerOptions, EventHandler
 from nitric.proto.nitric.resource.v1 import (
     Resource,
     ResourceType,
@@ -80,10 +80,10 @@ class Topic(SecureResource):
 
         return Events().topic(self.name)
 
-    def subscribe(self):
+    def subscribe(self) -> Callable[[EventHandler], None]:
         """Create and return a subscription decorator for this topic."""
 
-        def decorator(func: Middleware[EventContext]):
+        def decorator(func: EventHandler) -> None:
             server = FunctionServer(SubscriptionWorkerOptions(topic=self.name))
             server.event(func)
             # type ignored because the register call is treated as protected.
