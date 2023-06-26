@@ -67,11 +67,12 @@ class Schedule:
         return Nitric._register_worker(self.server)  # type: ignore
 
 
-def schedule(description: str, every: str) -> Callable[[EventHandler], None]:
+def schedule(description: str, every: str) -> Callable[[EventHandler], Schedule]:
     """Return a schedule decorator."""
 
-    def decorator(func: EventHandler) -> None:
+    def decorator(func: EventHandler) -> Schedule:
         r = Schedule(description)
         r.every(every, func)
+        return r
 
     return decorator
