@@ -20,7 +20,7 @@ from __future__ import annotations
 
 from nitric.api.events import Events, TopicRef
 from nitric.exception import exception_from_grpc_error
-from typing import List, Union, Callable, Literal
+from typing import List, Callable, Literal
 from grpclib import GRPCError
 from nitric.application import Nitric
 from nitric.faas import FunctionServer, SubscriptionWorkerOptions, EventHandler
@@ -47,7 +47,7 @@ class Topic(SecureResource):
         super().__init__()
         self.name = name
 
-    async def _register(self):
+    async def _register(self) -> None:
         try:
             await self._resources_stub.declare(
                 resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
@@ -56,12 +56,10 @@ class Topic(SecureResource):
             raise exception_from_grpc_error(grpc_err)
 
     def _to_resource(self) -> Resource:
-        return Resource(name=self.name, type=ResourceType.Topic) # type:ignore
+        return Resource(name=self.name, type=ResourceType.Topic)  # type:ignore
 
     def _perms_to_actions(self, *args: TopicPermission) -> List[int]:
-        _permMap: dict[TopicPermission, List[int]] = {
-            "publishing": [Action.TopicEventPublish]
-        }
+        _permMap: dict[TopicPermission, List[int]] = {"publishing": [Action.TopicEventPublish]}
 
         return [action for perm in args for action in _permMap[perm]]
 

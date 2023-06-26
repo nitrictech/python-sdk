@@ -19,7 +19,7 @@
 from __future__ import annotations
 
 from nitric.exception import exception_from_grpc_error
-from typing import List, Union, Literal
+from typing import List, Literal
 from grpclib import GRPCError
 from nitric.api.queues import QueueRef, Queues
 from nitric.application import Nitric
@@ -34,6 +34,7 @@ from nitric.resources.resource import SecureResource
 
 QueuePermission = Literal["sending", "receiving"]
 
+
 class Queue(SecureResource):
     """A queue resource."""
 
@@ -46,7 +47,7 @@ class Queue(SecureResource):
         self.name = name
 
     def _to_resource(self) -> Resource:
-        return Resource(name=self.name, type=ResourceType.Queue) # type:ignore
+        return Resource(name=self.name, type=ResourceType.Queue)  # type:ignore
 
     def _perms_to_actions(self, *args: QueuePermission) -> List[int]:
         permission_actions_map: dict[QueuePermission, List[int]] = {
@@ -56,7 +57,7 @@ class Queue(SecureResource):
 
         return [action for perm in args for action in permission_actions_map[perm]]
 
-    async def _register(self):
+    async def _register(self) -> None:
         try:
             await self._resources_stub.declare(
                 resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())

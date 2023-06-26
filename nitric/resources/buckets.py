@@ -49,7 +49,7 @@ class Bucket(SecureResource):
         super().__init__()
         self.name = name
 
-    async def _register(self):
+    async def _register(self) -> None:
         try:
             await self._resources_stub.declare(
                 resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
@@ -67,7 +67,7 @@ class Bucket(SecureResource):
         return [action for perm in args for action in permission_actions_map[perm]]
 
     def _to_resource(self) -> Resource:
-        return Resource(name=self.name, type=ResourceType.Bucket) # type:ignore
+        return Resource(name=self.name, type=ResourceType.Bucket)  # type:ignore
 
     def allow(self, *args: BucketPermission) -> BucketRef:
         """Request the required permissions for this resource."""

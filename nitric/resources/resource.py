@@ -26,7 +26,6 @@ from typing import Any, Sequence, TypeVar, Type, Optional, List
 
 from grpclib import GRPCError
 from nitric.proto.nitric.resource.v1 import (
-    Action,
     PolicyResource,
     Resource as WireResource,
     ResourceType,
@@ -50,7 +49,7 @@ class Resource(ABC):
         self._resources_stub = ResourceServiceStub(channel=self._channel)
 
     @abstractmethod
-    async def _register(self):
+    async def _register(self) -> None:
         pass
 
     @classmethod
@@ -82,7 +81,7 @@ class SecureResource(Resource):
     def _perms_to_actions(self, *args: Any) -> List[int]:
         pass
 
-    async def _register_policy_async(self, *args: str):
+    async def _register_policy_async(self, *args: str) -> None:
         # if self._reg is not None:
         #     await asyncio.wait({self._reg})
 
@@ -100,7 +99,7 @@ class SecureResource(Resource):
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    def _register_policy(self, *args: str):
+    def _register_policy(self, *args: str) -> None:
         try:
             loop = asyncio.get_event_loop()
             loop.run_until_complete(self._register_policy_async(*args))

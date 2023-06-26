@@ -17,8 +17,11 @@
 # limitations under the License.
 #
 from __future__ import annotations
+
+from typing import Coroutine, Callable
+
 from nitric.application import Nitric
-from nitric.faas import FunctionServer, Middleware, RateWorkerOptions, Frequency, EventContext
+from nitric.faas import FunctionServer, RateWorkerOptions, Frequency, EventHandler
 
 
 class Schedule:
@@ -27,7 +30,7 @@ class Schedule:
     description: str
     server: FunctionServer
 
-    def start(self):
+    def start(self) -> Coroutine:
         """Start the function server that executes the scheduled middleware."""
         return self.server.start()
 
@@ -35,7 +38,7 @@ class Schedule:
         """Construct a new schedule."""
         self.description = description
 
-    def every(self, rate_description: str, *middleware: Middleware[EventContext]):
+    def every(self, rate_description: str, handler: EventHandler) -> None:
         """
         Register middleware to be run at the specified rate.
 
@@ -59,15 +62,15 @@ class Schedule:
         opts = RateWorkerOptions(self.description, int(rate), freq)
 
         self.server = FunctionServer(opts)
-        self.server.event(*middleware)
+        self.server.event(handler)
         # type ignored because the register call is treated as protected.
         return Nitric._register_worker(self.server)  # type: ignore
 
 
-def schedule(description: str, every: str):
+def schedule(description: str, every: str) -> Callable[[EventHandler], Schedule]:
     """Return a schedule decorator."""
 
-    def decorator(func: Middleware[EventContext]):
+    def decorator(func: EventHandler) -> Schedule:
         r = Schedule(description)
         r.every(every, func)
         return r

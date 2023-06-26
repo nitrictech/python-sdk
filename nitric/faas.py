@@ -263,9 +263,10 @@ class EventRequest(Request):
         self.topic = topic
 
     @property
-    def payload(self) -> bytes:
-        """Return the payload of this request as text."""
-        return json.loads(self.data.decode("utf-8"))
+    def payload(self) -> Any:
+        """Return the payload of this event, usually a dictionary."""
+        event_envelope = json.loads(self.data.decode("utf-8"))
+        return event_envelope["payload"] if isinstance(event_envelope, dict) else event_envelope
 
 
 class EventResponse(Response):
