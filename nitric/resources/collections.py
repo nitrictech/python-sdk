@@ -43,7 +43,7 @@ class Collection(SecureResource):
         super().__init__()
         self.name = name
 
-    async def _register(self):
+    async def _register(self) -> None:
         try:
             await self._resources_stub.declare(
                 resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
@@ -52,7 +52,7 @@ class Collection(SecureResource):
             raise exception_from_grpc_error(grpc_err)
 
     def _to_resource(self) -> Resource:
-        return Resource(name=self.name, type=ResourceType.Collection) # type:ignore
+        return Resource(name=self.name, type=ResourceType.Collection)  # type:ignore
 
     def _perms_to_actions(self, *args: CollectionPermission) -> List[int]:
         permission_actions_map: dict[CollectionPermission, List[int]] = {

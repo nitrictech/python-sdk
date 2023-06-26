@@ -41,9 +41,9 @@ class Secrets(object):
     This client insulates application code from stack specific secrets managements services.
     """
 
-    def __init__(self):
+    def __init__(self: Secrets):
         """Construct a Nitric Storage Client."""
-        self._channel: Union[Channel, None] = new_default_channel()
+        self._channel: Channel = new_default_channel()
         self.secrets_stub = SecretServiceStub(channel=self._channel)
 
     def __del__(self):
@@ -51,7 +51,7 @@ class Secrets(object):
         if self._channel is not None:
             self._channel.close()
 
-    def secret(self, name: str):
+    def secret(self, name: str) -> SecretContainerRef:
         """Return a reference to a secret container from the connected secrets management service."""
         return SecretContainerRef(_secrets=self, name=name)
 
@@ -86,7 +86,7 @@ class SecretContainerRef(object):
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    def version(self, version: str):
+    def version(self, version: str) -> SecretVersion:
         """
         Return a reference to a specific version of a secret.
 
@@ -94,7 +94,7 @@ class SecretContainerRef(object):
         """
         return SecretVersion(_secrets=self._secrets, secret=self, id=version)
 
-    def latest(self):
+    def latest(self) -> SecretVersion:
         """
         Return a reference to the 'latest' secret version.
 
@@ -152,10 +152,10 @@ class SecretValue(object):
     def __bytes__(self) -> bytes:
         return self.value
 
-    def as_string(self):
+    def as_string(self) -> str:
         """Return the content of this secret value as a string."""
         return str(self)
 
-    def as_bytes(self):
+    def as_bytes(self) -> bytes:
         """Return the content of this secret value."""
         return bytes(self)
