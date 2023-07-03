@@ -511,7 +511,7 @@ C = TypeVar("C", TriggerContext, HttpContext, EventContext, FileNotificationCont
 class Middleware(Protocol, Generic[C]):
     """A middleware function."""
 
-    async def __call__(self, ctx: C, nxt: Optional[Middleware[C]]) -> C:
+    async def __call__(self, ctx: C, nxt: Optional[Middleware[C]] = None) -> C:
         """Process trigger context."""
         ...
 
