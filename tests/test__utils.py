@@ -18,7 +18,7 @@
 #
 import copy
 
-from nitric.utils import _struct_from_dict, _dict_from_struct
+from nitric.utils import struct_from_dict, dict_from_struct
 
 
 def test__dict_from_struct():
@@ -35,4 +35,4 @@ def test__dict_from_struct():
     dict_copy = copy.deepcopy(dict_val)
 
     # Serialization and Deserialization shouldn't modify the object in most cases.
-    assert _dict_from_struct(_struct_from_dict(dict_val)) == dict_copy
+    assert dict_from_struct(struct_from_dict(dict_val)) == dict_copy

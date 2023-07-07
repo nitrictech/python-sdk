@@ -18,11 +18,9 @@
 #
 from dataclasses import dataclass
 from typing import Union
-
+from grpclib.client import Channel
 from grpclib import GRPCError
 from nitric.exception import exception_from_grpc_error, InvalidArgumentException
-from nitric.application import Nitric
-from nitric.faas import FunctionServer, FileNotificationWorkerOptions, FileNotificationMiddleware
 from nitric.utils import new_default_channel
 from nitric.proto.nitric.storage.v1 import (
     StorageServiceStub,
@@ -46,8 +44,9 @@ class Storage(object):
 
     def __init__(self):
         """Construct a Nitric Storage Client."""
-        self._channel = new_default_channel()
-        self._storage_stub = StorageServiceStub(channel=self._channel)
+        self._channel: Union[Channel, None] = new_default_channel()
+        # Had to make unprotected (publically accessible in order to use as part of bucket reference)
+        self.storage_stub = StorageServiceStub(channel=self._channel)
 
     def __del__(self):
         # close the channel when this client is destroyed
@@ -56,7 +55,7 @@ class Storage(object):
 
     def bucket(self, name: str):
         """Return a reference to a bucket from the connected storage service."""
-        return BucketRef(_storage=self, name=name, _server=None)
+        return BucketRef(_storage=self, name=name)
 
 
 @dataclass(order=True)
@@ -65,7 +64,6 @@ class BucketRef(object):
 
     _storage: Storage
     name: str
-    _server: Union[FunctionServer, None]
 
     def file(self, key: str):
         """Return a reference to a file in this bucket."""
@@ -73,26 +71,10 @@ class BucketRef(object):
 
     async def files(self):
         """Return a list of files in this bucket."""
-        resp = await self._storage._storage_stub.list_files(
+        resp = await self._storage.storage_stub.list_files(
             storage_list_files_request=StorageListFilesRequest(bucket_name=self.name)
         )
         return [self.file(f.key) for f in resp.files]
-
-    def on(self, notification_type: str, notification_prefix_filter: str):
-        """Create and return a bucket notification decorator for this bucket."""
-
-        def decorator(func: FileNotificationMiddleware):
-            self._server = FunctionServer(
-                FileNotificationWorkerOptions(
-                    bucket=self,
-                    notification_type=notification_type,
-                    notification_prefix_filter=notification_prefix_filter,
-                )
-            )
-            self._server.bucket_notification(func)
-            Nitric._register_worker(self._server)
-
-        return decorator
 
 
 class FileMode(Enum):
@@ -126,7 +108,7 @@ class File(object):
         Will create the file if it doesn't already exist.
         """
         try:
-            await self._storage._storage_stub.write(
+            await self._storage.storage_stub.write(
                 storage_write_request=StorageWriteRequest(bucket_name=self._bucket, key=self.key, body=body)
             )
         except GRPCError as grpc_err:
@@ -135,7 +117,7 @@ class File(object):
     async def read(self) -> bytes:
         """Read this files contents from the bucket."""
         try:
-            response = await self._storage._storage_stub.read(
+            response = await self._storage.storage_stub.read(
                 storage_read_request=StorageReadRequest(bucket_name=self._bucket, key=self.key)
             )
             return response.body
@@ -145,7 +127,7 @@ class File(object):
     async def delete(self):
         """Delete this file from the bucket."""
         try:
-            await self._storage._storage_stub.delete(
+            await self._storage.storage_stub.delete(
                 storage_delete_request=StorageDeleteRequest(bucket_name=self._bucket, key=self.key)
             )
         except GRPCError as grpc_err:
@@ -163,7 +145,7 @@ class File(object):
         """Generate a signed URL for reading or writing to a file."""
         warn("File.sign_url() is deprecated, use upload_url() or download_url() instead", DeprecationWarning)
         try:
-            response = await self._storage._storage_stub.pre_sign_url(
+            response = await self._storage.storage_stub.pre_sign_url(
                 storage_pre_sign_url_request=StoragePreSignUrlRequest(
                     bucket_name=self._bucket, key=self.key, operation=mode.to_request_operation(), expiry=expiry
                 )

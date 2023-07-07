@@ -18,12 +18,13 @@
 #
 from __future__ import annotations
 
-from typing import List, Union
+from typing import Any, List, Optional, Union
 
 from grpclib import GRPCError
 
 from nitric.exception import exception_from_grpc_error
-from nitric.utils import new_default_channel, _struct_from_dict
+from grpclib.client import Channel
+from nitric.utils import new_default_channel, struct_from_dict
 from nitric.proto.nitric.event.v1 import (
     EventServiceStub,
     NitricEvent,
@@ -38,16 +39,16 @@ from dataclasses import dataclass, field
 class Event(object):
     """Eventing client, providing access to Topic and Event references and operations on those entities."""
 
-    payload: dict = field(default_factory=dict)
-    id: str = field(default=None)
-    payload_type: str = field(default=None)
+    payload: dict[str, Any] = field(default_factory=dict)
+    id: Optional[str] = field(default=None)
+    payload_type: Optional[str] = field(default=None)
 
 
 def _event_to_wire(event: Event) -> NitricEvent:
     return NitricEvent(
-        id=event.id,
-        payload=_struct_from_dict(event.payload),
-        payload_type=event.payload_type,
+        id=event.id if event.id else None,
+        payload=struct_from_dict(event.payload),
+        payload_type=event.payload_type if event.payload_type else None,
     )
 
 
@@ -60,7 +61,7 @@ class TopicRef(object):
 
     async def publish(
         self,
-        event: Union[Event, dict] = None,
+        event: Union[Event, dict[str, Any]],
     ) -> Event:
         """
         Publish an event/message to a topic, which can be subscribed to by other services.
@@ -68,14 +69,11 @@ class TopicRef(object):
         :param event: the event to publish
         :return: the published event, with the id added if one was auto-generated
         """
-        if event is None:
-            event = Event()
-
         if isinstance(event, dict):
             event = Event(payload=event)
 
         try:
-            response = await self._events._stub.publish(
+            response = await self._events.events_stub.publish(
                 event_publish_request=EventPublishRequest(topic=self.name, event=_event_to_wire(event))
             )
             return Event(**{**event.__dict__.copy(), **{"id": response.id}})
@@ -92,9 +90,9 @@ class Events(object):
 
     def __init__(self):
         """Construct a Nitric Event Client."""
-        self.channel = new_default_channel()
-        self._stub = EventServiceStub(channel=self.channel)
-        self._topic_stub = TopicServiceStub(channel=self.channel)
+        self.channel: Union[Channel, None] = new_default_channel()
+        self.events_stub = EventServiceStub(channel=self.channel)
+        self.topic_stub = TopicServiceStub(channel=self.channel)
 
     def __del__(self):
         # close the channel when this client is destroyed
@@ -104,7 +102,7 @@ class Events(object):
     async def topics(self) -> List[TopicRef]:
         """Get a list of topics available for publishing or subscription."""
         try:
-            response = await self._topic_stub.list(topic_list_request=TopicListRequest())
+            response = await self.topic_stub.list(topic_list_request=TopicListRequest())
             return [self.topic(topic.name) for topic in response.topics]
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)

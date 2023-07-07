@@ -22,13 +22,12 @@ import asyncio
 from abc import ABC, abstractmethod
 from asyncio import Task
 
-from typing import TypeVar, Type, Union, List
+from typing import Any, Sequence, TypeVar, Type, Optional, List
 
 from grpclib import GRPCError
 from nitric.proto.nitric.resource.v1 import (
-    Action,
     PolicyResource,
-    Resource,
+    Resource as WireResource,
     ResourceType,
     ResourceDeclareRequest,
     ResourceServiceStub,
@@ -37,30 +36,30 @@ from nitric.proto.nitric.resource.v1 import (
 from nitric.exception import exception_from_grpc_error, NitricResourceException
 from nitric.utils import new_default_channel
 
-T = TypeVar("T", bound="BaseResource")
+T = TypeVar("T", bound="Resource")
 
 
-class BaseResource(ABC):
+class Resource(ABC):
     """A base resource class with common functionality."""
 
     def __init__(self):
         """Construct a new resource."""
-        self._reg: Union[Task, None] = None
+        self._reg: Optional[Task[Any]] = None
         self._channel = new_default_channel()
         self._resources_stub = ResourceServiceStub(channel=self._channel)
 
     @abstractmethod
-    async def _register(self):
+    async def _register(self) -> None:
         pass
 
     @classmethod
-    def make(cls: Type[T], name: str, *args, **kwargs) -> T:
+    def make(cls: Type[T], name: str, *args: Sequence[Any], **kwargs: dict[str, Any]) -> T:
         """
         Create and register the resource.
 
         The registration process for resources async, so this method should be used instead of __init__.
         """
-        r = cls(name, *args, **kwargs)
+        r = cls(name, *args, **kwargs)  # type: ignore
         try:
             loop = asyncio.get_running_loop()
             r._reg = loop.create_task(r._register())
@@ -71,36 +70,36 @@ class BaseResource(ABC):
         return r
 
 
-class SecureResource(BaseResource):
+class SecureResource(Resource):
     """A secure base resource class."""
 
     @abstractmethod
-    def _to_resource(self) -> Resource:
+    def _to_resource(self) -> WireResource:
         pass
 
     @abstractmethod
-    def _perms_to_actions(self, *args: str) -> List[Action]:
+    def _perms_to_actions(self, *args: Any) -> List[int]:
         pass
 
-    async def _register_policy_async(self, *args: str):
+    async def _register_policy_async(self, *args: str) -> None:
         # if self._reg is not None:
         #     await asyncio.wait({self._reg})
 
         policy = PolicyResource(
-            principals=[Resource(type=ResourceType.Function)],
+            principals=[WireResource(type=ResourceType.Function)],
             actions=self._perms_to_actions(*args),
             resources=[self._to_resource()],
         )
         try:
             await self._resources_stub.declare(
                 resource_declare_request=ResourceDeclareRequest(
-                    resource=Resource(type=ResourceType.Policy), policy=policy
+                    resource=WireResource(type=ResourceType.Policy), policy=policy
                 )
             )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    def _register_policy(self, *args: str):
+    def _register_policy(self, *args: str) -> None:
         try:
             loop = asyncio.get_event_loop()
             loop.run_until_complete(self._register_policy_async(*args))

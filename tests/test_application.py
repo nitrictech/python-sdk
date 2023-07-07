@@ -19,6 +19,7 @@
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import patch, AsyncMock, Mock
 
+import pytest
 from opentelemetry.sdk.trace import sampling
 
 
@@ -44,7 +45,7 @@ class ApplicationTest(IsolatedAsyncioTestCase):
         mock_make = Mock()
         mock_make.side_effect = ConnectionRefusedError("test error")
 
-        with patch("nitric.resources.base.BaseResource.make", mock_make):
+        with patch("nitric.resources.resource.Resource.make", mock_make):
             try:
                 application._create_resource(Bucket, "test-bucket")
             except NitricUnavailableException as e:

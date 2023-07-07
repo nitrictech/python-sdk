@@ -26,7 +26,7 @@ from grpclib import GRPCError, Status
 from nitric.api import Events, Event
 from nitric.exception import UnknownException
 from nitric.proto.nitric.event.v1 import TopicListResponse, NitricTopic, EventPublishRequest, NitricEvent
-from nitric.utils import _struct_from_dict
+from nitric.utils import struct_from_dict
 
 
 class Object(object):
@@ -53,7 +53,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
         # mock_publish.assert_called_once()
         mock_publish.assert_called_once_with(
             event_publish_request=EventPublishRequest(
-                topic="test-topic", event=NitricEvent(id=None, payload_type=None, payload=_struct_from_dict(payload))
+                topic="test-topic", event=NitricEvent(id=None, payload_type=None, payload=struct_from_dict(payload))
             )
         )
 
@@ -71,7 +71,7 @@ class EventClientTest(IsolatedAsyncioTestCase):
 
         mock_publish.assert_called_once_with(
             event_publish_request=EventPublishRequest(
-                topic="test-topic", event=NitricEvent(id="123", payload=_struct_from_dict(payload), payload_type=None)
+                topic="test-topic", event=NitricEvent(id="123", payload=struct_from_dict(payload), payload_type=None)
             )
         )
 
@@ -87,25 +87,6 @@ class EventClientTest(IsolatedAsyncioTestCase):
             topic = Events().topic("test-topic")
             with pytest.raises(Exception):
                 await topic.publish((1, 2, 3))
-
-    async def test_publish_none(self):
-        mock_publish = AsyncMock()
-        mock_response = Object()
-        mock_response.id = "123"
-        mock_publish.return_value = mock_response
-
-        payload = {"content": "of event"}
-
-        with patch("nitric.proto.nitric.event.v1.EventServiceStub.publish", mock_publish):
-            topic = Events().topic("test-topic")
-            await topic.publish()
-
-        # Check expected values were passed to Stub
-        mock_publish.assert_called_once_with(
-            event_publish_request=EventPublishRequest(
-                topic="test-topic", event=NitricEvent(id=None, payload=Struct(), payload_type=None)
-            )
-        )
 
     async def test_get_topics(self):
         mock_list_topics = AsyncMock()

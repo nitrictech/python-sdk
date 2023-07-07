@@ -37,7 +37,7 @@ from nitric.proto.nitric.queue.v1 import (
     QueueReceiveRequest,
     QueueCompleteRequest,
 )
-from nitric.utils import _struct_from_dict
+from nitric.utils import struct_from_dict
 
 
 class Object(object):
@@ -59,7 +59,7 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         # Check expected values were passed to Stub
         mock_send.assert_called_once_with(
             queue_send_request=QueueSendRequest(
-                queue="test-queue", task=NitricTask(id=None, payload_type=None, payload=_struct_from_dict(payload))
+                queue="test-queue", task=NitricTask(id=None, payload_type=None, payload=struct_from_dict(payload))
             )
         )
 
@@ -77,7 +77,7 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         # Check expected values were passed to Stub
         mock_send.assert_called_once_with(
             queue_send_request=QueueSendRequest(
-                queue="test-queue", task=NitricTask(id=None, payload_type=None, payload=_struct_from_dict(payload))
+                queue="test-queue", task=NitricTask(id=None, payload_type=None, payload=struct_from_dict(payload))
             )
         )
 
@@ -90,7 +90,7 @@ class QueueClientTest(IsolatedAsyncioTestCase):
                 FailedTask(
                     task=NitricTask(
                         id="test-id",
-                        payload=_struct_from_dict(payload),
+                        payload=struct_from_dict(payload),
                     ),
                     message="failed to send in this test",
                 )
@@ -105,8 +105,8 @@ class QueueClientTest(IsolatedAsyncioTestCase):
             queue_send_batch_request=QueueSendBatchRequest(
                 queue="test-queue",
                 tasks=[
-                    NitricTask(id=None, payload_type=None, payload=_struct_from_dict(payload)),
-                    NitricTask(id=None, payload_type=None, payload=_struct_from_dict(payload)),
+                    NitricTask(id=None, payload_type=None, payload=struct_from_dict(payload)),
+                    NitricTask(id=None, payload_type=None, payload=struct_from_dict(payload)),
                 ],
             )
         )
@@ -130,7 +130,7 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         # Check expected values were passed to Stub
         mock_send.assert_called_once_with(
             queue_send_request=QueueSendRequest(
-                queue="test-queue", task=NitricTask(id="123", payload_type=None, payload=_struct_from_dict(payload))
+                queue="test-queue", task=NitricTask(id="123", payload_type=None, payload=struct_from_dict(payload))
             )
         )
 
@@ -146,24 +146,6 @@ class QueueClientTest(IsolatedAsyncioTestCase):
             with pytest.raises(AttributeError):
                 await queue.send((1, 2, 3))
 
-    async def test_send_none(self):
-        mock_send = AsyncMock()
-        mock_response = Object()
-        mock_send.return_value = mock_response
-
-        payload = {"content": "of task"}
-
-        with patch("nitric.proto.nitric.queue.v1.QueueServiceStub.send", mock_send):
-            queue = Queues().queue("test-queue")
-            await queue.send()
-
-        # Check expected values were passed to Stub
-        mock_send.assert_called_once_with(
-            queue_send_request=QueueSendRequest(
-                queue="test-queue", task=NitricTask(id=None, payload_type=None, payload=Struct())
-            )
-        )
-
     async def test_send_empty_list(self):
         with pytest.raises(Exception) as e_info:
             await Queues().queue("test-queue").send([])
@@ -177,7 +159,7 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         mock_receive.return_value = QueueReceiveResponse(
             tasks=[
                 NitricTask(
-                    id="test-task", lease_id="test-lease", payload_type="test-type", payload=_struct_from_dict(payload)
+                    id="test-task", lease_id="test-lease", payload_type="test-type", payload=struct_from_dict(payload)
                 )
             ]
         )
@@ -205,7 +187,7 @@ class QueueClientTest(IsolatedAsyncioTestCase):
                     id="test-task",
                     lease_id="test-lease",
                     payload_type="test-type",
-                    payload=_struct_from_dict({"content": "of task"}),
+                    payload=struct_from_dict({"content": "of task"}),
                 )
             ]
         )
@@ -224,7 +206,7 @@ class QueueClientTest(IsolatedAsyncioTestCase):
                     id="test-task",
                     lease_id="test-lease",
                     payload_type="test-type",
-                    payload=_struct_from_dict({"content": "of task"}),
+                    payload=struct_from_dict({"content": "of task"}),
                 )
             ]
         )
@@ -260,15 +242,6 @@ class QueueClientTest(IsolatedAsyncioTestCase):
         mock_complete.assert_called_once_with(
             queue_complete_request=QueueCompleteRequest(queue="test-queue", lease_id="test-lease")
         )
-
-    async def test_complete_task_without_client(self):
-        queueing = Queues()
-        # lease_id omitted.
-        task = ReceivedTask(lease_id="test-lease")
-
-        with pytest.raises(Exception) as e:
-            await task.complete()
-        self.assertIn("Task is missing internal client", str(e.value))
 
     async def test_send_error(self):
         mock_send = AsyncMock()

@@ -17,11 +17,11 @@
 # limitations under the License.
 #
 from __future__ import annotations
-from typing import List, Union
+from typing import List, Union, Optional, ParamSpec, TypeVar, Callable, Concatenate
 from dataclasses import dataclass
-from nitric.faas import ApiWorkerOptions, FunctionServer, HttpMiddleware, Middleware, MethodOptions, HttpMethod
+from nitric.faas import ApiWorkerOptions, FunctionServer, MethodOptions, HttpMethod, HttpMiddleware, HttpHandler
 from nitric.application import Nitric
-from nitric.resources.base import BaseResource
+from nitric.resources.resource import Resource as BaseResource
 from nitric.proto.nitric.resource.v1 import (
     Resource,
     ResourceType,
@@ -73,14 +73,14 @@ class ApiOptions:
     """Represents options when creating an API, such as middleware to be applied to all HTTP request to the API."""
 
     path: str
-    middleware: Union[HttpMiddleware, List[HttpMiddleware]]
+    middleware: Optional[Union[HttpMiddleware, List[HttpMiddleware]]]
     security_definitions: dict[str, SecurityDefinition]
     security: dict[str, List[str]]
 
     def __init__(
         self,
         path: str = "",
-        middleware: List[Middleware] = [],
+        middleware: Optional[Union[HttpMiddleware, List[HttpMiddleware]]] = [],
         security_definitions: dict[str, SecurityDefinition] = {},
         security: dict[str, List[str]] = {},
     ):
@@ -94,9 +94,9 @@ class ApiOptions:
 class RouteOptions:
     """Represents options when creating a route, such as middleware to be applied to all HTTP Methods for the route."""
 
-    middleware: Union[None, List[Middleware]]
+    middleware: Union[None, List[HttpMiddleware]]
 
-    def __init__(self, middleware: List[Middleware] = []):
+    def __init__(self, middleware: List[HttpMiddleware] = []):
         """Construct a new route options object."""
         self.middleware = middleware
 
@@ -106,7 +106,7 @@ def _to_resource(b: Api) -> Resource:
 
 
 def _security_definition_to_grpc_declaration(
-    security_definitions: dict[str, SecurityDefinition]
+    security_definitions: Optional[dict[str, SecurityDefinition]] = None
 ) -> dict[str, ApiSecurityDefinition]:
     if security_definitions is None or len(security_definitions) == 0:
         return {}
@@ -116,10 +116,16 @@ def _security_definition_to_grpc_declaration(
     }
 
 
-def _security_to_grpc_declaration(security: dict[str, List[str]]) -> dict[str, ApiScopes]:
+def _security_to_grpc_declaration(security: Optional[dict[str, List[str]]] = None) -> dict[str, ApiScopes]:
     if security is None or len(security) == 0:
         return {}
     return {k: ApiScopes(v) for k, v in security.items()}
+
+
+Param = ParamSpec("Param")
+RetType = TypeVar("RetType")
+OriginalFunc = Callable[Param, RetType]
+DecoratedFunc = Callable[Concatenate[str, Param], RetType]
 
 
 class Api(BaseResource):
@@ -133,20 +139,26 @@ class Api(BaseResource):
     security_definitions: dict[str, SecurityDefinition]
     security: dict[str, List[str]]
 
-    def __init__(self, name: str, opts: ApiOptions = None):
+    def __init__(self, name: str, opts: Optional[ApiOptions] = None):
         """Construct a new HTTP API."""
         super().__init__()
         if opts is None:
             opts = ApiOptions()
 
         self.name = name
-        self.middleware = opts.middleware if opts.middleware is not None else []
+        self.middleware = (
+            opts.middleware
+            if isinstance(opts.middleware, list)
+            else [opts.middleware]
+            if opts.middleware is not None
+            else []
+        )
         self.path = opts.path
         self.routes = []
         self.security_definitions = opts.security_definitions
         self.security = opts.security
 
-    async def _register(self):
+    async def _register(self) -> None:
         try:
             await self._resources_stub.declare(
                 resource_declare_request=ResourceDeclareRequest(
@@ -160,7 +172,7 @@ class Api(BaseResource):
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    def _route(self, match: str, opts: RouteOptions = None) -> Route:
+    def _route(self, match: str, opts: Optional[RouteOptions] = None) -> Route:
         """Define an HTTP route to be handled by this API."""
         if opts is None:
             opts = RouteOptions()
@@ -169,12 +181,10 @@ class Api(BaseResource):
         self.routes.append(r)
         return r
 
-    def all(self, match: str, opts: MethodOptions = None):
+    def all(self, match: str, opts: Optional[MethodOptions] = None) -> Callable[[HttpHandler], None]:
         """Define an HTTP route which will respond to HTTP GET requests."""
-        if opts is None:
-            opts = MethodOptions()
 
-        def decorator(function: HttpMiddleware):
+        def decorator(function: HttpHandler) -> None:
             r = self._route(match)
             r.method(
                 [
@@ -186,83 +196,85 @@ class Api(BaseResource):
                     HttpMethod.OPTIONS,
                 ],
                 function,
-                opts=opts,
+                opts=opts if opts is not None else MethodOptions(),
             )
 
         return decorator
 
-    def methods(self, methods: List[HttpMethod], match: str, opts: MethodOptions = None):
+    def methods(
+        self, methods: List[HttpMethod], match: str, opts: Optional[MethodOptions] = None
+    ) -> Callable[[HttpHandler], None]:
         """Define an HTTP route which will respond to specific HTTP requests defined by a list of verbs."""
         if opts is None:
             opts = MethodOptions()
 
-        def decorator(function: HttpMiddleware):
+        def decorator(function: HttpHandler) -> None:
             r = self._route(match)
             r.method(methods, function, opts=opts)
 
         return decorator
 
-    def get(self, match: str, opts: MethodOptions = None):
+    def get(self, match: str, opts: Optional[MethodOptions] = None) -> Callable[[HttpHandler], None]:
         """Define an HTTP route which will respond to HTTP GET requests."""
         if opts is None:
             opts = MethodOptions()
 
-        def decorator(function: HttpMiddleware):
+        def decorator(function: HttpHandler) -> None:
             r = self._route(match)
             r.get(function, opts=opts)
 
         return decorator
 
-    def post(self, match: str, opts: MethodOptions = None):
+    def post(self, match: str, opts: Optional[MethodOptions] = None) -> Callable[[HttpHandler], None]:
         """Define an HTTP route which will respond to HTTP POST requests."""
         if opts is None:
             opts = MethodOptions()
 
-        def decorator(function: HttpMiddleware):
+        def decorator(function: HttpHandler) -> None:
             r = self._route(match)
             r.post(function, opts=opts)
 
         return decorator
 
-    def delete(self, match: str, opts: MethodOptions = None):
+    def delete(self, match: str, opts: Optional[MethodOptions] = None) -> Callable[[HttpHandler], None]:
         """Define an HTTP route which will respond to HTTP DELETE requests."""
         if opts is None:
             opts = MethodOptions()
 
-        def decorator(function: HttpMiddleware):
+        def decorator(function: HttpHandler) -> None:
             r = self._route(match)
             r.delete(function, opts=opts)
 
         return decorator
 
-    def options(self, match: str, opts: MethodOptions = None):
+    def options(self, match: str, opts: Optional[MethodOptions] = None) -> Callable[[HttpHandler], None]:
         """Define an HTTP route which will respond to HTTP OPTIONS requests."""
         if opts is None:
             opts = MethodOptions()
 
-        def decorator(function: HttpMiddleware):
+        def decorator(function: HttpHandler) -> None:
             r = self._route(match)
             r.options(function, opts=opts)
 
         return decorator
 
-    def patch(self, match: str, opts: MethodOptions = None):
+    def patch(self, match: str, opts: Optional[MethodOptions] = None) -> Callable[[HttpHandler], None]:
         """Define an HTTP route which will respond to HTTP PATCH requests."""
         if opts is None:
             opts = MethodOptions()
 
-        def decorator(function: HttpMiddleware):
+        def decorator(function: HttpHandler) -> None:
             r = self._route(match)
             r.patch(function, opts=opts)
 
         return decorator
 
-    def put(self, match: str, opts: MethodOptions = None):
+    def put(self, match: str, opts: Optional[MethodOptions] = None) -> Callable[[HttpHandler], None]:
         """Define an HTTP route which will respond to HTTP PUT requests."""
         if opts is None:
             opts = MethodOptions()
 
-        def decorator(function: HttpMiddleware):
+        def decorator(function: HttpHandler) -> None:
             r = self._route(match)
             r.put(function, opts=opts)
 
@@ -291,7 +303,7 @@ class Route:
 
     api: Api
     path: str
-    middleware: List[Middleware]
+    middleware: List[HttpMiddleware]
 
     def __init__(self, api: Api, path: str, opts: RouteOptions):
         """Define a route to be handled by the provided API."""
@@ -299,31 +311,33 @@ class Route:
         self.path = (api.path + path).replace("//", "/")
         self.middleware = opts.middleware if opts.middleware is not None else []
 
-    def method(self, methods: List[HttpMethod], *middleware: HttpMiddleware, opts: MethodOptions = None):
+    def method(
+        self, methods: List[HttpMethod], *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None
+    ) -> None:
         """Register middleware for multiple HTTP Methods."""
         return Method(self, methods, *middleware, opts=opts).start()
 
-    def get(self, *middleware: HttpMiddleware, opts: MethodOptions = None):
+    def get(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None) -> None:
         """Register middleware for HTTP GET requests."""
         return self.method([HttpMethod.GET], *middleware, opts=opts)
 
-    def post(self, *middleware: HttpMiddleware, opts: MethodOptions = None):
+    def post(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None) -> None:
         """Register middleware for HTTP POST requests."""
         return self.method([HttpMethod.POST], *middleware, opts=opts)
 
-    def put(self, *middleware: HttpMiddleware, opts: MethodOptions = None):
+    def put(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None) -> None:
         """Register middleware for HTTP PUT requests."""
         return self.method([HttpMethod.PUT], *middleware, opts=opts)
 
-    def patch(self, *middleware: HttpMiddleware, opts: MethodOptions = None):
+    def patch(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None) -> None:
         """Register middleware for HTTP PATCH requests."""
         return self.method([HttpMethod.PATCH], *middleware, opts=opts)
 
-    def delete(self, *middleware: HttpMiddleware, opts: MethodOptions = None):
+    def delete(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None) -> None:
         """Register middleware for HTTP DELETE requests."""
         return self.method([HttpMethod.DELETE], *middleware, opts=opts)
 
-    def options(self, *middleware: HttpMiddleware, opts: MethodOptions = None):
+    def options(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None) -> None:
         """Register middleware for HTTP OPTIONS requests."""
         return self.method([HttpMethod.OPTIONS], *middleware, opts=opts)
 
@@ -334,10 +348,14 @@ class Method:
     server: FunctionServer
     route: Route
     methods: List[HttpMethod]
-    opts: MethodOptions
+    opts: Optional[MethodOptions]
 
     def __init__(
-        self, route: Route, methods: List[HttpMethod], *middleware: HttpMiddleware, opts: MethodOptions = None
+        self,
+        route: Route,
+        methods: List[HttpMethod],
+        *middleware: HttpMiddleware | HttpHandler,
+        opts: Optional[MethodOptions] = None,
     ):
         """Construct a method handler for the specified route."""
         self.route = route
@@ -345,11 +363,11 @@ class Method:
         self.server = FunctionServer(ApiWorkerOptions(route.api.name, route.path, methods, opts))
         self.server.http(*route.api.middleware, *route.middleware, *middleware)
 
-    def start(self):
+    def start(self) -> None:
         """Start the server which will respond to incoming requests."""
-        Nitric._register_worker(self.server)
+        Nitric._register_worker(self.server)  # type: ignore
 
 
-def api(name: str, opts: ApiOptions = None) -> Api:
+def api(name: str, opts: Optional[ApiOptions] = None) -> Api:
     """Create a new API resource."""
-    return Nitric._create_resource(Api, name, opts=opts)
+    return Nitric._create_resource(Api, name, opts=opts)  # type: ignore
