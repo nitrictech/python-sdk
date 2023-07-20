@@ -80,10 +80,8 @@ class Bucket(SecureResource):
         self, notification_type: str, notification_prefix_filter: str
     ) -> Callable[[BucketNotificationHandler], None]:
         """Create and return a bucket notification decorator for this bucket."""
-        print("this has been called")
 
         def decorator(func: BucketNotificationHandler) -> None:
-            print("this has been called")
             self._server = FunctionServer(
                 BucketNotificationWorkerOptions(
                     bucket_name=self.name,
