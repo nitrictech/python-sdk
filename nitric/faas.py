@@ -24,7 +24,7 @@ from enum import Enum
 import functools
 import json
 import traceback
-from typing import Dict, Generic, Protocol, Union, List, TypeVar, Any, Optional, Sequence
+from typing import Dict, Generic, Literal, Protocol, Union, List, TypeVar, Any, Optional, Sequence
 from opentelemetry import context, propagate
 
 import betterproto
@@ -48,6 +48,9 @@ from nitric.proto.nitric.faas.v1 import (
     BucketNotificationConfig,
     BucketNotificationType,
     NotificationResponseContext,
+    WebsocketResponseContext,
+    WebsocketEvent,
+    WebsocketWorker,
 )
 import grpclib
 import asyncio
@@ -101,6 +104,10 @@ class TriggerContext(ABC):
         """Return this context as a BucketNotificationContext if it is one, otherwise returns None."""
         return None
 
+    def websocket(self) -> Union[WebsocketContext, None]:
+        """Return this context as a WebsocketContext if it is one, otherwise returns None."""
+        return None
+
 
 def _ctx_from_grpc_trigger_request(trigger_request: TriggerRequest, options: Optional[FaasClientOptions] = None):
     """Return a TriggerContext from a TriggerRequest."""
@@ -114,6 +121,8 @@ def _ctx_from_grpc_trigger_request(trigger_request: TriggerRequest, options: Opt
             return FileNotificationContext.from_grpc_trigger_request_and_options(trigger_request, options)
         else:
             return BucketNotificationContext.from_grpc_trigger_request(trigger_request)
+    elif context_type == "websocket":
+        return WebsocketContext.from_grpc_trigger_request(trigger_request)
     else:
         print(f"Trigger with unknown context received, context type: {context_type}")
         raise Exception(f"Unknown trigger context, type: {context_type}")
@@ -153,6 +162,10 @@ def _grpc_response_from_ctx(ctx: TriggerContext) -> TriggerResponse:
     bucket_context = ctx.bucket_notification()
     if bucket_context is not None:
         return TriggerResponse(notification=NotificationResponseContext(success=bucket_context.res.success))
+
+    websocket_context = ctx.websocket()
+    if websocket_context is not None:
+        return TriggerResponse(websocket=WebsocketResponseContext(success=websocket_context.res.success))
 
     raise Exception("Unknown Trigger Context type, unable to return valid response")
 
@@ -302,6 +315,54 @@ class EventContext(TriggerContext):
         )
 
 
+class WebsocketRequest(Request):
+    """Represents an incoming websocket event."""
+
+    def __init__(
+        self, connection_id: str, data: bytes, query: Dict[str, str | List[str]], trace_context: Dict[str, str]
+    ):
+        """Construct a new WebsocketRequest."""
+        super().__init__(data, trace_context)
+
+        self.connection_id = connection_id
+        self.query = query
+
+
+class WebsocketResponse(Response):
+    """Represents a response to a websocket event."""
+
+    def __init__(self, success: bool = True):
+        """Construct a new WebsocketResponse."""
+        self.success = success
+
+
+class WebsocketContext(TriggerContext):
+    """Represents the full request/response context for a Websocket based trigger."""
+
+    def __init__(self, request: WebsocketRequest, response: Optional[WebsocketResponse] = None):
+        """Construct a new WebsocketContext."""
+        super().__init__()
+        self.req = request
+        self.res = response if response else WebsocketResponse()
+
+    def websocket(self) -> WebsocketContext:
+        """Return this WebsocketContext, used when determining the context type of a trigger."""
+        return self
+
+    @staticmethod
+    def from_grpc_trigger_request(trigger_request: TriggerRequest) -> WebsocketContext:
+        """Construct a new WebsocketContext from a Websocket trigger from the Nitric Membrane."""
+        query: Record = {k: v.value for (k, v) in trigger_request.websocket.query_params.items()}
+        return WebsocketContext(
+            request=WebsocketRequest(
+                data=trigger_request.data,
+                connection_id=trigger_request.websocket.connection_id,
+                query=query,
+                trace_context=trigger_request.trace_context.values,
+            )
+        )
+
+
 class BucketNotificationRequest(Request):
     """Represents a translated Event, from a subscribed bucket notification, forwarded from the Nitric Membrane."""
 
@@ -424,6 +485,26 @@ class BucketNotificationWorkerOptions:
             raise ValueError(f"Event type {event_type} is unsupported")
 
 
+class WebsocketWorkerOptions:
+    """Options for websocket workers."""
+
+    def __init__(self, socket_name: str, event_type: Literal["connect", "disconnect", "message"]):
+        """Construct new websocket worker options."""
+        self.socket_name = socket_name
+        self.event_type = WebsocketWorkerOptions._to_grpc_event_type(event_type)
+
+    @staticmethod
+    def _to_grpc_event_type(event_type: Literal["connect", "disconnect", "message"]) -> WebsocketEvent:
+        if event_type == "connect":
+            return WebsocketEvent.Connect
+        elif event_type == "disconnect":
+            return WebsocketEvent.Disconnect
+        elif event_type == "message":
+            return WebsocketEvent.Message
+        else:
+            raise ValueError(f"Event type {event_type} is unsupported")
+
+
 class FileNotificationWorkerOptions(BucketNotificationWorkerOptions):
     """Options for bucket notification workers with file references."""
 
@@ -499,13 +580,16 @@ FaasClientOptions = Union[
     SubscriptionWorkerOptions,
     BucketNotificationWorkerOptions,
     FileNotificationWorkerOptions,
+    WebsocketWorkerOptions,
     FaasWorkerOptions,
 ]
 
 # class Context(Protocol):
 #     ...
 
-C = TypeVar("C", TriggerContext, HttpContext, EventContext, FileNotificationContext, BucketNotificationContext)
+C = TypeVar(
+    "C", TriggerContext, HttpContext, EventContext, FileNotificationContext, BucketNotificationContext, WebsocketContext
+)
 
 
 class Middleware(Protocol, Generic[C]):
@@ -528,11 +612,13 @@ HttpMiddleware = Middleware[HttpContext]
 EventMiddleware = Middleware[EventContext]
 BucketNotificationMiddleware = Middleware[BucketNotificationContext]
 FileNotificationMiddleware = Middleware[FileNotificationContext]
+WebsocketMiddleware = Middleware[WebsocketContext]
 
 HttpHandler = Handler[HttpContext]
 EventHandler = Handler[EventContext]
 BucketNotificationHandler = Handler[BucketNotificationContext]
 FileNotificationHandler = Handler[FileNotificationContext]
+WebsocketHandler = Handler[WebsocketContext]
 
 
 def _convert_to_middleware(handler: Handler[C] | Middleware[C]) -> Middleware[C]:
@@ -615,6 +701,7 @@ class FunctionServer:
         self.__bucket_notification_handler: Optional[
             Union[BucketNotificationMiddleware, FileNotificationMiddleware]
         ] = None
+        self.__websocket_handler: Optional[WebsocketMiddleware] = None
         self._opts = opts
 
     def http(self, *handlers: HttpMiddleware | HttpHandler) -> FunctionServer:
@@ -646,9 +733,23 @@ class FunctionServer:
         self.__bucket_notification_handler = compose_middleware(*handlers)
         return self
 
+    def websocket(self, *handlers: WebsocketMiddleware) -> FunctionServer:
+        """
+        Register one or more Websocket Trigger Handlers or Middleware.
+
+        When multiple handlers are provided, they will be called in order.
+        """
+        self.__websocket_handler = compose_middleware(*handlers)
+        return self
+
     async def start(self):
         """Start the function server using the previously provided middleware."""
-        if not self._http_handler and not self._event_handler and not self.__bucket_notification_handler:
+        if (
+            not self._http_handler
+            and not self._event_handler
+            and not self.__bucket_notification_handler
+            and not self.__websocket_handler
+        ):
             raise Exception("At least one handler function must be provided.")
 
         await self._run()
@@ -664,6 +765,10 @@ class FunctionServer:
     @property
     def _bucket_notification_handler(self):
         return self.__bucket_notification_handler
+
+    @property
+    def _websocket_handler(self):
+        return self._websocket_handler
 
     async def _run(self):
         """Register a new FaaS worker with the Membrane, using the provided function as the handler."""
@@ -697,6 +802,10 @@ class FunctionServer:
                 init_request = InitRequest(
                     bucket_notification=BucketNotificationWorker(bucket=self._opts.bucket_name, config=config)
                 )
+            elif isinstance(self._opts, WebsocketWorkerOptions):
+                init_request = InitRequest(
+                    websocket=WebsocketWorker(socket=self._opts.socket_name, event=self._opts.event_type)
+                )
 
             # let the membrane server know we're ready to start
             await request_channel.send(ClientMessage(init_request=init_request))
@@ -722,6 +831,8 @@ class FunctionServer:
                             func = self._event_handler
                         elif ctx.bucket_notification():
                             func = self._bucket_notification_handler
+                        elif ctx.websocket():
+                            func = self._websocket_handler
 
                         assert func is not None
 

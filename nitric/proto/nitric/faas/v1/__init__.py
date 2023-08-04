@@ -33,6 +33,17 @@ class BucketNotificationType(betterproto.Enum):
     Deleted = 2
 
 
+class WebsocketEvent(betterproto.Enum):
+    Connect = 0
+    """Specialised Event for handling new client connections"""
+
+    Disconnect = 1
+    """Specialised Event for handling existing client connections"""
+
+    Message = 2
+    """All other types of events are messages"""
+
+
 @dataclass(eq=False, repr=False)
 class ClientMessage(betterproto.Message):
     """Messages the client is able to send to the server"""
@@ -117,6 +128,12 @@ class ScheduleCron(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class HttpWorker(betterproto.Message):
+    port: int = betterproto.int32_field(1)
+    """The local port the server can be accessed on"""
+
+
+@dataclass(eq=False, repr=False)
 class BucketNotificationWorker(betterproto.Message):
     bucket: str = betterproto.string_field(1)
     config: "BucketNotificationConfig" = betterproto.message_field(2)
@@ -135,6 +152,15 @@ class BucketNotificationConfig(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class WebsocketWorker(betterproto.Message):
+    socket: str = betterproto.string_field(1)
+    """The nitric name of the socket that this worker listens on"""
+
+    event: "WebsocketEvent" = betterproto.enum_field(2)
+    """The type of event that this worker handles"""
+
+
+@dataclass(eq=False, repr=False)
 class InitRequest(betterproto.Message):
     """
     InitRequest - Identifies a worker as ready to recieve triggers This message
@@ -148,6 +174,8 @@ class InitRequest(betterproto.Message):
     bucket_notification: "BucketNotificationWorker" = betterproto.message_field(
         13, group="Worker"
     )
+    websocket: "WebsocketWorker" = betterproto.message_field(14, group="Worker")
+    http_worker: "HttpWorker" = betterproto.message_field(15, group="Worker")
 
 
 @dataclass(eq=False, repr=False)
@@ -187,6 +215,7 @@ class TriggerRequest(betterproto.Message):
     notification: "NotificationTriggerContext" = betterproto.message_field(
         5, group="context"
     )
+    websocket: "WebsocketTriggerContext" = betterproto.message_field(6, group="context")
 
 
 @dataclass(eq=False, repr=False)
@@ -269,6 +298,23 @@ class NotificationTriggerContext(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class WebsocketTriggerContext(betterproto.Message):
+    socket: str = betterproto.string_field(1)
+    """The nitric name of the socket that this worker listens on"""
+
+    event: "WebsocketEvent" = betterproto.enum_field(2)
+    """The type of websocket event"""
+
+    connection_id: str = betterproto.string_field(3)
+    """The connection this trigger came from"""
+
+    query_params: Dict[str, "QueryValue"] = betterproto.map_field(
+        6, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+    )
+    """The query params available in the connection request"""
+
+
+@dataclass(eq=False, repr=False)
 class TriggerResponse(betterproto.Message):
     """The worker has successfully processed a trigger"""
 
@@ -285,6 +331,10 @@ class TriggerResponse(betterproto.Message):
         12, group="context"
     )
     """response to a notification trigger"""
+
+    websocket: "WebsocketResponseContext" = betterproto.message_field(
+        13, group="context"
+    )
 
 
 @dataclass(eq=False, repr=False)
@@ -329,6 +379,16 @@ class TopicResponseContext(betterproto.Message):
 @dataclass(eq=False, repr=False)
 class NotificationResponseContext(betterproto.Message):
     success: bool = betterproto.bool_field(1)
+
+
+@dataclass(eq=False, repr=False)
+class WebsocketResponseContext(betterproto.Message):
+    success: bool = betterproto.bool_field(1)
+    """
+    There aren't really responses here, instead we need to provide a runtime
+    API for responding back and emitting/broadcasting on the websocket from the
+    server
+    """
 
 
 class FaasServiceStub(betterproto.ServiceStub):

@@ -32,6 +32,8 @@ class ResourceType(betterproto.Enum):
     Policy = 8
     Secret = 9
     Notification = 10
+    Websocket = 11
+    Http = 12
 
 
 class Action(betterproto.Enum):
@@ -63,6 +65,8 @@ class Action(betterproto.Enum):
     """Secret Permissions: 5XX"""
 
     SecretAccess = 501
+    WebsocketManage = 600
+    """Websocket Permissions: 6XX"""
 
 
 @dataclass(eq=False, repr=False)
@@ -160,6 +164,11 @@ class ApiResourceDetails(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class WebsocketResourceDetails(betterproto.Message):
+    url: str = betterproto.string_field(1)
+
+
+@dataclass(eq=False, repr=False)
 class ResourceDetailsRequest(betterproto.Message):
     resource: "Resource" = betterproto.message_field(1)
 
@@ -176,6 +185,9 @@ class ResourceDetailsResponse(betterproto.Message):
     """The service this resource is deployed on (e.g. ApiGateway)"""
 
     api: "ApiResourceDetails" = betterproto.message_field(10, group="details")
+    websocket: "WebsocketResourceDetails" = betterproto.message_field(
+        11, group="details"
+    )
 
 
 class ResourceServiceStub(betterproto.ServiceStub):

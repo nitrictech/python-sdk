@@ -131,6 +131,7 @@ class StoragePreSignUrlResponse(betterproto.Message):
 @dataclass(eq=False, repr=False)
 class StorageListFilesRequest(betterproto.Message):
     bucket_name: str = betterproto.string_field(1)
+    prefix: str = betterproto.string_field(2)
 
 
 @dataclass(eq=False, repr=False)
