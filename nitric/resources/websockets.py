@@ -45,7 +45,7 @@ class Websocket(BaseResource):
     name: str
 
     def __init__(self, name: str):
-        """Construct a new HTTP API."""
+        """Construct a new Websocket API."""
         super().__init__()
 
         self._websocket = WebsocketClient()
