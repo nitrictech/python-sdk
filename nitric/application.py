@@ -45,6 +45,7 @@ class Nitric:
         "secret": {},
         "queue": {},
         "collection": {},
+        "websocket": {},
     }
 
     @classmethod
