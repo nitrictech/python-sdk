@@ -768,7 +768,7 @@ class FunctionServer:
 
     @property
     def _websocket_handler(self):
-        return self._websocket_handler
+        return self.__websocket_handler
 
     async def _run(self):
         """Register a new FaaS worker with the Membrane, using the provided function as the handler."""
