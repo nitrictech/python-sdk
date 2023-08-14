@@ -96,7 +96,6 @@ class Nitric:
         This will execute in an existing event loop if there is one, otherwise it will attempt to create its own.
         """
         provider = cls._create_tracer()
-        print(cls._workers)
         try:
             try:
                 loop = asyncio.get_running_loop()
