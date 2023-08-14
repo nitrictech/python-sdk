@@ -92,7 +92,7 @@ class Websocket(BaseResource):
                     event_type=event_type,
                 )
             )
-            self._server._websocket_handler(func)
+            self._server.websocket(func)
             return Nitric._register_worker(self._server)  # type: ignore
 
         return decorator

@@ -733,7 +733,7 @@ class FunctionServer:
         self.__bucket_notification_handler = compose_middleware(*handlers)
         return self
 
-    def websocket(self, *handlers: WebsocketMiddleware) -> FunctionServer:
+    def websocket(self, *handlers: WebsocketHandler | WebsocketMiddleware) -> FunctionServer:
         """
         Register one or more Websocket Trigger Handlers or Middleware.
 
