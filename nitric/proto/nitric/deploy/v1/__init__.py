@@ -185,6 +185,19 @@ class TopicSubscription(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class HttpTarget(betterproto.Message):
+    execution_unit: str = betterproto.string_field(1, group="target")
+    """The name of an execution unit to target"""
+
+
+@dataclass(eq=False, repr=False)
+class Http(betterproto.Message):
+    """A http resource"""
+
+    target: "HttpTarget" = betterproto.message_field(1)
+
+
+@dataclass(eq=False, repr=False)
 class Api(betterproto.Message):
     openapi: str = betterproto.string_field(1, group="document")
     """
@@ -192,6 +205,26 @@ class Api(betterproto.Message):
     that hint of execution units that should be targeted as part of the
     deployment
     """
+
+
+@dataclass(eq=False, repr=False)
+class Websocket(betterproto.Message):
+    """Declare a new websocket"""
+
+    connect_target: "WebsocketTarget" = betterproto.message_field(1)
+    """Target for handling new client connections"""
+
+    disconnect_target: "WebsocketTarget" = betterproto.message_field(2)
+    """Target for handling client disconnections"""
+
+    message_target: "WebsocketTarget" = betterproto.message_field(3)
+    """Target for handling all other message types"""
+
+
+@dataclass(eq=False, repr=False)
+class WebsocketTarget(betterproto.Message):
+    execution_unit: str = betterproto.string_field(1, group="target")
+    """The name of an execution unit to target"""
 
 
 @dataclass(eq=False, repr=False)
@@ -219,6 +252,8 @@ class Resource(betterproto.Message):
     schedule: "Schedule" = betterproto.message_field(16, group="config")
     collection: "Collection" = betterproto.message_field(17, group="config")
     secret: "Secret" = betterproto.message_field(18, group="config")
+    websocket: "Websocket" = betterproto.message_field(19, group="config")
+    http: "Http" = betterproto.message_field(20, group="config")
 
 
 @dataclass(eq=False, repr=False)

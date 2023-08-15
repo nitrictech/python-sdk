@@ -21,7 +21,7 @@ test:
 	@echo Running Tox tests
 	@tox -e py
 
-NITRIC_VERSION="v0.27.0"
+NITRIC_VERSION="v0.32.0"
 
 download:
 	@curl -L https://github.com/nitrictech/nitric/releases/download/${NITRIC_VERSION}/contracts.tgz -o contracts.tgz
