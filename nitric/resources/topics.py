@@ -63,9 +63,9 @@ class Topic(SecureResource):
 
         return [action for perm in args for action in _permMap[perm]]
 
-    def allow(self, *args: TopicPermission) -> TopicRef:
+    def allow(self, perm: TopicPermission, *args: TopicPermission) -> TopicRef:
         """Request the specified permissions to this resource."""
-        str_args = [str(permission) for permission in args]
+        str_args = [perm] + [str(permission) for permission in args]
         self._register_policy(*str_args)
 
         return Events().topic(self.name)

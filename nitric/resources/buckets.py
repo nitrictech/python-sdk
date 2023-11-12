@@ -69,9 +69,9 @@ class Bucket(SecureResource):
     def _to_resource(self) -> Resource:
         return Resource(name=self.name, type=ResourceType.Bucket)  # type:ignore
 
-    def allow(self, *args: BucketPermission) -> BucketRef:
+    def allow(self, perm: BucketPermission, *args: BucketPermission) -> BucketRef:
         """Request the required permissions for this resource."""
-        str_args = [str(permission) for permission in args]
+        str_args = [str(perm)] + [str(permission) for permission in args]
         self._register_policy(*str_args)
 
         return Storage().bucket(self.name)

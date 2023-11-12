@@ -67,10 +67,10 @@ class Collection(SecureResource):
 
         return [action for perm in args for action in permission_actions_map[perm]]
 
-    def allow(self, *args: CollectionPermission) -> CollectionRef:
+    def allow(self, perm: CollectionPermission, *args: CollectionPermission) -> CollectionRef:
         """Request the required permissions for this collection."""
         # Ensure registration of the resource is complete before requesting permissions.
-        str_args = [str(permission) for permission in args]
+        str_args = [str(perm)] + [str(permission) for permission in args]
         self._register_policy(*str_args)
 
         return Documents().collection(self.name)
