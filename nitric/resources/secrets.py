@@ -66,9 +66,9 @@ class Secret(SecureResource):
 
         return [action for perm in args for action in permissions_actions_map[perm]]
 
-    def allow(self, *args: SecretPermission) -> SecretContainerRef:
+    def allow(self, perm: SecretPermission, *args: SecretPermission) -> SecretContainerRef:
         """Request the specified permissions to this resource."""
-        str_args = [str(permission) for permission in args]
+        str_args = [str(perm)] + [str(permission) for permission in args]
         self._register_policy(*str_args)
 
         return Secrets().secret(self.name)

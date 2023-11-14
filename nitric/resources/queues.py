@@ -65,10 +65,10 @@ class Queue(SecureResource):
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    def allow(self, *args: QueuePermission) -> QueueRef:
+    def allow(self, perm: QueuePermission, *args: QueuePermission) -> QueueRef:
         """Request the required permissions for this queue."""
         # Ensure registration of the resource is complete before requesting permissions.
-        str_args = [str(permission) for permission in args]
+        str_args = [str(perm)] + [str(permission) for permission in args]
         self._register_policy(*str_args)
 
         return Queues().queue(self.name)
