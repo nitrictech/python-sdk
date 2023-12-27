@@ -24,7 +24,7 @@ from grpclib import GRPCError
 
 from nitric.application import Nitric
 from nitric.api.secrets import Secrets, SecretContainerRef
-from nitric.proto.nitric.resource.v1 import (
+from nitric.proto.resources.v1 import (
     Resource,
     ResourceType,
     Action,
@@ -48,7 +48,7 @@ class Secret(SecureResource):
         self.name = name
 
     def _to_resource(self) -> Resource:
-        return Resource(name=self.name, type=ResourceType.Secret) # type:ignore
+        return Resource(name=self.name, type=ResourceType.Secret)  # type:ignore
 
     async def _register(self):
         try:

@@ -21,10 +21,11 @@ from __future__ import annotations
 from nitric.api.events import Events, TopicRef
 from nitric.exception import exception_from_grpc_error
 from typing import List, Callable, Literal
+from dataclasses import dataclass
 from grpclib import GRPCError
 from nitric.application import Nitric
-from nitric.faas import FunctionServer, SubscriptionWorkerOptions, EventHandler
-from nitric.proto.nitric.resource.v1 import (
+from nitric.faas import FunctionServer, EventHandler
+from nitric.proto.resources.v1 import (
     Resource,
     ResourceType,
     Action,
@@ -34,6 +35,17 @@ from nitric.proto.nitric.resource.v1 import (
 from nitric.resources.resource import SecureResource
 
 TopicPermission = Literal["publishing"]
+
+
+@dataclass
+class SubscriptionWorkerOptions:
+    """
+    Options for subscription workers.
+
+    topic (str): the name of the topic to subscribe to
+    """
+
+    topic: str
 
 
 class Topic(SecureResource):

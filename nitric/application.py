@@ -70,7 +70,7 @@ class Nitric:
     @classmethod
     def _create_tracer(cls, local: bool = True, sampler: int = 100) -> TracerProvider:
         local_run = local or "OTELCOL_BIN" not in environ
-        samplePercent = int(getenv("NITRIC_TRACE_SAMPLE_PERCENT", sampler)) / 100.0
+        sample_percent = int(getenv("NITRIC_TRACE_SAMPLE_PERCENT", sampler)) / 100.0
 
         # If its a local run use a console exporter, otherwise export using OTEL Protocol
         exporter = OTLPSpanExporter(endpoint="http://localhost:4317", insecure=True)
@@ -79,7 +79,7 @@ class Nitric:
 
         provider = TracerProvider(
             active_span_processor=BatchSpanProcessor(exporter),
-            sampler=sampling.TraceIdRatioBased(samplePercent),
+            sampler=sampling.TraceIdRatioBased(sample_percent),
         )
         trace.set_tracer_provider(provider)
 

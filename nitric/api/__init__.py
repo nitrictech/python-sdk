@@ -18,7 +18,6 @@
 #
 """Nitric API SDK."""
 from nitric.api.events import Events, Event, TopicRef
-from nitric.api.queues import Queues, Task, FailedTask
 from nitric.api.storage import Storage
 from nitric.api.documents import Documents
 from nitric.api.secrets import Secrets
@@ -26,12 +25,9 @@ from nitric.api.websocket import Websocket
 
 __all__ = [
     "Events",
-    "Queues",
     "Documents",
     "Storage",
     "Event",
-    "Task",
-    "FailedTask",
     "TopicRef",
     "Secrets",
     "Websocket",

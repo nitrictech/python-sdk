@@ -19,34 +19,38 @@
 from __future__ import annotations
 from typing import List, Union, Optional, ParamSpec, TypeVar, Callable, Concatenate
 from dataclasses import dataclass
-from nitric.faas import ApiWorkerOptions, FunctionServer, MethodOptions, HttpMethod, HttpMiddleware, HttpHandler
+from nitric.faas import FunctionServer, HttpMethod, HttpMiddleware, HttpHandler
 from nitric.application import Nitric
 from nitric.resources.resource import Resource as BaseResource
-from nitric.proto.nitric.resource.v1 import (
+from nitric.proto.resources.v1 import (
     Resource,
     ResourceType,
     ApiResource,
     ApiScopes,
-    ApiSecurityDefinition,
-    ApiSecurityDefinitionJwt,
+    ApiSecurityDefinitionResource,
+    ApiOpenIdConnectionDefinition,
     ResourceDeclareRequest,
     ResourceDetailsRequest,
 )
+from nitric.proto.apis.v1 import ApiWorkerOptions
 from grpclib import GRPCError
 from nitric.exception import exception_from_grpc_error
 
 
 @dataclass
 class ApiDetails:
-    """Represents the APIs deployment details."""
+    """
+    Represents the APIs deployment details.
 
-    # the identifier of the resource
+    id (str): the identifier of the resource
+    provider (str): the provider this resource is deployed with (e.g. aws)
+    service (str): the service this resource is deployed to (e.g. ApiGateway)
+    url (str): the url of the API
+    """
+
     id: str
-    # The provider this resource is deployed with (e.g. aws)
     provider: str
-    # The service this resource is deployed on (e.g. ApiGateway)
     service: str
-    # The url of the API
     url: str
 
 
@@ -61,6 +65,17 @@ class JwtSecurityDefinition:
 
     issuer: str
     audiences: List[str]
+
+
+@dataclass
+class MethodOptions:
+    """
+    Represents options when defining a method handler.
+
+    security (dict[str, List[str]])
+    """
+
+    security: Optional[dict[str, List[str]]]
 
 
 # TODO: Union type for multiple security definition mappings
@@ -107,11 +122,11 @@ def _to_resource(b: Api) -> Resource:
 
 def _security_definition_to_grpc_declaration(
     security_definitions: Optional[dict[str, SecurityDefinition]] = None
-) -> dict[str, ApiSecurityDefinition]:
+) -> dict[str, ApiSecurityDefinitionResource]:
     if security_definitions is None or len(security_definitions) == 0:
         return {}
     return {
-        k: ApiSecurityDefinition(jwt=ApiSecurityDefinitionJwt(issuer=v.issuer, audiences=v.audiences))
+        k: ApiSecurityDefinitionResource(oidc=ApiOpenIdConnectionDefinition(issuer=v.issuer, audiences=v.audiences))
         for k, v in security_definitions.items()
     }
 
@@ -164,7 +179,6 @@ class Api(BaseResource):
                 resource_declare_request=ResourceDeclareRequest(
                     resource=_to_resource(self),
                     api=ApiResource(
-                        security_definitions=_security_definition_to_grpc_declaration(self.security_definitions),
                         security=_security_to_grpc_declaration(self.security),
                     ),
                 )

@@ -25,12 +25,12 @@ from asyncio import Task
 from typing import Any, Sequence, TypeVar, Type, Optional, List
 
 from grpclib import GRPCError
-from nitric.proto.nitric.resource.v1 import (
+from nitric.proto.resources.v1 import (
     PolicyResource,
     Resource as WireResource,
     ResourceType,
     ResourceDeclareRequest,
-    ResourceServiceStub,
+    ResourcesStub,
 )
 
 from nitric.exception import exception_from_grpc_error, NitricResourceException
@@ -46,7 +46,7 @@ class Resource(ABC):
         """Construct a new resource."""
         self._reg: Optional[Task[Any]] = None
         self._channel = new_default_channel()
-        self._resources_stub = ResourceServiceStub(channel=self._channel)
+        self._resources_stub = ResourcesStub(channel=self._channel)
 
     @abstractmethod
     async def _register(self) -> None:

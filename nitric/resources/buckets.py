@@ -24,17 +24,37 @@ from typing import List, Callable, Literal
 from grpclib import GRPCError
 
 from nitric.application import Nitric
-from nitric.faas import FunctionServer, BucketNotificationWorkerOptions, BucketNotificationHandler
-from nitric.proto.nitric.resource.v1 import (
+from nitric.faas import FunctionServer, BucketNotificationHandler
+from nitric.proto.resources.v1 import (
     Resource,
     ResourceType,
     Action,
     ResourceDeclareRequest,
 )
+from nitric.proto.storage.v1 import BlobEventType
 
 from nitric.resources.resource import SecureResource
 
 BucketPermission = Literal["reading", "writing", "deleting"]
+
+
+class BucketNotificationWorkerOptions:
+    """Options for bucket notification workers."""
+
+    def __init__(self, bucket_name: str, notification_type: str, notification_prefix_filter: str):
+        """Construct a new options object."""
+        self.bucket_name = bucket_name
+        self.notification_type = BucketNotificationWorkerOptions._to_grpc_event_type(notification_type.lower())
+        self.notification_prefix_filter = notification_prefix_filter
+
+    @staticmethod
+    def _to_grpc_event_type(event_type: str) -> BlobEventType:
+        if event_type == "write":
+            return BlobEventType.Created
+        elif event_type == "delete":
+            return BlobEventType.Deleted
+        else:
+            raise ValueError(f"Event type {event_type} is unsupported")
 
 
 class Bucket(SecureResource):

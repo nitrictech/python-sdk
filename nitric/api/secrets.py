@@ -25,8 +25,8 @@ from grpclib.client import Channel
 
 from nitric.exception import exception_from_grpc_error
 from nitric.utils import new_default_channel
-from nitric.proto.nitric.secret.v1 import (
-    SecretServiceStub,
+from nitric.proto.secrets.v1 import (
+    SecretManagerStub,
     Secret as SecretMessage,
     SecretVersion as VersionMessage,
     SecretPutRequest,
@@ -44,7 +44,7 @@ class Secrets(object):
     def __init__(self: Secrets):
         """Construct a Nitric Storage Client."""
         self._channel: Channel = new_default_channel()
-        self.secrets_stub = SecretServiceStub(channel=self._channel)
+        self.secrets_stub = SecretManagerStub(channel=self._channel)
 
     def __del__(self):
         # close the channel when this client is destroyed

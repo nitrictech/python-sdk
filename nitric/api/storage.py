@@ -22,14 +22,15 @@ from grpclib.client import Channel
 from grpclib import GRPCError
 from nitric.exception import exception_from_grpc_error, InvalidArgumentException
 from nitric.utils import new_default_channel
-from nitric.proto.nitric.storage.v1 import (
-    StorageServiceStub,
+from nitric.proto.storage.v1 import (
+    StorageStub,
     StoragePreSignUrlRequestOperation,
     StorageWriteRequest,
     StorageReadRequest,
     StorageDeleteRequest,
     StoragePreSignUrlRequest,
-    StorageListFilesRequest,
+    StorageListBlobsRequest,
+    StorageExistsRequest,
 )
 from enum import Enum
 from warnings import warn
@@ -46,7 +47,7 @@ class Storage(object):
         """Construct a Nitric Storage Client."""
         self._channel: Union[Channel, None] = new_default_channel()
         # Had to make unprotected (publically accessible in order to use as part of bucket reference)
-        self.storage_stub = StorageServiceStub(channel=self._channel)
+        self.storage_stub = StorageStub(channel=self._channel)
 
     def __del__(self):
         # close the channel when this client is destroyed
@@ -72,9 +73,16 @@ class BucketRef(object):
     async def files(self):
         """Return a list of files in this bucket."""
         resp = await self._storage.storage_stub.list_files(
-            storage_list_files_request=StorageListFilesRequest(bucket_name=self.name)
+            storage_list_files_request=StorageListBlobsRequest(bucket_name=self.name)
         )
         return [self.file(f.key) for f in resp.files]
+
+    async def exists(self, key: str) -> bool:
+        """Return true if a file in the bucket exists."""
+        resp = await self._storage.storage_stub.exists(
+            storage_exists_request=StorageExistsRequest(bucket_name=self.name, key=key)
+        )
+        return resp.exists
 
 
 class FileMode(Enum):

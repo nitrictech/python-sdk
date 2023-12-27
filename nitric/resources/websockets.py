@@ -20,17 +20,35 @@ from __future__ import annotations
 from typing import Literal, Callable
 from nitric.faas import (
     FunctionServer,
-    WebsocketWorkerOptions,
     WebsocketHandler,
 )
 from nitric.api.websocket import Websocket as WebsocketClient
 from nitric.application import Nitric
 from nitric.resources.resource import Resource as BaseResource
-from nitric.proto.nitric.resource.v1 import Resource, Action, ResourceType, ResourceDeclareRequest, PolicyResource
+from nitric.proto.resources.v1 import Resource, Action, ResourceType, ResourceDeclareRequest, PolicyResource
 from grpclib import GRPCError
 from nitric.exception import exception_from_grpc_error
+from nitric.proto.websockets.v1 import WebsocketEventType
 
-WebsocketEventType = Literal["connect", "disconnect", "message"]
+
+class WebsocketWorkerOptions:
+    """Options for websocket workers."""
+
+    def __init__(self, socket_name: str, event_type: Literal["connect", "disconnect", "message"]):
+        """Construct new websocket worker options."""
+        self.socket_name = socket_name
+        self.event_type = WebsocketWorkerOptions._to_grpc_event_type(event_type)
+
+    @staticmethod
+    def _to_grpc_event_type(event_type: Literal["connect", "disconnect", "message"]) -> WebsocketEventType:
+        if event_type == "connect":
+            return WebsocketEventType.Connect
+        elif event_type == "disconnect":
+            return WebsocketEventType.Disconnect
+        elif event_type == "message":
+            return WebsocketEventType.Message
+        else:
+            raise ValueError(f"Event type {event_type} is unsupported")
 
 
 def _to_resource(b: Websocket) -> Resource:
@@ -86,12 +104,7 @@ class Websocket(BaseResource):
         """Create and return a worker decorator for this socket."""
 
         def decorator(func: WebsocketHandler) -> None:
-            self._server = FunctionServer(
-                WebsocketWorkerOptions(
-                    socket_name=self.name,
-                    event_type=event_type,
-                )
-            )
+            self._server = FunctionServer()
             self._server.websocket(func)
             return Nitric._register_worker(self._server)  # type: ignore
 

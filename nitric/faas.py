@@ -23,38 +23,34 @@ from enum import Enum
 
 import functools
 import json
-import traceback
-from typing import Dict, Generic, Literal, Protocol, Union, List, TypeVar, Any, Optional, Sequence
-from opentelemetry import context, propagate
 
-import betterproto
-from betterproto.grpc.util.async_channel import AsyncChannel
-from nitric.api.storage import BucketRef
-from nitric.utils import new_default_channel
-from nitric.proto.nitric.faas.v1 import (
-    FaasServiceStub,
-    InitRequest,
-    ClientMessage,
-    TriggerRequest,
-    TriggerResponse,
-    HeaderValue,
-    HttpResponseContext,
-    TopicResponseContext,
-    ScheduleWorker,
-    ApiWorker,
-    SubscriptionWorker,
-    ScheduleRate,
-    BucketNotificationWorker,
-    BucketNotificationConfig,
-    BucketNotificationType,
-    NotificationResponseContext,
-    WebsocketResponseContext,
-    WebsocketEvent,
-    WebsocketWorker,
+from typing import Dict, Generic, Protocol, Union, List, TypeVar, Any, Optional
+from opentelemetry import propagate
+
+from abc import ABC, abstractmethod
+
+from nitric.proto.apis.v1 import (
+    ClientMessage as ApiClientMessage,
+    ServerMessage as ApiServerMessage,
+    HttpResponse as ApiResponse,
 )
-import grpclib
-import asyncio
-from abc import ABC
+from nitric.proto.schedules.v1 import (
+    ClientMessage as ScheduleClientMessage,
+    ServerMessage as ScheduleServerMessage,
+)
+from nitric.proto.storage.v1 import (
+    ClientMessage as BucketNotificationClientMessage,
+    BlobEventType,
+)
+from nitric.proto.topics.v1 import (
+    ClientMessage as TopicClientMessage,
+    ServerMessage as TopicServerMessage,
+    MessageResponse as TopicResponse,
+)
+from nitric.proto.websockets.v1 import (
+    ServerMessage as WebsocketServerMessage,
+    WebsocketEventResponse,
+)
 
 Record = Dict[str, Union[str, List[str]]]
 PROPAGATOR = propagate.get_global_textmap()
@@ -89,85 +85,17 @@ class Response(ABC):
     pass
 
 
-class TriggerContext(ABC):
+class TriggerContext(Protocol):
     """Represents an abstract request/response context for any trigger."""
 
-    def http(self) -> Union[HttpContext, None]:
-        """Return this context as an HttpContext if it is one, otherwise returns None."""
-        return None
+    @staticmethod
+    def from_request(server_message) -> TriggerContext:
+        """Convert a server message request into this trigger context."""
+        pass
 
-    def event(self) -> Union[EventContext, None]:
-        """Return this context as an EventContext if it is one, otherwise returns None."""
-        return None
-
-    def bucket_notification(self) -> Union[BucketNotificationContext, None]:
-        """Return this context as a BucketNotificationContext if it is one, otherwise returns None."""
-        return None
-
-    def websocket(self) -> Union[WebsocketContext, None]:
-        """Return this context as a WebsocketContext if it is one, otherwise returns None."""
-        return None
-
-
-def _ctx_from_grpc_trigger_request(trigger_request: TriggerRequest, options: Optional[FaasClientOptions] = None):
-    """Return a TriggerContext from a TriggerRequest."""
-    context_type, _ = betterproto.which_one_of(trigger_request, "context")
-    if context_type == "http":
-        return HttpContext.from_grpc_trigger_request(trigger_request)
-    elif context_type == "topic":
-        return EventContext.from_grpc_trigger_request(trigger_request)
-    elif context_type == "notification":
-        if isinstance(options, FileNotificationWorkerOptions):
-            return FileNotificationContext.from_grpc_trigger_request_and_options(trigger_request, options)
-        else:
-            return BucketNotificationContext.from_grpc_trigger_request(trigger_request)
-    elif context_type == "websocket":
-        return WebsocketContext.from_grpc_trigger_request(trigger_request)
-    else:
-        print(f"Trigger with unknown context received, context type: {context_type}")
-        raise Exception(f"Unknown trigger context, type: {context_type}")
-
-
-def _ensure_header_is_list(value: Union[str, Sequence[str]]) -> List[str]:
-    if isinstance(value, str):
-        return [value]
-    return list(value)
-
-
-def _grpc_response_from_ctx(ctx: TriggerContext) -> TriggerResponse:
-    """
-    Create a GRPC TriggerResponse from a TriggerContext.
-
-    The ctx is used to determine the appropriate TriggerResponse content,
-    the ctx.res is then used to construct the response.
-    """
-    http_context = ctx.http()
-    if http_context is not None:
-        headers = {k: HeaderValue(value=_ensure_header_is_list(v)) for (k, v) in http_context.res.headers.items()}
-        data = http_context.res.body if http_context.res.body else bytes()
-
-        return TriggerResponse(
-            data=data,
-            http=HttpResponseContext(status=http_context.res.status, headers=headers),
-        )
-
-    event_context = ctx.event()
-    if event_context is not None:
-        return TriggerResponse(
-            topic=TopicResponseContext(
-                success=event_context.res.success,
-            ),
-        )
-
-    bucket_context = ctx.bucket_notification()
-    if bucket_context is not None:
-        return TriggerResponse(notification=NotificationResponseContext(success=bucket_context.res.success))
-
-    websocket_context = ctx.websocket()
-    if websocket_context is not None:
-        return TriggerResponse(websocket=WebsocketResponseContext(success=websocket_context.res.success))
-
-    raise Exception("Unknown Trigger Context type, unable to return valid response")
+    def to_response(self):
+        """Convert this trigger context into a server message response."""
+        pass
 
 
 # ====== HTTP ======
@@ -235,36 +163,48 @@ class HttpResponse(Response):
             self.headers["Content-Type"] = ["application/json"]
 
 
-class HttpContext(TriggerContext):
+class HttpContext:
     """Represents the full request/response context for an Http based trigger."""
 
     def __init__(self, request: HttpRequest, response: Optional[HttpResponse] = None):
         """Construct a new HttpContext."""
-        super().__init__()
         self.req = request
         self.res = response if response else HttpResponse()
 
-    def http(self) -> HttpContext:
-        """Return this HttpContext, used when determining the context type of a trigger."""
-        return self
-
     @staticmethod
-    def from_grpc_trigger_request(trigger_request: TriggerRequest) -> HttpContext:
+    def from_request(msg: ApiServerMessage) -> HttpContext:
         """Construct a new HttpContext from an Http trigger from the Nitric Membrane."""
-        headers: Record = {k: v.value for (k, v) in trigger_request.http.headers.items()}
-        query: Record = {k: v.value for (k, v) in trigger_request.http.query_params.items()}
+        headers: Record = {k: v.value for (k, v) in msg.http_request.headers.items()}
+        query: Record = {k: v.value for (k, v) in msg.http_request.query_params.items()}
 
         return HttpContext(
             request=HttpRequest(
-                data=trigger_request.data,
-                method=trigger_request.http.method,
+                data=msg.data,
+                method=msg.http_request.method,
                 query=query,
-                path=trigger_request.http.path,
-                params={k: v for (k, v) in trigger_request.http.path_params.items()},
+                path=msg.http_request.path,
+                params={k: v for (k, v) in msg.http_request.path_params.items()},
                 headers=headers,
-                trace_context=trigger_request.trace_context.values,
+                trace_context=msg.trace_context.values,
             )
         )
+
+    def to_response(self) -> ApiClientMessage:
+        """Construct a HttpResponse for the Nitric Membrane from this context object."""
+        headers = {k: HttpContext._ensure_value_is_list(v) for (k, v) in self.res.headers.items()}
+        body = self.res.body if self.res.body else bytes()
+
+        resp = ApiResponse(
+            status=self.res.status,
+            body=body,
+            headers=headers,
+        )
+
+        return ApiClientMessage(http_response=resp)
+
+    @staticmethod
+    def _ensure_value_is_list(value: Union[str, List[str]]) -> List[str]:
+        return list(value) if isinstance(value, list) else [value]
 
 
 class EventRequest(Request):
@@ -290,32 +230,36 @@ class EventResponse(Response):
         self.success = success
 
 
-class EventContext(TriggerContext):
+class EventContext:
     """Represents the full request/response context for an Event based trigger."""
 
     def __init__(self, request: EventRequest, response: Optional[EventResponse] = None):
         """Construct a new EventContext."""
-        super().__init__()
         self.req = request
         self.res = response if response else EventResponse()
 
-    def event(self) -> EventContext:
-        """Return this EventContext, used when determining the context type of a trigger."""
-        return self
-
     @staticmethod
-    def from_grpc_trigger_request(trigger_request: TriggerRequest):
-        """Construct a new EventContext from an Event trigger from the Nitric Membrane."""
+    def from_request(msg: TopicServerMessage) -> EventContext:
+        """Construct a new EventContext from a Topic trigger from the Nitric Membrane."""
+        data = msg.message_request.message.struct_payload.to_json()
+
         return EventContext(
             request=EventRequest(
-                data=trigger_request.data,
-                topic=trigger_request.topic.topic,
-                trace_context=trigger_request.trace_context.values,
+                data=bytes(data),
+                topic=msg.message_request.topic,
+                trace_context=msg.trace_context.values,
             )
         )
 
+    def to_response(self) -> TopicClientMessage:
+        """Construct a EventContext for the Nitric Membrane from this context object."""
+        return TopicClientMessage(message_response=TopicResponse(success=self.res.success))
 
-class WebsocketRequest(Request):
+
+# == WEBSOCKET ==
+
+
+class WebsocketRequest:
     """Represents an incoming websocket event."""
 
     def __init__(
@@ -336,37 +280,36 @@ class WebsocketResponse(Response):
         self.success = success
 
 
-class WebsocketContext(TriggerContext):
+class WebsocketContext:
     """Represents the full request/response context for a Websocket based trigger."""
 
     def __init__(self, request: WebsocketRequest, response: Optional[WebsocketResponse] = None):
         """Construct a new WebsocketContext."""
-        super().__init__()
         self.req = request
         self.res = response if response else WebsocketResponse()
 
-    def websocket(self) -> WebsocketContext:
-        """Return this WebsocketContext, used when determining the context type of a trigger."""
-        return self
-
     @staticmethod
-    def from_grpc_trigger_request(trigger_request: TriggerRequest) -> WebsocketContext:
+    def from_request(msg: WebsocketServerMessage) -> WebsocketContext:
         """Construct a new WebsocketContext from a Websocket trigger from the Nitric Membrane."""
-        query: Record = {k: v.value for (k, v) in trigger_request.websocket.query_params.items()}
+        query: Record = {k: v.value for (k, v) in msg.websocket_event_request.query_params.items()}
         return WebsocketContext(
             request=WebsocketRequest(
-                data=trigger_request.data,
-                connection_id=trigger_request.websocket.connection_id,
+                data=msg,
+                connection_id=msg.websocket_event_request.connection_id,
                 query=query,
-                trace_context=trigger_request.trace_context.values,
+                trace_context=msg.trace_context.values,
             )
         )
+
+    def to_response(self) -> WebsocketEventResponse:
+        """Construct a WebsocketContext for the Nitric Membrane from this context object."""
+        return WebsocketEventResponse()
 
 
 class BucketNotificationRequest(Request):
     """Represents a translated Event, from a subscribed bucket notification, forwarded from the Nitric Membrane."""
 
-    def __init__(self, data: bytes, key: str, notification_type: BucketNotificationType, trace_context: Dict[str, str]):
+    def __init__(self, data: bytes, key: str, notification_type: BlobEventType, trace_context: Dict[str, str]):
         """Construct a new EventRequest."""
         super().__init__(data, trace_context)
 
@@ -382,28 +325,23 @@ class BucketNotificationResponse(Response):
         self.success = success
 
 
-class BucketNotificationContext(TriggerContext):
+class BucketNotificationContext:
     """Represents the full request/response context for a bucket notification trigger."""
 
     def __init__(self, request: BucketNotificationRequest, response: Optional[BucketNotificationResponse] = None):
         """Construct a new BucketNotificationContext."""
-        super().__init__()
         self.req = request
         self.res = response if response else BucketNotificationResponse()
 
-    def bucket_notification(self) -> BucketNotificationContext:
-        """Return this BucketNotificationContext, used when determining the context type of a trigger."""
-        return self
-
     @staticmethod
-    def from_grpc_trigger_request(trigger_request: TriggerRequest) -> BucketNotificationContext:
+    def from_client_message(client_message: BucketNotificationClientMessage) -> BucketNotificationContext:
         """Construct a new BucketNotificationContext from a Bucket Notification trigger from the Nitric Membrane."""
         return BucketNotificationContext(
             request=BucketNotificationRequest(
-                data=trigger_request.data,
-                key=trigger_request.notification.bucket.key,
-                notification_type=trigger_request.notification.bucket.type,
-                trace_context=trigger_request.trace_context.values,
+                data=client_message.data,
+                key=client_message.notification.bucket.key,
+                notification_type=client_message.notification.bucket.type,
+                trace_context=client_message.trace_context.values,
             )
         )
 
@@ -416,7 +354,7 @@ class FileNotificationRequest(BucketNotificationRequest):
         data: bytes,
         bucket_ref: Any,  # can't import BucketRef due to circular dependency problems
         key: str,
-        notification_type: BucketNotificationType,
+        notification_type: BlobEventType,
         trace_context: Dict[str, str],
     ):
         """Construct a new FileNotificationRequest."""
@@ -432,163 +370,81 @@ class FileNotificationContext(BucketNotificationContext):
         super().__init__(request=request, response=response)
         self.req = request
 
-    def bucket_notification(self) -> BucketNotificationContext:
-        """Return this FileNotificationContext, used when determining the context type of a trigger."""
-        return self
-
     @staticmethod
-    def from_grpc_trigger_request_and_options(
-        trigger_request: TriggerRequest, options: FileNotificationWorkerOptions
+    def from_client_message_with_bucket(
+        client_message: BucketNotificationClientMessage, bucket_ref
     ) -> FileNotificationContext:
         """Construct a new FileNotificationTrigger from a Bucket Notification trigger from the Nitric Membrane."""
         return FileNotificationContext(
             request=FileNotificationRequest(
-                data=trigger_request.data,
-                key=trigger_request.notification.bucket.key,
-                bucket_ref=options.bucket_ref,
-                notification_type=trigger_request.notification.bucket.type,
-                trace_context=trigger_request.trace_context.values,
+                data=client_message.data,
+                key=client_message.notification.bucket.key,
+                bucket_ref=bucket_ref,
+                notification_type=client_message.notification.bucket.type,
+                trace_context=client_message.trace_context.values,
             )
         )
 
 
-class RateWorkerOptions:
-    """Options for rate workers."""
-
-    description: str
-    rate: int
-    frequency: Frequency
-
-    def __init__(self, description: str, rate: int, frequency: Frequency):
-        """Construct a new options object."""
-        self.description = description
-        self.rate = rate
-        self.frequency = frequency
+# == Schedules ==
 
 
-class BucketNotificationWorkerOptions:
-    """Options for bucket notification workers."""
+class IntervalRequest(Request):
+    """Represents a translated Event, from a Schedule, forwarded from the Nitric Membrane."""
 
-    def __init__(self, bucket_name: str, notification_type: str, notification_prefix_filter: str):
-        """Construct a new options object."""
-        self.bucket_name = bucket_name
-        self.notification_type = BucketNotificationWorkerOptions._to_grpc_event_type(notification_type.lower())
-        self.notification_prefix_filter = notification_prefix_filter
+    def __init__(self, data: bytes, schedule_name: str, trace_context: Dict[str, str]):
+        """Construct a new IntervalRequest."""
+        super().__init__(data, trace_context)
+        self.schedule_name = schedule_name
 
-    @staticmethod
-    def _to_grpc_event_type(event_type: str) -> BucketNotificationType:
-        if event_type == "write":
-            return BucketNotificationType.Created
-        elif event_type == "delete":
-            return BucketNotificationType.Deleted
-        else:
-            raise ValueError(f"Event type {event_type} is unsupported")
+    @property
+    def payload(self) -> Any:
+        """Return the payload of this event, usually a dictionary."""
+        event_envelope = json.loads(self.data.decode("utf-8"))
+        return event_envelope["payload"] if isinstance(event_envelope, dict) else event_envelope
 
 
-class WebsocketWorkerOptions:
-    """Options for websocket workers."""
+class IntervalResponse(Response):
+    """Represents the response to a trigger from an Interval as a result of a Schedule."""
 
-    def __init__(self, socket_name: str, event_type: Literal["connect", "disconnect", "message"]):
-        """Construct new websocket worker options."""
-        self.socket_name = socket_name
-        self.event_type = WebsocketWorkerOptions._to_grpc_event_type(event_type)
+    def __init__(self, success: bool = True):
+        """Construct a new EventResponse."""
+        self.success = success
+
+
+class IntervalContext:
+    """Represents the full request/response context for an Interval based trigger."""
+
+    def __init__(self, request: IntervalRequest, response: Optional[IntervalResponse] = None):
+        """Construct a new EventContext."""
+        self.req = request
+        self.res = response if response else IntervalResponse()
 
     @staticmethod
-    def _to_grpc_event_type(event_type: Literal["connect", "disconnect", "message"]) -> WebsocketEvent:
-        if event_type == "connect":
-            return WebsocketEvent.Connect
-        elif event_type == "disconnect":
-            return WebsocketEvent.Disconnect
-        elif event_type == "message":
-            return WebsocketEvent.Message
-        else:
-            raise ValueError(f"Event type {event_type} is unsupported")
+    def from_request(msg: ScheduleServerMessage) -> IntervalContext:
+        """Construct a new IntervalContext from a Schedule trigger from the Nitric Membrane."""
+        return IntervalContext(
+            request=IntervalRequest(
+                data=msg.data,
+                schedule_name=msg.interval_request.schedule_name,
+                trace_context=msg.trace_context.values,
+            )
+        )
 
+    def to_response(self) -> TopicClientMessage:
+        """Construct a EventContext for the Nitric Membrane from this context object."""
+        return ScheduleClientMessage(interval_response=IntervalResponse(success=self.res.success))
 
-class FileNotificationWorkerOptions(BucketNotificationWorkerOptions):
-    """Options for bucket notification workers with file references."""
-
-    def __init__(self, bucket: BucketRef, notification_type: str, notification_prefix_filter: str):
-        """Construct a new FileNotificationWorkerOptions."""
-        super().__init__(bucket.name, notification_type, notification_prefix_filter)
-
-        self.bucket_ref = bucket
-
-
-class ApiWorkerOptions:
-    """Options for API workers."""
-
-    def __init__(
-        self, api: str, route: str, methods: Sequence[Union[str, HttpMethod]], opts: Optional[MethodOptions] = None
-    ):
-        """Construct a new options object."""
-        self.api = api
-        self.route = route
-        self.methods = [str(method) for method in methods]
-        self.opts = opts
-
-
-class MethodOptions:
-    """Represents options when defining a method handler."""
-
-    security: Optional[dict[str, List[str]]]
-
-    def __init__(self, security: Optional[dict[str, List[str]]] = None):
-        """Construct a new HTTP method options object."""
-        self.security = security
-
-
-class SubscriptionWorkerOptions:
-    """Options for subscription workers."""
-
-    def __init__(self, topic: str):
-        """Construct a new options object."""
-        self.topic = topic
-
-
-class Frequency(Enum):
-    """Valid schedule frequencies."""
-
-    seconds = "seconds"
-    minutes = "minutes"
-    hours = "hours"
-    days = "days"
-
-    @staticmethod
-    def from_str(value: str) -> Frequency:
-        """Convert a string frequency value to a Frequency."""
-        try:
-            return Frequency[value.strip().lower()]
-        except Exception:
-            raise ValueError(f"{value} is not valid frequency")
-
-    @staticmethod
-    def as_str_list() -> List[str]:
-        """Return all frequency values as a list of strings."""
-        return [str(frequency.value) for frequency in Frequency]
-
-
-class FaasWorkerOptions:
-    """Empty worker options for generic function handlers."""
-
-    pass
-
-
-FaasClientOptions = Union[
-    ApiWorkerOptions,
-    RateWorkerOptions,
-    SubscriptionWorkerOptions,
-    BucketNotificationWorkerOptions,
-    FileNotificationWorkerOptions,
-    WebsocketWorkerOptions,
-    FaasWorkerOptions,
-]
-
-# class Context(Protocol):
-#     ...
 
 C = TypeVar(
-    "C", TriggerContext, HttpContext, EventContext, FileNotificationContext, BucketNotificationContext, WebsocketContext
+    "C",
+    TriggerContext,
+    HttpContext,
+    EventContext,
+    FileNotificationContext,
+    BucketNotificationContext,
+    WebsocketContext,
+    IntervalContext,
 )
 
 
@@ -610,12 +466,14 @@ class Handler(Protocol, Generic[C]):
 
 HttpMiddleware = Middleware[HttpContext]
 EventMiddleware = Middleware[EventContext]
+IntervalMiddleware = Middleware[IntervalContext]
 BucketNotificationMiddleware = Middleware[BucketNotificationContext]
 FileNotificationMiddleware = Middleware[FileNotificationContext]
 WebsocketMiddleware = Middleware[WebsocketContext]
 
 HttpHandler = Handler[HttpContext]
 EventHandler = Handler[EventContext]
+IntervalHandler = Handler[IntervalContext]
 BucketNotificationHandler = Handler[BucketNotificationContext]
 FileNotificationHandler = Handler[FileNotificationContext]
 WebsocketHandler = Handler[WebsocketContext]
@@ -661,11 +519,6 @@ def compose_middleware(*middlewares: Middleware[C] | Handler[C]) -> Middleware[C
                 output_context = await cur(result, acc_next)  # type: ignore
                 if not output_context:
                     return result  # type: ignore
-                if not isinstance(output_context, TriggerContext):
-                    raise Exception(
-                        f"middleware {cur} returned unexpected response type, expected a context object, "
-                        f"got {output_context}"
-                    )
                 return output_context  # type: ignore
 
             return chained_middleware
@@ -677,202 +530,10 @@ def compose_middleware(*middlewares: Middleware[C] | Handler[C]) -> Middleware[C
     return composed
 
 
-# ====== Function Server ======
+class FunctionServer(ABC):
+    """Represents a worker that should be started at runtime."""
 
-
-def _create_internal_error_response(req: TriggerRequest) -> TriggerResponse:
-    """Create a general error response based on the trigger request type."""
-    context_type, _ = betterproto.which_one_of(req, "context")
-    if context_type == "http":
-        return TriggerResponse(data=bytes(), http=HttpResponseContext(status=500))
-    elif context_type == "topic":
-        return TriggerResponse(data=bytes(), topic=TopicResponseContext(success=False))
-    else:
-        raise Exception(f"Unknown trigger type: {context_type}, unable to generate expected response")
-
-
-class FunctionServer:
-    """A Function as a Service server, which acts as a faas handler for the Nitric Membrane."""
-
-    def __init__(self, opts: FaasClientOptions):
-        """Construct a new function server."""
-        self.__http_handler: Optional[HttpMiddleware] = None
-        self.__event_handler: Optional[EventMiddleware] = None
-        self.__bucket_notification_handler: Optional[
-            Union[BucketNotificationMiddleware, FileNotificationMiddleware]
-        ] = None
-        self.__websocket_handler: Optional[WebsocketMiddleware] = None
-        self._opts = opts
-
-    def http(self, *handlers: HttpMiddleware | HttpHandler) -> FunctionServer:
-        """
-        Register one or more HTTP Trigger Handlers or Middleware.
-
-        When multiple handlers are provided, they will be called in order.
-        """
-        self.__http_handler = compose_middleware(*handlers)
-        return self
-
-    def event(self, *handlers: EventMiddleware | EventHandler) -> FunctionServer:
-        """
-        Register one or more Event Trigger Handlers or Middleware.
-
-        When multiple handlers are provided, they will be called in order.
-        """
-        self.__event_handler = compose_middleware(*handlers)
-        return self
-
-    def bucket_notification(
-        self, *handlers: BucketNotificationMiddleware | BucketNotificationHandler
-    ) -> FunctionServer:
-        """
-        Register one or more Bucket Notification Trigger Handlers or Middleware.
-
-        When multiple handlers are provided, they will be called in order.
-        """
-        self.__bucket_notification_handler = compose_middleware(*handlers)
-        return self
-
-    def websocket(self, *handlers: WebsocketHandler | WebsocketMiddleware) -> FunctionServer:
-        """
-        Register one or more Websocket Trigger Handlers or Middleware.
-
-        When multiple handlers are provided, they will be called in order.
-        """
-        self.__websocket_handler = compose_middleware(*handlers)
-        return self
-
-    async def start(self):
-        """Start the function server using the previously provided middleware."""
-        if (
-            not self._http_handler
-            and not self._event_handler
-            and not self.__bucket_notification_handler
-            and not self.__websocket_handler
-        ):
-            raise Exception("At least one handler function must be provided.")
-
-        await self._run()
-
-    @property
-    def _http_handler(self):
-        return self.__http_handler
-
-    @property
-    def _event_handler(self):
-        return self.__event_handler
-
-    @property
-    def _bucket_notification_handler(self):
-        return self.__bucket_notification_handler
-
-    @property
-    def _websocket_handler(self):
-        return self.__websocket_handler
-
-    async def _run(self):
-        """Register a new FaaS worker with the Membrane, using the provided function as the handler."""
-        channel = new_default_channel()
-        client = FaasServiceStub(channel)
-        request_channel = AsyncChannel(close=True)
-        # We can start be sending all the requests we already have
-        try:
-            init_request = InitRequest()
-            # Construct init request based on API worker options
-            if isinstance(self._opts, ApiWorkerOptions):
-                init_request = InitRequest(
-                    api=ApiWorker(api=self._opts.api, path=self._opts.route, methods=self._opts.methods)
-                )
-            elif isinstance(self._opts, RateWorkerOptions):
-                # TODO: Populate rate
-                init_request = InitRequest(
-                    schedule=ScheduleWorker(
-                        key=self._opts.description, rate=ScheduleRate(rate=f"{self._opts.rate} {self._opts.frequency}")
-                    )
-                )
-            elif isinstance(self._opts, SubscriptionWorkerOptions):
-                init_request = InitRequest(subscription=SubscriptionWorker(topic=self._opts.topic))
-            elif isinstance(self._opts, BucketNotificationWorkerOptions) or isinstance(
-                self._opts, FileNotificationWorkerOptions
-            ):
-                config = BucketNotificationConfig(
-                    notification_type=self._opts.notification_type,
-                    notification_prefix_filter=self._opts.notification_prefix_filter,
-                )
-                init_request = InitRequest(
-                    bucket_notification=BucketNotificationWorker(bucket=self._opts.bucket_name, config=config)
-                )
-            elif isinstance(self._opts, WebsocketWorkerOptions):
-                init_request = InitRequest(
-                    websocket=WebsocketWorker(socket=self._opts.socket_name, event=self._opts.event_type)
-                )
-
-            # let the membrane server know we're ready to start
-            await request_channel.send(ClientMessage(init_request=init_request))
-            async for srv_msg in client.trigger_stream(request_channel):
-                # The response iterator will remain active until the connection is closed
-                msg_type, _ = betterproto.which_one_of(srv_msg, "content")
-
-                if msg_type == "init_response":
-                    print("function connected to Membrane")
-                    # We don't need to reply
-                    # proceed to the next available message
-                    continue
-                if msg_type == "trigger_request":
-                    ctx: Any = _ctx_from_grpc_trigger_request(srv_msg.trigger_request, self._opts)  # type: ignore
-
-                    try:
-                        if len(ctx.req.trace_context) > 0:
-                            context.attach(PROPAGATOR.extract(ctx.req.trace_context))
-
-                        if ctx.http():
-                            func = self._http_handler
-                        elif ctx.event():
-                            func = self._event_handler
-                        elif ctx.bucket_notification():
-                            func = self._bucket_notification_handler
-                        elif ctx.websocket():
-                            func = self._websocket_handler
-
-                        assert func is not None
-
-                        response_ctx: TriggerContext = await func(ctx)  # type: ignore
-
-                        # TODO: should we allow middleware/handlers that return None still?
-                        if response_ctx is None:
-                            response_ctx = ctx
-
-                        # Send function response back to server
-                        await request_channel.send(
-                            ClientMessage(
-                                id=srv_msg.id,
-                                trigger_response=_grpc_response_from_ctx(response_ctx),
-                            )
-                        )
-                    except Exception:
-                        # Any unhandled exceptions in the above code will end the loop
-                        # and stop processing future triggers, we catch them here as a last resort.
-                        print("An unexpected error occurred processing trigger or response")
-                        traceback.print_exc()
-                        response = _create_internal_error_response(srv_msg.trigger_request)
-                        await request_channel.send(ClientMessage(id=srv_msg.id, trigger_response=response))
-                else:
-                    print(f"unhandled message type {msg_type}, skipping")
-                    continue
-                if request_channel.done():
-                    break
-        except grpclib.exceptions.StreamTerminatedError:
-            print("stream from Membrane closed, closing client stream")
-        except asyncio.CancelledError:
-            # Membrane has closed stream after init
-            print("stream from Membrane closed, closing client stream")
-        except ConnectionRefusedError as cre:
-            traceback.print_exc()
-            raise ConnectionRefusedError("Failed to register function with Membrane") from cre
-        except Exception as e:
-            traceback.print_exc()
-            raise Exception("An unexpected error occurred.") from e
-        finally:
-            # The channel must be closed to complete the gRPC connection
-            request_channel.close()
-            channel.close()
+    @abstractmethod
+    def start(self) -> None:
+        """Start the worker."""
+        pass

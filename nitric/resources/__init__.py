@@ -18,10 +18,9 @@
 #
 """Nitric Python SDK API Documentation. See: https://nitric.io/docs?lang=python for full framework documentation."""
 
-from nitric.resources.apis import Api, api, MethodOptions, ApiOptions, ApiDetails, JwtSecurityDefinition
+from nitric.resources.apis import Api, api, ApiOptions, ApiDetails, JwtSecurityDefinition
 from nitric.resources.buckets import Bucket, bucket
 from nitric.resources.collections import Collection, collection
-from nitric.resources.queues import Queue, queue
 from nitric.resources.schedules import Schedule, schedule
 from nitric.resources.secrets import Secret, secret
 from nitric.resources.topics import Topic, topic
@@ -33,13 +32,10 @@ __all__ = [
     "ApiOptions",
     "ApiDetails",
     "JwtSecurityDefinition",
-    "MethodOptions",
     "bucket",
     "Bucket",
     "collection",
     "Collection",
-    "queue",
-    "Queue",
     "Schedule",
     "schedule",
     "secret",

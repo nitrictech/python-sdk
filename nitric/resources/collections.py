@@ -23,7 +23,7 @@ from nitric.exception import exception_from_grpc_error
 from typing import List, Literal
 from grpclib import GRPCError
 from nitric.application import Nitric
-from nitric.proto.nitric.resource.v1 import (
+from nitric.proto.resources.v1 import (
     Resource,
     ResourceType,
     Action,

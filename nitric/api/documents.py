@@ -27,8 +27,8 @@ from grpclib.client import Channel
 
 from nitric.api.const import MAX_SUB_COLLECTION_DEPTH
 from nitric.exception import exception_from_grpc_error
-from nitric.proto.nitric.document.v1 import (
-    DocumentServiceStub,
+from nitric.proto.documents.v1 import (
+    DocumentsStub,
     Collection as CollectionMessage,
     Key as KeyMessage,
     Expression as ExpressionMessage,
@@ -260,13 +260,13 @@ class CollectionGroupRef:
         )
 
     @staticmethod
-    def from_collection_ref(collectionRef: CollectionRef, documents: Documents) -> Union[CollectionGroupRef, None]:
+    def from_collection_ref(collection_ref: CollectionRef, documents: Documents) -> Union[CollectionGroupRef, None]:
         """Return a collection ref as a collection group."""
-        if collectionRef.parent is not None:
+        if collection_ref.parent is not None:
             return CollectionGroupRef(
                 documents,
-                collectionRef.name,
-                collectionRef.parent.parent,
+                collection_ref.name,
+                collection_ref.parent.parent,
                 # FIXME: Need to determine why this was here
                 # CollectionGroupRef.from_collection_ref(
                 #     collectionRef.parent.parent,
@@ -344,17 +344,8 @@ class Expression:
     """Query expressions, representing a boolean operation used for query filters."""
 
     operand: str
-    operator: Union[Operator, str]
+    operator: str
     value: Union[str, int, float, bool]
-    _operator: Operator = field(init=False)
-
-    def __post_init__(self):
-        if isinstance(self.operator, str):
-            # Convert string operators to their enum values
-            self._operator = Operator(self.operator)
-            self.operator = Operator(self.operator)
-        else:
-            self._operator = self.operator
 
     def _value_to_expression_value(self):
         """Return an ExpressionValue message representation of the value of this expression."""
@@ -372,12 +363,12 @@ class Expression:
         """Return the Expression protobuf message representation of this expression."""
         return ExpressionMessage(
             operand=self.operand,
-            operator=self._operator.value,
+            operator=self.operator,
             value=self._value_to_expression_value(),
         )
 
     def __str__(self):
-        return "{0} {1} {2}".format(self.operand, self._operator.name, self.value)
+        return "{0} {1} {2}".format(self.operand, self.operator, self.value)
 
 
 @dataclass(frozen=True, order=True)
@@ -590,12 +581,12 @@ class Documents(object):
     This client insulates application code from stack specific event operations or SDKs.
     """
 
-    docs_stub: DocumentServiceStub
+    docs_stub: DocumentsStub
 
     def __init__(self):
         """Construct a Nitric Document Client."""
         self._channel: Optional[Channel] = new_default_channel()
-        self.docs_stub = DocumentServiceStub(channel=self._channel)
+        self.docs_stub = DocumentsStub(channel=self._channel)
 
     def __del__(self):
         # close the channel when this client is destroyed

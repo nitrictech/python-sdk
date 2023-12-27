@@ -2,6 +2,7 @@
 # sources: proto/schedules/v1/schedules.proto
 # plugin: python-betterproto
 from dataclasses import dataclass
+from datetime import timedelta
 from typing import (
     TYPE_CHECKING,
     AsyncIterable,
@@ -72,7 +73,7 @@ class RegistrationRequest(betterproto.Message):
 
 @dataclass(eq=False, repr=False)
 class ScheduleRate(betterproto.Message):
-    rate: str = betterproto.string_field(1)
+    interval: timedelta = betterproto.message_field(1)
 
 
 @dataclass(eq=False, repr=False)
