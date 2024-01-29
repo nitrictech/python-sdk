@@ -20,7 +20,7 @@
 
 from nitric.resources.apis import Api, api, ApiOptions, ApiDetails, JwtSecurityDefinition
 from nitric.resources.buckets import Bucket, bucket
-from nitric.resources.collections import Collection, collection
+from nitric.resources.kv import KVStore, kv
 from nitric.resources.schedules import Schedule, schedule
 from nitric.resources.secrets import Secret, secret
 from nitric.resources.topics import Topic, topic
@@ -34,8 +34,8 @@ __all__ = [
     "JwtSecurityDefinition",
     "bucket",
     "Bucket",
-    "collection",
-    "Collection",
+    "kv",
+    "KVStore",
     "Schedule",
     "schedule",
     "secret",

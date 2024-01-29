@@ -19,20 +19,19 @@
 from __future__ import annotations
 from typing import List, Union, Optional, ParamSpec, TypeVar, Callable, Concatenate
 from dataclasses import dataclass
-from nitric.faas import FunctionServer, HttpMethod, HttpMiddleware, HttpHandler
 from nitric.application import Nitric
 from nitric.resources.resource import Resource as BaseResource
 from nitric.proto.resources.v1 import (
-    Resource,
+    ResourceIdentifier,
     ResourceType,
     ApiResource,
     ApiScopes,
     ApiSecurityDefinitionResource,
     ApiOpenIdConnectionDefinition,
     ResourceDeclareRequest,
-    ResourceDetailsRequest,
 )
-from nitric.proto.apis.v1 import ApiWorkerOptions
+from nitric.context import HttpHandler, HttpMiddleware, HttpMethod
+from nitric.proto.apis.v1 import ApiWorkerOptions, ApiDetailsRequest
 from grpclib import GRPCError
 from nitric.exception import exception_from_grpc_error
 
@@ -116,8 +115,8 @@ class RouteOptions:
         self.middleware = middleware
 
 
-def _to_resource(b: Api) -> Resource:
-    return Resource(name=b.name, type=ResourceType.Api)
+def _to_resource(b: Api) -> ResourceIdentifier:
+    return ResourceIdentifier(name=b.name, type=ResourceType.Api)
 
 
 def _security_definition_to_grpc_declaration(
@@ -177,7 +176,7 @@ class Api(BaseResource):
         try:
             await self._resources_stub.declare(
                 resource_declare_request=ResourceDeclareRequest(
-                    resource=_to_resource(self),
+                    id=_to_resource(self),
                     api=ApiResource(
                         security=_security_to_grpc_declaration(self.security),
                     ),
@@ -298,8 +297,8 @@ class Api(BaseResource):
         """Get the API deployment details."""
         try:
             res = await self._resources_stub.details(
-                resource_details_request=ResourceDetailsRequest(
-                    resource=_to_resource(self),
+                resource_details_request=ApiDetailsRequest(
+                    api_name=self.name,
                 )
             )
             return ApiDetails(res.id, res.provider, res.service, res.api.url)

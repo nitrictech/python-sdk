@@ -24,7 +24,7 @@ from opentelemetry.sdk.trace import sampling
 
 
 from nitric.exception import NitricUnavailableException
-from nitric.resources import Bucket
+from nitric.resources import Bucket, schedule
 from nitric.application import Nitric
 
 
@@ -120,3 +120,10 @@ class ApplicationTest(IsolatedAsyncioTestCase):
 
                 mock_running_loop.assert_called_once()
                 mock_event_loop.assert_not_called()
+
+    def test_v1(self):
+        @schedule("run", "7 minutes")
+        def run_on_schedule():
+            print("blah")
+
+        Nitric.run()

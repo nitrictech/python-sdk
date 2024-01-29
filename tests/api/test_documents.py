@@ -23,7 +23,7 @@ import pytest
 from betterproto.lib.google.protobuf import Struct, Value
 from grpclib import GRPCError, Status
 
-from nitric.api.documents import (
+from nitric.api.kv import (
     QueryBuilder,
     Operator,
     Documents,

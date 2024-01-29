@@ -25,6 +25,16 @@ if TYPE_CHECKING:
 
 
 @dataclass(eq=False, repr=False)
+class ApiDetailsRequest(betterproto.Message):
+    api_name: str = betterproto.string_field(1)
+
+
+@dataclass(eq=False, repr=False)
+class ApiDetailsResponse(betterproto.Message):
+    url: str = betterproto.string_field(1)
+
+
+@dataclass(eq=False, repr=False)
 class ClientMessage(betterproto.Message):
     id: str = betterproto.string_field(1)
     """globally unique ID of the request/response pair"""
@@ -163,11 +173,33 @@ class ApiStub(betterproto.ServiceStub):
         ):
             yield response
 
+    async def details(
+        self,
+        api_details_request: "ApiDetailsRequest",
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional["Deadline"] = None,
+        metadata: Optional["MetadataLike"] = None
+    ) -> "ApiDetailsResponse":
+        return await self._unary_unary(
+            "/nitric.proto.apis.v1.Api/Details",
+            api_details_request,
+            ApiDetailsResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
+
 
 class ApiBase(ServiceBase):
     async def serve(
         self, client_message_iterator: AsyncIterator["ClientMessage"]
     ) -> AsyncIterator["ServerMessage"]:
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
+    async def details(
+        self, api_details_request: "ApiDetailsRequest"
+    ) -> "ApiDetailsResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def __rpc_serve(
@@ -180,6 +212,13 @@ class ApiBase(ServiceBase):
             request,
         )
 
+    async def __rpc_details(
+        self, stream: "grpclib.server.Stream[ApiDetailsRequest, ApiDetailsResponse]"
+    ) -> None:
+        request = await stream.recv_message()
+        response = await self.details(request)
+        await stream.send_message(response)
+
     def __mapping__(self) -> Dict[str, grpclib.const.Handler]:
         return {
             "/nitric.proto.apis.v1.Api/Serve": grpclib.const.Handler(
@@ -187,5 +226,11 @@ class ApiBase(ServiceBase):
                 grpclib.const.Cardinality.STREAM_STREAM,
                 ClientMessage,
                 ServerMessage,
+            ),
+            "/nitric.proto.apis.v1.Api/Details": grpclib.const.Handler(
+                self.__rpc_details,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                ApiDetailsRequest,
+                ApiDetailsResponse,
             ),
         }

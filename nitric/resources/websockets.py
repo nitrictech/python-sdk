@@ -18,14 +18,14 @@
 #
 from __future__ import annotations
 from typing import Literal, Callable
-from nitric.faas import (
+from nitric.context import (
     FunctionServer,
     WebsocketHandler,
 )
 from nitric.api.websocket import Websocket as WebsocketClient
 from nitric.application import Nitric
 from nitric.resources.resource import Resource as BaseResource
-from nitric.proto.resources.v1 import Resource, Action, ResourceType, ResourceDeclareRequest, PolicyResource
+from nitric.proto.resources.v1 import ResourceIdentifier, Action, ResourceType, ResourceDeclareRequest, PolicyResource
 from grpclib import GRPCError
 from nitric.exception import exception_from_grpc_error
 from nitric.proto.websockets.v1 import WebsocketEventType
@@ -51,8 +51,8 @@ class WebsocketWorkerOptions:
             raise ValueError(f"Event type {event_type} is unsupported")
 
 
-def _to_resource(b: Websocket) -> Resource:
-    return Resource(name=b.name, type=ResourceType.Websocket)
+def _to_resource(b: Websocket) -> ResourceIdentifier:
+    return ResourceIdentifier(name=b.name, type=ResourceType.Websocket)
 
 
 class Websocket(BaseResource):
@@ -72,17 +72,17 @@ class Websocket(BaseResource):
     async def _register(self) -> None:
         try:
             resource = _to_resource(self)
-            default_principle = Resource(type=ResourceType.Function)
+            default_principle = ResourceIdentifier(type=ResourceType.Service)
 
             await self._resources_stub.declare(
                 resource_declare_request=ResourceDeclareRequest(
-                    resource=resource,
+                    id=resource,
                 )
             )
 
             await self._resources_stub.declare(
                 resource_declare_request=ResourceDeclareRequest(
-                    resource=Resource(type=ResourceType.Policy),
+                    id=ResourceIdentifier(type=ResourceType.Policy),
                     policy=PolicyResource(
                         actions=[Action.WebsocketManage], principals=[default_principle], resources=[resource]
                     ),

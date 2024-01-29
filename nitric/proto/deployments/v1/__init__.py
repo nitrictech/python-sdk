@@ -26,8 +26,42 @@ if TYPE_CHECKING:
     from grpclib.metadata import Deadline
 
 
+class ResourceDeploymentAction(betterproto.Enum):
+    CREATE = 0
+    """A new resource is being created"""
+
+    UPDATE = 1
+    """An existing resource is being updated"""
+
+    REPLACE = 2
+    """An existing resource is being replaced"""
+
+    SAME = 3
+    """No-op on the resource (it already exists and requires no changes)"""
+
+    DELETE = 4
+    """An existing resource is being deleted"""
+
+
+class ResourceDeploymentStatus(betterproto.Enum):
+    PENDING = 0
+    """The action hasn't started, usually due to a dependency"""
+
+    IN_PROGRESS = 1
+    """
+    The action in currently in-flight, e.g. waiting for cloud provder to
+    provision a resource
+    """
+
+    SUCCESS = 2
+    """The action has been applied successfully"""
+
+    FAILED = 3
+    """The action has failed to be (completely) applied"""
+
+
 @dataclass(eq=False, repr=False)
-class DeployUpRequest(betterproto.Message):
+class DeploymentUpRequest(betterproto.Message):
     spec: "Spec" = betterproto.message_field(1)
     """The spec to deploy"""
 
@@ -46,40 +80,51 @@ class DeployUpRequest(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
-class DeployUpEvent(betterproto.Message):
-    message: "DeployEventMessage" = betterproto.message_field(1, group="content")
-    result: "DeployUpEventResult" = betterproto.message_field(2, group="content")
+class DeploymentUpEvent(betterproto.Message):
+    message: str = betterproto.string_field(1, group="content")
+    update: "ResourceUpdate" = betterproto.message_field(2, group="content")
+    result: "UpResult" = betterproto.message_field(3, group="content")
 
 
 @dataclass(eq=False, repr=False)
-class DeployEventMessage(betterproto.Message):
-    """Messages to provide status updates on the deployment"""
+class ResourceUpdate(betterproto.Message):
+    id: "__resources_v1__.ResourceIdentifier" = betterproto.message_field(1)
+    """
+    The resource being updated, if this is nil the update applies to the stack
+    """
 
-    message: str = betterproto.string_field(1)
+    action: "ResourceDeploymentAction" = betterproto.enum_field(3)
+    """The type of update being applied"""
+
+    status: "ResourceDeploymentStatus" = betterproto.enum_field(4)
+    """The current status of the action being applied"""
+
+    sub_resource: str = betterproto.string_field(5)
+    """
+    (optional) A globally unique identifier (scoped to the id above), used when
+    Nitric Resources map 1:many in a cloud provider. e.g. the container image
+    repository for a service deployment. This can also be set when id is nil
+    above and it will imply a non-nitric resource that is necessary to deploy
+    for a stack to operate  e.g. an Azure StorageAccount
+    """
+
+    message: str = betterproto.string_field(6)
+    """Additional information about the update"""
 
 
 @dataclass(eq=False, repr=False)
 class UpResult(betterproto.Message):
-    string_result: str = betterproto.string_field(1, group="content")
-    """Simple formatted string output as result"""
-
-
-@dataclass(eq=False, repr=False)
-class DeployUpEventResult(betterproto.Message):
     """Terminal message indicating deployment success"""
 
     success: bool = betterproto.bool_field(1)
     """Indicate the success status"""
 
-    result: "UpResult" = betterproto.message_field(2)
-    """
-    Output state as a struct, this can be provided as an output file or pretty
-    printed for CLI output
-    """
+    details: str = betterproto.string_field(2)
+    """Simple formatted string output as result"""
 
 
 @dataclass(eq=False, repr=False)
-class DeployDownRequest(betterproto.Message):
+class DeploymentDownRequest(betterproto.Message):
     attributes: "betterproto_lib_google_protobuf.Struct" = betterproto.message_field(1)
     """
     A map of attributes related to the deploy request this allows for adding
@@ -95,13 +140,14 @@ class DeployDownRequest(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
-class DeployDownEvent(betterproto.Message):
-    message: "DeployEventMessage" = betterproto.message_field(1, group="content")
-    result: "DeployDownEventResult" = betterproto.message_field(2, group="content")
+class DeploymentDownEvent(betterproto.Message):
+    message: str = betterproto.string_field(1, group="content")
+    result: "DownResult" = betterproto.message_field(2, group="content")
+    update: "ResourceUpdate" = betterproto.message_field(3, group="content")
 
 
 @dataclass(eq=False, repr=False)
-class DeployDownEventResult(betterproto.Message):
+class DownResult(betterproto.Message):
     """Terminal message indicating deployment success"""
 
     pass
@@ -109,7 +155,7 @@ class DeployDownEventResult(betterproto.Message):
 
 @dataclass(eq=False, repr=False)
 class ImageSource(betterproto.Message):
-    """An image source to be used for execution unit deployment"""
+    """An image source to be used for service deployment"""
 
     uri: str = betterproto.string_field(1)
     """
@@ -119,14 +165,14 @@ class ImageSource(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
-class ExecutionUnit(betterproto.Message):
-    """A unit of execution (i.e. function/container)"""
+class Service(betterproto.Message):
+    """A unit of service (i.e. function/container)"""
 
     image: "ImageSource" = betterproto.message_field(1, group="source")
-    """Container image as a execution unit"""
+    """Container image as a service"""
 
     workers: int = betterproto.int32_field(10)
-    """Expected worker count for this execution unit"""
+    """Expected worker count for this service"""
 
     timeout: int = betterproto.int32_field(11)
     """Configurable timeout for request handling"""
@@ -136,34 +182,34 @@ class ExecutionUnit(betterproto.Message):
 
     type: str = betterproto.string_field(13)
     """
-    A simple type property describes the requested type of execution unit that
-    this should be for this project, a provider can implement how this request
-    is satisfied in any way
+    A simple type property describes the requested type of service that this
+    should be for this project, a provider can implement how this request is
+    satisfied in any way
     """
 
     env: Dict[str, str] = betterproto.map_field(
         14, betterproto.TYPE_STRING, betterproto.TYPE_STRING
     )
-    """Environment variables for this execution unit"""
+    """Environment variables for this service"""
 
     def __post_init__(self) -> None:
         super().__post_init__()
         if self.is_set("timeout"):
-            warnings.warn("ExecutionUnit.timeout is deprecated", DeprecationWarning)
+            warnings.warn("Service.timeout is deprecated", DeprecationWarning)
         if self.is_set("memory"):
-            warnings.warn("ExecutionUnit.memory is deprecated", DeprecationWarning)
+            warnings.warn("Service.memory is deprecated", DeprecationWarning)
 
 
 @dataclass(eq=False, repr=False)
 class Bucket(betterproto.Message):
-    notifications: List["BucketNotificationTarget"] = betterproto.message_field(1)
+    listeners: List["BucketListener"] = betterproto.message_field(1)
 
 
 @dataclass(eq=False, repr=False)
-class BucketNotificationTarget(betterproto.Message):
+class BucketListener(betterproto.Message):
     config: "__storage_v1__.RegistrationRequest" = betterproto.message_field(1)
-    execution_unit: str = betterproto.string_field(2, group="target")
-    """The name of an execution unit to target"""
+    service: str = betterproto.string_field(2, group="target")
+    """The name of an service to target"""
 
 
 @dataclass(eq=False, repr=False)
@@ -172,7 +218,7 @@ class Topic(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
-class Collection(betterproto.Message):
+class KeyValueStore(betterproto.Message):
     pass
 
 
@@ -183,8 +229,8 @@ class Secret(betterproto.Message):
 
 @dataclass(eq=False, repr=False)
 class SubscriptionTarget(betterproto.Message):
-    execution_unit: str = betterproto.string_field(1, group="target")
-    """The name of an execution unit to target"""
+    service: str = betterproto.string_field(1, group="target")
+    """The name of an service to target"""
 
 
 @dataclass(eq=False, repr=False)
@@ -194,8 +240,8 @@ class TopicSubscription(betterproto.Message):
 
 @dataclass(eq=False, repr=False)
 class HttpTarget(betterproto.Message):
-    execution_unit: str = betterproto.string_field(1, group="target")
-    """The name of an execution unit to target"""
+    service: str = betterproto.string_field(1, group="target")
+    """The name of an service to target"""
 
 
 @dataclass(eq=False, repr=False)
@@ -210,8 +256,7 @@ class Api(betterproto.Message):
     openapi: str = betterproto.string_field(1, group="document")
     """
     An OpenAPI document for deployment This document will contain extensions
-    that hint of execution units that should be targeted as part of the
-    deployment
+    that hint of services that should be targeted as part of the deployment
     """
 
 
@@ -231,33 +276,48 @@ class Websocket(betterproto.Message):
 
 @dataclass(eq=False, repr=False)
 class WebsocketTarget(betterproto.Message):
-    execution_unit: str = betterproto.string_field(1, group="target")
-    """The name of an execution unit to target"""
+    service: str = betterproto.string_field(1, group="target")
+    """The name of an service to target"""
 
 
 @dataclass(eq=False, repr=False)
 class ScheduleTarget(betterproto.Message):
-    execution_unit: str = betterproto.string_field(1, group="target")
-    """The name of an execution unit to target"""
+    service: str = betterproto.string_field(1, group="target")
+    """The name of an service to target"""
 
 
 @dataclass(eq=False, repr=False)
 class Schedule(betterproto.Message):
-    cron: str = betterproto.string_field(1)
-    target: "ScheduleTarget" = betterproto.message_field(2)
+    target: "ScheduleTarget" = betterproto.message_field(1)
+    every: "ScheduleEvery" = betterproto.message_field(10, group="cadence")
+    cron: "ScheduleCron" = betterproto.message_field(11, group="cadence")
+
+
+@dataclass(eq=False, repr=False)
+class ScheduleEvery(betterproto.Message):
+    rate: str = betterproto.string_field(1)
+    """
+    rate string e.g. '5 minutes'. Value frequencies are 'minutes', 'hours',
+    'days'.
+    """
+
+
+@dataclass(eq=False, repr=False)
+class ScheduleCron(betterproto.Message):
+    expression: str = betterproto.string_field(1)
+    """standard unix cron expression"""
 
 
 @dataclass(eq=False, repr=False)
 class Resource(betterproto.Message):
-    name: str = betterproto.string_field(1)
-    type: "__resources_v1__.ResourceType" = betterproto.enum_field(2)
-    execution_unit: "ExecutionUnit" = betterproto.message_field(10, group="config")
+    id: "__resources_v1__.ResourceIdentifier" = betterproto.message_field(1)
+    service: "Service" = betterproto.message_field(10, group="config")
     bucket: "Bucket" = betterproto.message_field(11, group="config")
     topic: "Topic" = betterproto.message_field(12, group="config")
     api: "Api" = betterproto.message_field(13, group="config")
     policy: "Policy" = betterproto.message_field(14, group="config")
     schedule: "Schedule" = betterproto.message_field(15, group="config")
-    collection: "Collection" = betterproto.message_field(16, group="config")
+    key_value_store: "KeyValueStore" = betterproto.message_field(16, group="config")
     secret: "Secret" = betterproto.message_field(17, group="config")
     websocket: "Websocket" = betterproto.message_field(18, group="config")
     http: "Http" = betterproto.message_field(19, group="config")
@@ -287,19 +347,19 @@ class Spec(betterproto.Message):
     """list of resources to deploy"""
 
 
-class DeployStub(betterproto.ServiceStub):
+class DeploymentStub(betterproto.ServiceStub):
     async def up(
         self,
-        deploy_up_request: "DeployUpRequest",
+        deployment_up_request: "DeploymentUpRequest",
         *,
         timeout: Optional[float] = None,
         deadline: Optional["Deadline"] = None,
         metadata: Optional["MetadataLike"] = None
-    ) -> AsyncIterator["DeployUpEvent"]:
+    ) -> AsyncIterator["DeploymentUpEvent"]:
         async for response in self._unary_stream(
-            "/nitric.proto.deployments.v1.Deploy/Up",
-            deploy_up_request,
-            DeployUpEvent,
+            "/nitric.proto.deployments.v1.Deployment/Up",
+            deployment_up_request,
+            DeploymentUpEvent,
             timeout=timeout,
             deadline=deadline,
             metadata=metadata,
@@ -308,16 +368,16 @@ class DeployStub(betterproto.ServiceStub):
 
     async def down(
         self,
-        deploy_down_request: "DeployDownRequest",
+        deployment_down_request: "DeploymentDownRequest",
         *,
         timeout: Optional[float] = None,
         deadline: Optional["Deadline"] = None,
         metadata: Optional["MetadataLike"] = None
-    ) -> AsyncIterator["DeployDownEvent"]:
+    ) -> AsyncIterator["DeploymentDownEvent"]:
         async for response in self._unary_stream(
-            "/nitric.proto.deployments.v1.Deploy/Down",
-            deploy_down_request,
-            DeployDownEvent,
+            "/nitric.proto.deployments.v1.Deployment/Down",
+            deployment_down_request,
+            DeploymentDownEvent,
             timeout=timeout,
             deadline=deadline,
             metadata=metadata,
@@ -325,19 +385,19 @@ class DeployStub(betterproto.ServiceStub):
             yield response
 
 
-class DeployBase(ServiceBase):
+class DeploymentBase(ServiceBase):
     async def up(
-        self, deploy_up_request: "DeployUpRequest"
-    ) -> AsyncIterator["DeployUpEvent"]:
+        self, deployment_up_request: "DeploymentUpRequest"
+    ) -> AsyncIterator["DeploymentUpEvent"]:
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def down(
-        self, deploy_down_request: "DeployDownRequest"
-    ) -> AsyncIterator["DeployDownEvent"]:
+        self, deployment_down_request: "DeploymentDownRequest"
+    ) -> AsyncIterator["DeploymentDownEvent"]:
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def __rpc_up(
-        self, stream: "grpclib.server.Stream[DeployUpRequest, DeployUpEvent]"
+        self, stream: "grpclib.server.Stream[DeploymentUpRequest, DeploymentUpEvent]"
     ) -> None:
         request = await stream.recv_message()
         await self._call_rpc_handler_server_stream(
@@ -347,7 +407,8 @@ class DeployBase(ServiceBase):
         )
 
     async def __rpc_down(
-        self, stream: "grpclib.server.Stream[DeployDownRequest, DeployDownEvent]"
+        self,
+        stream: "grpclib.server.Stream[DeploymentDownRequest, DeploymentDownEvent]",
     ) -> None:
         request = await stream.recv_message()
         await self._call_rpc_handler_server_stream(
@@ -358,16 +419,16 @@ class DeployBase(ServiceBase):
 
     def __mapping__(self) -> Dict[str, grpclib.const.Handler]:
         return {
-            "/nitric.proto.deployments.v1.Deploy/Up": grpclib.const.Handler(
+            "/nitric.proto.deployments.v1.Deployment/Up": grpclib.const.Handler(
                 self.__rpc_up,
                 grpclib.const.Cardinality.UNARY_STREAM,
-                DeployUpRequest,
-                DeployUpEvent,
+                DeploymentUpRequest,
+                DeploymentUpEvent,
             ),
-            "/nitric.proto.deployments.v1.Deploy/Down": grpclib.const.Handler(
+            "/nitric.proto.deployments.v1.Deployment/Down": grpclib.const.Handler(
                 self.__rpc_down,
                 grpclib.const.Cardinality.UNARY_STREAM,
-                DeployDownRequest,
-                DeployDownEvent,
+                DeploymentDownRequest,
+                DeploymentDownEvent,
             ),
         }

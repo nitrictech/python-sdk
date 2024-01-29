@@ -25,7 +25,7 @@ from grpclib import GRPCError
 from nitric.application import Nitric
 from nitric.api.secrets import Secrets, SecretContainerRef
 from nitric.proto.resources.v1 import (
-    Resource,
+    ResourceIdentifier,
     ResourceType,
     Action,
     ResourceDeclareRequest,
@@ -47,14 +47,12 @@ class Secret(SecureResource):
         super().__init__()
         self.name = name
 
-    def _to_resource(self) -> Resource:
-        return Resource(name=self.name, type=ResourceType.Secret)  # type:ignore
+    def _to_resource(self) -> ResourceIdentifier:
+        return ResourceIdentifier(name=self.name, type=ResourceType.Secret)  # type:ignore
 
     async def _register(self):
         try:
-            await self._resources_stub.declare(
-                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
-            )
+            await self._resources_stub.declare(resource_declare_request=ResourceDeclareRequest(id=self._to_resource()))
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 

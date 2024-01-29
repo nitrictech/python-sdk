@@ -36,6 +36,16 @@ class WebsocketEventType(betterproto.Enum):
 
 
 @dataclass(eq=False, repr=False)
+class WebsocketDetailsRequest(betterproto.Message):
+    socket_name: str = betterproto.string_field(1)
+
+
+@dataclass(eq=False, repr=False)
+class WebsocketDetailsResponse(betterproto.Message):
+    url: str = betterproto.string_field(1)
+
+
+@dataclass(eq=False, repr=False)
 class WebsocketSendRequest(betterproto.Message):
     socket_name: str = betterproto.string_field(1)
     """The nitric name of the socket to send on"""
@@ -213,6 +223,23 @@ class WebsocketStub(betterproto.ServiceStub):
             metadata=metadata,
         )
 
+    async def details(
+        self,
+        websocket_details_request: "WebsocketDetailsRequest",
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional["Deadline"] = None,
+        metadata: Optional["MetadataLike"] = None
+    ) -> "WebsocketDetailsResponse":
+        return await self._unary_unary(
+            "/nitric.proto.websockets.v1.Websocket/Details",
+            websocket_details_request,
+            WebsocketDetailsResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
+
 
 class WebsocketHandlerStub(betterproto.ServiceStub):
     async def handle_events(
@@ -248,6 +275,11 @@ class WebsocketBase(ServiceBase):
     ) -> "WebsocketCloseResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
+    async def details(
+        self, websocket_details_request: "WebsocketDetailsRequest"
+    ) -> "WebsocketDetailsResponse":
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
     async def __rpc_send(
         self,
         stream: "grpclib.server.Stream[WebsocketSendRequest, WebsocketSendResponse]",
@@ -264,6 +296,14 @@ class WebsocketBase(ServiceBase):
         response = await self.close(request)
         await stream.send_message(response)
 
+    async def __rpc_details(
+        self,
+        stream: "grpclib.server.Stream[WebsocketDetailsRequest, WebsocketDetailsResponse]",
+    ) -> None:
+        request = await stream.recv_message()
+        response = await self.details(request)
+        await stream.send_message(response)
+
     def __mapping__(self) -> Dict[str, grpclib.const.Handler]:
         return {
             "/nitric.proto.websockets.v1.Websocket/Send": grpclib.const.Handler(
@@ -277,6 +317,12 @@ class WebsocketBase(ServiceBase):
                 grpclib.const.Cardinality.UNARY_UNARY,
                 WebsocketCloseRequest,
                 WebsocketCloseResponse,
+            ),
+            "/nitric.proto.websockets.v1.Websocket/Details": grpclib.const.Handler(
+                self.__rpc_details,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                WebsocketDetailsRequest,
+                WebsocketDetailsResponse,
             ),
         }
 

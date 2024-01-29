@@ -18,13 +18,14 @@
 #
 from __future__ import annotations
 
-from nitric.api.documents import CollectionRef, Documents
+from nitric.api.kv import KVStore
 from nitric.exception import exception_from_grpc_error
 from typing import List, Literal
 from grpclib import GRPCError
 from nitric.application import Nitric
 from nitric.proto.resources.v1 import (
-    Resource,
+    KeyValueStoreResource,
+    ResourceIdentifier,
     ResourceType,
     Action,
     ResourceDeclareRequest,
@@ -32,55 +33,53 @@ from nitric.proto.resources.v1 import (
 from nitric.resources.resource import SecureResource
 
 
-CollectionPermission = Literal["reading", "writing", "deleting"]
+KVPermission = Literal["getting", "setting", "deleting"]
 
 
-class Collection(SecureResource):
-    """A document collection resource."""
+class KVStoreResource(SecureResource):
+    """A key value store resource."""
 
     def __init__(self, name: str):
-        """Construct a new document collection."""
+        """Construct a new key value store."""
         super().__init__()
         self.name = name
 
     async def _register(self) -> None:
         try:
             await self._resources_stub.declare(
-                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
+                resource_declare_request=ResourceDeclareRequest(
+                    id=self._to_resource(), key_value_store=KeyValueStoreResource()
+                )
             )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    def _to_resource(self) -> Resource:
-        return Resource(name=self.name, type=ResourceType.Collection)  # type:ignore
+    def _to_resource(self) -> ResourceIdentifier:
+        return ResourceIdentifier(name=self.name, type=ResourceType.KeyValueStore)
 
-    def _perms_to_actions(self, *args: CollectionPermission) -> List[int]:
-        permission_actions_map: dict[CollectionPermission, List[int]] = {
-            "reading": [
-                Action.CollectionDocumentRead,
-                Action.CollectionQuery,
-                Action.CollectionList,
-            ],
-            "writing": [Action.CollectionDocumentWrite, Action.CollectionList],
-            "deleting": [Action.CollectionDocumentDelete, Action.CollectionList],
+    def _perms_to_actions(self, *args: KVPermission) -> List[int]:
+        permission_actions_map: dict[KVPermission, List[int]] = {
+            "getting": [Action.KeyValueStoreRead],
+            "setting": [Action.KeyValueStoreWrite],
+            "deleting": [Action.KeyValueStoreDelete],
         }
 
         return [action for perm in args for action in permission_actions_map[perm]]
 
-    def allow(self, perm: CollectionPermission, *args: CollectionPermission) -> CollectionRef:
+    def allow(self, perm: KVPermission, *args: KVPermission) -> KVStore:
         """Request the required permissions for this collection."""
         # Ensure registration of the resource is complete before requesting permissions.
         str_args = [str(perm)] + [str(permission) for permission in args]
         self._register_policy(*str_args)
 
-        return Documents().collection(self.name)
+        return KVStore(self.name)
 
 
-def collection(name: str) -> Collection:
+def kv(name: str) -> KVStoreResource:
     """
-    Create and register a collection.
+    Create and register a key value store.
 
-    If a collection has already been registered with the same name, the original reference will be reused.
+    If a key value store has already been registered with the same name, the original reference will be reused.
     """
     # type ignored because the register call is treated as protected.
-    return Nitric._create_resource(Collection, name)  # type: ignore
+    return Nitric._create_resource(KVStore, name)  # type: ignore

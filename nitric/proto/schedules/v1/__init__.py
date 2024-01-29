@@ -2,7 +2,6 @@
 # sources: proto/schedules/v1/schedules.proto
 # plugin: python-betterproto
 from dataclasses import dataclass
-from datetime import timedelta
 from typing import (
     TYPE_CHECKING,
     AsyncIterable,
@@ -67,13 +66,13 @@ class ServerMessage(betterproto.Message):
 @dataclass(eq=False, repr=False)
 class RegistrationRequest(betterproto.Message):
     schedule_name: str = betterproto.string_field(1)
-    rate: "ScheduleRate" = betterproto.message_field(10, group="cadence")
+    every: "ScheduleEvery" = betterproto.message_field(10, group="cadence")
     cron: "ScheduleCron" = betterproto.message_field(11, group="cadence")
 
 
 @dataclass(eq=False, repr=False)
-class ScheduleRate(betterproto.Message):
-    interval: timedelta = betterproto.message_field(1)
+class ScheduleEvery(betterproto.Message):
+    rate: str = betterproto.string_field(1)
 
 
 @dataclass(eq=False, repr=False)

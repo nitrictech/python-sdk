@@ -19,7 +19,7 @@
 """Nitric API SDK."""
 from nitric.api.events import Events, Event, TopicRef
 from nitric.api.storage import Storage
-from nitric.api.documents import Documents
+from nitric.api.kv import Documents
 from nitric.api.secrets import Secrets
 from nitric.api.websocket import Websocket
 

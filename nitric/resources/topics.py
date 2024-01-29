@@ -24,9 +24,9 @@ from typing import List, Callable, Literal
 from dataclasses import dataclass
 from grpclib import GRPCError
 from nitric.application import Nitric
-from nitric.faas import FunctionServer, EventHandler
+from nitric.context import FunctionServer, EventHandler
 from nitric.proto.resources.v1 import (
-    Resource,
+    ResourceIdentifier,
     ResourceType,
     Action,
     ResourceDeclareRequest,
@@ -61,14 +61,12 @@ class Topic(SecureResource):
 
     async def _register(self) -> None:
         try:
-            await self._resources_stub.declare(
-                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
-            )
+            await self._resources_stub.declare(resource_declare_request=ResourceDeclareRequest(id=self._to_resource()))
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    def _to_resource(self) -> Resource:
-        return Resource(name=self.name, type=ResourceType.Topic)  # type:ignore
+    def _to_resource(self) -> ResourceIdentifier:
+        return ResourceIdentifier(name=self.name, type=ResourceType.Topic)  # type:ignore
 
     def _perms_to_actions(self, *args: TopicPermission) -> List[int]:
         _permMap: dict[TopicPermission, List[int]] = {"publishing": [Action.TopicEventPublish]}

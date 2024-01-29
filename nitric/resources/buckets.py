@@ -24,9 +24,9 @@ from typing import List, Callable, Literal
 from grpclib import GRPCError
 
 from nitric.application import Nitric
-from nitric.faas import FunctionServer, BucketNotificationHandler
+from nitric.context import FunctionServer, BucketNotificationHandler
 from nitric.proto.resources.v1 import (
-    Resource,
+    ResourceIdentifier,
     ResourceType,
     Action,
     ResourceDeclareRequest,
@@ -86,7 +86,7 @@ class Bucket(SecureResource):
 
         return [action for perm in args for action in permission_actions_map[perm]]
 
-    def _to_resource(self) -> Resource:
+    def _to_resource(self) -> ResourceIdentifier:
         return Resource(name=self.name, type=ResourceType.Bucket)  # type:ignore
 
     def allow(self, perm: BucketPermission, *args: BucketPermission) -> BucketRef:

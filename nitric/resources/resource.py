@@ -27,7 +27,6 @@ from typing import Any, Sequence, TypeVar, Type, Optional, List
 from grpclib import GRPCError
 from nitric.proto.resources.v1 import (
     PolicyResource,
-    Resource as WireResource,
     ResourceType,
     ResourceDeclareRequest,
     ResourcesStub,

@@ -23,17 +23,18 @@ from enum import Enum
 from typing import Callable, List
 
 import betterproto
-import grpclib.client
+import grpclib.exceptions
+
 from nitric.application import Nitric
-from nitric.faas import IntervalHandler, IntervalContext
 from nitric.proto.schedules.v1 import (
-    ScheduleRate,
+    ScheduleCron,
+    ScheduleEvery,
     SchedulesStub,
     ClientMessage,
     RegistrationRequest,
 )
 from nitric.utils import new_default_channel
-from nitric.faas import FunctionServer
+from nitric.context import FunctionServer, IntervalHandler, IntervalContext
 
 
 class Schedule(FunctionServer):
@@ -55,21 +56,32 @@ class Schedule(FunctionServer):
 
         E.g. every("3 hours")
         """
-        rate_description = rate_description.lower()
-
-        rate, raw_freq = rate_description.split(" ")
-        freq = Frequency.from_str(raw_freq)
-
-        minutes = freq.as_time(int(rate))
-
         self.registration_request = RegistrationRequest(
             schedule_name=self.description,
-            rate=ScheduleRate(minutes),
+            every=ScheduleEvery(rate=rate_description.lower()),
         )
 
         self.handler = handler
 
         Nitric._register_worker(self)
+
+    def cron(self, cron_expression: str, handler: IntervalHandler) -> None:
+        """
+        Register middleware to be run at the specified cron schedule.
+
+        E.g. cron("3 * * * *")
+        """
+        self.registration_request = RegistrationRequest(
+            schedule_name=self.description,
+            cron=ScheduleCron(expression=cron_expression),
+        )
+
+        self.handler = handler
+
+        Nitric._register_worker(self)
+
+    async def _schedule_request_iterator(self):
+        yield ClientMessage(registration_request=self.registration_request)
 
     async def start(self) -> None:
         """Register this schedule and start listening for requests."""
@@ -77,18 +89,16 @@ class Schedule(FunctionServer):
         server = SchedulesStub(channel=channel)
 
         try:
-            async for server_message in server.schedule(
-                [ClientMessage(registration_request=self.registration_request)]
-            ):
-                msg_type = betterproto.which_one_of(server_message, "content")
+            async for response in server.schedule(self._schedule_request_iterator()):
+                msg_type = betterproto.which_one_of(response, "content")
 
                 if msg_type == "registration_response":
                     print("Schedule connected with membrane")
                     continue
                 if msg_type == "interval_request":
-                    ctx = IntervalContext.from_request(server_message)
-                    await self.handler(ctx)
-                    await self.server.schedule([ctx.to_response()])
+                    ctx = IntervalContext.from_request(response)
+                    ctx = await self.handler(ctx)
+                    return await ctx.to_response()
         except grpclib.exceptions.GRPCError as e:
             print(f"Stream terminated: {e.message}")
         except grpclib.exceptions.StreamTerminatedError:
@@ -130,12 +140,42 @@ class Frequency(Enum):
             raise ValueError(f"{self} is not a valid frequency")
 
 
-def schedule(description: str, every: str) -> Callable[[IntervalHandler], Schedule]:
-    """Return a schedule decorator."""
+class ScheduleResource:
+    """A raw schedule to be assigned a rate or cron interval."""
 
-    def decorator(func: IntervalHandler) -> Schedule:
-        r = Schedule(description)
-        r.every(every, func)
-        return r
+    def __init__(self, description: str):
+        """Create a new schedule resource."""
+        self.description = description
 
-    return decorator
+    def every(self, every: str) -> Callable[[IntervalHandler], Schedule]:
+        """
+        Set the schedule interval.
+
+        e.g. every('3 days').
+        """
+
+        def decorator(func: IntervalHandler) -> Schedule:
+            r = Schedule(self.description)
+            r.every(every, func)
+            return r
+
+        return decorator
+
+    def cron(self, cron: str) -> Callable[[IntervalHandler], Schedule]:
+        """
+        Set the schedule interval.
+
+        e.g. cron('3 * * * *').
+        """
+
+        def decorator(func: IntervalHandler) -> Schedule:
+            r = Schedule(self.description)
+            r.cron(cron, func)
+            return r
+
+        return decorator
+
+
+def schedule(description: str) -> ScheduleResource:
+    """Return a schedule."""
+    return ScheduleResource(description=description)

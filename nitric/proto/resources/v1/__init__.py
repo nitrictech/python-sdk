@@ -22,15 +22,15 @@ if TYPE_CHECKING:
 
 class ResourceType(betterproto.Enum):
     Api = 0
-    Function = 1
+    Service = 1
     Bucket = 2
     Topic = 3
     Schedule = 4
     Subscription = 5
-    Collection = 6
+    KeyValueStore = 6
     Policy = 7
     Secret = 8
-    Notification = 9
+    BucketListener = 9
     Websocket = 10
     Http = 11
     ApiSecurityDefinition = 12
@@ -48,13 +48,11 @@ class Action(betterproto.Enum):
 
     TopicDetail = 201
     TopicEventPublish = 202
-    CollectionDocumentRead = 300
+    KeyValueStoreRead = 300
     """Collection Permissions: 3XX"""
 
-    CollectionDocumentWrite = 301
-    CollectionDocumentDelete = 302
-    CollectionQuery = 303
-    CollectionList = 304
+    KeyValueStoreWrite = 301
+    KeyValueStoreDelete = 302
     SecretPut = 400
     """Secret Permissions: 5XX"""
 
@@ -65,24 +63,28 @@ class Action(betterproto.Enum):
 
 @dataclass(eq=False, repr=False)
 class PolicyResource(betterproto.Message):
-    principals: List["Resource"] = betterproto.message_field(1)
+    principals: List["ResourceIdentifier"] = betterproto.message_field(1)
     actions: List["Action"] = betterproto.enum_field(2)
-    resources: List["Resource"] = betterproto.message_field(3)
+    resources: List["ResourceIdentifier"] = betterproto.message_field(3)
 
 
 @dataclass(eq=False, repr=False)
-class Resource(betterproto.Message):
+class ResourceIdentifier(betterproto.Message):
+    """Unique identifier for a resource within a nitric application."""
+
     type: "ResourceType" = betterproto.enum_field(1)
     name: str = betterproto.string_field(2)
 
 
 @dataclass(eq=False, repr=False)
 class ResourceDeclareRequest(betterproto.Message):
-    resource: "Resource" = betterproto.message_field(1)
+    id: "ResourceIdentifier" = betterproto.message_field(1)
     policy: "PolicyResource" = betterproto.message_field(10, group="config")
     bucket: "BucketResource" = betterproto.message_field(11, group="config")
     topic: "TopicResource" = betterproto.message_field(12, group="config")
-    collection: "CollectionResource" = betterproto.message_field(13, group="config")
+    key_value_store: "KeyValueStoreResource" = betterproto.message_field(
+        13, group="config"
+    )
     secret: "SecretResource" = betterproto.message_field(14, group="config")
     api: "ApiResource" = betterproto.message_field(15, group="config")
     api_security_definition: "ApiSecurityDefinitionResource" = (
@@ -101,7 +103,7 @@ class TopicResource(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
-class CollectionResource(betterproto.Message):
+class KeyValueStoreResource(betterproto.Message):
     pass
 
 
@@ -118,8 +120,9 @@ class ApiOpenIdConnectionDefinition(betterproto.Message):
 
 @dataclass(eq=False, repr=False)
 class ApiSecurityDefinitionResource(betterproto.Message):
+    api_name: str = betterproto.string_field(1)
     oidc: "ApiOpenIdConnectionDefinition" = betterproto.message_field(
-        1, group="definition"
+        2, group="definition"
     )
 
 
@@ -144,38 +147,6 @@ class ResourceDeclareResponse(betterproto.Message):
     pass
 
 
-@dataclass(eq=False, repr=False)
-class ApiResourceDetails(betterproto.Message):
-    url: str = betterproto.string_field(1)
-
-
-@dataclass(eq=False, repr=False)
-class WebsocketResourceDetails(betterproto.Message):
-    url: str = betterproto.string_field(1)
-
-
-@dataclass(eq=False, repr=False)
-class ResourceDetailsRequest(betterproto.Message):
-    resource: "Resource" = betterproto.message_field(1)
-
-
-@dataclass(eq=False, repr=False)
-class ResourceDetailsResponse(betterproto.Message):
-    id: str = betterproto.string_field(1)
-    """The identifier of the resource"""
-
-    provider: str = betterproto.string_field(2)
-    """The provider this resource is deployed with (e.g. aws)"""
-
-    service: str = betterproto.string_field(3)
-    """The service this resource is deployed on (e.g. ApiGateway)"""
-
-    api: "ApiResourceDetails" = betterproto.message_field(10, group="details")
-    websocket: "WebsocketResourceDetails" = betterproto.message_field(
-        11, group="details"
-    )
-
-
 class ResourcesStub(betterproto.ServiceStub):
     async def declare(
         self,
@@ -194,33 +165,11 @@ class ResourcesStub(betterproto.ServiceStub):
             metadata=metadata,
         )
 
-    async def details(
-        self,
-        resource_details_request: "ResourceDetailsRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
-    ) -> "ResourceDetailsResponse":
-        return await self._unary_unary(
-            "/nitric.proto.resources.v1.Resources/Details",
-            resource_details_request,
-            ResourceDetailsResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
-        )
-
 
 class ResourcesBase(ServiceBase):
     async def declare(
         self, resource_declare_request: "ResourceDeclareRequest"
     ) -> "ResourceDeclareResponse":
-        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
-
-    async def details(
-        self, resource_details_request: "ResourceDetailsRequest"
-    ) -> "ResourceDetailsResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def __rpc_declare(
@@ -231,14 +180,6 @@ class ResourcesBase(ServiceBase):
         response = await self.declare(request)
         await stream.send_message(response)
 
-    async def __rpc_details(
-        self,
-        stream: "grpclib.server.Stream[ResourceDetailsRequest, ResourceDetailsResponse]",
-    ) -> None:
-        request = await stream.recv_message()
-        response = await self.details(request)
-        await stream.send_message(response)
-
     def __mapping__(self) -> Dict[str, grpclib.const.Handler]:
         return {
             "/nitric.proto.resources.v1.Resources/Declare": grpclib.const.Handler(
@@ -246,11 +187,5 @@ class ResourcesBase(ServiceBase):
                 grpclib.const.Cardinality.UNARY_UNARY,
                 ResourceDeclareRequest,
                 ResourceDeclareResponse,
-            ),
-            "/nitric.proto.resources.v1.Resources/Details": grpclib.const.Handler(
-                self.__rpc_details,
-                grpclib.const.Cardinality.UNARY_UNARY,
-                ResourceDetailsRequest,
-                ResourceDetailsResponse,
             ),
         }
