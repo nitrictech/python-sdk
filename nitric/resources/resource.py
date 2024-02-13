@@ -28,8 +28,10 @@ from grpclib import GRPCError
 from nitric.proto.resources.v1 import (
     PolicyResource,
     ResourceType,
+    ResourceIdentifier,
     ResourceDeclareRequest,
     ResourcesStub,
+    Action,
 )
 
 from nitric.exception import exception_from_grpc_error, NitricResourceException
@@ -43,7 +45,7 @@ class Resource(ABC):
 
     def __init__(self):
         """Construct a new resource."""
-        self._reg: Optional[Task[Any]] = None
+        self._reg: Optional[Task[Any]] = None  # type: ignore
         self._channel = new_default_channel()
         self._resources_stub = ResourcesStub(channel=self._channel)
 
@@ -73,11 +75,11 @@ class SecureResource(Resource):
     """A secure base resource class."""
 
     @abstractmethod
-    def _to_resource(self) -> WireResource:
+    def _to_resource(self) -> ResourceIdentifier:
         pass
 
     @abstractmethod
-    def _perms_to_actions(self, *args: Any) -> List[int]:
+    def _perms_to_actions(self, *args: Any) -> List[Action]:
         pass
 
     async def _register_policy_async(self, *args: str) -> None:
@@ -85,14 +87,14 @@ class SecureResource(Resource):
         #     await asyncio.wait({self._reg})
 
         policy = PolicyResource(
-            principals=[WireResource(type=ResourceType.Function)],
+            principals=[ResourceIdentifier(type=ResourceType.Service)],
             actions=self._perms_to_actions(*args),
             resources=[self._to_resource()],
         )
         try:
             await self._resources_stub.declare(
                 resource_declare_request=ResourceDeclareRequest(
-                    resource=WireResource(type=ResourceType.Policy), policy=policy
+                    id=ResourceIdentifier(type=ResourceType.Policy), policy=policy
                 )
             )
         except GRPCError as grpc_err:

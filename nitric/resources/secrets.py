@@ -56,8 +56,8 @@ class Secret(SecureResource):
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    def _perms_to_actions(self, *args: SecretPermission) -> List[int]:
-        permissions_actions_map: dict[SecretPermission, List[int]] = {
+    def _perms_to_actions(self, *args: SecretPermission) -> List[Action]:
+        permissions_actions_map: dict[SecretPermission, List[Action]] = {
             "accessing": [Action.SecretAccess],
             "putting": [Action.SecretPut],
         }

@@ -18,13 +18,17 @@
 #
 from __future__ import annotations
 
+import asyncio
+import logging
 from datetime import timedelta
 from enum import Enum
-from typing import Callable, List
+from typing import Callable, List, Coroutine, Any
 
 import betterproto
 import grpclib.exceptions
+from betterproto.grpc.util.async_channel import AsyncChannel
 
+from nitric.bidi import AsyncNotifierList
 from nitric.application import Nitric
 from nitric.proto.schedules.v1 import (
     ScheduleCron,
@@ -45,14 +49,16 @@ class Schedule(FunctionServer):
     handler: IntervalHandler
     registration_request: RegistrationRequest
     server: SchedulesStub
+    _responses: AsyncNotifierList[ClientMessage]
 
     def __init__(self, description: str):
         """Create a schedule for running functions on a cadence."""
         self.description = description
+        self._responses = AsyncNotifierList()
 
     def every(self, rate_description: str, handler: IntervalHandler) -> None:
         """
-        Register middleware to be run at the specified rate.
+        Register a function to be run at the specified rate.
 
         E.g. every("3 hours")
         """
@@ -67,7 +73,7 @@ class Schedule(FunctionServer):
 
     def cron(self, cron_expression: str, handler: IntervalHandler) -> None:
         """
-        Register middleware to be run at the specified cron schedule.
+        Register a function to be run at the specified cron schedule.
 
         E.g. cron("3 * * * *")
         """
@@ -81,7 +87,11 @@ class Schedule(FunctionServer):
         Nitric._register_worker(self)
 
     async def _schedule_request_iterator(self):
+        # Register with the server
         yield ClientMessage(registration_request=self.registration_request)
+        # wait for any responses for the server and send them
+        async for response in self.responses:
+            yield response
 
     async def start(self) -> None:
         """Register this schedule and start listening for requests."""
@@ -89,16 +99,20 @@ class Schedule(FunctionServer):
         server = SchedulesStub(channel=channel)
 
         try:
-            async for response in server.schedule(self._schedule_request_iterator()):
-                msg_type = betterproto.which_one_of(response, "content")
+            async for server_msg in server.schedule(self._schedule_request_iterator()):
+                msg_type = betterproto.which_one_of(server_msg, "content")
 
                 if msg_type == "registration_response":
                     print("Schedule connected with membrane")
                     continue
                 if msg_type == "interval_request":
-                    ctx = IntervalContext.from_request(response)
-                    ctx = await self.handler(ctx)
-                    return await ctx.to_response()
+                    ctx = IntervalContext(server_msg)
+                    response: ClientMessage
+                    try:
+                        await self.handler(ctx)
+                    except Exception as e:
+                        logging.exception(f"An unhandled error occurred in a scheduled function: {e}")
+                    await self._responses.add_item(ClientMessage(id=server_msg.id))
         except grpclib.exceptions.GRPCError as e:
             print(f"Stream terminated: {e.message}")
         except grpclib.exceptions.StreamTerminatedError:

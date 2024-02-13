@@ -57,8 +57,8 @@ class KVStoreResource(SecureResource):
     def _to_resource(self) -> ResourceIdentifier:
         return ResourceIdentifier(name=self.name, type=ResourceType.KeyValueStore)
 
-    def _perms_to_actions(self, *args: KVPermission) -> List[int]:
-        permission_actions_map: dict[KVPermission, List[int]] = {
+    def _perms_to_actions(self, *args: KVPermission) -> List[Action]:
+        permission_actions_map: dict[KVPermission, List[Action]] = {
             "getting": [Action.KeyValueStoreRead],
             "setting": [Action.KeyValueStoreWrite],
             "deleting": [Action.KeyValueStoreDelete],

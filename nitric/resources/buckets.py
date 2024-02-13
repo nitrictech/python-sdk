@@ -18,22 +18,35 @@
 #
 from __future__ import annotations
 
+import logging
+
+import betterproto
+import grpclib
+
+from nitric.bidi import AsyncNotifierList
 from nitric.exception import exception_from_grpc_error
 from nitric.api.storage import BucketRef, Storage
 from typing import List, Callable, Literal
 from grpclib import GRPCError
 
 from nitric.application import Nitric
-from nitric.context import FunctionServer, BucketNotificationHandler
+from nitric.context import FunctionServer, BucketNotificationHandler, BucketNotificationContext, BucketNotifyRequest
 from nitric.proto.resources.v1 import (
     ResourceIdentifier,
     ResourceType,
     Action,
     ResourceDeclareRequest,
 )
-from nitric.proto.storage.v1 import BlobEventType
+from nitric.proto.storage.v1 import (
+    BlobEventType,
+    StorageListenerStub,
+    ClientMessage,
+    RegistrationRequest,
+    BlobEventResponse,
+)
 
 from nitric.resources.resource import SecureResource
+from nitric.utils import new_default_channel
 
 BucketPermission = Literal["reading", "writing", "deleting"]
 
@@ -71,14 +84,12 @@ class Bucket(SecureResource):
 
     async def _register(self) -> None:
         try:
-            await self._resources_stub.declare(
-                resource_declare_request=ResourceDeclareRequest(resource=self._to_resource())
-            )
+            await self._resources_stub.declare(resource_declare_request=ResourceDeclareRequest(id=self._to_resource()))
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err)
 
-    def _perms_to_actions(self, *args: BucketPermission) -> List[int]:
-        permission_actions_map: dict[BucketPermission, List[int]] = {
+    def _perms_to_actions(self, *args: BucketPermission) -> List[Action]:
+        permission_actions_map: dict[BucketPermission, List[Action]] = {
             "reading": [Action.BucketFileGet, Action.BucketFileList],
             "writing": [Action.BucketFilePut],
             "deleting": [Action.BucketFileDelete],
@@ -102,17 +113,87 @@ class Bucket(SecureResource):
         """Create and return a bucket notification decorator for this bucket."""
 
         def decorator(func: BucketNotificationHandler) -> None:
-            self._server = FunctionServer(
-                BucketNotificationWorkerOptions(
-                    bucket_name=self.name,
-                    notification_type=notification_type,
-                    notification_prefix_filter=notification_prefix_filter,
-                )
+            Listener(
+                bucket_name=self.name,
+                notification_type=notification_type,
+                notification_prefix_filter=notification_prefix_filter,
+                handler=func,
             )
-            self._server.bucket_notification(func)
-            return Nitric._register_worker(self._server)  # type: ignore
 
         return decorator
+
+
+class Listener(FunctionServer):
+    _handler: BucketNotificationHandler
+    _registration_request: RegistrationRequest
+    _responses: AsyncNotifierList[ClientMessage]
+
+    def __init__(
+        self,
+        bucket_name: str,
+        notification_type: str,
+        notification_prefix_filter: str,
+        handler: BucketNotificationHandler,
+    ):
+        self._handler = handler
+        self._responses = AsyncNotifierList()
+
+        event_type = BlobEventType.Created
+        if "del" in notification_type:
+            event_type = BlobEventType.Deleted
+
+        self._registration_request = RegistrationRequest(
+            bucket_name=bucket_name,
+            blob_event_type=event_type,
+            key_prefix_filter=notification_prefix_filter,
+        )
+
+        Nitric._register_worker(self)
+
+    async def _listener_request_iterator(self):
+        # Register with the server
+        yield ClientMessage(registration_request=self._registration_request)
+        # wait for any responses for the server and send them
+        async for response in self.responses:
+            yield response
+
+    async def start(self) -> None:
+        """Register this bucket listener and listen for events."""
+        channel = new_default_channel()
+        server = StorageListenerStub(channel=channel)
+
+        try:
+            async for server_msg in server.listen(self._listener_request_iterator()):
+                msg_type = betterproto.which_one_of(server_msg, "content")
+
+                if msg_type == "registration_request":
+                    continue
+                if msg_type == "blob_event_response":
+                    ctx = BucketNotificationContext(
+                        request=BucketNotifyRequest(
+                            bucket_name=server_msg.blob_event_request.bucket_name,
+                            key=server_msg.blob_event_request.blob_event.key,
+                            notification_type=server_msg.blob_event_request.blob_event.type,
+                        )
+                    )
+                    response: ClientMessage
+                    try:
+                        result = await self._handler(ctx)
+                        ctx = result if result else ctx
+                        be = BlobEventResponse(success=ctx.res.success)
+                        response = ClientMessage(id=server_msg.id, blob_event_response=be)
+                    except Exception as e:
+                        logging.exception(f"An unhandled error occurred in a bucket event listener: {e}")
+                        be = BlobEventResponse(success=False)
+                        response = ClientMessage(id=server_msg.id, blob_event_response=be)
+                    await self._responses.add_item(response)
+        except grpclib.exceptions.GRPCError as e:
+            print(f"Stream terminated: {e.message}")
+        except grpclib.exceptions.StreamTerminatedError:
+            print("Stream from membrane closed.")
+        finally:
+            print("Closing client stream")
+            channel.close()
 
 
 def bucket(name: str) -> Bucket:

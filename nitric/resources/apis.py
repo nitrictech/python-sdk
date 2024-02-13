@@ -30,7 +30,7 @@ from nitric.proto.resources.v1 import (
     ApiOpenIdConnectionDefinition,
     ResourceDeclareRequest,
 )
-from nitric.context import HttpHandler, HttpMiddleware, HttpMethod
+from nitric.context import HttpHandler, HttpMiddleware, HttpMethod, FunctionServer
 from nitric.proto.apis.v1 import ApiWorkerOptions, ApiDetailsRequest
 from grpclib import GRPCError
 from nitric.exception import exception_from_grpc_error

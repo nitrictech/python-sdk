@@ -25,8 +25,8 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExport
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.grpc import GrpcInstrumentorClient
 
-from nitric.faas import FunctionServer
 from nitric.exception import NitricUnavailableException
+from nitric.context import FunctionServer
 
 from typing import Dict, List, Type, Any, TypeVar
 
@@ -68,34 +68,12 @@ class Nitric:
             )
 
     @classmethod
-    def _create_tracer(cls, local: bool = True, sampler: int = 100) -> TracerProvider:
-        local_run = local or "OTELCOL_BIN" not in environ
-        sample_percent = int(getenv("NITRIC_TRACE_SAMPLE_PERCENT", sampler)) / 100.0
-
-        # If its a local run use a console exporter, otherwise export using OTEL Protocol
-        exporter = OTLPSpanExporter(endpoint="http://localhost:4317", insecure=True)
-        if local_run:
-            exporter = ConsoleSpanExporter()
-
-        provider = TracerProvider(
-            active_span_processor=BatchSpanProcessor(exporter),
-            sampler=sampling.TraceIdRatioBased(sample_percent),
-        )
-        trace.set_tracer_provider(provider)
-
-        grpc_client_instrumentor = GrpcInstrumentorClient()
-        grpc_client_instrumentor.instrument()
-
-        return provider
-
-    @classmethod
     def run(cls) -> None:
         """
         Start the nitric application.
 
         This will execute in an existing event loop if there is one, otherwise it will attempt to create its own.
         """
-        provider = cls._create_tracer()
         try:
             try:
                 loop = asyncio.get_running_loop()
@@ -109,6 +87,3 @@ class Nitric:
             raise NitricUnavailableException(
                 'Unable to connect to a nitric server! If you\'re running locally make sure to run "nitric start"'
             )
-        finally:
-            if provider is not None:  # type: ignore
-                provider.force_flush()
