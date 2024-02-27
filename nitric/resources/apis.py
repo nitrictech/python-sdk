@@ -17,9 +17,16 @@
 # limitations under the License.
 #
 from __future__ import annotations
-from typing import List, Union, Optional, ParamSpec, TypeVar, Callable, Concatenate
+
+import logging
+from typing import List, Union, Optional, ParamSpec, TypeVar, Callable, Concatenate, Dict
 from dataclasses import dataclass
+
+import betterproto
+import grpclib
+
 from nitric.application import Nitric
+from nitric.bidi import AsyncNotifierList
 from nitric.resources.resource import Resource as BaseResource
 from nitric.proto.resources.v1 import (
     ResourceIdentifier,
@@ -30,10 +37,30 @@ from nitric.proto.resources.v1 import (
     ApiOpenIdConnectionDefinition,
     ResourceDeclareRequest,
 )
-from nitric.context import HttpHandler, HttpMiddleware, HttpMethod, FunctionServer
-from nitric.proto.apis.v1 import ApiWorkerOptions, ApiDetailsRequest
+from nitric.context import (
+    HttpHandler,
+    HttpMiddleware,
+    HttpMethod,
+    FunctionServer,
+    HttpContext,
+    HttpRequest,
+    Record,
+    compose_middleware,
+)
+from nitric.proto.apis.v1 import (
+    ApiWorkerOptions,
+    ApiDetailsRequest,
+    RegistrationRequest,
+    ApiStub,
+    ClientMessage,
+    HttpResponse as ProtoHttpResponse,
+    HttpRequest as ProtoHttpRequest,
+    HeaderValue,
+    ApiWorkerScopes,
+)
 from grpclib import GRPCError
 from nitric.exception import exception_from_grpc_error
+from nitric.utils import new_default_channel
 
 
 @dataclass
@@ -74,7 +101,7 @@ class MethodOptions:
     security (dict[str, List[str]])
     """
 
-    security: Optional[dict[str, List[str]]]
+    security: Optional[List[ScopedOidcOptions]] = None
 
 
 # TODO: Union type for multiple security definition mappings
@@ -94,11 +121,17 @@ class ApiOptions:
     def __init__(
         self,
         path: str = "",
-        middleware: Optional[Union[HttpMiddleware, List[HttpMiddleware]]] = [],
-        security_definitions: dict[str, SecurityDefinition] = {},
-        security: dict[str, List[str]] = {},
+        middleware: Optional[Union[HttpMiddleware, List[HttpMiddleware]]] = None,
+        security_definitions: Optional[dict[str, SecurityDefinition]] = None,
+        security: Optional[dict[str, List[str]]] = None,
     ):
         """Construct a new API options object."""
+        if middleware is None:
+            middleware = []
+        if security_definitions is None:
+            security_definitions = {}
+        if security is None:
+            security = {}
         self.middleware = middleware
         self.security_definitions = security_definitions
         self.security = security
@@ -110,8 +143,10 @@ class RouteOptions:
 
     middleware: Union[None, List[HttpMiddleware]]
 
-    def __init__(self, middleware: List[HttpMiddleware] = []):
+    def __init__(self, middleware: Optional[List[HttpMiddleware]] = None):
         """Construct a new route options object."""
+        if middleware is None:
+            middleware = []
         self.middleware = middleware
 
 
@@ -209,7 +244,7 @@ class Api(BaseResource):
                     HttpMethod.OPTIONS,
                 ],
                 function,
-                opts=opts if opts is not None else MethodOptions(),
+                opts=opts if opts is not None else MethodOptions(security=None),
             )
 
         return decorator
@@ -328,7 +363,7 @@ class Route:
         self, methods: List[HttpMethod], *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None
     ) -> None:
         """Register middleware for multiple HTTP Methods."""
-        return Method(self, methods, *middleware, opts=opts).start()
+        return Method(self, methods, *middleware, opts=opts if opts else MethodOptions()).start()
 
     def get(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None) -> None:
         """Register middleware for HTTP GET requests."""
@@ -358,7 +393,7 @@ class Route:
 class Method:
     """A method handler."""
 
-    server: FunctionServer
+    server: ApiRouteWorker
     route: Route
     methods: List[HttpMethod]
     opts: Optional[MethodOptions]
@@ -368,19 +403,194 @@ class Method:
         route: Route,
         methods: List[HttpMethod],
         *middleware: HttpMiddleware | HttpHandler,
-        opts: Optional[MethodOptions] = None,
+        opts: MethodOptions,
     ):
         """Construct a method handler for the specified route."""
         self.route = route
         self.methods = methods
-        self.server = FunctionServer(ApiWorkerOptions(route.api.name, route.path, methods, opts))
-        self.server.http(*route.api.middleware, *route.middleware, *middleware)
+
+        handler = compose_middleware(*middleware)
+
+        self.server = ApiRouteWorker(
+            api_name=self.route.api.name, path=self.route.path, methods=self.methods, handler=handler, options=opts
+        )
 
     def start(self) -> None:
         """Start the server which will respond to incoming requests."""
         Nitric._register_worker(self.server)  # type: ignore
 
 
+def _http_context_from_proto(msg: ProtoHttpRequest) -> HttpContext:
+    """Construct a new HttpContext from a Http trigger from the Nitric Membrane."""
+    headers: Record = {k: v.value for (k, v) in msg.headers.items()}
+    query: Record = {k: v.value for (k, v) in msg.query_params.items()}
+
+    return HttpContext(
+        request=HttpRequest(
+            data=msg.body,
+            method=msg.method,
+            query=query,
+            path=msg.path,
+            params=dict(msg.path_params.items()),
+            headers=headers,
+        )
+    )
+
+
+def _http_context_to_proto_response(ctx: HttpContext) -> ProtoHttpResponse:
+    """Construct a HttpResponse for the Nitric Membrane from this context object."""
+    body = ctx.res.body if ctx.res.body else bytes()
+    headers: Dict[str, HeaderValue] = {}
+    for k, v in ctx.res.headers.items():
+        hv = HeaderValue()
+        hv.value = HttpContext._ensure_value_is_list(v)
+        headers[k] = hv
+
+    return ProtoHttpResponse(
+        status=ctx.res.status,
+        body=body,
+        headers=headers,
+    )
+
+
+class ApiRouteWorker(FunctionServer):
+    _handler: HttpHandler
+    _registration_request: RegistrationRequest
+    _responses: AsyncNotifierList[ClientMessage]
+    _options: MethodOptions
+
+    def __init__(
+        self,
+        api_name: str,
+        path: str,
+        methods: List[HttpMethod],
+        handler: HttpHandler,
+        options: MethodOptions,
+    ):
+        sec = {opt.name: ApiWorkerScopes(scopes=opt.scopes) for opt in options.security} if options.security else {}
+        reg_options = ApiWorkerOptions(
+            security=sec,
+            security_disabled=True if options.security == [] else False,
+        )
+
+        self._handler = handler
+        self._responses = AsyncNotifierList()
+        self._options = options
+        self._registration_request = RegistrationRequest(
+            api=api_name, path=path, methods=[method.value for method in methods], options=reg_options
+        )
+
+        Nitric._register_worker(self)
+
+    async def _route_request_iterator(self):
+        # Register with the server
+        yield ClientMessage(registration_request=self._registration_request)
+        # wait for any responses for the server and send them
+        async for response in self.responses:
+            yield response
+
+    async def start(self) -> None:
+        """Register this API route handler and handle http requests."""
+        channel = new_default_channel()
+        server = ApiStub(channel=channel)
+
+        # Attach security rules for this route
+        for security_rule in self._options.security if self._options.security else []:
+            _attach_oidc(api_name=self._registration_request.api, options=security_rule)
+
+        try:
+            async for server_msg in server.serve(self._route_request_iterator()):
+                msg_type = betterproto.which_one_of(server_msg, "content")
+
+                if msg_type == "registration_response":
+                    continue
+                if msg_type == "http_request":
+                    ctx = _http_context_from_proto(server_msg.http_request)
+                    response: ClientMessage
+                    try:
+                        result = await self._handler(ctx)
+                        ctx = result if result else ctx
+                        response = ClientMessage(id=server_msg.id, http_response=_http_context_to_proto_response(ctx))
+                    except Exception as e:
+                        logging.exception(f"An unhandled error occurred in an api route handler: {e}")
+                        failed_http_response = ProtoHttpResponse(
+                            status=500,
+                            body=b"Internal Server Error",
+                        )
+                        response = ClientMessage(id=server_msg.id, http_response=failed_http_response)
+                    await self._responses.add_item(response)
+        except grpclib.exceptions.GRPCError as e:
+            print(f"Stream terminated: {e.message}")
+        except grpclib.exceptions.StreamTerminatedError:
+            print("Stream from membrane closed.")
+        finally:
+            print("Closing client stream")
+            channel.close()
+
+
 def api(name: str, opts: Optional[ApiOptions] = None) -> Api:
     """Create a new API resource."""
     return Nitric._create_resource(Api, name, opts=opts)  # type: ignore
+
+
+class OidcOptions:
+    name: str
+    issuer: str
+    audiences: List[str]
+
+    def __init__(self, name: str, issuer: str, audiences: List[str]):
+        self.name = name
+        self.issuer = issuer
+        self.audiences = audiences
+
+
+class ScopedOidcOptions(OidcOptions):
+    scopes: List[str]
+
+    def __init__(self, name: str, issuer: str, audiences: List[str], scopes: List[str]):
+        super().__init__(name=name, issuer=issuer, audiences=audiences)
+        self.scopes = scopes
+
+
+def _oidc_to_resource(b: OidcSecurityDefinition) -> ResourceIdentifier:
+    return ResourceIdentifier(name=b.name, type=ResourceType.ApiSecurityDefinition)
+
+
+class OidcSecurityDefinition(BaseResource):
+    api_name: str
+    issuer: str
+    rule_name: str
+    audiences: List[str]
+
+    def __init__(self, name: str, api_name: str, options: OidcOptions):
+        super().__init__()
+        self.name = name
+        self.api_name = api_name
+        self.issuer = options.issuer
+        self.audiences = options.audiences
+        self.rule_name = options.name
+
+    async def _register(self) -> None:
+        try:
+            await self._resources_stub.declare(
+                resource_declare_request=ResourceDeclareRequest(
+                    id=_oidc_to_resource(self),
+                    api_security_definition=ApiSecurityDefinitionResource(
+                        api_name=self.api_name,
+                        oidc=ApiOpenIdConnectionDefinition(
+                            issuer=self.issuer,
+                            audiences=self.audiences,
+                        ),
+                    ),
+                )
+            )
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err)
+
+
+def _attach_oidc(api_name: str, options: OidcOptions) -> OidcSecurityDefinition:
+    return Nitric._create_resource(OidcSecurityDefinition, f"{options.name}-{api_name}", api_name, options)
+
+
+def oidc_rule(name: str, issuer: str, audiences: List[str]) -> Callable[[List[str]], ScopedOidcOptions]:
+    return lambda scopes: ScopedOidcOptions(name, issuer, audiences, scopes)

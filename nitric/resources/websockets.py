@@ -17,10 +17,23 @@
 # limitations under the License.
 #
 from __future__ import annotations
-from typing import Literal, Callable
+
+import logging
+from typing import Literal, Callable, Dict, List, Union
+
+import betterproto
+import grpclib
+
+from nitric.bidi import AsyncNotifierList
 from nitric.context import (
     FunctionServer,
     WebsocketHandler,
+    WebsocketContext,
+    WebsocketRequest,
+    Record,
+    WebsocketConnectionResponse,
+    WebsocketConnectionRequest,
+    WebsocketMessageRequest,
 )
 from nitric.api.websocket import Websocket as WebsocketClient
 from nitric.application import Nitric
@@ -28,7 +41,19 @@ from nitric.resources.resource import Resource as BaseResource
 from nitric.proto.resources.v1 import ResourceIdentifier, Action, ResourceType, ResourceDeclareRequest, PolicyResource
 from grpclib import GRPCError
 from nitric.exception import exception_from_grpc_error
-from nitric.proto.websockets.v1 import WebsocketEventType
+from nitric.proto.websockets.v1 import (
+    ClientMessage,
+    ServerMessage,
+    WebsocketEventType,
+    WebsocketHandlerStub,
+    WebsocketStub,
+    WebsocketEventRequest,
+    WebsocketEventResponse,
+    RegistrationRequest,
+    QueryValue,
+    WebsocketConnectionResponse as ProtoWebsocketConnectionResponse,
+)
+from nitric.utils import new_default_channel
 
 
 class WebsocketWorkerOptions:
@@ -104,9 +129,11 @@ class Websocket(BaseResource):
         """Create and return a worker decorator for this socket."""
 
         def decorator(func: WebsocketHandler) -> None:
-            self._server = FunctionServer()
-            self._server.websocket(func)
-            return Nitric._register_worker(self._server)  # type: ignore
+            WebsocketWorker(
+                socket_name=self.name,
+                event_type=event_type,
+                handler=func,
+            )
 
         return decorator
 
@@ -118,3 +145,87 @@ def websocket(name: str) -> Websocket:
     If a websocket has already been registered with the same name, the original reference will be reused.
     """
     return Nitric._create_resource(Websocket, name)  # type: ignore
+
+
+def _websocket_context_from_proto(msg: WebsocketEventRequest) -> WebsocketContext:
+    """Construct a new WebsocketContext from a websocket trigger from the Nitric Server."""
+    query: Record = {k: v.value for (k, v) in msg.connection.query_params.items()}
+
+    req = WebsocketRequest(
+        connection_id=msg.connection_id,
+    )
+    evt_type = betterproto.which_one_of(msg, "websocket_event")
+    if evt_type == "connection":
+        req = WebsocketConnectionRequest(
+            connection_id=msg.connection_id,
+            query=query,
+        )
+    if evt_type == "message":
+        req = WebsocketMessageRequest(connection_id=msg.connection_id, data=msg.message.body)
+
+    return WebsocketContext(request=req)
+
+
+def _websocket_context_to_proto_response(ctx: WebsocketContext) -> WebsocketEventResponse:
+    resp = WebsocketEventResponse()
+    if isinstance(ctx.res, WebsocketConnectionResponse):
+        resp.connection_response = ProtoWebsocketConnectionResponse(reject=ctx.res.reject)
+    return resp
+
+
+class WebsocketWorker(FunctionServer):
+    """A handler for websocket events."""
+
+    _handler: WebsocketHandler
+    _registration_request: RegistrationRequest
+    _responses: AsyncNotifierList[ClientMessage]
+
+    def __init__(self, socket_name: str, event_type: WebsocketEventType, handler: WebsocketHandler):
+        """Construct a new WebsocketHandler."""
+        self._handler = handler
+        self._responses = AsyncNotifierList()
+        self._registration_request = RegistrationRequest(socket_name=socket_name, event_type=event_type)
+
+        Nitric._register_worker(self)
+
+    async def _ws_request_iterator(self):
+        # Register with the server
+        yield ClientMessage(registration_request=self._registration_request)
+        # wait for any responses for the server and send them
+        async for response in self.responses:
+            yield response
+
+    async def start(self) -> None:
+        """Register this websocket handler and listen for messages."""
+        channel = new_default_channel()
+        server = WebsocketHandlerStub(channel=channel)
+
+        try:
+            async for server_msg in server.handle_events(self._ws_request_iterator()):
+                msg_type = betterproto.which_one_of(server_msg, "content")
+
+                if msg_type == "registration_response":
+                    continue
+                if msg_type == "websocket_event_request":
+                    ctx = _websocket_context_from_proto(server_msg.websocket_event_request)
+
+                    response: ClientMessage
+                    try:
+                        result = await self._handler(ctx)
+                        ctx = result if result else ctx
+                        response = ClientMessage(id=server_msg.id, websocket_event_response=WebsocketEventResponse())
+                        if isinstance(ctx.res, WebsocketConnectionResponse):
+                            response.websocket_event_response.connection_response.reject = ctx.res.reject
+                    except Exception as e:
+                        logging.exception(f"An unhandled error occurred in a websocket event handler: {e}")
+                        response = ClientMessage(id=server_msg.id, websocket_event_response=WebsocketEventResponse())
+                        if isinstance(ctx.req, WebsocketConnectionRequest):
+                            response.websocket_event_response.connection_response.reject = True
+                    await self._responses.add_item(response)
+        except grpclib.exceptions.GRPCError as e:
+            print(f"Stream terminated: {e.message}")
+        except grpclib.exceptions.StreamTerminatedError:
+            print("Stream from membrane closed.")
+        finally:
+            print("Closing client stream")
+            channel.close()

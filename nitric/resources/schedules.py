@@ -18,16 +18,12 @@
 #
 from __future__ import annotations
 
-import asyncio
 import logging
 from datetime import timedelta
 from enum import Enum
-from typing import Callable, List, Coroutine, Any
-
+from typing import Callable, List
 import betterproto
 import grpclib.exceptions
-from betterproto.grpc.util.async_channel import AsyncChannel
-
 from nitric.bidi import AsyncNotifierList
 from nitric.application import Nitric
 from nitric.proto.schedules.v1 import (
@@ -36,6 +32,7 @@ from nitric.proto.schedules.v1 import (
     SchedulesStub,
     ClientMessage,
     RegistrationRequest,
+    IntervalResponse,
 )
 from nitric.utils import new_default_channel
 from nitric.context import FunctionServer, IntervalHandler, IntervalContext
@@ -107,12 +104,12 @@ class Schedule(FunctionServer):
                     continue
                 if msg_type == "interval_request":
                     ctx = IntervalContext(server_msg)
-                    response: ClientMessage
                     try:
                         await self.handler(ctx)
                     except Exception as e:
                         logging.exception(f"An unhandled error occurred in a scheduled function: {e}")
-                    await self._responses.add_item(ClientMessage(id=server_msg.id))
+                    resp = IntervalResponse()
+                    await self._responses.add_item(ClientMessage(id=server_msg.id, interval_response=resp))
         except grpclib.exceptions.GRPCError as e:
             print(f"Stream terminated: {e.message}")
         except grpclib.exceptions.StreamTerminatedError:

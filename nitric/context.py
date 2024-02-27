@@ -29,14 +29,7 @@ from opentelemetry import propagate
 
 from abc import ABC, abstractmethod
 
-from nitric.proto.apis.v1 import (
-    ClientMessage as ApiClientMessage,
-    ServerMessage as ApiServerMessage,
-    HttpResponse as ApiResponse,
-    HeaderValue,
-)
 from nitric.proto.schedules.v1 import (
-    ClientMessage as ScheduleClientMessage,
     ServerMessage as ScheduleServerMessage,
 )
 from nitric.proto.storage.v1 import (
@@ -157,40 +150,6 @@ class HttpContext:
         self.res = response if response else HttpResponse()
 
     @staticmethod
-    def _from_request(msg: ApiServerMessage) -> HttpContext:
-        """Construct a new HttpContext from an Http trigger from the Nitric Membrane."""
-        headers: Record = {k: v.value for (k, v) in msg.http_request.headers.items()}
-        query: Record = {k: v.value for (k, v) in msg.http_request.query_params.items()}
-
-        return HttpContext(
-            request=HttpRequest(
-                data=msg.http_request.body,
-                method=msg.http_request.method,
-                query=query,
-                path=msg.http_request.path,
-                params={k: v for (k, v) in msg.http_request.path_params.items()},
-                headers=headers,
-            )
-        )
-
-    def _to_response(self) -> ApiClientMessage:
-        """Construct a HttpResponse for the Nitric Membrane from this context object."""
-        body = self.res.body if self.res.body else bytes()
-        headers: Dict[str, HeaderValue] = {}
-        for k, v in self.res.headers.items():
-            hv = HeaderValue()
-            hv.value = HttpContext._ensure_value_is_list(v)
-            headers[k] = hv
-
-        resp = ApiResponse(
-            status=self.res.status,
-            body=body,
-            headers=headers,
-        )
-
-        return ApiClientMessage(http_response=resp)
-
-    @staticmethod
     def _ensure_value_is_list(value: Union[str, List[str]]) -> List[str]:
         return list(value) if isinstance(value, list) else [value]
 
@@ -244,46 +203,65 @@ class MessageContext:
 class WebsocketRequest:
     """Represents an incoming websocket event."""
 
+    def __init__(self, connection_id: str):
+        """Construct a new WebsocketRequest."""
+        self.connection_id = connection_id
+
+
+class WebsocketConnectionRequest(WebsocketRequest):
+    """Represents an incoming websocket connection."""
+
+    query: Dict[str, str | List[str]]
+
+    def __init__(self, connection_id: str, query: Dict[str, str | List[str]]):
+        """Construct a new WebsocketConnectionRequest."""
+        super().__init__(connection_id=connection_id)
+        self.query = query
+
+
+class WebsocketMessageRequest(WebsocketRequest):
+    """Represents an incoming websocket message."""
+
     data: bytes
 
-    def __init__(self, connection_id: str, data: bytes, query: Dict[str, str | List[str]]):
-        """Construct a new WebsocketRequest."""
+    def __init__(self, connection_id: str, data: bytes):
+        """Construct a new WebsocketMessageRequest."""
+        super().__init__(connection_id=connection_id)
         self.data = data
-        self.connection_id = connection_id
-        self.query = query
 
 
 class WebsocketResponse:
     """Represents a response to a websocket event."""
 
-    def __init__(self, success: bool = True):
+    def __init__(self):
         """Construct a new WebsocketResponse."""
-        self.success = success
+
+
+class WebsocketConnectionResponse(WebsocketResponse):
+    """Represents a response to a websocket connection event."""
+
+    reject: bool
+
+    def __init__(self, reject: bool = False):
+        self.reject = reject
+
+
+AnyWebsocketRequest = Union[WebsocketRequest, WebsocketConnectionRequest, WebsocketMessageRequest]
+AnyWebsocketResponse = Union[WebsocketResponse, WebsocketConnectionResponse]
 
 
 class WebsocketContext:
     """Represents the full request/response context for a Websocket based trigger."""
 
-    def __init__(self, request: WebsocketRequest, response: Optional[WebsocketResponse] = None):
+    def __init__(self, request: AnyWebsocketRequest, response: Optional[AnyWebsocketResponse] = None):
         """Construct a new WebsocketContext."""
         self.req = request
-        self.res = response if response else WebsocketResponse()
-
-    @staticmethod
-    def _from_request(msg: WebsocketServerMessage) -> WebsocketContext:
-        """Construct a new WebsocketContext from a Websocket trigger from the Nitric Membrane."""
-        query: Record = {k: v.value for (k, v) in msg.websocket_event_request.connection.query_params.items()}
-        return WebsocketContext(
-            request=WebsocketRequest(
-                data=msg.websocket_event_request.message.body,
-                connection_id=msg.websocket_event_request.connection_id,
-                query=query,
-            )
-        )
-
-    def to_response(self) -> WebsocketEventResponse:
-        """Construct a WebsocketContext for the Nitric Membrane from this context object."""
-        return WebsocketEventResponse()
+        if response:
+            self.res = response
+        elif isinstance(request, WebsocketConnectionRequest):
+            self.res = WebsocketConnectionResponse()
+        else:
+            self.res = WebsocketResponse()
 
 
 class BucketNotifyRequest:

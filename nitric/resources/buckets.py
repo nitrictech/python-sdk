@@ -166,9 +166,9 @@ class Listener(FunctionServer):
             async for server_msg in server.listen(self._listener_request_iterator()):
                 msg_type = betterproto.which_one_of(server_msg, "content")
 
-                if msg_type == "registration_request":
+                if msg_type == "registration_response":
                     continue
-                if msg_type == "blob_event_response":
+                if msg_type == "blob_event_request":
                     ctx = BucketNotificationContext(
                         request=BucketNotifyRequest(
                             bucket_name=server_msg.blob_event_request.bucket_name,
