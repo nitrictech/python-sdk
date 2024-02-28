@@ -18,21 +18,35 @@
 #
 from __future__ import annotations
 
+import logging
+
+import betterproto
+import grpclib
+
 from nitric.api.events import Events, TopicRef
+from nitric.bidi import AsyncNotifierList
 from nitric.exception import exception_from_grpc_error
 from typing import List, Callable, Literal
 from dataclasses import dataclass
 from grpclib import GRPCError
 from nitric.application import Nitric
-from nitric.context import FunctionServer, EventHandler
+from nitric.context import FunctionServer, EventHandler, MessageContext, MessageRequest
 from nitric.proto.resources.v1 import (
     ResourceIdentifier,
     ResourceType,
     Action,
     ResourceDeclareRequest,
 )
+from nitric.proto.topics.v1 import (
+    RegistrationRequest,
+    ClientMessage,
+    SubscriberStub,
+    MessageRequest as ProtoMessageRequest,
+    MessageResponse as ProtoMessageResponse,
+)
 
 from nitric.resources.resource import SecureResource
+from nitric.utils import new_default_channel
 
 TopicPermission = Literal["publishing"]
 
@@ -68,8 +82,8 @@ class Topic(SecureResource):
     def _to_resource(self) -> ResourceIdentifier:
         return ResourceIdentifier(name=self.name, type=ResourceType.Topic)  # type:ignore
 
-    def _perms_to_actions(self, *args: TopicPermission) -> List[int]:
-        _permMap: dict[TopicPermission, List[int]] = {"publishing": [Action.TopicEventPublish]}
+    def _perms_to_actions(self, *args: TopicPermission) -> List[Action]:
+        _permMap: dict[TopicPermission, List[Action]] = {"publishing": [Action.TopicEventPublish]}
 
         return [action for perm in args for action in _permMap[perm]]
 
@@ -84,12 +98,81 @@ class Topic(SecureResource):
         """Create and return a subscription decorator for this topic."""
 
         def decorator(func: EventHandler) -> None:
-            server = FunctionServer(SubscriptionWorkerOptions(topic=self.name))
-            server.event(func)
-            # type ignored because the register call is treated as protected.
-            Nitric._register_worker(server)  # type: ignore
+            Subscriber(
+                topic_name=self.name,
+                handler=func,
+            )
 
         return decorator
+
+
+def _message_context_from_proto(msg: ProtoMessageRequest) -> MessageContext:
+    return MessageContext(
+        request=MessageRequest(
+            data=msg.message.struct_payload.to_dict(),
+            topic=msg.topic_name,
+        )
+    )
+
+
+class Subscriber(FunctionServer):
+    """A handler for topic messages."""
+
+    _handler: EventHandler
+    _registration_request: RegistrationRequest
+    _responses: AsyncNotifierList[ClientMessage]
+
+    def __init__(self, topic_name: str, handler: EventHandler):
+        """Construct a new WebsocketHandler."""
+        self._handler = handler
+        self._responses = AsyncNotifierList()
+        self._registration_request = RegistrationRequest(
+            topic_name=topic_name
+        )
+
+        Nitric._register_worker(self)
+
+    async def _message_request_iterator(self):
+        # Register with the server
+        yield ClientMessage(registration_request=self._registration_request)
+        # wait for any responses for the server and send them
+        async for response in self._responses:
+            yield response
+
+    async def start(self) -> None:
+        """Register this subscriber and listen for messages."""
+        channel = new_default_channel()
+        server = SubscriberStub(channel=channel)
+
+        try:
+            async for server_msg in server.subscribe(self._message_request_iterator()):
+                msg_type = betterproto.which_one_of(server_msg, "content")
+
+                if msg_type == "registration_response":
+                    continue
+                if msg_type == "message_request":
+                    ctx = _message_context_from_proto(server_msg.message_request)
+
+                    response: ClientMessage
+                    try:
+                        result = await self._handler(ctx)
+                        ctx = result if result else ctx
+                        response = ClientMessage(id=server_msg.id, message_response=ProtoMessageResponse(
+                            success=ctx.res.success
+                        ))
+                    except Exception as e:
+                        logging.exception(f"An unhandled error occurred in a subscription event handler: {e}")
+                        response = ClientMessage(id=server_msg.id, message_response=ProtoMessageResponse(
+                            success=False
+                        ))
+                    await self._responses.add_item(response)
+        except grpclib.exceptions.GRPCError as e:
+            print(f"Stream terminated: {e.message}")
+        except grpclib.exceptions.StreamTerminatedError:
+            print("Stream from membrane closed.")
+        finally:
+            print("Closing client stream")
+            channel.close()
 
 
 def topic(name: str) -> Topic:

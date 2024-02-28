@@ -43,14 +43,11 @@ from grpclib import GRPCError
 from nitric.exception import exception_from_grpc_error
 from nitric.proto.websockets.v1 import (
     ClientMessage,
-    ServerMessage,
     WebsocketEventType,
     WebsocketHandlerStub,
-    WebsocketStub,
     WebsocketEventRequest,
     WebsocketEventResponse,
     RegistrationRequest,
-    QueryValue,
     WebsocketConnectionResponse as ProtoWebsocketConnectionResponse,
 )
 from nitric.utils import new_default_channel
@@ -192,7 +189,7 @@ class WebsocketWorker(FunctionServer):
         # Register with the server
         yield ClientMessage(registration_request=self._registration_request)
         # wait for any responses for the server and send them
-        async for response in self.responses:
+        async for response in self._responses:
             yield response
 
     async def start(self) -> None:

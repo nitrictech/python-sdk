@@ -104,9 +104,6 @@ class MethodOptions:
     security: Optional[List[ScopedOidcOptions]] = None
 
 
-# TODO: Union type for multiple security definition mappings
-# type SecurityDefinition = JwtSecurityDefinition;
-
 SecurityDefinition = JwtSecurityDefinition
 
 
@@ -486,7 +483,7 @@ class ApiRouteWorker(FunctionServer):
         # Register with the server
         yield ClientMessage(registration_request=self._registration_request)
         # wait for any responses for the server and send them
-        async for response in self.responses:
+        async for response in self._responses:
             yield response
 
     async def start(self) -> None:
