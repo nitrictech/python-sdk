@@ -17,14 +17,6 @@
 # limitations under the License.
 #
 import asyncio
-from os import getenv, environ
-
-from opentelemetry import trace
-from opentelemetry.sdk.trace import TracerProvider, sampling
-from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.instrumentation.grpc import GrpcInstrumentorClient
-
 from nitric.exception import NitricUnavailableException
 from nitric.context import FunctionServer
 
