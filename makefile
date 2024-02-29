@@ -21,26 +21,32 @@ test:
 	@echo Running Tox tests
 	@tox -e py
 
-NITRIC_VERSION="v1.0.0"
+NITRIC_VERSION := 1.0.0
+
+download-local:
+	@rm -r ./proto/nitric
+	@mkdir ./proto/nitric
+	@cp -r ${NITRIC_CORE_HOME}/nitric/proto ./proto/nitric
 
 download:
-	@curl -L https://github.com/nitrictech/nitric/releases/download/${NITRIC_VERSION}/contracts.tgz -o contracts.tgz
-	@tar xvzf contracts.tgz
-	@rm contracts.tgz
+	@mkdir -p ./proto/
+	@curl -L https://github.com/nitrictech/nitric/releases/download/v${NITRIC_VERSION}/proto.tgz -o ./proto/nitric.tgz
+	@cd ./proto && tar xvzf nitric.tgz
+	@cd ../
+	@rm ./proto/nitric.tgz
 
-OUTPUT="./nitric/proto"
-CONTRACTS="./contracts"
+OUTPUT="."
+CONTRACTS="./proto"
 
 grpc-client: install download generate-proto
+	@mv ./nitric/proto/KeyValue ./nitric/proto/keyvalue
 
 generate-proto:
 	@echo Generating Proto Sources
+	@ rm -rf $(OUTPUT)/nitric/proto
 	@echo $(OUTPUT)
 	@mkdir -p $(OUTPUT)
-    # protoc doesn't create the __init__.py for the nitric module, so we need to create it.
-	@mkdir -p $(OUTPUT)/nitric/
-	@touch $(OUTPUT)/nitric/__init__.py
-	@python3 -m grpc_tools.protoc -I $(CONTRACTS) --python_betterproto_out=$(OUTPUT) ./contracts/proto/*/*/*.proto
+	@python3 -m grpc_tools.protoc -I $(CONTRACTS) --python_betterproto_out=$(OUTPUT) ./$(CONTRACTS)/nitric/proto/*/*/*.proto
 
 license:
 	@echo Applying Apache 2 header to source files
