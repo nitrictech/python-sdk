@@ -22,23 +22,25 @@ import logging
 from datetime import timedelta
 from enum import Enum
 from typing import Callable, List
+
 import betterproto
 import grpclib.exceptions
-from nitric.bidi import AsyncNotifierList
+
 from nitric.application import Nitric
+from nitric.bidi import AsyncNotifierList
+from nitric.context import FunctionServer, IntervalContext, IntervalHandler
 from nitric.proto.schedules.v1 import (
+    ClientMessage,
+    IntervalResponse,
+    RegistrationRequest,
     ScheduleCron,
     ScheduleEvery,
     SchedulesStub,
-    ClientMessage,
-    RegistrationRequest,
-    IntervalResponse,
 )
 from nitric.utils import new_default_channel
-from nitric.context import FunctionServer, IntervalHandler, IntervalContext
 
 
-class Schedule(FunctionServer):
+class ScheduleServer(FunctionServer):
     """A schedule for running functions on a cadence."""
 
     description: str
@@ -66,7 +68,7 @@ class Schedule(FunctionServer):
 
         self.handler = handler
 
-        Nitric._register_worker(self)
+        Nitric._register_worker(self)  # type: ignore pylint: disable=protected-access
 
     def cron(self, cron_expression: str, handler: IntervalHandler) -> None:
         """
@@ -81,13 +83,13 @@ class Schedule(FunctionServer):
 
         self.handler = handler
 
-        Nitric._register_worker(self)
+        Nitric._register_worker(self)  # type: ignore pylint: disable=protected-access
 
     async def _schedule_request_iterator(self):
         # Register with the server
         yield ClientMessage(registration_request=self.registration_request)
         # wait for any responses for the server and send them
-        async for response in self.responses:
+        async for response in self._responses:
             yield response
 
     async def start(self) -> None:
@@ -106,8 +108,8 @@ class Schedule(FunctionServer):
                     ctx = IntervalContext(server_msg)
                     try:
                         await self.handler(ctx)
-                    except Exception as e:
-                        logging.exception(f"An unhandled error occurred in a scheduled function: {e}")
+                    except Exception as e:  # pylint: disable=broad-except
+                        logging.exception("An unhandled error occurred in a scheduled function: %s", e)
                     resp = IntervalResponse()
                     await self._responses.add_item(ClientMessage(id=server_msg.id, interval_response=resp))
         except grpclib.exceptions.GRPCError as e:
@@ -151,42 +153,42 @@ class Frequency(Enum):
             raise ValueError(f"{self} is not a valid frequency")
 
 
-class ScheduleResource:
-    """A raw schedule to be assigned a rate or cron interval."""
+class Schedule:
+    """A raw schedule to be deployed and assigned a rate or cron interval."""
 
     def __init__(self, description: str):
         """Create a new schedule resource."""
         self.description = description
 
-    def every(self, every: str) -> Callable[[IntervalHandler], Schedule]:
+    def every(self, every: str) -> Callable[[IntervalHandler], ScheduleServer]:
         """
         Set the schedule interval.
 
         e.g. every('3 days').
         """
 
-        def decorator(func: IntervalHandler) -> Schedule:
-            r = Schedule(self.description)
+        def decorator(func: IntervalHandler) -> ScheduleServer:
+            r = ScheduleServer(self.description)
             r.every(every, func)
             return r
 
         return decorator
 
-    def cron(self, cron: str) -> Callable[[IntervalHandler], Schedule]:
+    def cron(self, cron: str) -> Callable[[IntervalHandler], ScheduleServer]:
         """
         Set the schedule interval.
 
         e.g. cron('3 * * * *').
         """
 
-        def decorator(func: IntervalHandler) -> Schedule:
-            r = Schedule(self.description)
+        def decorator(func: IntervalHandler) -> ScheduleServer:
+            r = ScheduleServer(self.description)
             r.cron(cron, func)
             return r
 
         return decorator
 
 
-def schedule(description: str) -> ScheduleResource:
+def schedule(description: str) -> Schedule:
     """Return a schedule."""
-    return ScheduleResource(description=description)
+    return Schedule(description=description)

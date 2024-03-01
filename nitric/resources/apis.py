@@ -19,64 +19,58 @@
 from __future__ import annotations
 
 import logging
-from typing import List, Union, Optional, ParamSpec, TypeVar, Callable, Concatenate, Dict
 from dataclasses import dataclass
+from typing import Callable, Concatenate, Dict, List, Optional, ParamSpec, TypeVar, Union
 
 import betterproto
 import grpclib
+from grpclib import GRPCError
 
 from nitric.application import Nitric
 from nitric.bidi import AsyncNotifierList
-from nitric.resources.resource import Resource as BaseResource
-from nitric.proto.resources.v1 import (
-    ResourceIdentifier,
-    ResourceType,
-    ApiResource,
-    ApiScopes,
-    ApiSecurityDefinitionResource,
-    ApiOpenIdConnectionDefinition,
-    ResourceDeclareRequest,
-)
 from nitric.context import (
-    HttpHandler,
-    HttpMiddleware,
-    HttpMethod,
     FunctionServer,
     HttpContext,
+    HttpHandler,
+    HttpMethod,
+    HttpMiddleware,
     HttpRequest,
     Record,
     compose_middleware,
 )
-from nitric.proto.apis.v1 import (
-    ApiWorkerOptions,
-    ApiDetailsRequest,
-    RegistrationRequest,
-    ApiStub,
-    ClientMessage,
-    HttpResponse as ProtoHttpResponse,
-    HttpRequest as ProtoHttpRequest,
-    HeaderValue,
-    ApiWorkerScopes,
-)
-from grpclib import GRPCError
 from nitric.exception import exception_from_grpc_error
+from nitric.proto.apis.v1 import (
+    ApiDetailsRequest,
+    ApiStub,
+    ApiWorkerOptions,
+    ApiWorkerScopes,
+    ClientMessage,
+    HeaderValue,
+)
+from nitric.proto.apis.v1 import HttpRequest as ProtoHttpRequest
+from nitric.proto.apis.v1 import HttpResponse as ProtoHttpResponse
+from nitric.proto.apis.v1 import RegistrationRequest
+from nitric.proto.resources.v1 import (
+    ApiOpenIdConnectionDefinition,
+    ApiResource,
+    ApiScopes,
+    ApiSecurityDefinitionResource,
+    ResourceDeclareRequest,
+    ResourceIdentifier,
+    ResourceType,
+)
+from nitric.resources.resource import Resource as BaseResource
 from nitric.utils import new_default_channel
 
 
 @dataclass
 class ApiDetails:
     """
-    Represents the APIs deployment details.
+    Represents a deployed API's details.
 
-    id (str): the identifier of the resource
-    provider (str): the provider this resource is deployed with (e.g. aws)
-    service (str): the service this resource is deployed to (e.g. ApiGateway)
     url (str): the url of the API
     """
 
-    id: str
-    provider: str
-    service: str
     url: str
 
 
@@ -147,19 +141,8 @@ class RouteOptions:
         self.middleware = middleware
 
 
-def _to_resource(b: Api) -> ResourceIdentifier:
+def _to_resource_identifier(b: Api) -> ResourceIdentifier:
     return ResourceIdentifier(name=b.name, type=ResourceType.Api)
-
-
-def _security_definition_to_grpc_declaration(
-    security_definitions: Optional[dict[str, SecurityDefinition]] = None
-) -> dict[str, ApiSecurityDefinitionResource]:
-    if security_definitions is None or len(security_definitions) == 0:
-        return {}
-    return {
-        k: ApiSecurityDefinitionResource(oidc=ApiOpenIdConnectionDefinition(issuer=v.issuer, audiences=v.audiences))
-        for k, v in security_definitions.items()
-    }
 
 
 def _security_to_grpc_declaration(security: Optional[dict[str, List[str]]] = None) -> dict[str, ApiScopes]:
@@ -184,14 +167,15 @@ class Api(BaseResource):
     routes: List[Route]
     security_definitions: dict[str, SecurityDefinition]
     security: dict[str, List[str]]
+    _api_stub: ApiStub
 
     def __init__(self, name: str, opts: Optional[ApiOptions] = None):
         """Construct a new HTTP API."""
-        super().__init__()
+        super().__init__(name)
+        self._api_stub = ApiStub(channel=self._channel)
         if opts is None:
             opts = ApiOptions()
 
-        self.name = name
         self.middleware = (
             opts.middleware
             if isinstance(opts.middleware, list)
@@ -208,14 +192,14 @@ class Api(BaseResource):
         try:
             await self._resources_stub.declare(
                 resource_declare_request=ResourceDeclareRequest(
-                    id=_to_resource(self),
+                    id=_to_resource_identifier(self),
                     api=ApiResource(
                         security=_security_to_grpc_declaration(self.security),
                     ),
                 )
             )
         except GRPCError as grpc_err:
-            raise exception_from_grpc_error(grpc_err)
+            raise exception_from_grpc_error(grpc_err) from grpc_err
 
     def _route(self, match: str, opts: Optional[RouteOptions] = None) -> Route:
         """Define an HTTP route to be handled by this API."""
@@ -328,14 +312,14 @@ class Api(BaseResource):
     async def _details(self) -> ApiDetails:
         """Get the API deployment details."""
         try:
-            res = await self._resources_stub.details(
-                resource_details_request=ApiDetailsRequest(
+            res = await self._api_stub.api_details(
+                api_details_request=ApiDetailsRequest(
                     api_name=self.name,
                 )
             )
-            return ApiDetails(res.id, res.provider, res.service, res.api.url)
+            return ApiDetails(res.url)
         except GRPCError as grpc_err:
-            raise exception_from_grpc_error(grpc_err)
+            raise exception_from_grpc_error(grpc_err) from grpc_err
 
     async def url(self) -> str:
         """Get the APIs live URL."""
@@ -360,7 +344,7 @@ class Route:
         self, methods: List[HttpMethod], *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None
     ) -> None:
         """Register middleware for multiple HTTP Methods."""
-        return Method(self, methods, *middleware, opts=opts if opts else MethodOptions()).start()
+        Method(self, methods, *middleware, opts=opts if opts else MethodOptions())
 
     def get(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None) -> None:
         """Register middleware for HTTP GET requests."""
@@ -412,10 +396,6 @@ class Method:
             api_name=self.route.api.name, path=self.route.path, methods=self.methods, handler=handler, options=opts
         )
 
-    def start(self) -> None:
-        """Start the server which will respond to incoming requests."""
-        Nitric._register_worker(self.server)  # type: ignore
-
 
 def _http_context_from_proto(msg: ProtoHttpRequest) -> HttpContext:
     """Construct a new HttpContext from a Http trigger from the Nitric Membrane."""
@@ -440,7 +420,7 @@ def _http_context_to_proto_response(ctx: HttpContext) -> ProtoHttpResponse:
     headers: Dict[str, HeaderValue] = {}
     for k, v in ctx.res.headers.items():
         hv = HeaderValue()
-        hv.value = HttpContext._ensure_value_is_list(v)
+        hv.value = HttpContext._ensure_value_is_list(v)  # pylint: disable=protected-access
         headers[k] = hv
 
     return ProtoHttpResponse(
@@ -451,6 +431,8 @@ def _http_context_to_proto_response(ctx: HttpContext) -> ProtoHttpResponse:
 
 
 class ApiRouteWorker(FunctionServer):
+    """A worker for handling HTTP requests for a specific API route."""
+
     _handler: HttpHandler
     _registration_request: RegistrationRequest
     _responses: AsyncNotifierList[ClientMessage]
@@ -474,12 +456,16 @@ class ApiRouteWorker(FunctionServer):
         self._responses = AsyncNotifierList()
         self._options = options
         self._registration_request = RegistrationRequest(
-            api=api_name, path=path, methods=[method.value for method in methods], options=reg_options
+            api=api_name,
+            path=path,
+            methods=[method.value for method in methods],
+            options=reg_options,
         )
 
         Nitric._register_worker(self)
 
     async def _route_request_iterator(self):
+        print("iter")
         # Register with the server
         yield ClientMessage(registration_request=self._registration_request)
         # wait for any responses for the server and send them
@@ -497,7 +483,7 @@ class ApiRouteWorker(FunctionServer):
 
         try:
             async for server_msg in server.serve(self._route_request_iterator()):
-                msg_type = betterproto.which_one_of(server_msg, "content")
+                msg_type, _ = betterproto.which_one_of(server_msg, "content")
 
                 if msg_type == "registration_response":
                     continue
@@ -508,8 +494,8 @@ class ApiRouteWorker(FunctionServer):
                         result = await self._handler(ctx)
                         ctx = result if result else ctx
                         response = ClientMessage(id=server_msg.id, http_response=_http_context_to_proto_response(ctx))
-                    except Exception as e:
-                        logging.exception(f"An unhandled error occurred in an api route handler: {e}")
+                    except Exception as e:  # pylint: disable=broad-except
+                        logging.exception("An unhandled error occurred in an api route handler: %s", e)
                         failed_http_response = ProtoHttpResponse(
                             status=500,
                             body=b"Internal Server Error",
@@ -527,10 +513,13 @@ class ApiRouteWorker(FunctionServer):
 
 def api(name: str, opts: Optional[ApiOptions] = None) -> Api:
     """Create a new API resource."""
-    return Nitric._create_resource(Api, name, opts=opts)  # type: ignore
+    print("api")
+    return Nitric._create_resource(Api, name, opts=opts)  # type: ignore pylint: disable=protected-access
 
 
 class OidcOptions:
+    """An OIDC security definition for an API."""
+
     name: str
     issuer: str
     audiences: List[str]
@@ -542,6 +531,8 @@ class OidcOptions:
 
 
 class ScopedOidcOptions(OidcOptions):
+    """An OIDC security definition for an API with scopes."""
+
     scopes: List[str]
 
     def __init__(self, name: str, issuer: str, audiences: List[str], scopes: List[str]):
@@ -550,18 +541,20 @@ class ScopedOidcOptions(OidcOptions):
 
 
 def _oidc_to_resource(b: OidcSecurityDefinition) -> ResourceIdentifier:
+    """Generate a resource identifier for an OIDC security definition."""
     return ResourceIdentifier(name=b.name, type=ResourceType.ApiSecurityDefinition)
 
 
 class OidcSecurityDefinition(BaseResource):
+    """An OIDC security definition for an API."""
+
     api_name: str
     issuer: str
     rule_name: str
     audiences: List[str]
 
     def __init__(self, name: str, api_name: str, options: OidcOptions):
-        super().__init__()
-        self.name = name
+        super().__init__(name)
         self.api_name = api_name
         self.issuer = options.issuer
         self.audiences = options.audiences
@@ -582,12 +575,15 @@ class OidcSecurityDefinition(BaseResource):
                 )
             )
         except GRPCError as grpc_err:
-            raise exception_from_grpc_error(grpc_err)
+            raise exception_from_grpc_error(grpc_err) from grpc_err
 
 
 def _attach_oidc(api_name: str, options: OidcOptions) -> OidcSecurityDefinition:
-    return Nitric._create_resource(OidcSecurityDefinition, f"{options.name}-{api_name}", api_name, options)
+    return Nitric._create_resource(  # pylint: disable=protected-access
+        OidcSecurityDefinition, f"{options.name}-{api_name}", api_name, options
+    )
 
 
 def oidc_rule(name: str, issuer: str, audiences: List[str]) -> Callable[[List[str]], ScopedOidcOptions]:
+    """Create a function that returns scoped OIDC security definitions."""
     return lambda scopes: ScopedOidcOptions(name, issuer, audiences, scopes)

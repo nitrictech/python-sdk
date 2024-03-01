@@ -18,33 +18,22 @@
 #
 from __future__ import annotations
 
-import inspect
-from enum import Enum
-
 import functools
+import inspect
 import json
+from abc import ABC, abstractmethod
+from enum import Enum
+from typing import Any, Dict, Generic, List, Optional, Protocol, TypeVar, Union
 
-from typing import Dict, Generic, Protocol, Union, List, TypeVar, Any, Optional
 from opentelemetry import propagate
 
-from abc import ABC, abstractmethod
-
-from nitric.proto.schedules.v1 import (
-    ServerMessage as ScheduleServerMessage,
-)
-from nitric.proto.storage.v1 import (
-    BlobEventType,
-    BlobEventRequest,
-)
-from nitric.proto.topics.v1 import (
-    ClientMessage as TopicClientMessage,
-    ServerMessage as TopicServerMessage,
-    MessageResponse as TopicResponse,
-)
-from nitric.proto.websockets.v1 import (
-    ServerMessage as WebsocketServerMessage,
-    WebsocketEventResponse,
-)
+from nitric.proto.schedules.v1 import ServerMessage as ScheduleServerMessage
+from nitric.proto.storage.v1 import BlobEventRequest, BlobEventType
+from nitric.proto.topics.v1 import ClientMessage as TopicClientMessage
+from nitric.proto.topics.v1 import MessageResponse as TopicResponse
+from nitric.proto.topics.v1 import ServerMessage as TopicServerMessage
+from nitric.proto.websockets.v1 import ServerMessage as WebsocketServerMessage
+from nitric.proto.websockets.v1 import WebsocketEventResponse
 
 Record = Dict[str, Union[str, List[str]]]
 PROPAGATOR = propagate.get_global_textmap()
@@ -461,4 +450,3 @@ class FunctionServer(ABC):
     @abstractmethod
     async def start(self) -> None:
         """Start the worker."""
-        pass

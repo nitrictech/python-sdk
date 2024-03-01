@@ -19,38 +19,57 @@
 from __future__ import annotations
 
 import logging
-from typing import Literal, Callable, Dict, List, Union
+from typing import Callable, Literal
 
 import betterproto
 import grpclib
+from grpclib import GRPCError
+from grpclib.client import Channel
 
+from nitric.application import Nitric
 from nitric.bidi import AsyncNotifierList
 from nitric.context import (
     FunctionServer,
-    WebsocketHandler,
-    WebsocketContext,
-    WebsocketRequest,
     Record,
-    WebsocketConnectionResponse,
     WebsocketConnectionRequest,
+    WebsocketConnectionResponse,
+    WebsocketContext,
+    WebsocketHandler,
     WebsocketMessageRequest,
+    WebsocketRequest,
 )
-from nitric.api.websocket import Websocket as WebsocketClient
-from nitric.application import Nitric
-from nitric.resources.resource import Resource as BaseResource
-from nitric.proto.resources.v1 import ResourceIdentifier, Action, ResourceType, ResourceDeclareRequest, PolicyResource
-from grpclib import GRPCError
 from nitric.exception import exception_from_grpc_error
+from nitric.proto.resources.v1 import Action, PolicyResource, ResourceDeclareRequest, ResourceIdentifier, ResourceType
+from nitric.proto.websockets.v1 import ClientMessage, RegistrationRequest
+from nitric.proto.websockets.v1 import WebsocketConnectionResponse as ProtoWebsocketConnectionResponse
 from nitric.proto.websockets.v1 import (
-    ClientMessage,
-    WebsocketEventType,
-    WebsocketHandlerStub,
     WebsocketEventRequest,
     WebsocketEventResponse,
-    RegistrationRequest,
-    WebsocketConnectionResponse as ProtoWebsocketConnectionResponse,
+    WebsocketEventType,
+    WebsocketHandlerStub,
+    WebsocketSendRequest,
+    WebsocketStub,
 )
+from nitric.resources.resource import Resource as BaseResource
 from nitric.utils import new_default_channel
+
+
+class WebsocketRef:
+    """A reference to a deployed websocket, used to interact with the websocket at runtime."""
+
+    def __init__(self) -> None:
+        """Construct a Nitric Websocket Client."""
+        self._channel: Channel = new_default_channel()
+        self._websocket_stub = WebsocketStub(channel=self._channel)
+
+    async def send(self, socket: str, connection_id: str, data: bytes):
+        """Send data to a connection on a socket."""
+        try:
+            await self._websocket_stub.send_message(
+                websocket_send_request=WebsocketSendRequest(socket_name=socket, connection_id=connection_id, data=data)
+            )
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err) from grpc_err
 
 
 class WebsocketWorkerOptions:
@@ -81,15 +100,13 @@ class Websocket(BaseResource):
     """A Websocket API."""
 
     app: Nitric
-    _websocket: WebsocketClient
+    _websocket: WebsocketRef
     name: str
 
     def __init__(self, name: str):
         """Construct a new Websocket API."""
-        super().__init__()
-
-        self._websocket = WebsocketClient()
-        self.name = name
+        super().__init__(name)
+        self._websocket = WebsocketRef()
 
     async def _register(self) -> None:
         try:
@@ -112,7 +129,7 @@ class Websocket(BaseResource):
             )
 
         except GRPCError as grpc_err:
-            raise exception_from_grpc_error(grpc_err)
+            raise exception_from_grpc_error(grpc_err) from grpc_err
 
     async def send(
         self,
@@ -141,7 +158,7 @@ def websocket(name: str) -> Websocket:
 
     If a websocket has already been registered with the same name, the original reference will be reused.
     """
-    return Nitric._create_resource(Websocket, name)  # type: ignore
+    return Nitric._create_resource(Websocket, name)  # type: ignore pylint: disable=protected-access
 
 
 def _websocket_context_from_proto(msg: WebsocketEventRequest) -> WebsocketContext:
@@ -213,8 +230,8 @@ class WebsocketWorker(FunctionServer):
                         response = ClientMessage(id=server_msg.id, websocket_event_response=WebsocketEventResponse())
                         if isinstance(ctx.res, WebsocketConnectionResponse):
                             response.websocket_event_response.connection_response.reject = ctx.res.reject
-                    except Exception as e:
-                        logging.exception(f"An unhandled error occurred in a websocket event handler: {e}")
+                    except Exception as e:  # pylint: disable=broad-except
+                        logging.exception("An unhandled error occurred in a websocket event handler: %s", e)
                         response = ClientMessage(id=server_msg.id, websocket_event_response=WebsocketEventResponse())
                         if isinstance(ctx.req, WebsocketConnectionRequest):
                             response.websocket_event_response.connection_response.reject = True

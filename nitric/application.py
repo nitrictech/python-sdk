@@ -17,11 +17,10 @@
 # limitations under the License.
 #
 import asyncio
-from nitric.exception import NitricUnavailableException
+from typing import Any, Dict, List, Type, TypeVar
+
 from nitric.context import FunctionServer
-
-from typing import Dict, List, Type, Any, TypeVar
-
+from nitric.exception import NitricUnavailableException
 
 BT = TypeVar("BT")
 
@@ -38,11 +37,13 @@ class Nitric:
         "queue": {},
         "collection": {},
         "websocket": {},
+        "kvstoreresource": {},
     }
 
     @classmethod
     def _register_worker(cls, srv: FunctionServer):
         """Register a worker for this application."""
+        print("registering worker")
         cls._workers.append(srv)
 
     @classmethod
@@ -57,7 +58,7 @@ class Nitric:
         except ConnectionRefusedError:
             raise NitricUnavailableException(
                 'Unable to connect to a nitric server! If you\'re running locally make sure to run "nitric start"'
-            )
+            ) from None
 
     @classmethod
     def run(cls) -> None:
@@ -66,6 +67,7 @@ class Nitric:
 
         This will execute in an existing event loop if there is one, otherwise it will attempt to create its own.
         """
+        print("running")
         try:
             try:
                 loop = asyncio.get_running_loop()
@@ -78,4 +80,4 @@ class Nitric:
         except ConnectionRefusedError:
             raise NitricUnavailableException(
                 'Unable to connect to a nitric server! If you\'re running locally make sure to run "nitric start"'
-            )
+            ) from None

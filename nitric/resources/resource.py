@@ -21,20 +21,19 @@ from __future__ import annotations
 import asyncio
 from abc import ABC, abstractmethod
 from asyncio import Task
-
-from typing import Any, Sequence, TypeVar, Type, Optional, List
+from typing import Any, List, Optional, Sequence, Type, TypeVar
 
 from grpclib import GRPCError
-from nitric.proto.resources.v1 import (
-    PolicyResource,
-    ResourceType,
-    ResourceIdentifier,
-    ResourceDeclareRequest,
-    ResourcesStub,
-    Action,
-)
 
-from nitric.exception import exception_from_grpc_error, NitricResourceException
+from nitric.exception import NitricResourceException, exception_from_grpc_error
+from nitric.proto.resources.v1 import (
+    Action,
+    PolicyResource,
+    ResourceDeclareRequest,
+    ResourceIdentifier,
+    ResourcesStub,
+    ResourceType,
+)
 from nitric.utils import new_default_channel
 
 T = TypeVar("T", bound="Resource")
@@ -43,8 +42,11 @@ T = TypeVar("T", bound="Resource")
 class Resource(ABC):
     """A base resource class with common functionality."""
 
-    def __init__(self):
+    name: str
+
+    def __init__(self, name: str):
         """Construct a new resource."""
+        self.name = name
         self._reg: Optional[Task[Any]] = None  # type: ignore
         self._channel = new_default_channel()
         self._resources_stub = ResourcesStub(channel=self._channel)
@@ -75,7 +77,7 @@ class SecureResource(Resource):
     """A secure base resource class."""
 
     @abstractmethod
-    def _to_resource(self) -> ResourceIdentifier:
+    def _to_resource_id(self) -> ResourceIdentifier:
         pass
 
     @abstractmethod
@@ -89,7 +91,7 @@ class SecureResource(Resource):
         policy = PolicyResource(
             principals=[ResourceIdentifier(type=ResourceType.Service)],
             actions=self._perms_to_actions(*args),
-            resources=[self._to_resource()],
+            resources=[self._to_resource_id()],
         )
         try:
             await self._resources_stub.declare(
@@ -98,15 +100,14 @@ class SecureResource(Resource):
                 )
             )
         except GRPCError as grpc_err:
-            raise exception_from_grpc_error(grpc_err)
+            raise exception_from_grpc_error(grpc_err) from grpc_err
 
     def _register_policy(self, *args: str) -> None:
         try:
             loop = asyncio.get_event_loop()
             loop.run_until_complete(self._register_policy_async(*args))
         except RuntimeError:
-            # TODO: Check nitric runtime ENV variable
             raise NitricResourceException(
-                "Nitric resources cannot be declared at runtime e.g. within the scope of a function. \
+                "Nitric resources cannot be declared at runtime e.g. within the scope of a runtime function. \
                     Move resource declarations to the top level of scripts so that they can be safely provisioned"
-            )
+            ) from None

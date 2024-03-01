@@ -18,68 +18,121 @@
 #
 from __future__ import annotations
 
-from nitric.api.kv import KVStore
-from nitric.exception import exception_from_grpc_error
-from typing import List, Literal
+from typing import Any, List, Literal
+
 from grpclib import GRPCError
+from grpclib.client import Channel
+
 from nitric.application import Nitric
+from nitric.exception import exception_from_grpc_error
+from nitric.proto.kvstore.v1 import (
+    KvStoreDeleteKeyRequest,
+    KvStoreGetValueRequest,
+    KvStoreSetValueRequest,
+    KvStoreStub,
+    ValueRef,
+)
 from nitric.proto.resources.v1 import (
+    Action,
     KeyValueStoreResource,
+    ResourceDeclareRequest,
     ResourceIdentifier,
     ResourceType,
-    Action,
-    ResourceDeclareRequest,
 )
 from nitric.resources.resource import SecureResource
+from nitric.utils import dict_from_struct, new_default_channel, struct_from_dict
 
 
-KVPermission = Literal["getting", "setting", "deleting"]
+class KeyValueStoreRef:
+    """A reference to a deployed key value store, used to interact with the key value store at runtime."""
+
+    _kv_stub: KvStoreStub
+    _channel: Channel
+    name: str
+
+    def __init__(self, name: str):
+        """Construct a reference to a deployed key value store."""
+        self._channel: Channel = new_default_channel()
+        self._kv_stub = KvStoreStub(channel=self._channel)
+        self.name = name
+
+    def __del__(self):
+        # close the channel when this client is destroyed
+        if self._channel is not None:
+            self._channel.close()
+
+    async def set(self, key: str, value: dict[str, Any]) -> None:
+        """Set a key and value in the key value store."""
+        ref = ValueRef(store=self.name, key=key)
+
+        req = KvStoreSetValueRequest(ref=ref, content=struct_from_dict(value))
+
+        await self._kv_stub.set_value(kv_store_set_value_request=req)
+
+    async def get(self, key: str) -> dict[str, Any]:
+        """Return a value from the key value store."""
+        ref = ValueRef(store=self.name, key=key)
+
+        req = KvStoreGetValueRequest(ref=ref)
+
+        resp = await self._kv_stub.get_value(kv_store_get_value_request=req)
+
+        return dict_from_struct(resp.value.content)
+
+    async def delete(self, key: str) -> None:
+        """Delete a key from the key value store."""
+        ref = ValueRef(store=self.name, key=key)
+
+        req = KvStoreDeleteKeyRequest(ref=ref)
+
+        await self._kv_stub.delete_key(kv_store_delete_key_request=req)
 
 
-class KVStoreResource(SecureResource):
+KVPermission = Literal["get", "set", "delete"]
+
+
+class KeyValueStore(SecureResource):
     """A key value store resource."""
 
     def __init__(self, name: str):
         """Construct a new key value store."""
-        super().__init__()
-        self.name = name
+        super().__init__(name)
 
     async def _register(self) -> None:
         try:
             await self._resources_stub.declare(
                 resource_declare_request=ResourceDeclareRequest(
-                    id=self._to_resource(), key_value_store=KeyValueStoreResource()
+                    id=self._to_resource_id(), key_value_store=KeyValueStoreResource()
                 )
             )
         except GRPCError as grpc_err:
-            raise exception_from_grpc_error(grpc_err)
+            raise exception_from_grpc_error(grpc_err) from grpc_err
 
-    def _to_resource(self) -> ResourceIdentifier:
+    def _to_resource_id(self) -> ResourceIdentifier:
         return ResourceIdentifier(name=self.name, type=ResourceType.KeyValueStore)
 
     def _perms_to_actions(self, *args: KVPermission) -> List[Action]:
         permission_actions_map: dict[KVPermission, List[Action]] = {
-            "getting": [Action.KeyValueStoreRead],
-            "setting": [Action.KeyValueStoreWrite],
-            "deleting": [Action.KeyValueStoreDelete],
+            "get": [Action.KeyValueStoreRead],
+            "set": [Action.KeyValueStoreWrite],
+            "delete": [Action.KeyValueStoreDelete],
         }
 
         return [action for perm in args for action in permission_actions_map[perm]]
 
-    def allow(self, perm: KVPermission, *args: KVPermission) -> KVStore:
+    def allow(self, perm: KVPermission, *args: KVPermission) -> KeyValueStoreRef:
         """Request the required permissions for this collection."""
         # Ensure registration of the resource is complete before requesting permissions.
         str_args = [str(perm)] + [str(permission) for permission in args]
         self._register_policy(*str_args)
 
-        return KVStore(self.name)
+        return KeyValueStoreRef(self.name)
 
 
-def kv(name: str) -> KVStoreResource:
+def kv(name: str) -> KeyValueStore:
     """
     Create and register a key value store.
 
     If a key value store has already been registered with the same name, the original reference will be reused.
     """
-    # type ignored because the register call is treated as protected.
-    return Nitric._create_resource(KVStore, name)  # type: ignore
+    return Nitric._create_resource(KeyValueStore, name)  # type: ignore pylint: disable=protected-access

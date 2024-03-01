@@ -17,13 +17,14 @@
 # limitations under the License.
 #
 import asyncio
-from typing import Generic, TypeVar, List
-
+from typing import Generic, List, TypeVar
 
 T = TypeVar("T")
 
 
 class AsyncNotifierList(Generic[T]):
+    """An async iterable that notifies when new items are added."""
+
     def __init__(self):
         self.items: List[T] = []  # type: ignore
         self.new_item_event: asyncio.Event = asyncio.Event()  # type: ignore
