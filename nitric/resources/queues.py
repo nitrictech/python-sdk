@@ -64,7 +64,7 @@ class EnqueueFailedException(Exception):
 class FailedMessage:
     """Represents a failed queue publish."""
 
-    message: dict[str, Any] = field(default={})
+    message: dict[str, Any] = field(default_factory=dict)
     details: str = field(default="")
 
 

@@ -145,7 +145,7 @@ class SecretValue:
         return bytes(self)
 
 
-SecretPermission = Literal["accessing", "putting"]
+SecretPermission = Literal["access", "put"]
 
 
 class Secret(SecureResource):
@@ -171,8 +171,8 @@ class Secret(SecureResource):
 
     def _perms_to_actions(self, *args: SecretPermission) -> List[Action]:
         permissions_actions_map: dict[SecretPermission, List[Action]] = {
-            "accessing": [Action.SecretAccess],
-            "putting": [Action.SecretPut],
+            "access": [Action.SecretAccess],
+            "put": [Action.SecretPut],
         }
 
         return [action for perm in args for action in permissions_actions_map[perm]]

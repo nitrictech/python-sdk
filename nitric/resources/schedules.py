@@ -46,8 +46,7 @@ class ScheduleServer(FunctionServer):
     description: str
 
     handler: IntervalHandler
-    registration_request: RegistrationRequest
-    server: SchedulesStub
+    _registration_request: RegistrationRequest
     _responses: AsyncNotifierList[ClientMessage]
 
     def __init__(self, description: str):
@@ -61,7 +60,7 @@ class ScheduleServer(FunctionServer):
 
         E.g. every("3 hours")
         """
-        self.registration_request = RegistrationRequest(
+        self._registration_request = RegistrationRequest(
             schedule_name=self.description,
             every=ScheduleEvery(rate=rate_description.lower()),
         )
@@ -76,7 +75,7 @@ class ScheduleServer(FunctionServer):
 
         E.g. cron("3 * * * *")
         """
-        self.registration_request = RegistrationRequest(
+        self._registration_request = RegistrationRequest(
             schedule_name=self.description,
             cron=ScheduleCron(expression=cron_expression),
         )
@@ -87,7 +86,7 @@ class ScheduleServer(FunctionServer):
 
     async def _schedule_request_iterator(self):
         # Register with the server
-        yield ClientMessage(registration_request=self.registration_request)
+        yield ClientMessage(registration_request=self._registration_request)
         # wait for any responses for the server and send them
         async for response in self._responses:
             yield response
@@ -95,10 +94,10 @@ class ScheduleServer(FunctionServer):
     async def start(self) -> None:
         """Register this schedule and start listening for requests."""
         channel = new_default_channel()
-        server = SchedulesStub(channel=channel)
+        schedules_stub = SchedulesStub(channel=channel)
 
         try:
-            async for server_msg in server.schedule(self._schedule_request_iterator()):
+            async for server_msg in schedules_stub.schedule(self._schedule_request_iterator()):
                 msg_type = betterproto.which_one_of(server_msg, "content")
 
                 if msg_type == "registration_response":

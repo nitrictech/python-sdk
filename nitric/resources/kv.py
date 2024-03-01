@@ -67,7 +67,10 @@ class KeyValueStoreRef:
 
         req = KvStoreSetValueRequest(ref=ref, content=struct_from_dict(value))
 
-        await self._kv_stub.set_value(kv_store_set_value_request=req)
+        try:
+            await self._kv_stub.set_value(kv_store_set_value_request=req)
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err) from grpc_err
 
     async def get(self, key: str) -> dict[str, Any]:
         """Return a value from the key value store."""
@@ -75,9 +78,12 @@ class KeyValueStoreRef:
 
         req = KvStoreGetValueRequest(ref=ref)
 
-        resp = await self._kv_stub.get_value(kv_store_get_value_request=req)
+        try:
+            resp = await self._kv_stub.get_value(kv_store_get_value_request=req)
 
-        return dict_from_struct(resp.value.content)
+            return dict_from_struct(resp.value.content)
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err) from grpc_err
 
     async def delete(self, key: str) -> None:
         """Delete a key from the key value store."""
@@ -85,7 +91,10 @@ class KeyValueStoreRef:
 
         req = KvStoreDeleteKeyRequest(ref=ref)
 
-        await self._kv_stub.delete_key(kv_store_delete_key_request=req)
+        try:
+            await self._kv_stub.delete_key(kv_store_delete_key_request=req)
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err) from grpc_err
 
 
 KVPermission = Literal["get", "set", "delete"]
@@ -93,10 +102,6 @@ KVPermission = Literal["get", "set", "delete"]
 
 class KeyValueStore(SecureResource):
     """A key value store resource."""
-
-    def __init__(self, name: str):
-        """Construct a new key value store."""
-        super().__init__(name)
 
     async def _register(self) -> None:
         try:

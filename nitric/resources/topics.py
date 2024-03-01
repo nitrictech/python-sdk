@@ -31,11 +31,10 @@ from nitric.bidi import AsyncNotifierList
 from nitric.context import EventHandler, FunctionServer, MessageContext, MessageRequest
 from nitric.exception import exception_from_grpc_error
 from nitric.proto.resources.v1 import Action, ResourceDeclareRequest, ResourceIdentifier, ResourceType
-from nitric.proto.topics.v1 import ClientMessage
+from nitric.proto.topics.v1 import ClientMessage, TopicMessage
 from nitric.proto.topics.v1 import MessageRequest as ProtoMessageRequest
 from nitric.proto.topics.v1 import MessageResponse as ProtoMessageResponse
 from nitric.proto.topics.v1 import RegistrationRequest, SubscriberStub
-from nitric.proto.topics.v1 import TopicMessage as Message
 from nitric.proto.topics.v1 import TopicPublishRequest, TopicsStub
 from nitric.resources.resource import SecureResource
 from nitric.utils import new_default_channel, struct_from_dict
@@ -71,8 +70,11 @@ class TopicRef:
         :param message: the event to publish
         :return: the published event, with the id added if one was auto-generated
         """
+        if not isinstance(message, dict):
+            raise ValueError("Message must be a dictionary")
+
         try:
-            proto_message = Message(struct_payload=struct_from_dict(message))
+            proto_message = TopicMessage(struct_payload=struct_from_dict(message))
             await self._topics_stub.publish(
                 topic_publish_request=TopicPublishRequest(topic_name=self.name, message=proto_message)
             )

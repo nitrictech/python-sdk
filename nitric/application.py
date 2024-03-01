@@ -37,7 +37,7 @@ class Nitric:
         "queue": {},
         "collection": {},
         "websocket": {},
-        "kvstoreresource": {},
+        "keyvaluestore": {},
     }
 
     @classmethod

@@ -38,6 +38,8 @@ from nitric.proto.storage.v1 import (
 from nitric.resources import bucket
 from nitric.resources.buckets import BucketRef
 
+# pylint: disable=protected-access,missing-function-docstring,missing-class-docstring
+
 
 class Object(object):
     pass

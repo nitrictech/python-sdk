@@ -25,6 +25,7 @@ from nitric.resources.schedules import ScheduleServer, schedule
 from nitric.resources.secrets import Secret, secret
 from nitric.resources.topics import Topic, topic
 from nitric.resources.websockets import Websocket, websocket
+from nitric.resources.queues import Queue, queue
 
 __all__ = [
     "api",
@@ -36,6 +37,8 @@ __all__ = [
     "Bucket",
     "kv",
     "KeyValueStoreRef",
+    "queue",
+    "Queue",
     "ScheduleServer",
     "schedule",
     "secret",
