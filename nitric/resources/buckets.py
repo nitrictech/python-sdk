@@ -258,6 +258,7 @@ class Listener(FunctionServer):
         notification_prefix_filter: str,
         handler: BucketNotificationHandler,
     ):
+        """Construct a new bucket event listener."""
         self._handler = handler
         self._responses = AsyncNotifierList()
 

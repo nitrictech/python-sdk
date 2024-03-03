@@ -18,7 +18,7 @@
 #
 """Nitric Python SDK API Documentation. See: https://nitric.io/docs?lang=python for full framework documentation."""
 
-from nitric.resources.apis import Api, api, ApiOptions, ApiDetails, JwtSecurityDefinition
+from nitric.resources.apis import Api, api, ApiOptions, ApiDetails, JwtSecurityDefinition, oidc_rule
 from nitric.resources.buckets import Bucket, bucket
 from nitric.resources.kv import KeyValueStoreRef, kv
 from nitric.resources.schedules import ScheduleServer, schedule
@@ -37,6 +37,7 @@ __all__ = [
     "Bucket",
     "kv",
     "KeyValueStoreRef",
+    "oidc_rule",
     "queue",
     "Queue",
     "ScheduleServer",

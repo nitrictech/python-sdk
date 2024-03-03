@@ -38,6 +38,7 @@ class Nitric:
         "collection": {},
         "websocket": {},
         "keyvaluestore": {},
+        "oidcsecuritydefinition": {},
     }
 
     @classmethod

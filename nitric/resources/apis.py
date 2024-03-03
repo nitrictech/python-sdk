@@ -98,7 +98,7 @@ class MethodOptions:
     security: Optional[List[ScopedOidcOptions]] = None
 
 
-SecurityDefinition = JwtSecurityDefinition
+# SecurityDefinition = JwtSecurityDefinition
 
 
 class ApiOptions:
@@ -106,25 +106,20 @@ class ApiOptions:
 
     path: str
     middleware: Optional[Union[HttpMiddleware, List[HttpMiddleware]]]
-    security_definitions: dict[str, SecurityDefinition]
-    security: dict[str, List[str]]
+    security: Optional[List[ScopedOidcOptions]]
 
     def __init__(
         self,
         path: str = "",
         middleware: Optional[Union[HttpMiddleware, List[HttpMiddleware]]] = None,
-        security_definitions: Optional[dict[str, SecurityDefinition]] = None,
-        security: Optional[dict[str, List[str]]] = None,
+        security: Optional[List[ScopedOidcOptions]] = None,
     ):
         """Construct a new API options object."""
         if middleware is None:
             middleware = []
-        if security_definitions is None:
-            security_definitions = {}
         if security is None:
             security = {}
         self.middleware = middleware
-        self.security_definitions = security_definitions
         self.security = security
         self.path = path
 
@@ -145,10 +140,10 @@ def _to_resource_identifier(b: Api) -> ResourceIdentifier:
     return ResourceIdentifier(name=b.name, type=ResourceType.Api)
 
 
-def _security_to_grpc_declaration(security: Optional[dict[str, List[str]]] = None) -> dict[str, ApiScopes]:
+def _security_to_grpc_declaration(security: Optional[List[ScopedOidcOptions]] = None) -> dict[str, ApiScopes]:
     if security is None or len(security) == 0:
         return {}
-    return {k: ApiScopes(v) for k, v in security.items()}
+    return {sec.name: ApiScopes(sec.scopes) for sec in security}
 
 
 Param = ParamSpec("Param")
@@ -165,8 +160,7 @@ class Api(BaseResource):
     path: str
     middleware: List[HttpMiddleware]
     routes: List[Route]
-    security_definitions: dict[str, SecurityDefinition]
-    security: dict[str, List[str]]
+    security: Optional[List[ScopedOidcOptions]]
     _api_stub: ApiStub
 
     def __init__(self, name: str, opts: Optional[ApiOptions] = None):
@@ -179,13 +173,10 @@ class Api(BaseResource):
         self.middleware = (
             opts.middleware
             if isinstance(opts.middleware, list)
-            else [opts.middleware]
-            if opts.middleware is not None
-            else []
+            else [opts.middleware] if opts.middleware is not None else []
         )
         self.path = opts.path
         self.routes = []
-        self.security_definitions = opts.security_definitions
         self.security = opts.security
 
     async def _register(self) -> None:
@@ -198,6 +189,10 @@ class Api(BaseResource):
                     ),
                 )
             )
+
+            # Attach security rules for this api
+            for security_rule in self.security if self.security else []:
+                _attach_oidc(api_name=self.name, options=security_rule)
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err) from grpc_err
 
@@ -446,6 +441,7 @@ class ApiRouteWorker(FunctionServer):
         handler: HttpHandler,
         options: MethodOptions,
     ):
+        """Construct a new ApiRouteWorker."""
         sec = {opt.name: ApiWorkerScopes(scopes=opt.scopes) for opt in options.security} if options.security else {}
         reg_options = ApiWorkerOptions(
             security=sec,
@@ -525,6 +521,7 @@ class OidcOptions:
     audiences: List[str]
 
     def __init__(self, name: str, issuer: str, audiences: List[str]):
+        """Construct a new OIDC security definition."""
         self.name = name
         self.issuer = issuer
         self.audiences = audiences
@@ -536,6 +533,7 @@ class ScopedOidcOptions(OidcOptions):
     scopes: List[str]
 
     def __init__(self, name: str, issuer: str, audiences: List[str], scopes: List[str]):
+        """Construct a new scoped OIDC security definition."""
         super().__init__(name=name, issuer=issuer, audiences=audiences)
         self.scopes = scopes
 
@@ -554,6 +552,7 @@ class OidcSecurityDefinition(BaseResource):
     audiences: List[str]
 
     def __init__(self, name: str, api_name: str, options: OidcOptions):
+        """Construct a new OIDC security definition."""
         super().__init__(name)
         self.api_name = api_name
         self.issuer = options.issuer

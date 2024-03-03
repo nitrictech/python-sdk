@@ -32,8 +32,9 @@ from nitric.proto.storage.v1 import BlobEventRequest, BlobEventType
 from nitric.proto.topics.v1 import ClientMessage as TopicClientMessage
 from nitric.proto.topics.v1 import MessageResponse as TopicResponse
 from nitric.proto.topics.v1 import ServerMessage as TopicServerMessage
-from nitric.proto.websockets.v1 import ServerMessage as WebsocketServerMessage
-from nitric.proto.websockets.v1 import WebsocketEventResponse
+
+# from nitric.proto.websockets.v1 import ServerMessage as WebsocketServerMessage
+# from nitric.proto.websockets.v1 import WebsocketEventResponse
 
 Record = Dict[str, Union[str, List[str]]]
 PROPAGATOR = propagate.get_global_textmap()
@@ -232,6 +233,7 @@ class WebsocketConnectionResponse(WebsocketResponse):
     reject: bool
 
     def __init__(self, reject: bool = False):
+        """Construct a new WebsocketConnectionResponse."""
         self.reject = reject
 
 
@@ -337,7 +339,7 @@ class IntervalResponse:
     _request_id: str
 
     def __init__(self, request_id: str):
-        """Construct a new IntervalResponse"""
+        """Construct a new IntervalResponse."""
         self._request_id = request_id
 
 

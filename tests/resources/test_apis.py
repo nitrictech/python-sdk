@@ -26,8 +26,10 @@ from nitric.exception import InternalException
 
 # from nitric.faas import HttpMethod, MethodOptions, ApiWorkerOptions
 from nitric.resources import api, ApiOptions, JwtSecurityDefinition
-from nitric.resources.apis import MethodOptions, ScopedOidcOptions
+from nitric.resources.apis import MethodOptions, ScopedOidcOptions, oidc_rule
 from nitric.proto.resources.v1 import (
+    ApiOpenIdConnectionDefinition,
+    ApiSecurityDefinitionResource,
     ResourceDeclareRequest,
     ApiResource,
     ResourceIdentifier,
@@ -131,21 +133,34 @@ class ApiTest(IsolatedAsyncioTestCase):
         mock_response = Object()
         mock_declare.return_value = mock_response
 
+        test_rule = oidc_rule(
+            "user", issuer="https://example-issuer.com", audiences=["test-audience", "other-audience"]
+        )
+
         with patch("nitric.proto.resources.v1.ResourcesStub.declare", mock_declare):
             api(
                 "test-api-security-definition",
                 ApiOptions(
-                    security_definitions={
-                        "user": JwtSecurityDefinition(
-                            issuer="https://example-issuer.com", audiences=["test-audience", "other-audience"]
-                        )
-                    },
-                    security={"user": ["test:read", "test:write"]},
+                    security=[test_rule(["test:read", "test:write"])],
                 ),
             )
 
+        mock_declare.assert_any_call(
+            resource_declare_request=ResourceDeclareRequest(
+                id=ResourceIdentifier(
+                    type=ResourceType.ApiSecurityDefinition, name="user-test-api-security-definition"
+                ),
+                api_security_definition=ApiSecurityDefinitionResource(
+                    api_name="test-api-security-definition",
+                    oidc=ApiOpenIdConnectionDefinition(
+                        issuer="https://example-issuer.com", audiences=["test-audience", "other-audience"]
+                    ),
+                ),
+            )
+        )
+
         # Check expected values were passed to Stub
-        mock_declare.assert_called_with(
+        mock_declare.assert_any_call(
             resource_declare_request=ResourceDeclareRequest(
                 id=ResourceIdentifier(type=ResourceType.Api, name="test-api-security-definition"),
                 api=ApiResource(
@@ -153,6 +168,8 @@ class ApiTest(IsolatedAsyncioTestCase):
                 ),
             )
         )
+
+        assert mock_declare.call_count == 2
 
     @patch.object(Api, "_register", AsyncMock())
     async def test_get_api_url(self):
@@ -249,7 +266,9 @@ class ApiTest(IsolatedAsyncioTestCase):
 
         assert test_method.server._registration_request.methods == ["GET", "POST"]
         assert test_method.server._registration_request.api == "test-api-define-method"
-        assert test_method.server._registration_request.options.security == {'user': ApiWorkerScopes(scopes=['test:delete'])}
+        assert test_method.server._registration_request.options.security == {
+            "user": ApiWorkerScopes(scopes=["test:delete"])
+        }
 
     def test_api_get(self):
         mock_declare = AsyncMock()

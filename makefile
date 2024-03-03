@@ -21,7 +21,7 @@ test:
 	@echo Running Tox tests
 	@tox -e py
 
-NITRIC_VERSION := 1.0.0
+NITRIC_VERSION := 1.1.0
 
 download-local:
 	@rm -r ./proto/nitric

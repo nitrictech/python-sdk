@@ -26,10 +26,12 @@ class AsyncNotifierList(Generic[T]):
     """An async iterable that notifies when new items are added."""
 
     def __init__(self):
+        """Create a new AsyncNotifierList."""
         self.items: List[T] = []  # type: ignore
         self.new_item_event: asyncio.Event = asyncio.Event()  # type: ignore
 
     async def add_item(self, item: T) -> None:
+        """Add a new item to the list."""
         self.items.append(item)
         self.new_item_event.set()
 

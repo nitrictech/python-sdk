@@ -1,6 +1,7 @@
 .idea/
 .nitric/
 nitric.yaml
+nitric.*.yaml
 proto/
 
 # Byte-compiled / optimized / DLL files
