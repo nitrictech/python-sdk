@@ -39,7 +39,6 @@ OUTPUT="."
 CONTRACTS="./proto"
 
 grpc-client: install download generate-proto
-	@mv ./nitric/proto/KeyValue ./nitric/proto/keyvalue
 
 generate-proto:
 	@echo Generating Proto Sources
@@ -47,6 +46,7 @@ generate-proto:
 	@echo $(OUTPUT)
 	@mkdir -p $(OUTPUT)
 	@python3 -m grpc_tools.protoc -I $(CONTRACTS) --python_betterproto_out=$(OUTPUT) ./$(CONTRACTS)/nitric/proto/*/*/*.proto
+	@rm ./__init__.py
 
 license:
 	@echo Applying Apache 2 header to source files
