@@ -49,10 +49,8 @@ The SDK is in early stage development and APIs and interfaces are still subject 
 > nitric is included in all python related projects by default
 
 ```bash
-nitric new
+nitric new py-starter
 ```
-
-Follow the prompts and select `official/Python - Starter` as your template
 
 ### Adding to an existing project
 
@@ -64,9 +62,11 @@ pip3 install nitric
 ```
 
 **pipenv**
+
 ```
 pipenv install nitric
 ```
 
 ## Usage
+
 [Nitric Documentation](https://nitric.io/docs)
