@@ -44,7 +44,6 @@ class Nitric:
     @classmethod
     def _register_worker(cls, srv: FunctionServer):
         """Register a worker for this application."""
-        print("registering worker")
         cls._workers.append(srv)
 
     @classmethod
@@ -68,7 +67,6 @@ class Nitric:
 
         This will execute in an existing event loop if there is one, otherwise it will attempt to create its own.
         """
-        print("running")
         try:
             try:
                 loop = asyncio.get_running_loop()

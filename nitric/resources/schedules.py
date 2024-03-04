@@ -101,7 +101,6 @@ class ScheduleServer(FunctionServer):
                 msg_type = betterproto.which_one_of(server_msg, "content")
 
                 if msg_type == "registration_response":
-                    print("Schedule connected with membrane")
                     continue
                 if msg_type == "interval_request":
                     ctx = IntervalContext(server_msg)

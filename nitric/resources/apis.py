@@ -461,7 +461,6 @@ class ApiRouteWorker(FunctionServer):
         Nitric._register_worker(self)
 
     async def _route_request_iterator(self):
-        print("iter")
         # Register with the server
         yield ClientMessage(registration_request=self._registration_request)
         # wait for any responses for the server and send them
@@ -509,7 +508,6 @@ class ApiRouteWorker(FunctionServer):
 
 def api(name: str, opts: Optional[ApiOptions] = None) -> Api:
     """Create a new API resource."""
-    print("api")
     return Nitric._create_resource(Api, name, opts=opts)  # type: ignore pylint: disable=protected-access
 
 
