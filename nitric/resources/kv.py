@@ -18,7 +18,7 @@
 #
 from __future__ import annotations
 
-from typing import Any, List, Literal
+from typing import Any, List, Literal, AsyncIterator, Optional
 
 from grpclib import GRPCError
 from grpclib.client import Channel
@@ -26,6 +26,8 @@ from grpclib.client import Channel
 from nitric.application import Nitric
 from nitric.exception import exception_from_grpc_error
 from nitric.proto.kvstore.v1 import (
+    Store,
+    KvStoreScanKeysRequest,
     KvStoreDeleteKeyRequest,
     KvStoreGetValueRequest,
     KvStoreSetValueRequest,
@@ -85,6 +87,25 @@ class KeyValueStoreRef:
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err) from grpc_err
 
+    async def keys(self, prefix: Optional[str] = "") -> AsyncIterator[str]:
+        """Return a list of keys from the key value store."""
+        if prefix is None:
+            prefix = ""
+
+        req = KvStoreScanKeysRequest(
+            store=Store(name=self.name),
+            prefix=prefix,
+        )
+
+        try:
+            response_iterator = self._kv_stub.scan_keys(kv_store_scan_keys_request=req)
+            async for item in response_iterator:
+                yield item.key
+        except GRPCError as grpc_err:
+            raise exception_from_grpc_error(grpc_err) from grpc_err
+
+        return
+
     async def delete(self, key: str) -> None:
         """Delete a key from the key value store."""
         ref = ValueRef(store=self.name, key=key)
@@ -97,7 +118,7 @@ class KeyValueStoreRef:
             raise exception_from_grpc_error(grpc_err) from grpc_err
 
 
-KVPermission = Literal["get", "set", "delete"]
+KVPermission = Literal["get", "set", "delete", "scan"]
 
 
 class KeyValueStore(SecureResource):

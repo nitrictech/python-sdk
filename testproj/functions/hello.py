@@ -18,6 +18,12 @@ async def process_transactions(ctx: HttpContext):
     thing = ctx.req.params["thing"]
     await users.set(thing, {"thing": ctx.req.params["thing"]})
     out = await users.get(thing)
+
+    async_keys = users.keys()
+
+    async for key in async_keys:
+        print("got key:", key)
+
     print(out)
 
 
