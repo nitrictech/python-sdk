@@ -118,7 +118,7 @@ class KeyValueStoreRef:
             raise exception_from_grpc_error(grpc_err) from grpc_err
 
 
-KVPermission = Literal["get", "set", "delete", "scan"]
+KVPermission = Literal["get", "set", "delete"]
 
 
 class KeyValueStore(SecureResource):
