@@ -166,7 +166,7 @@ class Subscriber(FunctionServer):
 
         try:
             async for server_msg in server.subscribe(self._message_request_iterator()):
-                msg_type = betterproto.which_one_of(server_msg, "content")
+                msg_type, _ = betterproto.which_one_of(server_msg, "content")
 
                 if msg_type == "registration_response":
                     continue

@@ -168,7 +168,7 @@ def _websocket_context_from_proto(msg: WebsocketEventRequest) -> WebsocketContex
     req = WebsocketRequest(
         connection_id=msg.connection_id,
     )
-    evt_type = betterproto.which_one_of(msg, "websocket_event")
+    evt_type, _ = betterproto.which_one_of(msg, "websocket_event")
     if evt_type == "connection":
         req = WebsocketConnectionRequest(
             connection_id=msg.connection_id,
@@ -216,7 +216,7 @@ class WebsocketWorker(FunctionServer):
 
         try:
             async for server_msg in server.handle_events(self._ws_request_iterator()):
-                msg_type = betterproto.which_one_of(server_msg, "content")
+                msg_type, _ = betterproto.which_one_of(server_msg, "content")
 
                 if msg_type == "registration_response":
                     continue
