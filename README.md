@@ -49,7 +49,7 @@ The SDK is in early stage development and APIs and interfaces are still subject 
 > nitric is included in all python related projects by default
 
 ```bash
-nitric new py-starter
+nitric new hello-world py-starter
 ```
 
 ### Adding to an existing project
