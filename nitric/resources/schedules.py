@@ -18,61 +18,175 @@
 #
 from __future__ import annotations
 
-from typing import Coroutine, Callable
+import logging
+from datetime import timedelta
+from enum import Enum
+from typing import Callable, List
+
+import betterproto
+import grpclib.exceptions
 
 from nitric.application import Nitric
-from nitric.faas import FunctionServer, RateWorkerOptions, Frequency, EventHandler
+from nitric.bidi import AsyncNotifierList
+from nitric.context import FunctionServer, IntervalContext, IntervalHandler
+from nitric.proto.schedules.v1 import (
+    ClientMessage,
+    IntervalResponse,
+    RegistrationRequest,
+    ScheduleCron,
+    ScheduleEvery,
+    SchedulesStub,
+)
+from nitric.utils import new_default_channel
 
 
-class Schedule:
+class ScheduleServer(FunctionServer):
     """A schedule for running functions on a cadence."""
 
     description: str
-    server: FunctionServer
 
-    def start(self) -> Coroutine:
-        """Start the function server that executes the scheduled middleware."""
-        return self.server.start()
+    handler: IntervalHandler
+    _registration_request: RegistrationRequest
+    _responses: AsyncNotifierList[ClientMessage]
 
     def __init__(self, description: str):
-        """Construct a new schedule."""
+        """Create a schedule for running functions on a cadence."""
         self.description = description
+        self._responses = AsyncNotifierList()
 
-    def every(self, rate_description: str, handler: EventHandler) -> None:
+    def every(self, rate_description: str, handler: IntervalHandler) -> None:
         """
-        Register middleware to be run at the specified rate.
+        Register a function to be run at the specified rate.
 
         E.g. every("3 hours")
         """
-        rate_description = rate_description.lower()
+        self._registration_request = RegistrationRequest(
+            schedule_name=self.description,
+            every=ScheduleEvery(rate=rate_description.lower()),
+        )
 
-        if not any([frequency in rate_description for frequency in Frequency.as_str_list()]):
-            # handle singular frequencies. e.g. every('day')
-            rate_description = f"1 {rate_description}s"  # 'day' becomes '1 days'
+        self.handler = handler
+
+        Nitric._register_worker(self)  # type: ignore pylint: disable=protected-access
+
+    def cron(self, cron_expression: str, handler: IntervalHandler) -> None:
+        """
+        Register a function to be run at the specified cron schedule.
+
+        E.g. cron("3 * * * *")
+        """
+        self._registration_request = RegistrationRequest(
+            schedule_name=self.description,
+            cron=ScheduleCron(expression=cron_expression),
+        )
+
+        self.handler = handler
+
+        Nitric._register_worker(self)  # type: ignore pylint: disable=protected-access
+
+    async def _schedule_request_iterator(self):
+        # Register with the server
+        yield ClientMessage(registration_request=self._registration_request)
+        # wait for any responses for the server and send them
+        async for response in self._responses:
+            yield response
+
+    async def start(self) -> None:
+        """Register this schedule and start listening for requests."""
+        channel = new_default_channel()
+        schedules_stub = SchedulesStub(channel=channel)
 
         try:
-            rate, freq_str = rate_description.split(" ")
-            freq = Frequency.from_str(freq_str)
+            async for server_msg in schedules_stub.schedule(self._schedule_request_iterator()):
+                msg_type, _ = betterproto.which_one_of(server_msg, "content")
+
+                if msg_type == "registration_response":
+                    continue
+                if msg_type == "interval_request":
+                    ctx = IntervalContext(server_msg)
+                    try:
+                        await self.handler(ctx)
+                    except Exception as e:  # pylint: disable=broad-except
+                        logging.exception("An unhandled error occurred in a scheduled function: %s", e)
+                    resp = IntervalResponse()
+                    await self._responses.add_item(ClientMessage(id=server_msg.id, interval_response=resp))
+        except grpclib.exceptions.GRPCError as e:
+            print(f"Stream terminated: {e.message}")
+        except grpclib.exceptions.StreamTerminatedError:
+            print("Stream from membrane closed.")
+        finally:
+            print("Closing client stream")
+            channel.close()
+
+
+class Frequency(Enum):
+    """Valid schedule frequencies."""
+
+    MINUTES = "minutes"
+    HOURS = "hours"
+    DAYS = "days"
+
+    @staticmethod
+    def from_str(value: str) -> Frequency:
+        """Convert a string frequency value to Frequency."""
+        try:
+            return Frequency[value.strip().upper()]
         except Exception:
-            raise Exception(f"invalid rate expression, frequency must be one of {Frequency.as_str_list()}")
+            raise ValueError(f"{value} is not a valid frequency")
 
-        if not rate.isdigit():
-            raise Exception("invalid rate expression, expression must begin with a positive integer")
+    @staticmethod
+    def as_str_list() -> List[str]:
+        """Return all frequency values as a list of strings."""
+        return [str(frequency.value) for frequency in Frequency]
 
-        opts = RateWorkerOptions(self.description, int(rate), freq)
+    def as_time(self, rate: int) -> timedelta:
+        """Convert the rate to minutes based on the frequency."""
+        if self == Frequency.MINUTES:
+            return timedelta(minutes=rate)
+        elif self == Frequency.HOURS:
+            return timedelta(hours=rate)
+        elif self == Frequency.DAYS:
+            return timedelta(days=rate)
+        else:
+            raise ValueError(f"{self} is not a valid frequency")
 
-        self.server = FunctionServer(opts)
-        self.server.event(handler)
-        # type ignored because the register call is treated as protected.
-        return Nitric._register_worker(self.server)  # type: ignore
+
+class Schedule:
+    """A raw schedule to be deployed and assigned a rate or cron interval."""
+
+    def __init__(self, description: str):
+        """Create a new schedule resource."""
+        self.description = description
+
+    def every(self, every: str) -> Callable[[IntervalHandler], ScheduleServer]:
+        """
+        Set the schedule interval.
+
+        e.g. every('3 days').
+        """
+
+        def decorator(func: IntervalHandler) -> ScheduleServer:
+            r = ScheduleServer(self.description)
+            r.every(every, func)
+            return r
+
+        return decorator
+
+    def cron(self, cron: str) -> Callable[[IntervalHandler], ScheduleServer]:
+        """
+        Set the schedule interval.
+
+        e.g. cron('3 * * * *').
+        """
+
+        def decorator(func: IntervalHandler) -> ScheduleServer:
+            r = ScheduleServer(self.description)
+            r.cron(cron, func)
+            return r
+
+        return decorator
 
 
-def schedule(description: str, every: str) -> Callable[[EventHandler], Schedule]:
-    """Return a schedule decorator."""
-
-    def decorator(func: EventHandler) -> Schedule:
-        r = Schedule(description)
-        r.every(every, func)
-        return r
-
-    return decorator
+def schedule(description: str) -> Schedule:
+    """Return a schedule."""
+    return Schedule(description=description)

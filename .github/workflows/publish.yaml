@@ -1,9 +1,11 @@
 name: Publish release to Pypi
 
 on:
-  release:
-     types: [published]
-
+  push:
+    # run only against tags
+    tags:
+      - '*'
+      
 jobs:
   publish:
     runs-on: ubuntu-latest

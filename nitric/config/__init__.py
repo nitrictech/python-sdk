@@ -26,7 +26,7 @@ class Settings:
 
     def __init__(self):
         """Construct a new Nitric settings helper object."""
-        self.SERVICE_BIND = os.environ.get("SERVICE_ADDRESS", "127.0.0.1:50051")
+        self.SERVICE_ADDRESS = os.environ.get("SERVICE_ADDRESS", "127.0.0.1:50051")
 
 
 settings = Settings()

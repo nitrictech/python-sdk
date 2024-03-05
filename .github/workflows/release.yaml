@@ -4,32 +4,18 @@ on:
     branches:
       - main
 jobs:
-  # Bump the SDK version
-  version_bump:
-    name: Bump Version and Create Release
-    runs-on: ubuntu-latest
+  release:
+    name: semantic-release
+    runs-on: ubuntu-20.04
     outputs:
-      version_id: ${{ steps.tag_version.outputs.new_tag }}
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      new-release-published: ${{ steps.semantic-release.outputs.new_release_published }}
+      new-release-version: ${{ steps.semantic-release.outputs.new_release_version }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Bump version and push tag
-        id: tag_version
-        uses: mathieudutour/github-tag-action@v5.5
-        with:
-          # Use GITHUB_TOKEN here to prevent further workflows
-          # generated on 'tag' action
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create a GitHub release
-        id: create_release
-        uses: actions/create-release@v1
+          persist-credentials: false
+      - id: semantic-release
+        uses: cycjimmy/semantic-release-action@v4
         env:
-          # Use NITRIC_BOT_TOKEN here to
-          # trigger release 'published' workflows
           GITHUB_TOKEN: ${{ secrets.NITRIC_BOT_TOKEN }}
-        with:
-          tag_name: ${{ steps.tag_version.outputs.new_tag }}
-          release_name: Release ${{ steps.tag_version.outputs.new_tag }}
-          body: ${{ steps.tag_version.outputs.changelog }}

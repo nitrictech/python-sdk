@@ -45,7 +45,7 @@ setuptools.setup(
     install_requires=[
         "asyncio",
         "protobuf==4.23.3",
-        "betterproto==2.0.0b5",
+        "betterproto==2.0.0b6",
         "opentelemetry-api",
         "opentelemetry-sdk",
         "opentelemetry-exporter-otlp-proto-grpc",
@@ -69,9 +69,9 @@ setuptools.setup(
             "licenseheaders==0.8.8",
             "pdoc3==0.9.2",
             "markupsafe==2.0.1",
-            "betterproto[compiler]==2.0.0b5",
+            "betterproto[compiler]==2.0.0b6",
             # "grpcio==1.33.2",
-            "grpcio-tools==1.54.2",
+            "grpcio-tools==1.62.0",
             "twine==3.2.0",
             "mypy==1.3.0",
         ]

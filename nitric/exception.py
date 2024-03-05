@@ -17,6 +17,7 @@
 # limitations under the License.
 #
 from typing import Callable, Optional, Union
+
 from grpclib import GRPCError
 
 

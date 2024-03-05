@@ -17,19 +17,10 @@
 # limitations under the License.
 #
 import asyncio
-from os import getenv, environ
+from typing import Any, Dict, List, Type, TypeVar
 
-from opentelemetry import trace
-from opentelemetry.sdk.trace import TracerProvider, sampling
-from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.instrumentation.grpc import GrpcInstrumentorClient
-
-from nitric.faas import FunctionServer
+from nitric.context import FunctionServer
 from nitric.exception import NitricUnavailableException
-
-from typing import Dict, List, Type, Any, TypeVar
-
 
 BT = TypeVar("BT")
 
@@ -46,6 +37,8 @@ class Nitric:
         "queue": {},
         "collection": {},
         "websocket": {},
+        "keyvaluestore": {},
+        "oidcsecuritydefinition": {},
     }
 
     @classmethod
@@ -65,28 +58,7 @@ class Nitric:
         except ConnectionRefusedError:
             raise NitricUnavailableException(
                 'Unable to connect to a nitric server! If you\'re running locally make sure to run "nitric start"'
-            )
-
-    @classmethod
-    def _create_tracer(cls, local: bool = True, sampler: int = 100) -> TracerProvider:
-        local_run = local or "OTELCOL_BIN" not in environ
-        samplePercent = int(getenv("NITRIC_TRACE_SAMPLE_PERCENT", sampler)) / 100.0
-
-        # If its a local run use a console exporter, otherwise export using OTEL Protocol
-        exporter = OTLPSpanExporter(endpoint="http://localhost:4317", insecure=True)
-        if local_run:
-            exporter = ConsoleSpanExporter()
-
-        provider = TracerProvider(
-            active_span_processor=BatchSpanProcessor(exporter),
-            sampler=sampling.TraceIdRatioBased(samplePercent),
-        )
-        trace.set_tracer_provider(provider)
-
-        grpc_client_instrumentor = GrpcInstrumentorClient()
-        grpc_client_instrumentor.instrument()
-
-        return provider
+            ) from None
 
     @classmethod
     def run(cls) -> None:
@@ -95,7 +67,6 @@ class Nitric:
 
         This will execute in an existing event loop if there is one, otherwise it will attempt to create its own.
         """
-        provider = cls._create_tracer()
         try:
             try:
                 loop = asyncio.get_running_loop()
@@ -108,7 +79,4 @@ class Nitric:
         except ConnectionRefusedError:
             raise NitricUnavailableException(
                 'Unable to connect to a nitric server! If you\'re running locally make sure to run "nitric start"'
-            )
-        finally:
-            if provider is not None:  # type: ignore
-                provider.force_flush()
+            ) from None

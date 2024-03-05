@@ -20,8 +20,9 @@ from unittest import IsolatedAsyncioTestCase
 from unittest.mock import patch, AsyncMock
 from nitric.resources import queue
 
-from nitric.proto.nitric.resource.v1 import Action, ResourceDeclareRequest, Resource, ResourceType, PolicyResource
-from nitric.utils import struct_from_dict
+from nitric.proto.resources.v1 import Action, ResourceDeclareRequest, ResourceIdentifier, ResourceType, PolicyResource
+
+# pylint: disable=protected-access,missing-function-docstring,missing-class-docstring
 
 
 class Object(object):
@@ -34,21 +35,19 @@ class QueueTest(IsolatedAsyncioTestCase):
         mock_response = Object()
         mock_declare.return_value = mock_response
 
-        with patch("nitric.proto.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
-            queue("test-queue").allow("sending")
+        with patch("nitric.proto.resources.v1.ResourcesStub.declare", mock_declare):
+            queue("test-queue").allow("enqueue")
 
         # Check expected values were passed to Stub
         mock_declare.assert_called_with(
             resource_declare_request=ResourceDeclareRequest(
-                resource=Resource(type=ResourceType.Policy),
+                id=ResourceIdentifier(type=ResourceType.Policy),
                 policy=PolicyResource(
-                    principals=[Resource(type=ResourceType.Function)],
+                    principals=[ResourceIdentifier(type=ResourceType.Service)],
                     actions=[
-                        Action.QueueSend,
-                        Action.QueueList,
-                        Action.QueueDetail,
+                        Action.QueueEnqueue,
                     ],
-                    resources=[Resource(type=ResourceType.Queue, name="test-queue")],
+                    resources=[ResourceIdentifier(type=ResourceType.Queue, name="test-queue")],
                 ),
             )
         )
@@ -58,21 +57,19 @@ class QueueTest(IsolatedAsyncioTestCase):
         mock_response = Object()
         mock_declare.return_value = mock_response
 
-        with patch("nitric.proto.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
-            queue("test-queue").allow("receiving")
+        with patch("nitric.proto.resources.v1.ResourcesStub.declare", mock_declare):
+            queue("test-queue").allow("dequeue")
 
         # Check expected values were passed to Stub
         mock_declare.assert_called_with(
             resource_declare_request=ResourceDeclareRequest(
-                resource=Resource(type=ResourceType.Policy),
+                id=ResourceIdentifier(type=ResourceType.Policy),
                 policy=PolicyResource(
-                    principals=[Resource(type=ResourceType.Function)],
+                    principals=[ResourceIdentifier(type=ResourceType.Service)],
                     actions=[
-                        Action.QueueReceive,
-                        Action.QueueList,
-                        Action.QueueDetail,
+                        Action.QueueDequeue,
                     ],
-                    resources=[Resource(type=ResourceType.Queue, name="test-queue")],
+                    resources=[ResourceIdentifier(type=ResourceType.Queue, name="test-queue")],
                 ),
             )
         )
@@ -82,24 +79,20 @@ class QueueTest(IsolatedAsyncioTestCase):
         mock_response = Object()
         mock_declare.return_value = mock_response
 
-        with patch("nitric.proto.nitric.resource.v1.ResourceServiceStub.declare", mock_declare):
-            queue("test-queue").allow("sending", "receiving")
+        with patch("nitric.proto.resources.v1.ResourcesStub.declare", mock_declare):
+            queue("test-queue").allow("enqueue", "dequeue")
 
         # Check expected values were passed to Stub
         mock_declare.assert_called_with(
             resource_declare_request=ResourceDeclareRequest(
-                resource=Resource(type=ResourceType.Policy),
+                id=ResourceIdentifier(type=ResourceType.Policy),
                 policy=PolicyResource(
-                    principals=[Resource(type=ResourceType.Function)],
+                    principals=[ResourceIdentifier(type=ResourceType.Service)],
                     actions=[
-                        Action.QueueSend,
-                        Action.QueueList,
-                        Action.QueueDetail,
-                        Action.QueueReceive,
-                        Action.QueueList,
-                        Action.QueueDetail,
+                        Action.QueueEnqueue,
+                        Action.QueueDequeue,
                     ],
-                    resources=[Resource(type=ResourceType.Queue, name="test-queue")],
+                    resources=[ResourceIdentifier(type=ResourceType.Queue, name="test-queue")],
                 ),
             )
         )

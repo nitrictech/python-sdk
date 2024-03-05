@@ -16,3 +16,6 @@ exclude = '''
   | dist
 )/
 '''
+
+[tool.pylint]
+max-line-length = 120

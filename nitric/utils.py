@@ -18,13 +18,14 @@
 #
 import re
 from typing import Any, Optional
+from urllib.parse import urlparse
 
 from betterproto.lib.google.protobuf import Struct
 from google.protobuf.json_format import MessageToDict
 from google.protobuf.struct_pb2 import Struct as WorkingStruct
-from nitric.config import settings
-from urllib.parse import urlparse
 from grpclib.client import Channel
+
+from nitric.config import settings
 
 
 def format_url(url: str):
@@ -36,7 +37,7 @@ def format_url(url: str):
 
 def new_default_channel():
     """Create new gRPC channel from settings."""
-    channel_url = urlparse(format_url(settings.SERVICE_BIND))
+    channel_url = urlparse(format_url(settings.SERVICE_ADDRESS))
     return Channel(host=channel_url.hostname, port=channel_url.port)
 
 

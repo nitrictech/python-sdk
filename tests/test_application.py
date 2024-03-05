@@ -20,11 +20,12 @@ from unittest import IsolatedAsyncioTestCase
 from unittest.mock import patch, AsyncMock, Mock
 
 import pytest
-from opentelemetry.sdk.trace import sampling
 
 
 from nitric.exception import NitricUnavailableException
-from nitric.resources import Bucket
+from nitric.proto.deployments.v1 import ScheduleEvery
+from nitric.proto.schedules.v1 import RegistrationRequest
+from nitric.resources import Bucket, schedule
 from nitric.application import Nitric
 
 
@@ -50,27 +51,6 @@ class ApplicationTest(IsolatedAsyncioTestCase):
                 application._create_resource(Bucket, "test-bucket")
             except NitricUnavailableException as e:
                 assert str(e).startswith("Unable to connect")
-
-    def test_create_tracer(self):
-        application = Nitric()
-
-        tracer = application._create_tracer(local=True, sampler=80)
-
-        assert tracer is not None
-        assert isinstance(tracer.sampler, sampling.TraceIdRatioBased)
-        assert tracer.sampler.rate == 0.8
-
-        application = Nitric()
-
-        mock_running_loop = Mock()
-        mock_event_loop = Mock()
-
-        with patch("asyncio.get_event_loop", mock_event_loop):
-            with patch("asyncio.get_running_loop", mock_running_loop):
-                application.run()
-
-                mock_running_loop.assert_called_once()
-                mock_event_loop.assert_not_called()
 
     def test_run_with_no_active_event_loop(self):
         application = Nitric()
