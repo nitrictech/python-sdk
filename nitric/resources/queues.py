@@ -49,7 +49,7 @@ class DequeuedMessage(object):
         Only callable for messages that have been dequeued.
         """
         try:
-            await self._queue.queue_stub.complete(
+            await self._queue._queue_stub.complete(
                 queue_complete_request=QueueCompleteRequest(queue_name=self._queue.name, lease_id=self.lease_id)
             )
         except GRPCError as grpc_err:
