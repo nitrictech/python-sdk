@@ -26,7 +26,7 @@ from nitric.exception import InternalException
 
 # from nitric.faas import HttpMethod, MethodOptions, ApiWorkerOptions
 from nitric.resources import api, ApiOptions, JwtSecurityDefinition
-from nitric.resources.apis import MethodOptions, ScopedOidcOptions, oidc_rule
+from nitric.resources.apis import MethodOptions, ScopedOidcOptions, oidc_rule, HttpMiddleware
 from nitric.proto.resources.v1 import (
     ApiOpenIdConnectionDefinition,
     ApiSecurityDefinitionResource,
@@ -40,6 +40,7 @@ from nitric.proto.resources.v1 import (
 from nitric.proto.apis.v1 import ApiDetailsResponse, ApiDetailsRequest, ApiWorkerScopes
 
 from nitric.context import (
+    HttpContext,
     HttpMethod,
 )
 
@@ -220,6 +221,23 @@ class ApiTest(IsolatedAsyncioTestCase):
         assert test_route.path == "/api/v2/hello"
         assert test_route.middleware == []
         assert test_route.api.name == test_api.name
+
+    def test_api_route_middleware(self):
+        mock_declare = AsyncMock()
+        mock_response = Object()
+        mock_declare.return_value = mock_response
+
+        async def middleware_test(ctx: HttpContext, nxt: HttpMiddleware):
+            return nxt(ctx)
+
+        with patch("nitric.proto.resources.v1.ResourcesStub.declare", mock_declare):
+            test_api = api("test-api-route-middleware", ApiOptions(path="/api/v2/", middleware=[middleware_test]))
+
+        test_route = test_api._route("/test")
+
+        assert len(test_api.middleware) == 1
+        assert len(test_route.middleware) == 1
+        
 
     def test_define_route(self):
         mock_declare = AsyncMock()

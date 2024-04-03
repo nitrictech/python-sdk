@@ -201,6 +201,9 @@ class Api(BaseResource):
         if opts is None:
             opts = RouteOptions()
 
+        if self.middleware is not None:
+            opts.middleware = self.middleware + opts.middleware
+
         r = Route(self, match, opts)
         self.routes.append(r)
         return r
@@ -339,6 +342,13 @@ class Route:
         self, methods: List[HttpMethod], *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None
     ) -> None:
         """Register middleware for multiple HTTP Methods."""
+
+        # ensure route/api middlewares are added
+        middleware = (
+            *self.middleware,
+            *middleware
+        )
+
         Method(self, methods, *middleware, opts=opts if opts else MethodOptions())
 
     def get(self, *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None) -> None:
