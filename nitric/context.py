@@ -439,9 +439,9 @@ def compose_middleware(*middlewares: Middleware[C] | Handler[C]) -> Middleware[C
 
             return chained_middleware
 
-        middleware_chain = functools.reduce(reduce_chain, reversed(middlewares))  # type: ignore
+        middleware_chain = functools.reduce(reduce_chain, reversed(middlewares), last_middleware)  # type: ignore
         # type ignored because mypy appears to misidentify the correct return type
-        return await middleware_chain(ctx, last_middleware)  # type: ignore
+        return await middleware_chain(ctx)  # type: ignore
 
     return composed
 
