@@ -13,13 +13,13 @@
   <a href="https://codecov.io/gh/nitrictech/python-sdk">
     <img alt="Codecov" src="https://img.shields.io/codecov/c/gh/nitrictech/python-sdk?style=for-the-badge&token=SBFRNSZ4ZF">
   </a>
-  <a href="https://npmjs.org/package/@nitric/sdk">
+  <a href="https://pypi.org/project/nitric">
     <img alt="Version" src="https://img.shields.io/pypi/v/nitric?style=for-the-badge">
   </a>
   <a href="https://pypi.org/project/nitric">
     <img alt="Downloads/week" src="https://img.shields.io/pypi/dw/nitric?style=for-the-badge">
   </a>
-  <a href="https://discord.gg/Webemece5C"><img alt="Discord" src="https://img.shields.io/discord/955259353043173427?label=discord&style=for-the-badge"></a>
+  <a href="https://nitric.io/chat"><img alt="Discord" src="https://img.shields.io/discord/955259353043173427?label=discord&style=for-the-badge"></a>
 </p>
 
 The Python SDK supports the use of the [Nitric](https://nitric.io) framework with Python 3.10+. For more information check out the main [Nitric repo](https://github.com/nitrictech/nitric).
