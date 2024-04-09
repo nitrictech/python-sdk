@@ -113,6 +113,8 @@ class ApiOptions:
         path: str = "",
         middleware: Optional[Union[HttpMiddleware, List[HttpMiddleware]]] = None,
         security: Optional[List[ScopedOidcOptions]] = None,
+        jwt_secret: Optional[str] = None,
+        jwt_algorithm: Optional[str] = None,
     ):
         """Construct a new API options object."""
         if middleware is None:
@@ -122,6 +124,8 @@ class ApiOptions:
         self.middleware = middleware
         self.security = security
         self.path = path
+        self.jwt_secret = jwt_secret
+        self.jwt_algorithm = jwt_algorithm
 
 
 class RouteOptions:
@@ -342,12 +346,8 @@ class Route:
         self, methods: List[HttpMethod], *middleware: HttpMiddleware | HttpHandler, opts: Optional[MethodOptions] = None
     ) -> None:
         """Register middleware for multiple HTTP Methods."""
-
         # ensure route/api middlewares are added
-        middleware = (
-            *self.middleware,
-            *middleware
-        )
+        middleware = (*self.middleware, *middleware)
 
         Method(self, methods, *middleware, opts=opts if opts else MethodOptions())
 

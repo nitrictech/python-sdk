@@ -74,6 +74,7 @@ setuptools.setup(
             "grpcio-tools==1.62.0",
             "twine==3.2.0",
             "mypy==1.3.0",
+            "pyjwt==2.8.0",
         ]
     },
     python_requires=">=3.11",
