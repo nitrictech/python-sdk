@@ -146,20 +146,42 @@ class FileRef(object):
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err) from grpc_err
 
-    async def upload_url(self, expiry: Optional[timedelta] = None):
-        """Get a temporary writable URL to this file."""
-        return await self.sign_url(mode=FileMode.WRITE, expiry=expiry)
+    async def upload_url(self, expiry: Optional[Union[timedelta, int]] = None):
+        """
+        Get a temporary writable URL to this file.
 
-    async def download_url(self, expiry: Optional[timedelta] = None):
-        """Get a temporary readable URL to this file."""
-        return await self.sign_url(mode=FileMode.READ, expiry=expiry)
+        Parameters:
 
-    async def sign_url(self, mode: FileMode = FileMode.READ, expiry: Optional[timedelta] = None):
+        expiry (timedelta or int, optional): The expiry time for the signed URL.
+        If an integer is provided, it is treated as seconds. Default is 600 seconds.
+
+        Returns:
+        str: The signed URL.
+        """
+        return await self._sign_url(mode=FileMode.WRITE, expiry=expiry)
+
+    async def download_url(self, expiry: Optional[Union[timedelta, int]] = None):
+        """
+        Get a temporary readable URL to this file.
+
+        Parameters:
+
+        expiry (timedelta or int, optional): The expiry time for the signed URL.
+        If an integer is provided, it is treated as seconds. Default is 600 seconds.
+
+        Returns:
+        str: The signed URL.
+        """
+        return await self._sign_url(mode=FileMode.READ, expiry=expiry)
+
+    async def _sign_url(self, mode: FileMode = FileMode.READ, expiry: Optional[Union[timedelta, int]] = None):
         """Generate a signed URL for reading or writing to a file."""
         warn("File.sign_url() is deprecated, use upload_url() or download_url() instead", DeprecationWarning)
 
         if expiry is None:
             expiry = timedelta(seconds=600)
+        if not isinstance(expiry, timedelta):
+            expiry = timedelta(seconds=expiry)
 
         try:
             response = await self._bucket._storage_stub.pre_sign_url(  # type: ignore pylint: disable=protected-access
