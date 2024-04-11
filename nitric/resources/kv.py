@@ -18,7 +18,7 @@
 #
 from __future__ import annotations
 
-from typing import Any, List, Literal, AsyncIterator, AsyncGenerator, Optional
+from typing import Any, List, Literal, AsyncGenerator, Optional
 
 from grpclib import GRPCError
 from grpclib.client import Channel
