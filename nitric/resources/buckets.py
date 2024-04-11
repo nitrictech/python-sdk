@@ -90,6 +90,21 @@ class BucketRef(object):
         )
         return resp.exists
 
+    def on(
+        self, notification_type: str, notification_prefix_filter: str
+    ) -> Callable[[BucketNotificationHandler], None]:
+        """Create and return a bucket notification decorator for this bucket."""
+
+        def decorator(func: BucketNotificationHandler) -> None:
+            Listener(
+                bucket_name=self.name,
+                notification_type=notification_type,
+                notification_prefix_filter=notification_prefix_filter,
+                handler=func,
+            )
+
+        return decorator
+
 
 class FileMode(Enum):
     """Definition of available operation modes for file signed URLs."""
@@ -150,13 +165,16 @@ class FileRef(object):
         """
         Get a temporary writable URL to this file.
 
-        Parameters:
+        Parameters
+        ----------
+        expiry : int, timedelta, optional
+            The expiry time for the signed URL.
+            If an integer is provided, it is treated as seconds. Default is 600 seconds.
 
-        expiry (timedelta or int, optional): The expiry time for the signed URL.
-        If an integer is provided, it is treated as seconds. Default is 600 seconds.
-
-        Returns:
+        Returns
+        -------
         str: The signed URL.
+
         """
         return await self._sign_url(mode=FileMode.WRITE, expiry=expiry)
 
@@ -164,13 +182,16 @@ class FileRef(object):
         """
         Get a temporary readable URL to this file.
 
-        Parameters:
+        Parameters
+        ----------
+        expiry : int, timedelta, optional
+            The expiry time for the signed URL.
+            If an integer is provided, it is treated as seconds. Default is 600 seconds.
 
-        expiry (timedelta or int, optional): The expiry time for the signed URL.
-        If an integer is provided, it is treated as seconds. Default is 600 seconds.
-
-        Returns:
+        Returns
+        -------
         str: The signed URL.
+
         """
         return await self._sign_url(mode=FileMode.READ, expiry=expiry)
 
