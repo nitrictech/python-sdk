@@ -18,7 +18,7 @@
 #
 from __future__ import annotations
 
-from typing import Any, List, Literal, AsyncIterator, Optional
+from typing import Any, List, Literal, AsyncIterator, AsyncGenerator, Optional
 
 from grpclib import GRPCError
 from grpclib.client import Channel
@@ -87,7 +87,7 @@ class KeyValueStoreRef:
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err) from grpc_err
 
-    async def keys(self, prefix: Optional[str] = "") -> AsyncIterator[str]:
+    async def keys(self, prefix: Optional[str] = "") -> AsyncGenerator[str, None]:
         """Return a list of keys from the key value store."""
         if prefix is None:
             prefix = ""
@@ -103,8 +103,6 @@ class KeyValueStoreRef:
                 yield item.key
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err) from grpc_err
-
-        return
 
     async def delete(self, key: str) -> None:
         """Delete a key from the key value store."""
