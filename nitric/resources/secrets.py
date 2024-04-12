@@ -159,7 +159,7 @@ class Secret(SecureResource):
         super().__init__(name)
 
     def _to_resource_id(self) -> ResourceIdentifier:
-        return ResourceIdentifier(name=self.name, type=ResourceType.Secret)  # type:ignore
+        return ResourceIdentifier(name=self.name, type=ResourceType.Secret)
 
     async def _register(self):
         try:

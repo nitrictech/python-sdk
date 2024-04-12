@@ -28,13 +28,9 @@ from typing import Any, Dict, Generic, List, Optional, Protocol, TypeVar, Union
 from opentelemetry import propagate
 
 from nitric.proto.schedules.v1 import ServerMessage as ScheduleServerMessage
-from nitric.proto.storage.v1 import BlobEventRequest, BlobEventType
 from nitric.proto.topics.v1 import ClientMessage as TopicClientMessage
 from nitric.proto.topics.v1 import MessageResponse as TopicResponse
 from nitric.proto.topics.v1 import ServerMessage as TopicServerMessage
-
-# from nitric.proto.websockets.v1 import ServerMessage as WebsocketServerMessage
-# from nitric.proto.websockets.v1 import WebsocketEventResponse
 
 Record = Dict[str, Union[str, List[str]]]
 PROPAGATOR = propagate.get_global_textmap()
@@ -255,73 +251,6 @@ class WebsocketContext:
             self.res = WebsocketResponse()
 
 
-class BucketNotifyRequest:
-    """Represents a translated Event, from a subscribed bucket notification, forwarded from the Nitric Membrane."""
-
-    bucket_name: str
-    key: str
-    notification_type: BlobEventType
-
-    def __init__(self, bucket_name: str, key: str, notification_type: BlobEventType):
-        """Construct a new EventRequest."""
-        self.bucket_name = bucket_name
-        self.key = key
-        self.notification_type = notification_type
-
-
-class BucketNotifyResponse:
-    """Represents the response to a trigger from a Bucket."""
-
-    def __init__(self, success: bool = True):
-        """Construct a new BucketNotificationResponse."""
-        self.success = success
-
-
-class BucketNotificationContext:
-    """Represents the full request/response context for a bucket notification trigger."""
-
-    def __init__(self, request: BucketNotifyRequest, response: Optional[BucketNotifyResponse] = None):
-        """Construct a new BucketNotificationContext."""
-        self.req = request
-        self.res = response if response else BucketNotifyResponse()
-
-
-class FileNotifyRequest(BucketNotifyRequest):
-    """Represents a translated Event, from a subscribed bucket notification, forwarded from the Nitric Membrane."""
-
-    def __init__(
-        self,
-        bucket_name: str,
-        bucket_ref: Any,  # can't import BucketRef due to circular dependency problems
-        key: str,
-        notification_type: BlobEventType,
-    ):
-        """Construct a new FileNotificationRequest."""
-        super().__init__(bucket_name=bucket_name, key=key, notification_type=notification_type)
-        self.file = bucket_ref.file(key)
-
-
-class FileNotificationContext(BucketNotificationContext):
-    """Represents the full request/response context for a bucket notification trigger."""
-
-    def __init__(self, request: FileNotifyRequest, response: Optional[BucketNotifyResponse] = None):
-        """Construct a new FileNotificationContext."""
-        super().__init__(request=request, response=response)
-        self.req = request
-
-    @staticmethod
-    def _from_client_message_with_bucket(msg: BlobEventRequest, bucket_ref) -> FileNotificationContext:
-        """Construct a new FileNotificationTrigger from a Bucket Notification trigger from the Nitric Membrane."""
-        return FileNotificationContext(
-            request=FileNotifyRequest(
-                bucket_name=msg.bucket_name,
-                key=msg.blob_event.key,
-                bucket_ref=bucket_ref,
-                notification_type=msg.blob_event.type,
-            )
-        )
-
-
 # == Schedules ==
 
 
@@ -352,16 +281,7 @@ class IntervalContext:
         self.res = IntervalResponse(msg.id)
 
 
-C = TypeVar(
-    "C",
-    TriggerContext,
-    HttpContext,
-    MessageContext,
-    FileNotificationContext,
-    BucketNotificationContext,
-    WebsocketContext,
-    IntervalContext,
-)
+C = TypeVar("C")
 
 
 class Middleware(Protocol, Generic[C]):
@@ -383,15 +303,11 @@ class Handler(Protocol, Generic[C]):
 HttpMiddleware = Middleware[HttpContext]
 EventMiddleware = Middleware[MessageContext]
 IntervalMiddleware = Middleware[IntervalContext]
-BucketNotificationMiddleware = Middleware[BucketNotificationContext]
-FileNotificationMiddleware = Middleware[FileNotificationContext]
 WebsocketMiddleware = Middleware[WebsocketContext]
 
 HttpHandler = Handler[HttpContext]
 EventHandler = Handler[MessageContext]
 IntervalHandler = Handler[IntervalContext]
-BucketNotificationHandler = Handler[BucketNotificationContext]
-FileNotificationHandler = Handler[FileNotificationContext]
 WebsocketHandler = Handler[WebsocketContext]
 
 

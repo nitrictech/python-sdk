@@ -118,7 +118,7 @@ class ApiOptions:
         if middleware is None:
             middleware = []
         if security is None:
-            security = {}
+            security = []
         self.middleware = middleware
         self.security = security
         self.path = path
@@ -202,7 +202,7 @@ class Api(BaseResource):
             opts = RouteOptions()
 
         if self.middleware is not None:
-            opts.middleware = self.middleware + opts.middleware
+            opts.middleware = (self.middleware + opts.middleware) if opts.middleware is not None else self.middleware
 
         r = Route(self, match, opts)
         self.routes.append(r)

@@ -75,6 +75,7 @@ class Nitric:
 
             loop.run_until_complete(asyncio.gather(*[wkr.start() for wkr in cls._workers]))
         except KeyboardInterrupt:
+
             print("\nexiting")
         except ConnectionRefusedError:
             raise NitricUnavailableException(

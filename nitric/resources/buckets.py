@@ -32,10 +32,11 @@ from grpclib.client import Channel
 
 from nitric.application import Nitric
 from nitric.bidi import AsyncNotifierList
-from nitric.context import BucketNotificationContext, BucketNotificationHandler, BucketNotifyRequest, FunctionServer
+from nitric.context import FunctionServer, Handler, Middleware
 from nitric.exception import InvalidArgumentException, exception_from_grpc_error
 from nitric.proto.resources.v1 import Action, ResourceDeclareRequest, ResourceIdentifier, ResourceType
 from nitric.proto.storage.v1 import (
+    BlobEventRequest,
     BlobEventResponse,
     BlobEventType,
     ClientMessage,
@@ -52,6 +53,84 @@ from nitric.proto.storage.v1 import (
 )
 from nitric.resources.resource import SecureResource
 from nitric.utils import new_default_channel
+
+
+class BucketNotifyRequest:
+    """Represents a translated Event, from a subscribed bucket notification, forwarded from the Nitric Membrane."""
+
+    bucket_name: str
+    key: str
+    notification_type: BlobEventType
+    bucket: BucketRef
+    file: FileRef
+
+    def __init__(self, bucket_name: str, key: str, notification_type: BlobEventType):
+        """Construct a new BucketNotifyRequest."""
+        self.bucket_name = bucket_name
+        self.key = key
+        self.notification_type = notification_type
+        self.bucket = BucketRef(bucket_name)
+        self.file = self.bucket.file(key)
+
+
+class BucketNotifyResponse:
+    """Represents the response to a trigger from a Bucket."""
+
+    def __init__(self, success: bool = True):
+        """Construct a new BucketNotificationResponse."""
+        self.success = success
+
+
+class BucketNotificationContext:
+    """Represents the full request/response context for a bucket notification trigger."""
+
+    def __init__(self, request: BucketNotifyRequest, response: Optional[BucketNotifyResponse] = None):
+        """Construct a new BucketNotificationContext."""
+        self.req = request
+        self.res = response if response else BucketNotifyResponse()
+
+
+class FileNotifyRequest(BucketNotifyRequest):
+    """Represents a translated Event, from a subscribed bucket notification, forwarded from the Nitric Membrane."""
+
+    def __init__(
+        self,
+        bucket_name: str,
+        bucket_ref: BucketRef,
+        key: str,
+        notification_type: BlobEventType,
+    ):
+        """Construct a new FileNotificationRequest."""
+        super().__init__(bucket_name=bucket_name, key=key, notification_type=notification_type)
+        self.file = bucket_ref.file(key)
+
+
+class FileNotificationContext(BucketNotificationContext):
+    """Represents the full request/response context for a bucket notification trigger."""
+
+    def __init__(self, request: FileNotifyRequest, response: Optional[BucketNotifyResponse] = None):
+        """Construct a new FileNotificationContext."""
+        super().__init__(request=request, response=response)
+        self.req = request
+
+    @staticmethod
+    def _from_client_message_with_bucket(msg: BlobEventRequest, bucket_ref) -> FileNotificationContext:
+        """Construct a new FileNotificationTrigger from a Bucket Notification trigger from the Nitric Membrane."""
+        return FileNotificationContext(
+            request=FileNotifyRequest(
+                bucket_name=msg.bucket_name,
+                key=msg.blob_event.key,
+                bucket_ref=bucket_ref,
+                notification_type=msg.blob_event.type,
+            )
+        )
+
+
+BucketNotificationMiddleware = Middleware[BucketNotificationContext]
+BucketNotificationHandler = Handler[BucketNotificationContext]
+
+FileNotificationMiddleware = Middleware[FileNotificationContext]
+FileNotificationHandler = Handler[FileNotificationContext]
 
 
 class BucketRef(object):
@@ -90,6 +169,21 @@ class BucketRef(object):
         )
         return resp.exists
 
+    def on(
+        self, notification_type: str, notification_prefix_filter: str
+    ) -> Callable[[BucketNotificationHandler], None]:
+        """Create and return a bucket notification decorator for this bucket."""
+
+        def decorator(func: BucketNotificationHandler) -> None:
+            Listener(
+                bucket_name=self.name,
+                notification_type=notification_type,
+                notification_prefix_filter=notification_prefix_filter,
+                handler=func,
+            )
+
+        return decorator
+
 
 class FileMode(Enum):
     """Definition of available operation modes for file signed URLs."""
@@ -121,7 +215,7 @@ class FileRef(object):
         Will create the file if it doesn't already exist.
         """
         try:
-            await self._bucket._storage_stub.write(  # type: ignore pylint: disable=protected-access
+            await self._bucket._storage_stub.write(
                 storage_write_request=StorageWriteRequest(bucket_name=self._bucket.name, key=self.key, body=body)
             )
         except GRPCError as grpc_err:
@@ -130,7 +224,7 @@ class FileRef(object):
     async def read(self) -> bytes:
         """Read this files contents from the bucket."""
         try:
-            response = await self._bucket._storage_stub.read(  # type: ignore pylint: disable=protected-access
+            response = await self._bucket._storage_stub.read(
                 storage_read_request=StorageReadRequest(bucket_name=self._bucket.name, key=self.key)
             )
             return response.body
@@ -140,7 +234,7 @@ class FileRef(object):
     async def delete(self):
         """Delete this file from the bucket."""
         try:
-            await self._bucket._storage_stub.delete(  # type: ignore pylint: disable=protected-access
+            await self._bucket._storage_stub.delete(
                 storage_delete_request=StorageDeleteRequest(bucket_name=self._bucket.name, key=self.key)
             )
         except GRPCError as grpc_err:
@@ -150,13 +244,16 @@ class FileRef(object):
         """
         Get a temporary writable URL to this file.
 
-        Parameters:
+        Parameters
+        ----------
+        expiry : int, timedelta, optional
+            The expiry time for the signed URL.
+            If an integer is provided, it is treated as seconds. Default is 600 seconds.
 
-        expiry (timedelta or int, optional): The expiry time for the signed URL.
-        If an integer is provided, it is treated as seconds. Default is 600 seconds.
-
-        Returns:
+        Returns
+        -------
         str: The signed URL.
+
         """
         return await self._sign_url(mode=FileMode.WRITE, expiry=expiry)
 
@@ -164,13 +261,16 @@ class FileRef(object):
         """
         Get a temporary readable URL to this file.
 
-        Parameters:
+        Parameters
+        ----------
+        expiry : int, timedelta, optional
+            The expiry time for the signed URL.
+            If an integer is provided, it is treated as seconds. Default is 600 seconds.
 
-        expiry (timedelta or int, optional): The expiry time for the signed URL.
-        If an integer is provided, it is treated as seconds. Default is 600 seconds.
-
-        Returns:
+        Returns
+        -------
         str: The signed URL.
+
         """
         return await self._sign_url(mode=FileMode.READ, expiry=expiry)
 
@@ -182,7 +282,7 @@ class FileRef(object):
             expiry = timedelta(seconds=expiry)
 
         try:
-            response = await self._bucket._storage_stub.pre_sign_url(  # type: ignore pylint: disable=protected-access
+            response = await self._bucket._storage_stub.pre_sign_url(
                 storage_pre_sign_url_request=StoragePreSignUrlRequest(
                     bucket_name=self._bucket.name, key=self.key, operation=mode.to_request_operation(), expiry=expiry
                 )
@@ -257,7 +357,7 @@ class Bucket(SecureResource):
         return [action for perm in args for action in permission_actions_map[perm]]
 
     def _to_resource_id(self) -> ResourceIdentifier:
-        return ResourceIdentifier(name=self.name, type=ResourceType.Bucket)  # type:ignore
+        return ResourceIdentifier(name=self.name, type=ResourceType.Bucket)
 
     def allow(
         self,
@@ -316,6 +416,7 @@ class Listener(FunctionServer):
             key_prefix_filter=notification_prefix_filter,
         )
 
+        # noinspection PyProtectedMember
         Nitric._register_worker(self)
 
     async def _listener_request_iterator(self):
@@ -359,9 +460,12 @@ class Listener(FunctionServer):
             print(f"Stream terminated: {e.message}")
         except grpclib.exceptions.StreamTerminatedError:
             print("Stream from membrane closed.")
+        except KeyboardInterrupt:
+            print("Keyboard interrupt")
         finally:
             print("Closing client stream")
             channel.close()
+        print("Listener stopped")
 
 
 def bucket(name: str) -> Bucket:
@@ -370,4 +474,4 @@ def bucket(name: str) -> Bucket:
 
     If a bucket has already been registered with the same name, the original reference will be reused.
     """
-    return Nitric._create_resource(Bucket, name)  # type: ignore pylint: disable=protected-access
+    return Nitric._create_resource(Bucket, name)
