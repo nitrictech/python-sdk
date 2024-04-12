@@ -102,7 +102,7 @@ class Topic(SecureResource):
             raise exception_from_grpc_error(grpc_err) from grpc_err
 
     def _to_resource_id(self) -> ResourceIdentifier:
-        return ResourceIdentifier(name=self.name, type=ResourceType.Topic)  # type:ignore
+        return ResourceIdentifier(name=self.name, type=ResourceType.Topic)
 
     def _perms_to_actions(self, *args: TopicPermission) -> List[Action]:
         _permMap: dict[TopicPermission, List[Action]] = {"publish": [Action.TopicPublish]}

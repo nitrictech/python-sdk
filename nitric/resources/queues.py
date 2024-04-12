@@ -177,7 +177,7 @@ class Queue(SecureResource):
         super().__init__(name)
 
     def _to_resource_id(self) -> ResourceIdentifier:
-        return ResourceIdentifier(name=self.name, type=ResourceType.Queue)  # type:ignore
+        return ResourceIdentifier(name=self.name, type=ResourceType.Queue)
 
     def _perms_to_actions(self, *args: QueuePermission) -> List[Action]:
         permission_actions_map: dict[QueuePermission, List[Action]] = {

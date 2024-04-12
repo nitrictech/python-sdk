@@ -136,7 +136,7 @@ class FileRef(object):
         Will create the file if it doesn't already exist.
         """
         try:
-            await self._bucket._storage_stub.write(  # type: ignore pylint: disable=protected-access
+            await self._bucket._storage_stub.write(
                 storage_write_request=StorageWriteRequest(bucket_name=self._bucket.name, key=self.key, body=body)
             )
         except GRPCError as grpc_err:
@@ -145,7 +145,7 @@ class FileRef(object):
     async def read(self) -> bytes:
         """Read this files contents from the bucket."""
         try:
-            response = await self._bucket._storage_stub.read(  # type: ignore pylint: disable=protected-access
+            response = await self._bucket._storage_stub.read(
                 storage_read_request=StorageReadRequest(bucket_name=self._bucket.name, key=self.key)
             )
             return response.body
@@ -155,7 +155,7 @@ class FileRef(object):
     async def delete(self):
         """Delete this file from the bucket."""
         try:
-            await self._bucket._storage_stub.delete(  # type: ignore pylint: disable=protected-access
+            await self._bucket._storage_stub.delete(
                 storage_delete_request=StorageDeleteRequest(bucket_name=self._bucket.name, key=self.key)
             )
         except GRPCError as grpc_err:
@@ -203,7 +203,7 @@ class FileRef(object):
             expiry = timedelta(seconds=expiry)
 
         try:
-            response = await self._bucket._storage_stub.pre_sign_url(  # type: ignore pylint: disable=protected-access
+            response = await self._bucket._storage_stub.pre_sign_url(
                 storage_pre_sign_url_request=StoragePreSignUrlRequest(
                     bucket_name=self._bucket.name, key=self.key, operation=mode.to_request_operation(), expiry=expiry
                 )
@@ -278,7 +278,7 @@ class Bucket(SecureResource):
         return [action for perm in args for action in permission_actions_map[perm]]
 
     def _to_resource_id(self) -> ResourceIdentifier:
-        return ResourceIdentifier(name=self.name, type=ResourceType.Bucket)  # type:ignore
+        return ResourceIdentifier(name=self.name, type=ResourceType.Bucket)
 
     def allow(
         self,
@@ -337,6 +337,7 @@ class Listener(FunctionServer):
             key_prefix_filter=notification_prefix_filter,
         )
 
+        # noinspection PyProtectedMember
         Nitric._register_worker(self)
 
     async def _listener_request_iterator(self):
@@ -391,4 +392,4 @@ def bucket(name: str) -> Bucket:
 
     If a bucket has already been registered with the same name, the original reference will be reused.
     """
-    return Nitric._create_resource(Bucket, name)  # type: ignore pylint: disable=protected-access
+    return Nitric._create_resource(Bucket, name)
