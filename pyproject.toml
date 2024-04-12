@@ -19,4 +19,4 @@ exclude = '''
 
 [tool.pylint]
 max-line-length = 120
-disable = W0212
+disable = ["protected-access"]
