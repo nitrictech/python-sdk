@@ -32,10 +32,11 @@ from grpclib.client import Channel
 
 from nitric.application import Nitric
 from nitric.bidi import AsyncNotifierList
-from nitric.context import BucketNotificationContext, BucketNotificationHandler, BucketNotifyRequest, FunctionServer
+from nitric.context import FunctionServer, Handler, Middleware
 from nitric.exception import InvalidArgumentException, exception_from_grpc_error
 from nitric.proto.resources.v1 import Action, ResourceDeclareRequest, ResourceIdentifier, ResourceType
 from nitric.proto.storage.v1 import (
+    BlobEventRequest,
     BlobEventResponse,
     BlobEventType,
     ClientMessage,
@@ -52,6 +53,84 @@ from nitric.proto.storage.v1 import (
 )
 from nitric.resources.resource import SecureResource
 from nitric.utils import new_default_channel
+
+
+class BucketNotifyRequest:
+    """Represents a translated Event, from a subscribed bucket notification, forwarded from the Nitric Membrane."""
+
+    bucket_name: str
+    key: str
+    notification_type: BlobEventType
+    bucket: BucketRef
+    file: FileRef
+
+    def __init__(self, bucket_name: str, key: str, notification_type: BlobEventType):
+        """Construct a new BucketNotifyRequest."""
+        self.bucket_name = bucket_name
+        self.key = key
+        self.notification_type = notification_type
+        self.bucket = BucketRef(bucket_name)
+        self.file = self.bucket.file(key)
+
+
+class BucketNotifyResponse:
+    """Represents the response to a trigger from a Bucket."""
+
+    def __init__(self, success: bool = True):
+        """Construct a new BucketNotificationResponse."""
+        self.success = success
+
+
+class BucketNotificationContext:
+    """Represents the full request/response context for a bucket notification trigger."""
+
+    def __init__(self, request: BucketNotifyRequest, response: Optional[BucketNotifyResponse] = None):
+        """Construct a new BucketNotificationContext."""
+        self.req = request
+        self.res = response if response else BucketNotifyResponse()
+
+
+class FileNotifyRequest(BucketNotifyRequest):
+    """Represents a translated Event, from a subscribed bucket notification, forwarded from the Nitric Membrane."""
+
+    def __init__(
+        self,
+        bucket_name: str,
+        bucket_ref: BucketRef,
+        key: str,
+        notification_type: BlobEventType,
+    ):
+        """Construct a new FileNotificationRequest."""
+        super().__init__(bucket_name=bucket_name, key=key, notification_type=notification_type)
+        self.file = bucket_ref.file(key)
+
+
+class FileNotificationContext(BucketNotificationContext):
+    """Represents the full request/response context for a bucket notification trigger."""
+
+    def __init__(self, request: FileNotifyRequest, response: Optional[BucketNotifyResponse] = None):
+        """Construct a new FileNotificationContext."""
+        super().__init__(request=request, response=response)
+        self.req = request
+
+    @staticmethod
+    def _from_client_message_with_bucket(msg: BlobEventRequest, bucket_ref) -> FileNotificationContext:
+        """Construct a new FileNotificationTrigger from a Bucket Notification trigger from the Nitric Membrane."""
+        return FileNotificationContext(
+            request=FileNotifyRequest(
+                bucket_name=msg.bucket_name,
+                key=msg.blob_event.key,
+                bucket_ref=bucket_ref,
+                notification_type=msg.blob_event.type,
+            )
+        )
+
+
+BucketNotificationMiddleware = Middleware[BucketNotificationContext]
+BucketNotificationHandler = Handler[BucketNotificationContext]
+
+FileNotificationMiddleware = Middleware[FileNotificationContext]
+FileNotificationHandler = Handler[FileNotificationContext]
 
 
 class BucketRef(object):
@@ -381,9 +460,12 @@ class Listener(FunctionServer):
             print(f"Stream terminated: {e.message}")
         except grpclib.exceptions.StreamTerminatedError:
             print("Stream from membrane closed.")
+        except KeyboardInterrupt:
+            print("Keyboard interrupt")
         finally:
             print("Closing client stream")
             channel.close()
+        print("Listener stopped")
 
 
 def bucket(name: str) -> Bucket:
