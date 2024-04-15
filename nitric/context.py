@@ -31,6 +31,7 @@ from nitric.proto.schedules.v1 import ServerMessage as ScheduleServerMessage
 from nitric.proto.topics.v1 import ClientMessage as TopicClientMessage
 from nitric.proto.topics.v1 import MessageResponse as TopicResponse
 from nitric.proto.topics.v1 import ServerMessage as TopicServerMessage
+from nitric.utils import dict_from_struct
 
 Record = Dict[str, Union[str, List[str]]]
 PROPAGATOR = propagate.get_global_textmap()
@@ -173,7 +174,7 @@ class MessageContext:
         """Construct a new EventContext from a Topic trigger from the Nitric Membrane."""
         return MessageContext(
             request=MessageRequest(
-                data=msg.message_request.message.struct_payload.to_dict(),
+                data=dict_from_struct(msg.message_request.message.struct_payload),
                 topic=msg.message_request.topic_name,
             )
         )

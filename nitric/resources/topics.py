@@ -37,7 +37,7 @@ from nitric.proto.topics.v1 import MessageResponse as ProtoMessageResponse
 from nitric.proto.topics.v1 import RegistrationRequest, SubscriberStub
 from nitric.proto.topics.v1 import TopicPublishRequest, TopicsStub
 from nitric.resources.resource import SecureResource
-from nitric.utils import new_default_channel, struct_from_dict
+from nitric.utils import dict_from_struct, new_default_channel, struct_from_dict
 
 TopicPermission = Literal["publish"]
 
@@ -131,7 +131,7 @@ class Topic(SecureResource):
 def _message_context_from_proto(msg: ProtoMessageRequest) -> MessageContext:
     return MessageContext(
         request=MessageRequest(
-            data=msg.message.struct_payload.to_dict(),
+            data=dict_from_struct(msg.message.struct_payload),
             topic=msg.topic_name,
         )
     )
