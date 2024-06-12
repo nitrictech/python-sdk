@@ -72,24 +72,15 @@ class WebsocketRef:
             raise exception_from_grpc_error(grpc_err) from grpc_err
 
 
-class WebsocketWorkerOptions:
-    """Options for websocket workers."""
-
-    def __init__(self, socket_name: str, event_type: Literal["connect", "disconnect", "message"]):
-        """Construct new websocket worker options."""
-        self.socket_name = socket_name
-        self.event_type = WebsocketWorkerOptions._to_grpc_event_type(event_type)
-
-    @staticmethod
-    def _to_grpc_event_type(event_type: Literal["connect", "disconnect", "message"]) -> WebsocketEventType:
-        if event_type == "connect":
-            return WebsocketEventType.Connect
-        elif event_type == "disconnect":
-            return WebsocketEventType.Disconnect
-        elif event_type == "message":
-            return WebsocketEventType.Message
-        else:
-            raise ValueError(f"Event type {event_type} is unsupported")
+def _to_grpc_event_type(event_type: Literal["connect", "disconnect", "message"]) -> WebsocketEventType:
+    if event_type == "connect":
+        return WebsocketEventType.Connect
+    elif event_type == "disconnect":
+        return WebsocketEventType.Disconnect
+    elif event_type == "message":
+        return WebsocketEventType.Message
+    else:
+        raise ValueError(f"Event type {event_type} is unsupported")
 
 
 def _to_resource(b: Websocket) -> ResourceIdentifier:
@@ -194,11 +185,15 @@ class WebsocketWorker(FunctionServer):
     _registration_request: RegistrationRequest
     _responses: AsyncNotifierList[ClientMessage]
 
-    def __init__(self, socket_name: str, event_type: WebsocketEventType, handler: WebsocketHandler):
+    def __init__(
+        self, socket_name: str, event_type: Literal["connect", "disconnect", "message"], handler: WebsocketHandler
+    ):
         """Construct a new WebsocketHandler."""
         self._handler = handler
         self._responses = AsyncNotifierList()
-        self._registration_request = RegistrationRequest(socket_name=socket_name, event_type=event_type)
+        self._registration_request = RegistrationRequest(
+            socket_name=socket_name, event_type=_to_grpc_event_type(event_type)
+        )
 
         Nitric._register_worker(self)
 
