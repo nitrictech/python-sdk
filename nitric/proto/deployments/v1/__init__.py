@@ -50,7 +50,7 @@ class ResourceDeploymentStatus(betterproto.Enum):
 
     IN_PROGRESS = 1
     """
-    The action in currently in-flight, e.g. waiting for cloud provder to
+    The action in currently in-flight, e.g. waiting for cloud provider to
     provision a resource
     """
 
@@ -300,6 +300,15 @@ class Schedule(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class SqlDatabase(betterproto.Message):
+    image_uri: str = betterproto.string_field(1, group="migrations")
+    """
+    The URI of a docker image to use to execute the migrations for this
+    database
+    """
+
+
+@dataclass(eq=False, repr=False)
 class ScheduleEvery(betterproto.Message):
     rate: str = betterproto.string_field(1)
     """
@@ -328,6 +337,7 @@ class Resource(betterproto.Message):
     websocket: "Websocket" = betterproto.message_field(18, group="config")
     http: "Http" = betterproto.message_field(19, group="config")
     queue: "Queue" = betterproto.message_field(20, group="config")
+    sql_database: "SqlDatabase" = betterproto.message_field(21, group="config")
 
 
 @dataclass(eq=False, repr=False)
