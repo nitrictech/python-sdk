@@ -36,9 +36,7 @@ class ClientMessage(betterproto.Message):
     id: str = betterproto.string_field(1)
     """globally unique ID of the request/response pair"""
 
-    registration_request: "RegistrationRequest" = betterproto.message_field(
-        2, group="content"
-    )
+    registration_request: "RegistrationRequest" = betterproto.message_field(2, group="content")
     """Register a subscription to a topic"""
 
     message_response: "MessageResponse" = betterproto.message_field(3, group="content")
@@ -66,9 +64,7 @@ class ServerMessage(betterproto.Message):
     id: str = betterproto.string_field(1)
     """globally unique ID of the request/response pair"""
 
-    registration_response: "RegistrationResponse" = betterproto.message_field(
-        2, group="content"
-    )
+    registration_response: "RegistrationResponse" = betterproto.message_field(2, group="content")
     """Response to a topic subscription request"""
 
     message_request: "MessageRequest" = betterproto.message_field(3, group="content")
@@ -87,9 +83,7 @@ class RegistrationResponse(betterproto.Message):
 
 @dataclass(eq=False, repr=False)
 class TopicMessage(betterproto.Message):
-    struct_payload: "betterproto_lib_google_protobuf.Struct" = (
-        betterproto.message_field(1, group="content")
-    )
+    struct_payload: "betterproto_lib_google_protobuf.Struct" = betterproto.message_field(1, group="content")
 
 
 @dataclass(eq=False, repr=False)
@@ -135,9 +129,7 @@ class TopicsStub(betterproto.ServiceStub):
 class SubscriberStub(betterproto.ServiceStub):
     async def subscribe(
         self,
-        client_message_iterator: Union[
-            AsyncIterable["ClientMessage"], Iterable["ClientMessage"]
-        ],
+        client_message_iterator: Union[AsyncIterable["ClientMessage"], Iterable["ClientMessage"]],
         *,
         timeout: Optional[float] = None,
         deadline: Optional["Deadline"] = None,
@@ -156,14 +148,10 @@ class SubscriberStub(betterproto.ServiceStub):
 
 
 class TopicsBase(ServiceBase):
-    async def publish(
-        self, topic_publish_request: "TopicPublishRequest"
-    ) -> "TopicPublishResponse":
+    async def publish(self, topic_publish_request: "TopicPublishRequest") -> "TopicPublishResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def __rpc_publish(
-        self, stream: "grpclib.server.Stream[TopicPublishRequest, TopicPublishResponse]"
-    ) -> None:
+    async def __rpc_publish(self, stream: "grpclib.server.Stream[TopicPublishRequest, TopicPublishResponse]") -> None:
         request = await stream.recv_message()
         response = await self.publish(request)
         await stream.send_message(response)
@@ -186,9 +174,7 @@ class SubscriberBase(ServiceBase):
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
         yield ServerMessage()
 
-    async def __rpc_subscribe(
-        self, stream: "grpclib.server.Stream[ClientMessage, ServerMessage]"
-    ) -> None:
+    async def __rpc_subscribe(self, stream: "grpclib.server.Stream[ClientMessage, ServerMessage]") -> None:
         request = stream.__aiter__()
         await self._call_rpc_handler_server_stream(
             self.subscribe,

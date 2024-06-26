@@ -85,17 +85,13 @@ class ClientMessage(betterproto.Message):
     id: str = betterproto.string_field(1)
     """Globally unique id to pair requests/responses"""
 
-    registration_request: "RegistrationRequest" = betterproto.message_field(
-        2, group="content"
-    )
+    registration_request: "RegistrationRequest" = betterproto.message_field(2, group="content")
     """
     Client initialisation request A worker will not be eligible for triggers
     until it has identified itself
     """
 
-    websocket_event_response: "WebsocketEventResponse" = betterproto.message_field(
-        3, group="content"
-    )
+    websocket_event_response: "WebsocketEventResponse" = betterproto.message_field(3, group="content")
     """Client responding with result of a trigger"""
 
 
@@ -123,15 +119,9 @@ class WebsocketEventRequest(betterproto.Message):
     connection_id: str = betterproto.string_field(2)
     """The connection this trigger came from"""
 
-    connection: "WebsocketConnectionEvent" = betterproto.message_field(
-        10, group="websocket_event"
-    )
-    disconnection: "WebsocketDisconnectionEvent" = betterproto.message_field(
-        11, group="websocket_event"
-    )
-    message: "WebsocketMessageEvent" = betterproto.message_field(
-        12, group="websocket_event"
-    )
+    connection: "WebsocketConnectionEvent" = betterproto.message_field(10, group="websocket_event")
+    disconnection: "WebsocketDisconnectionEvent" = betterproto.message_field(11, group="websocket_event")
+    message: "WebsocketMessageEvent" = betterproto.message_field(12, group="websocket_event")
 
 
 @dataclass(eq=False, repr=False)
@@ -146,31 +136,23 @@ class ServerMessage(betterproto.Message):
     id: str = betterproto.string_field(1)
     """Server message ID, used to pair requests/responses"""
 
-    registration_response: "RegistrationResponse" = betterproto.message_field(
-        2, group="content"
-    )
+    registration_response: "RegistrationResponse" = betterproto.message_field(2, group="content")
     """
     Server responding with client configuration details to an InitRequest
     """
 
-    websocket_event_request: "WebsocketEventRequest" = betterproto.message_field(
-        3, group="content"
-    )
+    websocket_event_request: "WebsocketEventRequest" = betterproto.message_field(3, group="content")
     """Server requesting client to process an event"""
 
 
 @dataclass(eq=False, repr=False)
 class WebsocketEventResponse(betterproto.Message):
-    connection_response: "WebsocketConnectionResponse" = betterproto.message_field(
-        10, group="websocket_response"
-    )
+    connection_response: "WebsocketConnectionResponse" = betterproto.message_field(10, group="websocket_response")
 
 
 @dataclass(eq=False, repr=False)
 class WebsocketConnectionEvent(betterproto.Message):
-    query_params: Dict[str, "QueryValue"] = betterproto.map_field(
-        1, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
-    )
+    query_params: Dict[str, "QueryValue"] = betterproto.map_field(1, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE)
     """The query params available in the connection request"""
 
 
@@ -246,9 +228,7 @@ class WebsocketStub(betterproto.ServiceStub):
 class WebsocketHandlerStub(betterproto.ServiceStub):
     async def handle_events(
         self,
-        client_message_iterator: Union[
-            AsyncIterable["ClientMessage"], Iterable["ClientMessage"]
-        ],
+        client_message_iterator: Union[AsyncIterable["ClientMessage"], Iterable["ClientMessage"]],
         *,
         timeout: Optional[float] = None,
         deadline: Optional["Deadline"] = None,
@@ -267,9 +247,7 @@ class WebsocketHandlerStub(betterproto.ServiceStub):
 
 
 class WebsocketBase(ServiceBase):
-    async def send_message(
-        self, websocket_send_request: "WebsocketSendRequest"
-    ) -> "WebsocketSendResponse":
+    async def send_message(self, websocket_send_request: "WebsocketSendRequest") -> "WebsocketSendResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def close_connection(
@@ -277,9 +255,7 @@ class WebsocketBase(ServiceBase):
     ) -> "WebsocketCloseConnectionResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def socket_details(
-        self, websocket_details_request: "WebsocketDetailsRequest"
-    ) -> "WebsocketDetailsResponse":
+    async def socket_details(self, websocket_details_request: "WebsocketDetailsRequest") -> "WebsocketDetailsResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def __rpc_send_message(
@@ -336,9 +312,7 @@ class WebsocketHandlerBase(ServiceBase):
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
         yield ServerMessage()
 
-    async def __rpc_handle_events(
-        self, stream: "grpclib.server.Stream[ClientMessage, ServerMessage]"
-    ) -> None:
+    async def __rpc_handle_events(self, stream: "grpclib.server.Stream[ClientMessage, ServerMessage]") -> None:
         request = stream.__aiter__()
         await self._call_rpc_handler_server_stream(
             self.handle_events,

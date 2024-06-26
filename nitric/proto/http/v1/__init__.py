@@ -45,9 +45,7 @@ class HttpProxyRequest(betterproto.Message):
 class HttpStub(betterproto.ServiceStub):
     async def proxy(
         self,
-        client_message_iterator: Union[
-            AsyncIterable["ClientMessage"], Iterable["ClientMessage"]
-        ],
+        client_message_iterator: Union[AsyncIterable["ClientMessage"], Iterable["ClientMessage"]],
         *,
         timeout: Optional[float] = None,
         deadline: Optional["Deadline"] = None,
@@ -66,15 +64,11 @@ class HttpStub(betterproto.ServiceStub):
 
 
 class HttpBase(ServiceBase):
-    async def proxy(
-        self, client_message_iterator: AsyncIterator["ClientMessage"]
-    ) -> AsyncIterator["ServerMessage"]:
+    async def proxy(self, client_message_iterator: AsyncIterator["ClientMessage"]) -> AsyncIterator["ServerMessage"]:
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
         yield ServerMessage()
 
-    async def __rpc_proxy(
-        self, stream: "grpclib.server.Stream[ClientMessage, ServerMessage]"
-    ) -> None:
+    async def __rpc_proxy(self, stream: "grpclib.server.Stream[ClientMessage, ServerMessage]") -> None:
         request = stream.__aiter__()
         await self._call_rpc_handler_server_stream(
             self.proxy,

@@ -89,14 +89,10 @@ class ResourceDeclareRequest(betterproto.Message):
     policy: "PolicyResource" = betterproto.message_field(10, group="config")
     bucket: "BucketResource" = betterproto.message_field(11, group="config")
     topic: "TopicResource" = betterproto.message_field(12, group="config")
-    key_value_store: "KeyValueStoreResource" = betterproto.message_field(
-        13, group="config"
-    )
+    key_value_store: "KeyValueStoreResource" = betterproto.message_field(13, group="config")
     secret: "SecretResource" = betterproto.message_field(14, group="config")
     api: "ApiResource" = betterproto.message_field(15, group="config")
-    api_security_definition: "ApiSecurityDefinitionResource" = (
-        betterproto.message_field(16, group="config")
-    )
+    api_security_definition: "ApiSecurityDefinitionResource" = betterproto.message_field(16, group="config")
     queue: "QueueResource" = betterproto.message_field(17, group="config")
     sql_database: "SqlDatabaseResource" = betterproto.message_field(18, group="config")
 
@@ -152,9 +148,7 @@ class ApiOpenIdConnectionDefinition(betterproto.Message):
 @dataclass(eq=False, repr=False)
 class ApiSecurityDefinitionResource(betterproto.Message):
     api_name: str = betterproto.string_field(1)
-    oidc: "ApiOpenIdConnectionDefinition" = betterproto.message_field(
-        2, group="definition"
-    )
+    oidc: "ApiOpenIdConnectionDefinition" = betterproto.message_field(2, group="definition")
 
 
 @dataclass(eq=False, repr=False)
@@ -164,9 +158,7 @@ class ApiScopes(betterproto.Message):
 
 @dataclass(eq=False, repr=False)
 class ApiResource(betterproto.Message):
-    security: Dict[str, "ApiScopes"] = betterproto.map_field(
-        1, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
-    )
+    security: Dict[str, "ApiScopes"] = betterproto.map_field(1, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE)
     """
     root level security map for this api references
     ApiSecurityDefinitionResource(s)
@@ -198,9 +190,7 @@ class ResourcesStub(betterproto.ServiceStub):
 
 
 class ResourcesBase(ServiceBase):
-    async def declare(
-        self, resource_declare_request: "ResourceDeclareRequest"
-    ) -> "ResourceDeclareResponse":
+    async def declare(self, resource_declare_request: "ResourceDeclareRequest") -> "ResourceDeclareResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def __rpc_declare(

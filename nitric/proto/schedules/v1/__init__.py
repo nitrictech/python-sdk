@@ -32,14 +32,10 @@ class ClientMessage(betterproto.Message):
     id: str = betterproto.string_field(1)
     """globally unique ID of the request/response pair"""
 
-    registration_request: "RegistrationRequest" = betterproto.message_field(
-        2, group="content"
-    )
+    registration_request: "RegistrationRequest" = betterproto.message_field(2, group="content")
     """Register new a schedule"""
 
-    interval_response: "IntervalResponse" = betterproto.message_field(
-        3, group="content"
-    )
+    interval_response: "IntervalResponse" = betterproto.message_field(3, group="content")
     """
     Response to a schedule interval (i.e. response from callback function)
     """
@@ -57,9 +53,7 @@ class ServerMessage(betterproto.Message):
     id: str = betterproto.string_field(1)
     """globally unique ID of the request/response pair"""
 
-    registration_response: "RegistrationResponse" = betterproto.message_field(
-        2, group="content"
-    )
+    registration_response: "RegistrationResponse" = betterproto.message_field(2, group="content")
     """Response to a schedule subscription request"""
 
     interval_request: "IntervalRequest" = betterproto.message_field(3, group="content")
@@ -96,9 +90,7 @@ class IntervalResponse(betterproto.Message):
 class SchedulesStub(betterproto.ServiceStub):
     async def schedule(
         self,
-        client_message_iterator: Union[
-            AsyncIterable["ClientMessage"], Iterable["ClientMessage"]
-        ],
+        client_message_iterator: Union[AsyncIterable["ClientMessage"], Iterable["ClientMessage"]],
         *,
         timeout: Optional[float] = None,
         deadline: Optional["Deadline"] = None,
@@ -117,15 +109,11 @@ class SchedulesStub(betterproto.ServiceStub):
 
 
 class SchedulesBase(ServiceBase):
-    async def schedule(
-        self, client_message_iterator: AsyncIterator["ClientMessage"]
-    ) -> AsyncIterator["ServerMessage"]:
+    async def schedule(self, client_message_iterator: AsyncIterator["ClientMessage"]) -> AsyncIterator["ServerMessage"]:
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
         yield ServerMessage()
 
-    async def __rpc_schedule(
-        self, stream: "grpclib.server.Stream[ClientMessage, ServerMessage]"
-    ) -> None:
+    async def __rpc_schedule(self, stream: "grpclib.server.Stream[ClientMessage, ServerMessage]") -> None:
         request = stream.__aiter__()
         await self._call_rpc_handler_server_stream(
             self.schedule,

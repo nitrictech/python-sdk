@@ -118,21 +118,15 @@ class SecretManagerBase(ServiceBase):
     async def put(self, secret_put_request: "SecretPutRequest") -> "SecretPutResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def access(
-        self, secret_access_request: "SecretAccessRequest"
-    ) -> "SecretAccessResponse":
+    async def access(self, secret_access_request: "SecretAccessRequest") -> "SecretAccessResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def __rpc_put(
-        self, stream: "grpclib.server.Stream[SecretPutRequest, SecretPutResponse]"
-    ) -> None:
+    async def __rpc_put(self, stream: "grpclib.server.Stream[SecretPutRequest, SecretPutResponse]") -> None:
         request = await stream.recv_message()
         response = await self.put(request)
         await stream.send_message(response)
 
-    async def __rpc_access(
-        self, stream: "grpclib.server.Stream[SecretAccessRequest, SecretAccessResponse]"
-    ) -> None:
+    async def __rpc_access(self, stream: "grpclib.server.Stream[SecretAccessRequest, SecretAccessResponse]") -> None:
         request = await stream.recv_message()
         response = await self.access(request)
         await stream.send_message(response)

@@ -85,9 +85,7 @@ class QueueCompleteResponse(betterproto.Message):
 class QueueMessage(betterproto.Message):
     """An message to be sent to a queue."""
 
-    struct_payload: "betterproto_lib_google_protobuf.Struct" = (
-        betterproto.message_field(1, group="content")
-    )
+    struct_payload: "betterproto_lib_google_protobuf.Struct" = betterproto.message_field(1, group="content")
 
 
 @dataclass(eq=False, repr=False)
@@ -159,31 +157,21 @@ class QueuesStub(betterproto.ServiceStub):
 
 
 class QueuesBase(ServiceBase):
-    async def enqueue(
-        self, queue_enqueue_request: "QueueEnqueueRequest"
-    ) -> "QueueEnqueueResponse":
+    async def enqueue(self, queue_enqueue_request: "QueueEnqueueRequest") -> "QueueEnqueueResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def dequeue(
-        self, queue_dequeue_request: "QueueDequeueRequest"
-    ) -> "QueueDequeueResponse":
+    async def dequeue(self, queue_dequeue_request: "QueueDequeueRequest") -> "QueueDequeueResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def complete(
-        self, queue_complete_request: "QueueCompleteRequest"
-    ) -> "QueueCompleteResponse":
+    async def complete(self, queue_complete_request: "QueueCompleteRequest") -> "QueueCompleteResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def __rpc_enqueue(
-        self, stream: "grpclib.server.Stream[QueueEnqueueRequest, QueueEnqueueResponse]"
-    ) -> None:
+    async def __rpc_enqueue(self, stream: "grpclib.server.Stream[QueueEnqueueRequest, QueueEnqueueResponse]") -> None:
         request = await stream.recv_message()
         response = await self.enqueue(request)
         await stream.send_message(response)
 
-    async def __rpc_dequeue(
-        self, stream: "grpclib.server.Stream[QueueDequeueRequest, QueueDequeueResponse]"
-    ) -> None:
+    async def __rpc_dequeue(self, stream: "grpclib.server.Stream[QueueDequeueRequest, QueueDequeueResponse]") -> None:
         request = await stream.recv_message()
         response = await self.dequeue(request)
         await stream.send_message(response)

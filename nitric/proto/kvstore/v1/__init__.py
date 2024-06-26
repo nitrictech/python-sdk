@@ -183,19 +183,13 @@ class KvStoreStub(betterproto.ServiceStub):
 
 
 class KvStoreBase(ServiceBase):
-    async def get_value(
-        self, kv_store_get_value_request: "KvStoreGetValueRequest"
-    ) -> "KvStoreGetValueResponse":
+    async def get_value(self, kv_store_get_value_request: "KvStoreGetValueRequest") -> "KvStoreGetValueResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def set_value(
-        self, kv_store_set_value_request: "KvStoreSetValueRequest"
-    ) -> "KvStoreSetValueResponse":
+    async def set_value(self, kv_store_set_value_request: "KvStoreSetValueRequest") -> "KvStoreSetValueResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def delete_key(
-        self, kv_store_delete_key_request: "KvStoreDeleteKeyRequest"
-    ) -> "KvStoreDeleteKeyResponse":
+    async def delete_key(self, kv_store_delete_key_request: "KvStoreDeleteKeyRequest") -> "KvStoreDeleteKeyResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def scan_keys(
