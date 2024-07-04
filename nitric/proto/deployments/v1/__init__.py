@@ -17,6 +17,7 @@ import betterproto.lib.google.protobuf as betterproto_lib_google_protobuf
 import grpclib
 from betterproto.grpc.grpclib_server import ServiceBase
 
+from ...batch import v1 as __batch_v1__
 from ...resources import v1 as __resources_v1__
 from ...storage import v1 as __storage_v1__
 
@@ -202,6 +203,36 @@ class Service(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class Job(betterproto.Message):
+    name: str = betterproto.string_field(1)
+    """The name of the job to create"""
+
+    requirements: "__batch_v1__.JobResourceRequirements" = betterproto.message_field(2)
+    """The default resource requirements of the job"""
+
+
+@dataclass(eq=False, repr=False)
+class Batch(betterproto.Message):
+    image: "ImageSource" = betterproto.message_field(1, group="source")
+    """Image URI for this batch service"""
+
+    type: str = betterproto.string_field(10)
+    """
+    A simple type property describes the requested type of batch that this
+    should be for this project, a provider can implement how this request is
+    satisfied in any way
+    """
+
+    env: Dict[str, str] = betterproto.map_field(
+        11, betterproto.TYPE_STRING, betterproto.TYPE_STRING
+    )
+    """Environment variables for this Batch"""
+
+    jobs: List["Job"] = betterproto.message_field(12)
+    """Jobs that are defined in this Batch"""
+
+
+@dataclass(eq=False, repr=False)
 class Bucket(betterproto.Message):
     listeners: List["BucketListener"] = betterproto.message_field(1)
 
@@ -338,6 +369,7 @@ class Resource(betterproto.Message):
     http: "Http" = betterproto.message_field(19, group="config")
     queue: "Queue" = betterproto.message_field(20, group="config")
     sql_database: "SqlDatabase" = betterproto.message_field(21, group="config")
+    batch: "Batch" = betterproto.message_field(22, group="config")
 
 
 @dataclass(eq=False, repr=False)

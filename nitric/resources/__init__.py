@@ -27,6 +27,7 @@ from nitric.resources.topics import Topic, topic
 from nitric.resources.websockets import Websocket, websocket
 from nitric.resources.queues import Queue, queue
 from nitric.resources.sql import Sql, sql
+from nitric.resources.job import job, Job
 
 __all__ = [
     "api",
@@ -38,6 +39,8 @@ __all__ = [
     "Bucket",
     "kv",
     "KeyValueStoreRef",
+    "job",
+    "Job",
     "oidc_rule",
     "queue",
     "Queue",
