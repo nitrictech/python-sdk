@@ -2,7 +2,8 @@
 .nitric/
 nitric.yaml
 nitric.*.yaml
-proto/
+/proto/
+/nitric/proto/KeyValue
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

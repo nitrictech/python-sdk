@@ -46,10 +46,14 @@ class ClientMessage(betterproto.Message):
     id: str = betterproto.string_field(1)
     """globally unique ID of the request/response pair"""
 
-    registration_request: "RegistrationRequest" = betterproto.message_field(2, group="content")
+    registration_request: "RegistrationRequest" = betterproto.message_field(
+        2, group="content"
+    )
     """Watch for changes on a bucket"""
 
-    blob_event_response: "BlobEventResponse" = betterproto.message_field(3, group="content")
+    blob_event_response: "BlobEventResponse" = betterproto.message_field(
+        3, group="content"
+    )
     """Response to a blob event (change to a blob)"""
 
 
@@ -60,10 +64,14 @@ class ServerMessage(betterproto.Message):
     id: str = betterproto.string_field(1)
     """globally unique ID of the request/response pair"""
 
-    registration_response: "RegistrationResponse" = betterproto.message_field(2, group="content")
+    registration_response: "RegistrationResponse" = betterproto.message_field(
+        2, group="content"
+    )
     """Watch for changes on a bucket"""
 
-    blob_event_request: "BlobEventRequest" = betterproto.message_field(3, group="content")
+    blob_event_request: "BlobEventRequest" = betterproto.message_field(
+        3, group="content"
+    )
     """Event for a blob in a bucket"""
 
 
@@ -338,7 +346,9 @@ class StorageStub(betterproto.ServiceStub):
 class StorageListenerStub(betterproto.ServiceStub):
     async def listen(
         self,
-        client_message_iterator: Union[AsyncIterable["ClientMessage"], Iterable["ClientMessage"]],
+        client_message_iterator: Union[
+            AsyncIterable["ClientMessage"], Iterable["ClientMessage"]
+        ],
         *,
         timeout: Optional[float] = None,
         deadline: Optional["Deadline"] = None,
@@ -357,13 +367,19 @@ class StorageListenerStub(betterproto.ServiceStub):
 
 
 class StorageBase(ServiceBase):
-    async def read(self, storage_read_request: "StorageReadRequest") -> "StorageReadResponse":
+    async def read(
+        self, storage_read_request: "StorageReadRequest"
+    ) -> "StorageReadResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def write(self, storage_write_request: "StorageWriteRequest") -> "StorageWriteResponse":
+    async def write(
+        self, storage_write_request: "StorageWriteRequest"
+    ) -> "StorageWriteResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def delete(self, storage_delete_request: "StorageDeleteRequest") -> "StorageDeleteResponse":
+    async def delete(
+        self, storage_delete_request: "StorageDeleteRequest"
+    ) -> "StorageDeleteResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def pre_sign_url(
@@ -371,18 +387,26 @@ class StorageBase(ServiceBase):
     ) -> "StoragePreSignUrlResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def list_blobs(self, storage_list_blobs_request: "StorageListBlobsRequest") -> "StorageListBlobsResponse":
+    async def list_blobs(
+        self, storage_list_blobs_request: "StorageListBlobsRequest"
+    ) -> "StorageListBlobsResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def exists(self, storage_exists_request: "StorageExistsRequest") -> "StorageExistsResponse":
+    async def exists(
+        self, storage_exists_request: "StorageExistsRequest"
+    ) -> "StorageExistsResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def __rpc_read(self, stream: "grpclib.server.Stream[StorageReadRequest, StorageReadResponse]") -> None:
+    async def __rpc_read(
+        self, stream: "grpclib.server.Stream[StorageReadRequest, StorageReadResponse]"
+    ) -> None:
         request = await stream.recv_message()
         response = await self.read(request)
         await stream.send_message(response)
 
-    async def __rpc_write(self, stream: "grpclib.server.Stream[StorageWriteRequest, StorageWriteResponse]") -> None:
+    async def __rpc_write(
+        self, stream: "grpclib.server.Stream[StorageWriteRequest, StorageWriteResponse]"
+    ) -> None:
         request = await stream.recv_message()
         response = await self.write(request)
         await stream.send_message(response)
@@ -461,11 +485,15 @@ class StorageBase(ServiceBase):
 
 
 class StorageListenerBase(ServiceBase):
-    async def listen(self, client_message_iterator: AsyncIterator["ClientMessage"]) -> AsyncIterator["ServerMessage"]:
+    async def listen(
+        self, client_message_iterator: AsyncIterator["ClientMessage"]
+    ) -> AsyncIterator["ServerMessage"]:
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
         yield ServerMessage()
 
-    async def __rpc_listen(self, stream: "grpclib.server.Stream[ClientMessage, ServerMessage]") -> None:
+    async def __rpc_listen(
+        self, stream: "grpclib.server.Stream[ClientMessage, ServerMessage]"
+    ) -> None:
         request = stream.__aiter__()
         await self._call_rpc_handler_server_stream(
             self.listen,

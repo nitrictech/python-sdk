@@ -32,6 +32,7 @@ from nitric.proto.resources.v1 import (
 )
 from nitric.resources.resource import Resource as BaseResource
 from nitric.utils import new_default_channel
+from nitric.application import Nitric
 
 from nitric.proto.sql.v1 import SqlStub, SqlConnectionStringRequest
 
@@ -67,3 +68,12 @@ class Sql(BaseResource):
         response = await self._sql_stub.connection_string(SqlConnectionStringRequest(database_name=self.name))
 
         return response.connection_string
+
+
+def sql(name: str) -> Sql:
+    """
+    Create and register a sql database.
+
+    If a sql databse has already been registered with the same name, the original reference will be reused.
+    """
+    return Nitric._create_resource(Sql, name)

@@ -26,6 +26,7 @@ from nitric.resources.secrets import Secret, secret
 from nitric.resources.topics import Topic, topic
 from nitric.resources.websockets import Websocket, websocket
 from nitric.resources.queues import Queue, queue
+from nitric.resources.sql import Sql, sql
 
 __all__ = [
     "api",
@@ -44,6 +45,8 @@ __all__ = [
     "schedule",
     "secret",
     "Secret",
+    "sql",
+    "Sql",
     "topic",
     "Topic",
     "websocket",

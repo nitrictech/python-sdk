@@ -43,7 +43,9 @@ class ClientMessage(betterproto.Message):
     id: str = betterproto.string_field(1)
     """globally unique ID of the request/response pair"""
 
-    registration_request: "RegistrationRequest" = betterproto.message_field(2, group="content")
+    registration_request: "RegistrationRequest" = betterproto.message_field(
+        2, group="content"
+    )
     """Register an API route handler"""
 
     http_response: "HttpResponse" = betterproto.message_field(3, group="content")
@@ -68,13 +70,19 @@ class HttpRequest(betterproto.Message):
     path: str = betterproto.string_field(2)
     """The path of the request"""
 
-    headers: Dict[str, "HeaderValue"] = betterproto.map_field(3, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE)
+    headers: Dict[str, "HeaderValue"] = betterproto.map_field(
+        3, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+    )
     """HTTP request headers"""
 
-    query_params: Dict[str, "QueryValue"] = betterproto.map_field(4, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE)
+    query_params: Dict[str, "QueryValue"] = betterproto.map_field(
+        4, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+    )
     """HTTP Query params"""
 
-    path_params: Dict[str, str] = betterproto.map_field(5, betterproto.TYPE_STRING, betterproto.TYPE_STRING)
+    path_params: Dict[str, str] = betterproto.map_field(
+        5, betterproto.TYPE_STRING, betterproto.TYPE_STRING
+    )
     """HTTP Path parameters"""
 
     body: bytes = betterproto.bytes_field(6)
@@ -88,7 +96,9 @@ class HttpResponse(betterproto.Message):
     status: int = betterproto.int32_field(1)
     """The HTTP response status code"""
 
-    headers: Dict[str, "HeaderValue"] = betterproto.map_field(2, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE)
+    headers: Dict[str, "HeaderValue"] = betterproto.map_field(
+        2, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+    )
     """HTTP response headers"""
 
     body: bytes = betterproto.bytes_field(3)
@@ -102,7 +112,9 @@ class ServerMessage(betterproto.Message):
     id: str = betterproto.string_field(1)
     """globally unique ID of the request/response pair"""
 
-    registration_response: "RegistrationResponse" = betterproto.message_field(2, group="content")
+    registration_response: "RegistrationResponse" = betterproto.message_field(
+        2, group="content"
+    )
     """Response to an API serve request"""
 
     http_request: "HttpRequest" = betterproto.message_field(3, group="content")
@@ -121,7 +133,9 @@ class ApiWorkerScopes(betterproto.Message):
 
 @dataclass(eq=False, repr=False)
 class ApiWorkerOptions(betterproto.Message):
-    security: Dict[str, "ApiWorkerScopes"] = betterproto.map_field(1, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE)
+    security: Dict[str, "ApiWorkerScopes"] = betterproto.map_field(
+        1, betterproto.TYPE_STRING, betterproto.TYPE_MESSAGE
+    )
     """
     Apply security definitions to this operation This will be mapped to named
     ApiSecurityDefinitionResource(s)
@@ -146,7 +160,9 @@ class RegistrationRequest(betterproto.Message):
 class ApiStub(betterproto.ServiceStub):
     async def serve(
         self,
-        client_message_iterator: Union[AsyncIterable["ClientMessage"], Iterable["ClientMessage"]],
+        client_message_iterator: Union[
+            AsyncIterable["ClientMessage"], Iterable["ClientMessage"]
+        ],
         *,
         timeout: Optional[float] = None,
         deadline: Optional["Deadline"] = None,
@@ -182,14 +198,20 @@ class ApiStub(betterproto.ServiceStub):
 
 
 class ApiBase(ServiceBase):
-    async def serve(self, client_message_iterator: AsyncIterator["ClientMessage"]) -> AsyncIterator["ServerMessage"]:
+    async def serve(
+        self, client_message_iterator: AsyncIterator["ClientMessage"]
+    ) -> AsyncIterator["ServerMessage"]:
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
         yield ServerMessage()
 
-    async def api_details(self, api_details_request: "ApiDetailsRequest") -> "ApiDetailsResponse":
+    async def api_details(
+        self, api_details_request: "ApiDetailsRequest"
+    ) -> "ApiDetailsResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def __rpc_serve(self, stream: "grpclib.server.Stream[ClientMessage, ServerMessage]") -> None:
+    async def __rpc_serve(
+        self, stream: "grpclib.server.Stream[ClientMessage, ServerMessage]"
+    ) -> None:
         request = stream.__aiter__()
         await self._call_rpc_handler_server_stream(
             self.serve,
@@ -197,7 +219,9 @@ class ApiBase(ServiceBase):
             request,
         )
 
-    async def __rpc_api_details(self, stream: "grpclib.server.Stream[ApiDetailsRequest, ApiDetailsResponse]") -> None:
+    async def __rpc_api_details(
+        self, stream: "grpclib.server.Stream[ApiDetailsRequest, ApiDetailsResponse]"
+    ) -> None:
         request = await stream.recv_message()
         response = await self.api_details(request)
         await stream.send_message(response)

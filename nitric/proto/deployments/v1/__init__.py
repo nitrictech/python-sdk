@@ -188,7 +188,9 @@ class Service(betterproto.Message):
     satisfied in any way
     """
 
-    env: Dict[str, str] = betterproto.map_field(14, betterproto.TYPE_STRING, betterproto.TYPE_STRING)
+    env: Dict[str, str] = betterproto.map_field(
+        14, betterproto.TYPE_STRING, betterproto.TYPE_STRING
+    )
     """Environment variables for this service"""
 
     def __post_init__(self) -> None:
@@ -395,15 +397,21 @@ class DeploymentStub(betterproto.ServiceStub):
 
 
 class DeploymentBase(ServiceBase):
-    async def up(self, deployment_up_request: "DeploymentUpRequest") -> AsyncIterator["DeploymentUpEvent"]:
+    async def up(
+        self, deployment_up_request: "DeploymentUpRequest"
+    ) -> AsyncIterator["DeploymentUpEvent"]:
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
         yield DeploymentUpEvent()
 
-    async def down(self, deployment_down_request: "DeploymentDownRequest") -> AsyncIterator["DeploymentDownEvent"]:
+    async def down(
+        self, deployment_down_request: "DeploymentDownRequest"
+    ) -> AsyncIterator["DeploymentDownEvent"]:
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
         yield DeploymentDownEvent()
 
-    async def __rpc_up(self, stream: "grpclib.server.Stream[DeploymentUpRequest, DeploymentUpEvent]") -> None:
+    async def __rpc_up(
+        self, stream: "grpclib.server.Stream[DeploymentUpRequest, DeploymentUpEvent]"
+    ) -> None:
         request = await stream.recv_message()
         await self._call_rpc_handler_server_stream(
             self.up,
