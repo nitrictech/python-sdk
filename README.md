@@ -41,7 +41,7 @@ Install the [Nitric CLI](https://nitric.io/docs/getting-started/installation), t
 nitric new hello-world py-starter
 ```
 
-### Adding to an existing project
+### Add to an existing project
 
 First of all, you need to install the library:
 
