@@ -28,25 +28,14 @@ Python SDKs provide an infrastructure-from-code style that lets you define resou
 
 You can request the type of access you need to resources such as publishing for topics, without dealing directly with IAM or policy documents.
 
-## Status
+- Reference Documentation: https://nitric.io/docs/reference/python
+- Guides: https://nitric.io/docs/guides/python
 
-The SDK is in early stage development and APIs and interfaces are still subject to breaking changes. We’d love your feedback as we build additional functionality!
+## Usage
 
-## Get in touch
+### Starting a new project
 
-- Ask questions in [GitHub discussions](https://github.com/nitrictech/nitric/discussions)
-
-- Join us on [Discord](https://discord.gg/Webemece5C)
-
-- Find us on [Twitter](https://twitter.com/nitric_io)
-
-- Send us an [email](mailto:maintainers@nitric.io)
-
-## Getting Started
-
-### Using the [Nitric CLI](https://github.com/nitrictech/cli)
-
-> nitric is included in all python related projects by default
+Install the [Nitric CLI](https://nitric.io/docs/getting-started/installation), then generate your project:
 
 ```bash
 nitric new hello-world py-starter
@@ -54,10 +43,11 @@ nitric new hello-world py-starter
 
 ### Adding to an existing project
 
+First of all, you need to install the library:
+
 **pip**
 
 ```bash
-# Install the Nitric SDK
 pip3 install nitric
 ```
 
@@ -67,6 +57,37 @@ pip3 install nitric
 pipenv install nitric
 ```
 
-## Usage
+Then you're able to import the library and create cloud resources:
 
-[Nitric Documentation](https://nitric.io/docs)
+```python
+from nitric.resources import api, bucket
+from nitric.application import Nitric
+from nitric.context import HttpContext
+
+publicApi = api("public")
+uploads = bucket("uploads").allow("write")
+
+@publicApi.get("/upload")
+async def upload(ctx: HttpContext):
+    photo = uploads.file("images/photo.jpg")
+
+    url = await photo.upload_url()
+
+    ctx.res.body = {"url": url}
+
+Nitric.run()
+```
+
+## Learn more
+
+Learn more by checking out the [Nitric documentation](https://nitric.io/docs).
+
+## Get in touch:
+
+- Join us on [Discord](https://nitric.io/chat)
+
+- Ask questions in [GitHub discussions](https://github.com/nitrictech/nitric/discussions)
+
+- Find us on [Twitter](https://twitter.com/nitric_io)
+
+- Send us an [email](mailto:maintainers@nitric.io)
