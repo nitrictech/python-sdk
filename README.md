@@ -78,6 +78,10 @@ async def upload(ctx: HttpContext):
 Nitric.run()
 ```
 
+## Learn more
+
+Learn more by checking out the [Nitric documentation](https://nitric.io/docs).
+
 ## Get in touch:
 
 - Join us on [Discord](https://nitric.io/chat)
