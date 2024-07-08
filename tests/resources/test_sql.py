@@ -20,21 +20,14 @@ from unittest import IsolatedAsyncioTestCase
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from grpclib import GRPCError, Status
 
-from nitric.exception import UnknownException
 from nitric.proto.resources.v1 import (
-    Action,
-    PolicyResource,
     ResourceDeclareRequest,
     ResourceIdentifier,
     ResourceType,
     SqlDatabaseResource,
 )
-from nitric.proto.topics.v1 import TopicMessage, TopicPublishRequest
 from nitric.resources import sql
-from nitric.resources.topics import TopicRef
-from nitric.utils import struct_from_dict
 
 # pylint: disable=protected-access,missing-function-docstring,missing-class-docstring
 
