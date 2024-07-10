@@ -33,7 +33,8 @@ jobs:
       # Run tox using the version of Python in `PATH`
       run: tox -e py
     - name: Upload coverage to Codecov
+      if: secrets.CODECOV_TOKEN
       uses: codecov/codecov-action@v4.0.1
       with:
-        fail_ci_if_error: true
-        token: ${{ secrets.CODECOV_TOKEN }}
+      fail_ci_if_error: true
+      token: ${{ secrets.CODECOV_TOKEN }}
