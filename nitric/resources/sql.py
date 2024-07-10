@@ -75,7 +75,7 @@ class Sql(BaseResource):
         return response.connection_string
 
 
-def sql(name: str) -> Sql:
+def sql(name: str, migrations: Union[str, None] = None) -> Sql:
     """
     Create and register a sql database.
 
