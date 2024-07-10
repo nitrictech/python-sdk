@@ -51,7 +51,7 @@ class Sql(BaseResource):
         super().__init__(name)
 
         self._channel: Union[Channel, None] = new_default_channel()
-        self._storage_stub = SqlStub(channel=self._channel)
+        self._sql_stub = SqlStub(channel=self._channel)
         self.name = name
         self.migrations = migrations
 
