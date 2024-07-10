@@ -26,6 +26,7 @@ from grpclib.client import Channel
 from nitric.exception import exception_from_grpc_error
 from nitric.proto.resources.v1 import (
     SqlDatabaseResource,
+    SqlDatabaseMigrations,
     ResourceDeclareRequest,
     ResourceIdentifier,
     ResourceType,
@@ -43,22 +44,26 @@ class Sql(BaseResource):
     _channel: Channel
     _sql_stub: SqlStub
     name: str
+    migrations: Union[str, None]
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, migrations: Union[str, None] = None):
         """Construct a new SQL Database."""
         super().__init__(name)
 
         self._channel: Union[Channel, None] = new_default_channel()
         self._storage_stub = SqlStub(channel=self._channel)
         self.name = name
+        self.migrations = migrations
 
     async def _register(self) -> None:
         try:
             await self._resources_stub.declare(
                 resource_declare_request=ResourceDeclareRequest(
                     id=ResourceIdentifier(name=self.name, type=ResourceType.SqlDatabase),
-                    sql_database=SqlDatabaseResource(),
-                )
+                    sql_database=SqlDatabaseResource(
+                        migrations=SqlDatabaseMigrations(migrations_path=self.migrations if self.migrations else "")
+                    ),
+                ),
             )
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err) from grpc_err
