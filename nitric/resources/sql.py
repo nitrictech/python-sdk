@@ -81,4 +81,4 @@ def sql(name: str, migrations: Union[str, None] = None) -> Sql:
 
     If a sql databse has already been registered with the same name, the original reference will be reused.
     """
-    return Nitric._create_resource(Sql, name)
+    return Nitric._create_resource(Sql, name, migrations)
