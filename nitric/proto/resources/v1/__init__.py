@@ -37,6 +37,7 @@ class ResourceType(betterproto.Enum):
     Http = 11
     ApiSecurityDefinition = 12
     Queue = 13
+    SqlDatabase = 14
 
 
 class Action(betterproto.Enum):
@@ -97,6 +98,7 @@ class ResourceDeclareRequest(betterproto.Message):
         betterproto.message_field(16, group="config")
     )
     queue: "QueueResource" = betterproto.message_field(17, group="config")
+    sql_database: "SqlDatabaseResource" = betterproto.message_field(18, group="config")
 
 
 @dataclass(eq=False, repr=False)
@@ -122,6 +124,23 @@ class KeyValueStoreResource(betterproto.Message):
 @dataclass(eq=False, repr=False)
 class SecretResource(betterproto.Message):
     pass
+
+
+@dataclass(eq=False, repr=False)
+class SqlDatabaseMigrations(betterproto.Message):
+    migrations_path: str = betterproto.string_field(1, group="migrations")
+    """
+    The path to this databases SQL migrations Valid values are
+    file://relative/path/to/migrations as a directory or
+    dockerfile://path/to/migrations.dockerfile to hint at a docker image build
+    Paths should be relative to the root of the application (nitric.yaml file
+    location)
+    """
+
+
+@dataclass(eq=False, repr=False)
+class SqlDatabaseResource(betterproto.Message):
+    migrations: "SqlDatabaseMigrations" = betterproto.message_field(1)
 
 
 @dataclass(eq=False, repr=False)
