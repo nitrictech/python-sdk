@@ -58,7 +58,7 @@ class Nitric:
             return cls._cache[resource_type][name]
         except ConnectionRefusedError as cre:
             raise NitricUnavailableException(
-                "The nitric server may not be running or the host/port are inaccessible"
+                "The nitric server may not be running or the host/port is inaccessible"
             ) from cre
 
     @classmethod
