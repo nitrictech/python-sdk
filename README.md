@@ -22,7 +22,7 @@
   <a href="https://nitric.io/chat"><img alt="Discord" src="https://img.shields.io/discord/955259353043173427?label=discord&style=for-the-badge"></a>
 </p>
 
-The Python SDK supports the use of the [Nitric](https://nitric.io) framework with Python 3.10+. For more information check out the main [Nitric repo](https://github.com/nitrictech/nitric).
+The Python SDK supports the use of the [Nitric](https://nitric.io) framework with Python 3.11+. For more information check out the main [Nitric repo](https://github.com/nitrictech/nitric).
 
 Python SDKs provide an infrastructure-from-code style that lets you define resources in code. You can also write the functions that support the logic behind APIs, subscribers and schedules.
 

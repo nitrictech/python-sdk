@@ -96,7 +96,7 @@ class ApplicationTest(IsolatedAsyncioTestCase):
                     application.run()
                     pytest.fail()
                 except NitricUnavailableException as e:
-                    assert str(e).startswith("Unable to connect to a nitric server!")
+                    assert str(e).startswith("Unable to connect to nitric server")
 
                 mock_running_loop.assert_called_once()
                 mock_event_loop.assert_not_called()

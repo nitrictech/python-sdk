@@ -153,7 +153,8 @@ class NitricResourceException(Exception):
 class NitricUnavailableException(Exception):
     """Unable to connect to a nitric server."""
 
-    pass
+    def __init__(self, message: str):
+        super().__init__("Unable to connect to nitric server." + (" " + message if message else ""))
 
 
 def exception_from_grpc_error(error: GRPCError):

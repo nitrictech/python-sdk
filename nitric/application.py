@@ -56,10 +56,10 @@ class Nitric:
                 cls._cache[resource_type][name] = resource.make(name, *args, **kwargs)  # type: ignore
 
             return cls._cache[resource_type][name]
-        except ConnectionRefusedError:
+        except ConnectionRefusedError as cre:
             raise NitricUnavailableException(
-                'Unable to connect to a nitric server! If you\'re running locally make sure to run "nitric start"'
-            ) from None
+                "The nitric server may not be running or the host/port is inaccessible"
+            ) from cre
 
     @classmethod
     def run(cls) -> None:
@@ -78,7 +78,7 @@ class Nitric:
         except KeyboardInterrupt:
 
             print("\nexiting")
-        except ConnectionRefusedError:
+        except ConnectionRefusedError as cre:
             raise NitricUnavailableException(
-                'Unable to connect to a nitric server! If you\'re running locally make sure to run "nitric start"'
-            ) from None
+                'If you\'re running locally use "nitric start" or "nitric run" to start your application'
+            ) from cre
