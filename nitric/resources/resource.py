@@ -34,7 +34,7 @@ from nitric.proto.resources.v1 import (
     ResourcesStub,
     ResourceType,
 )
-from nitric.utils import new_default_channel
+from nitric.channel import ChannelManager
 
 T = TypeVar("T", bound="Resource")
 
@@ -48,7 +48,7 @@ class Resource(ABC):
         """Construct a new resource."""
         self.name = name
         self._reg: Optional[Task[Any]] = None  # type: ignore
-        self._channel = new_default_channel()
+        self._channel = ChannelManager.get_channel()
         self._resources_stub = ResourcesStub(channel=self._channel)
 
     @abstractmethod
@@ -85,9 +85,6 @@ class SecureResource(Resource):
         pass
 
     async def _register_policy_async(self, *args: str) -> None:
-        # if self._reg is not None:
-        #     await asyncio.wait({self._reg})
-
         policy = PolicyResource(
             principals=[ResourceIdentifier(type=ResourceType.Service)],
             actions=self._perms_to_actions(*args),

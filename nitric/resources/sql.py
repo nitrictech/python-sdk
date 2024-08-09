@@ -32,7 +32,7 @@ from nitric.proto.resources.v1 import (
     ResourceType,
 )
 from nitric.resources.resource import Resource as BaseResource
-from nitric.utils import new_default_channel
+from nitric.channel import ChannelManager
 from nitric.application import Nitric
 
 from nitric.proto.sql.v1 import SqlStub, SqlConnectionStringRequest
@@ -50,7 +50,7 @@ class Sql(BaseResource):
         """Construct a new SQL Database."""
         super().__init__(name)
 
-        self._channel: Union[Channel, None] = new_default_channel()
+        self._channel: Union[Channel, None] = ChannelManager.get_channel()
         self._sql_stub = SqlStub(channel=self._channel)
         self.name = name
         self.migrations = migrations

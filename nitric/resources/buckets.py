@@ -52,7 +52,7 @@ from nitric.proto.storage.v1 import (
     StorageWriteRequest,
 )
 from nitric.resources.resource import SecureResource
-from nitric.utils import new_default_channel
+from nitric.channel import ChannelManager
 
 
 class BucketNotifyRequest:
@@ -142,7 +142,7 @@ class BucketRef(object):
 
     def __init__(self, name: str):
         """Construct a Nitric Storage Client."""
-        self._channel: Union[Channel, None] = new_default_channel()
+        self._channel: Union[Channel, None] = ChannelManager.get_channel()
         self._storage_stub = StorageStub(channel=self._channel)
         self.name = name
 
@@ -428,7 +428,7 @@ class Listener(FunctionServer):
 
     async def start(self) -> None:
         """Register this bucket listener and listen for events."""
-        channel = new_default_channel()
+        channel = ChannelManager.get_channel()
         server = StorageListenerStub(channel=channel)
 
         try:

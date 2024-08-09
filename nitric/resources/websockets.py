@@ -51,7 +51,7 @@ from nitric.proto.websockets.v1 import (
     WebsocketStub,
 )
 from nitric.resources.resource import Resource as BaseResource
-from nitric.utils import new_default_channel
+from nitric.channel import ChannelManager
 
 
 class WebsocketRef:
@@ -59,7 +59,7 @@ class WebsocketRef:
 
     def __init__(self) -> None:
         """Construct a Nitric Websocket Client."""
-        self._channel: Channel = new_default_channel()
+        self._channel: Channel = ChannelManager.get_channel()
         self._websocket_stub = WebsocketStub(channel=self._channel)
 
     async def send(self, socket: str, connection_id: str, data: bytes):
@@ -206,7 +206,7 @@ class WebsocketWorker(FunctionServer):
 
     async def start(self) -> None:
         """Register this websocket handler and listen for messages."""
-        channel = new_default_channel()
+        channel = ChannelManager.get_channel()
         server = WebsocketHandlerStub(channel=channel)
 
         try:
