@@ -37,7 +37,8 @@ from nitric.proto.topics.v1 import MessageResponse as ProtoMessageResponse
 from nitric.proto.topics.v1 import RegistrationRequest, SubscriberStub
 from nitric.proto.topics.v1 import TopicPublishRequest, TopicsStub
 from nitric.resources.resource import SecureResource
-from nitric.utils import dict_from_struct, new_default_channel, struct_from_dict
+from nitric.utils import dict_from_struct, struct_from_dict
+from nitric.channel import ChannelManager
 
 TopicPermission = Literal["publish"]
 
@@ -51,7 +52,7 @@ class TopicRef:
 
     def __init__(self, name: str) -> None:
         """Construct a reference to a deployed Topic."""
-        self._channel: Channel = new_default_channel()
+        self._channel: Channel = ChannelManager.get_channel()
         self._topics_stub = TopicsStub(channel=self._channel)
         self.name = name
 
@@ -161,7 +162,7 @@ class Subscriber(FunctionServer):
 
     async def start(self) -> None:
         """Register this subscriber and listen for messages."""
-        channel = new_default_channel()
+        channel = ChannelManager.get_channel()
         server = SubscriberStub(channel=channel)
 
         try:

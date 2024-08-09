@@ -28,6 +28,8 @@ BT = TypeVar("BT")
 class Nitric:
     """Represents a nitric app."""
 
+    _has_run = False
+
     _workers: List[FunctionServer] = []
     _cache: Dict[str, Dict[str, Any]] = {
         "api": {},
@@ -62,12 +64,25 @@ class Nitric:
             ) from cre
 
     @classmethod
+    def has_run(cls) -> bool:
+        """
+        Check if the Nitric application has been started.
+
+        Returns:
+            bool: True if the Nitric application has been started, False otherwise.
+        """
+        return cls._has_run
+
+    @classmethod
     def run(cls) -> None:
         """
         Start the nitric application.
 
         This will execute in an existing event loop if there is one, otherwise it will attempt to create its own.
         """
+        if cls._has_run:
+            print("The Nitric application has already been started, Nitric.run() should only be called once.")
+        cls._has_run = True
         try:
             try:
                 loop = asyncio.get_running_loop()

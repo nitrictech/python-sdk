@@ -31,7 +31,8 @@ from nitric.proto.queues.v1 import QueueCompleteRequest, QueueDequeueRequest, Qu
 from nitric.proto.queues.v1 import QueuesStub as QueueServiceStub
 from nitric.proto.resources.v1 import Action, ResourceDeclareRequest, ResourceIdentifier, ResourceType
 from nitric.resources.resource import SecureResource
-from nitric.utils import dict_from_struct, new_default_channel, struct_from_dict
+from nitric.utils import dict_from_struct, struct_from_dict
+from nitric.channel import ChannelManager
 
 
 @dataclass(frozen=True, order=True)
@@ -91,7 +92,7 @@ class QueueRef(object):
 
     def __init__(self, name: str) -> None:
         """Construct a Nitric Queue Client."""
-        self._channel: Channel = new_default_channel()
+        self._channel: Channel = ChannelManager.get_channel()
         self._queue_stub = QueueServiceStub(channel=self._channel)
         self.name = name
 

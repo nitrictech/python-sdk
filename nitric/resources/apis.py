@@ -60,7 +60,7 @@ from nitric.proto.resources.v1 import (
     ResourceType,
 )
 from nitric.resources.resource import Resource as BaseResource
-from nitric.utils import new_default_channel
+from nitric.channel import ChannelManager
 
 
 @dataclass
@@ -479,7 +479,7 @@ class ApiRouteWorker(FunctionServer):
 
     async def start(self) -> None:
         """Register this API route handler and handle http requests."""
-        channel = new_default_channel()
+        channel = ChannelManager.get_channel()
         server = ApiStub(channel=channel)
 
         # Attach security rules for this route

@@ -31,7 +31,7 @@ from nitric.proto.secrets.v1 import Secret as SecretMessage
 from nitric.proto.secrets.v1 import SecretAccessRequest, SecretManagerStub, SecretPutRequest
 from nitric.proto.secrets.v1 import SecretVersion as VersionMessage
 from nitric.resources.resource import SecureResource
-from nitric.utils import new_default_channel
+from nitric.channel import ChannelManager
 
 
 class SecretRef:
@@ -43,7 +43,7 @@ class SecretRef:
 
     def __init__(self, name: str) -> None:
         """Construct a Nitric Storage Client."""
-        self._channel: Channel = new_default_channel()
+        self._channel: Channel = ChannelManager.get_channel()
         self._secrets_stub = SecretManagerStub(channel=self._channel)
         self.name = name
 

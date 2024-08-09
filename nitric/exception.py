@@ -157,6 +157,13 @@ class NitricUnavailableException(Exception):
         super().__init__("Unable to connect to nitric server." + (" " + message if message else ""))
 
 
+class NitricNotRunningException(Exception):
+    """The Nitric application wasn't started before the program exited."""
+
+    def __init__(self):
+        super().__init__("The Nitric application was not started, call Nitric.run() to start the application.")
+
+
 def exception_from_grpc_error(error: GRPCError):
     """Translate a gRPC error to a nitric api exception."""
     return exception_from_grpc_code(error.status.value, error.message or "")
