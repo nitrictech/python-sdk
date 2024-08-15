@@ -37,7 +37,7 @@ from nitric.proto.schedules.v1 import (
     ScheduleEvery,
     SchedulesStub,
 )
-from nitric.utils import new_default_channel
+from nitric.channel import ChannelManager
 
 
 class ScheduleServer(FunctionServer):
@@ -93,7 +93,7 @@ class ScheduleServer(FunctionServer):
 
     async def start(self) -> None:
         """Register this schedule and start listening for requests."""
-        channel = new_default_channel()
+        channel = ChannelManager.get_channel()
         schedules_stub = SchedulesStub(channel=channel)
 
         try:

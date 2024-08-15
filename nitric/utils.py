@@ -16,29 +16,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import re
 from typing import Any, Optional
-from urllib.parse import urlparse
 
 from betterproto.lib.google.protobuf import Struct
 from google.protobuf.json_format import MessageToDict
 from google.protobuf.struct_pb2 import Struct as WorkingStruct
-from grpclib.client import Channel
-
-from nitric.config import settings
-
-
-def format_url(url: str):
-    """Add the default http scheme prefix to urls without one."""
-    if not re.match("^((?:http|ftp|https):)?//", url.lower()):
-        return "http://{0}".format(url)
-    return url
-
-
-def new_default_channel():
-    """Create new gRPC channel from settings."""
-    channel_url = urlparse(format_url(settings.SERVICE_ADDRESS))
-    return Channel(host=channel_url.hostname, port=channel_url.port)
 
 
 # These functions convert to/from python dict <-> betterproto.lib.google.protobuf.Struct
