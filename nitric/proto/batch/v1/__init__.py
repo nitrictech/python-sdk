@@ -113,10 +113,7 @@ class SubmitJobRequest(betterproto.Message):
     name: str = betterproto.string_field(1)
     """The name of the job to create"""
 
-    requirements: "JobResourceRequirements" = betterproto.message_field(2)
-    """The resource requirements of the job"""
-
-    data: "JobData" = betterproto.message_field(3)
+    data: "JobData" = betterproto.message_field(2)
     """The data to be processed by the job"""
 
 
