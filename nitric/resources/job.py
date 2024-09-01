@@ -11,6 +11,7 @@ import betterproto
 from nitric.proto.batch.v1 import (
     BatchStub,
     SubmitJobRequest,
+    JobData,
     JobStub,
     RegistrationRequest,
     ClientMessage,
@@ -25,7 +26,7 @@ from typing import Callable, Any, Optional
 from nitric.context import FunctionServer, Handler
 from nitric.channel import ChannelManager
 from nitric.bidi import AsyncNotifierList
-from nitric.utils import dict_from_struct
+from nitric.utils import dict_from_struct, struct_from_dict
 import grpclib
 
 
@@ -165,9 +166,11 @@ class Job(BaseResource):
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err) from grpc_err
 
-    async def submit_job(self):
+    async def submit_job(self, data: dict[str, Any]) -> None:
         """Submit a new execution for this job definition."""
-        await self._stub.submit_job(submit_job_request=SubmitJobRequest(name=self.name))
+        await self._stub.submit_job(
+            submit_job_request=SubmitJobRequest(name=self.name, data=JobData(struct=struct_from_dict(data)))
+        )
 
     def __call__(
         self, cpus: Optional[float] = None, memory: Optional[int] = None, gpus: Optional[int] = None
