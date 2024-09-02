@@ -11,7 +11,7 @@ import logging
 import betterproto
 from nitric.proto.batch.v1 import (
     BatchStub,
-    SubmitJobRequest,
+    JobSubmitRequest,
     JobData,
     JobStub,
     RegistrationRequest,
@@ -165,7 +165,7 @@ class JobRef:
     async def submit(self, data: dict[str, Any]) -> None:
         """Submit a new execution for this job definition."""
         await self._stub.submit_job(
-            submit_job_request=SubmitJobRequest(name=self.name, data=JobData(struct=struct_from_dict(data)))
+            job_submit_request=JobSubmitRequest(job_name=self.name, data=JobData(struct=struct_from_dict(data)))
         )
 
 

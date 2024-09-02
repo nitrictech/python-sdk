@@ -44,7 +44,6 @@ class ClientMessage(betterproto.Message):
 class JobRequest(betterproto.Message):
     job_name: str = betterproto.string_field(1)
     data: "JobData" = betterproto.message_field(2)
-    """Message Type"""
 
 
 @dataclass(eq=False, repr=False)
@@ -101,24 +100,20 @@ class ServerMessage(betterproto.Message):
     """
 
     job_request: "JobRequest" = betterproto.message_field(3, group="content")
-    """
-    
-    """
+    """Request to a job handler"""
 
 
 @dataclass(eq=False, repr=False)
-class SubmitJobRequest(betterproto.Message):
-    """ClientMessages are sent from the service to the nitric server"""
-
-    name: str = betterproto.string_field(1)
-    """The name of the job to create"""
+class JobSubmitRequest(betterproto.Message):
+    job_name: str = betterproto.string_field(1)
+    """The name of the job that should handle the data"""
 
     data: "JobData" = betterproto.message_field(2)
     """The data to be processed by the job"""
 
 
 @dataclass(eq=False, repr=False)
-class SubmitJobResponse(betterproto.Message):
+class JobSubmitResponse(betterproto.Message):
     pass
 
 
@@ -148,16 +143,16 @@ class JobStub(betterproto.ServiceStub):
 class BatchStub(betterproto.ServiceStub):
     async def submit_job(
         self,
-        submit_job_request: "SubmitJobRequest",
+        job_submit_request: "JobSubmitRequest",
         *,
         timeout: Optional[float] = None,
         deadline: Optional["Deadline"] = None,
         metadata: Optional["MetadataLike"] = None
-    ) -> "SubmitJobResponse":
+    ) -> "JobSubmitResponse":
         return await self._unary_unary(
             "/nitric.proto.batch.v1.Batch/SubmitJob",
-            submit_job_request,
-            SubmitJobResponse,
+            job_submit_request,
+            JobSubmitResponse,
             timeout=timeout,
             deadline=deadline,
             metadata=metadata,
@@ -194,12 +189,12 @@ class JobBase(ServiceBase):
 
 class BatchBase(ServiceBase):
     async def submit_job(
-        self, submit_job_request: "SubmitJobRequest"
-    ) -> "SubmitJobResponse":
+        self, job_submit_request: "JobSubmitRequest"
+    ) -> "JobSubmitResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def __rpc_submit_job(
-        self, stream: "grpclib.server.Stream[SubmitJobRequest, SubmitJobResponse]"
+        self, stream: "grpclib.server.Stream[JobSubmitRequest, JobSubmitResponse]"
     ) -> None:
         request = await stream.recv_message()
         response = await self.submit_job(request)
@@ -210,7 +205,7 @@ class BatchBase(ServiceBase):
             "/nitric.proto.batch.v1.Batch/SubmitJob": grpclib.const.Handler(
                 self.__rpc_submit_job,
                 grpclib.const.Cardinality.UNARY_UNARY,
-                SubmitJobRequest,
-                SubmitJobResponse,
+                JobSubmitRequest,
+                JobSubmitResponse,
             ),
         }
