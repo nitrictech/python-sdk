@@ -173,15 +173,11 @@ class Job(SecureResource):
     """A Job Definition."""
 
     name: str
-    _stub: BatchStub
-    _channel: Channel
 
     def __init__(self, name: str):
         """Job definition constructor."""
         super().__init__(name)
         self.name = name
-        self._channel = ChannelManager.get_channel()
-        self._stub = BatchStub(channel=self._channel)
 
     async def _register(self) -> None:
         try:
@@ -206,6 +202,9 @@ class Job(SecureResource):
         self._register_policy(*str_args)
 
         return JobRef(self.name)
+
+    def _to_resource_id(self) -> ResourceIdentifier:
+        return ResourceIdentifier(name=self.name, type=ResourceType.Job)
 
     def __call__(
         self, cpus: Optional[float] = None, memory: Optional[int] = None, gpus: Optional[int] = None
