@@ -1,4 +1,4 @@
-from nitric.resources.resource import Resource as BaseResource
+from nitric.resources.resource import SecureResource
 from nitric.application import Nitric
 from nitric.proto.resources.v1 import (
     Action,
@@ -6,7 +6,6 @@ from nitric.proto.resources.v1 import (
     ResourceDeclareRequest,
     ResourceIdentifier,
     ResourceType,
-    PolicyResource,
 )
 import logging
 import betterproto
@@ -24,12 +23,15 @@ from nitric.proto.batch.v1 import (
 from nitric.exception import exception_from_grpc_error
 from grpclib import GRPCError
 from grpclib.client import Channel
-from typing import Callable, Any, Optional
+from typing import Callable, Any, Optional, Literal, List
 from nitric.context import FunctionServer, Handler
 from nitric.channel import ChannelManager
 from nitric.bidi import AsyncNotifierList
 from nitric.utils import dict_from_struct, struct_from_dict
 import grpclib
+
+
+JobPermission = Literal["submit"]
 
 
 class JobRequest:
@@ -142,7 +144,32 @@ class JobHandler(FunctionServer):
             channel.close()
 
 
-class Job(BaseResource):
+class JobRef:
+    """A reference to a deployed job, used to interact with the job at runtime."""
+
+    _channel: Channel
+    _stub: BatchStub
+    name: str
+
+    def __init__(self, name: str) -> None:
+        """Construct a reference to a deployed Job."""
+        self._channel: Channel = ChannelManager.get_channel()
+        self._topics_stub = JobStub(channel=self._channel)
+        self.name = name
+
+    def __del__(self) -> None:
+        # close the channel when this client is destroyed
+        if self._channel is not None:
+            self._channel.close()
+
+    async def submit(self, data: dict[str, Any]) -> None:
+        """Submit a new execution for this job definition."""
+        await self._stub.submit_job(
+            submit_job_request=SubmitJobRequest(name=self.name, data=JobData(struct=struct_from_dict(data)))
+        )
+
+
+class Job(SecureResource):
     """A Job Definition."""
 
     name: str
@@ -165,25 +192,20 @@ class Job(BaseResource):
                 )
             )
 
-            # As we only have a single permission also define a policy for submitting jobs
-            await self._resources_stub.declare(
-                resource_declare_request=ResourceDeclareRequest(
-                    policy=PolicyResource(
-                        principals=[ResourceIdentifier(type=ResourceType.Service)],
-                        actions=[Action.JobSubmit],
-                        resources=[_to_resource_identifier(self)],
-                    ),
-                )
-            )
-
         except GRPCError as grpc_err:
             raise exception_from_grpc_error(grpc_err) from grpc_err
 
-    async def submit_job(self, data: dict[str, Any]) -> None:
-        """Submit a new execution for this job definition."""
-        await self._stub.submit_job(
-            submit_job_request=SubmitJobRequest(name=self.name, data=JobData(struct=struct_from_dict(data)))
-        )
+    def _perms_to_actions(self, *args: JobPermission) -> List[Action]:
+        _permMap: dict[JobPermission, List[Action]] = {"submit": [Action.JobSubmit]}
+
+        return [action for perm in args for action in _permMap[perm]]
+
+    def allow(self, perm: JobPermission, *args: JobPermission) -> JobRef:
+        """Request the specified permissions to this resource."""
+        str_args = [perm] + [str(permission) for permission in args]
+        self._register_policy(*str_args)
+
+        return JobRef(self.name)
 
     def __call__(
         self, cpus: Optional[float] = None, memory: Optional[int] = None, gpus: Optional[int] = None
