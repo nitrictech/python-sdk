@@ -1,10 +1,12 @@
 from nitric.resources.resource import Resource as BaseResource
 from nitric.application import Nitric
 from nitric.proto.resources.v1 import (
+    Action,
     JobResource,
     ResourceDeclareRequest,
     ResourceIdentifier,
     ResourceType,
+    PolicyResource,
 )
 import logging
 import betterproto
@@ -160,6 +162,17 @@ class Job(BaseResource):
                 resource_declare_request=ResourceDeclareRequest(
                     id=_to_resource_identifier(self),
                     job=JobResource(),
+                )
+            )
+
+            # As we only have a single permission also define a policy for submitting jobs
+            await self._resources_stub.declare(
+                resource_declare_request=ResourceDeclareRequest(
+                    policy=PolicyResource(
+                        principals=[ResourceIdentifier(type=ResourceType.Service)],
+                        actions=[Action.JobSubmit],
+                        resources=[_to_resource_identifier(self)],
+                    ),
                 )
             )
 
