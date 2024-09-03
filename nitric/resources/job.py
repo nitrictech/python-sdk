@@ -154,7 +154,7 @@ class JobRef:
     def __init__(self, name: str) -> None:
         """Construct a reference to a deployed Job."""
         self._channel: Channel = ChannelManager.get_channel()
-        self._topics_stub = JobStub(channel=self._channel)
+        self._stub = BatchStub(channel=self._channel)
         self.name = name
 
     def __del__(self) -> None:
