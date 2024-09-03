@@ -132,7 +132,7 @@ class JobHandler(FunctionServer):
                             job_response=ProtoJobResponse(success=ctx.res.success),
                         )
                     except Exception as e:  # pylint: disable=broad-except
-                        logging.exception("An unhandled error occurred in a subscription event handler: %s", e)
+                        logging.exception("An unhandled error occurred in a job event handler: %s", e)
                         response = ClientMessage(id=server_msg.id, job_response=ProtoJobResponse(success=False))
                     await self._responses.add_item(response)
         except grpclib.exceptions.GRPCError as e:
