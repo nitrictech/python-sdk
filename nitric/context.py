@@ -31,6 +31,11 @@ from nitric.proto.schedules.v1 import ServerMessage as ScheduleServerMessage
 from nitric.proto.topics.v1 import ClientMessage as TopicClientMessage
 from nitric.proto.topics.v1 import MessageResponse as TopicResponse
 from nitric.proto.topics.v1 import ServerMessage as TopicServerMessage
+from nitric.proto.batch.v1 import (
+    ServerMessage as BatchServerMessage,
+    ClientMessage as BatchClientMessage,
+    JobResponse as BatchJobResponse,
+)
 from nitric.utils import dict_from_struct
 
 Record = Dict[str, Union[str, List[str]]]
@@ -361,6 +366,42 @@ def compose_middleware(*middlewares: Middleware[C] | Handler[C]) -> Middleware[C
         return await middleware_chain(ctx)  # type: ignore
 
     return composed
+
+
+class JobRequest:
+    """Represents a translated Job, from a Job Definition, forwarded from the Nitric Runtime Server."""
+
+    data: dict[str, Any]
+
+    def __init__(self, data: dict[str, Any]):
+        """Construct a new JobRequest."""
+        self.data = data
+
+
+class JobResponse:
+    """Represents the response to a trigger from a Job submission as a result of a SubmitJob call."""
+
+    def __init__(self, success: bool = True):
+        """Construct a new EventResponse."""
+        self.success = success
+
+
+class JobContext:
+    """Represents the full request/response context for an Event based trigger."""
+
+    def __init__(self, request: JobRequest, response: Optional[JobResponse] = None):
+        """Construct a new EventContext."""
+        self.req = request
+        self.res = response if response else JobResponse()
+
+    @staticmethod
+    def _from_request(msg: BatchServerMessage) -> "JobContext":
+        """Construct a new EventContext from a Topic trigger from the Nitric Membrane."""
+        return JobContext(request=JobRequest(data=dict_from_struct(msg.job_request.data.struct)))
+
+    def to_response(self) -> BatchClientMessage:
+        """Construct a EventContext for the Nitric Membrane from this context object."""
+        return BatchClientMessage(job_response=BatchJobResponse(success=self.res.success))
 
 
 class FunctionServer(ABC):

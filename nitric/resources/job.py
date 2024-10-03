@@ -7,6 +7,7 @@ from nitric.proto.resources.v1 import (
     ResourceIdentifier,
     ResourceType,
 )
+from nitric.context import JobContext
 import logging
 import betterproto
 from nitric.proto.batch.v1 import (
@@ -16,7 +17,6 @@ from nitric.proto.batch.v1 import (
     JobStub,
     RegistrationRequest,
     ClientMessage,
-    ServerMessage,
     JobResponse as ProtoJobResponse,
     JobResourceRequirements,
 )
@@ -27,49 +27,11 @@ from typing import Callable, Any, Optional, Literal, List
 from nitric.context import FunctionServer, Handler
 from nitric.channel import ChannelManager
 from nitric.bidi import AsyncNotifierList
-from nitric.utils import dict_from_struct, struct_from_dict
+from nitric.utils import struct_from_dict
 import grpclib
 
 
 JobPermission = Literal["submit"]
-
-
-class JobRequest:
-    """Represents a translated Job, from a Job Definition, forwarded from the Nitric Runtime Server."""
-
-    data: dict[str, Any]
-
-    def __init__(self, data: dict[str, Any]):
-        """Construct a new JobRequest."""
-        self.data = data
-
-
-class JobResponse:
-    """Represents the response to a trigger from a Job submission as a result of a SubmitJob call."""
-
-    def __init__(self, success: bool = True):
-        """Construct a new EventResponse."""
-        self.success = success
-
-
-class JobContext:
-    """Represents the full request/response context for an Event based trigger."""
-
-    def __init__(self, request: JobRequest, response: Optional[JobResponse] = None):
-        """Construct a new EventContext."""
-        self.req = request
-        self.res = response if response else JobResponse()
-
-    @staticmethod
-    def _from_request(msg: ServerMessage) -> "JobContext":
-        """Construct a new EventContext from a Topic trigger from the Nitric Membrane."""
-        return JobContext(request=JobRequest(data=dict_from_struct(msg.job_request.data.struct)))
-
-    def to_response(self) -> ClientMessage:
-        """Construct a EventContext for the Nitric Membrane from this context object."""
-        return ClientMessage(job_response=ProtoJobResponse(success=self.res.success))
-
-
 JobHandle = Handler[JobContext]
 
 
