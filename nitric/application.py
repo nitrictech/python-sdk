@@ -42,6 +42,8 @@ class Nitric:
         "keyvaluestore": {},
         "oidcsecuritydefinition": {},
         "sql": {},
+        "job": {},
+        "jobdefinition": {},
     }
 
     @classmethod
