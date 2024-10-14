@@ -37,6 +37,8 @@ __all__ = [
     "JwtSecurityDefinition",
     "bucket",
     "Bucket",
+    "BucketNotificationContext",
+    "FileNotificationContext",
     "kv",
     "KeyValueStoreRef",
     "job",
