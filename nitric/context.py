@@ -369,7 +369,7 @@ def compose_middleware(*middlewares: Middleware[C] | Handler[C]) -> Middleware[C
 
 
 class JobRequest:
-    """Represents a translated Job, from a Job Definition, forwarded from the Nitric Runtime Server."""
+    """Represents a job task forwarded from the Nitric Runtime Server."""
 
     data: dict[str, Any]
 
@@ -379,7 +379,7 @@ class JobRequest:
 
 
 class JobResponse:
-    """Represents the response to a trigger from a Job submission as a result of a SubmitJob call."""
+    """Represents the response to a job task, indicating the result."""
 
     def __init__(self, success: bool = True):
         """Construct a new EventResponse."""
@@ -387,20 +387,20 @@ class JobResponse:
 
 
 class JobContext:
-    """Represents the full request/response context for an Event based trigger."""
+    """Represents the full request/response context for a Job task trigger."""
 
     def __init__(self, request: JobRequest, response: Optional[JobResponse] = None):
-        """Construct a new EventContext."""
+        """Construct a new JobContext."""
         self.req = request
         self.res = response if response else JobResponse()
 
     @staticmethod
     def _from_request(msg: BatchServerMessage) -> "JobContext":
-        """Construct a new EventContext from a Topic trigger from the Nitric Membrane."""
+        """Construct a new JobContext from a Job trigger from the Nitric Server."""
         return JobContext(request=JobRequest(data=dict_from_struct(msg.job_request.data.struct)))
 
     def to_response(self) -> BatchClientMessage:
-        """Construct a EventContext for the Nitric Membrane from this context object."""
+        """Construct a JobContext for the Nitric Server from this context object."""
         return BatchClientMessage(job_response=BatchJobResponse(success=self.res.success))
 
 

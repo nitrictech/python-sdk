@@ -50,7 +50,7 @@ class JobHandler(FunctionServer):
         memory: int | None = None,
         gpus: int | None = None,
     ):
-        """Construct a new WebsocketHandler."""
+        """Construct a new JobHandler."""
         self._handler = handler
         self._responses = AsyncNotifierList()
         self._registration_request = RegistrationRequest(
@@ -70,7 +70,7 @@ class JobHandler(FunctionServer):
             yield response
 
     async def start(self) -> None:
-        """Register this subscriber and listen for messages."""
+        """Register this job handler and listen for tasks."""
         channel = ChannelManager.get_channel()
         server = JobStub(channel=channel)
 
