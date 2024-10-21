@@ -160,7 +160,7 @@ class BucketRef(object):
         resp = await self._storage_stub.list_blobs(
             storage_list_blobs_request=StorageListBlobsRequest(bucket_name=self.name)
         )
-        return [self.file(f.key) for f in resp.files]
+        return [self.file(f.key) for f in resp.blobs]
 
     async def exists(self, key: str) -> bool:
         """Return true if a file in the bucket exists."""
