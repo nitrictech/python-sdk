@@ -55,7 +55,7 @@ class SecretsClientTest(IsolatedAsyncioTestCase):
         )
 
         # Check the returned value
-        assert result.id == "test-version"
+        assert result.version == "test-version"
         assert result.secret.name == "test-secret"
 
     async def test_put_string(self):
@@ -78,7 +78,7 @@ class SecretsClientTest(IsolatedAsyncioTestCase):
         version = SecretRef("test-secret").latest()
 
         assert version.secret.name == "test-secret"
-        assert version.id == "latest"
+        assert version.version == "latest"
 
     async def test_access(self):
         mock_access = AsyncMock()
@@ -100,7 +100,7 @@ class SecretsClientTest(IsolatedAsyncioTestCase):
             )
 
             # Check the returned value
-            assert result.version.id == "response-version"
+            assert result.version.version == "response-version"
             assert result.value == b"super secret value"
 
     async def test_value_to_string(self):

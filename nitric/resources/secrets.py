@@ -20,6 +20,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import List, Literal, Union
+import warnings
 
 from grpclib import GRPCError
 from grpclib.client import Channel
@@ -77,7 +78,7 @@ class SecretRef:
 
         Can be used to retrieve the secret value associated with the version.
         """
-        return SecretVersionRef(secret=self, id=version)
+        return SecretVersionRef(secret=self, version=version)
 
     def latest(self) -> SecretVersionRef:
         """
@@ -90,7 +91,7 @@ class SecretRef:
 
 
 def _secret_version_to_wire(version: SecretVersionRef) -> VersionMessage:
-    return VersionMessage(SecretMessage(name=version.secret.name), version=version.id)
+    return VersionMessage(SecretMessage(name=version.secret.name), version=version.version)
 
 
 @dataclass(frozen=True)
@@ -98,7 +99,18 @@ class SecretVersionRef:
     """A reference to a version of a secret, used to access the value of the version."""
 
     secret: SecretRef
-    id: str
+    version: str
+
+    @property
+    def id(self) -> SecretVersionRef:
+        """Get the version of this secret value."""
+        warnings.warn(
+            "id is deprecated and will be removed in a future version. "
+            "Use version instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        return self.version
 
     async def access(self) -> SecretValue:
         """Return the value stored in this version of the secret."""
@@ -115,8 +127,8 @@ class SecretVersionRef:
         # with a fixed version id.
         static_version = (
             self
-            if response.secret_version.version == self.id
-            else SecretVersionRef(secret=self.secret, id=response.secret_version.version)
+            if response.secret_version.version == self.version
+            else SecretVersionRef(secret=self.secret, version=response.secret_version.version)
         )
 
         return SecretValue(version=static_version, value=response.value)
