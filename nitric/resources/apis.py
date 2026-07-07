@@ -548,7 +548,7 @@ class ScopedOidcOptions(OidcOptions):
 
 def _oidc_to_resource(b: OidcSecurityDefinition) -> ResourceIdentifier:
     """Generate a resource identifier for an OIDC security definition."""
-    return ResourceIdentifier(name=b.name, type=ResourceType.ApiSecurityDefinition)
+    return ResourceIdentifier(name=b.rule_name, type=ResourceType.ApiSecurityDefinition)
 
 
 class OidcSecurityDefinition(BaseResource):

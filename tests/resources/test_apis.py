@@ -149,7 +149,7 @@ class ApiTest(IsolatedAsyncioTestCase):
         mock_declare.assert_any_call(
             resource_declare_request=ResourceDeclareRequest(
                 id=ResourceIdentifier(
-                    type=ResourceType.ApiSecurityDefinition, name="user-test-api-security-definition"
+                    type=ResourceType.ApiSecurityDefinition, name="user"
                 ),
                 api_security_definition=ApiSecurityDefinitionResource(
                     api_name="test-api-security-definition",
